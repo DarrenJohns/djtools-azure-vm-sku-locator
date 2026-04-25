@@ -216,6 +216,9 @@
   .map-legend-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 3px; vertical-align: middle; }
 
   /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .region-grid { grid-template-columns: 1fr !important; }
+  }
   @media (max-width: 768px) {
     .region-bar { flex-direction: column; }
     .filter-bar { flex-direction: column; }
@@ -256,6 +259,9 @@
 
 <div class="container">
 
+  <!-- Region Selection Row -->
+  <div class="region-grid" style="display:grid; grid-template-columns:1fr 2fr; gap:12px; align-items:start;">
+
   <!-- Region Selector -->
   <div class="section-collapsible">
     <div class="section-header" onclick="toggleSection('regionsel')" style="border-left-color:#4caf50;">
@@ -275,21 +281,23 @@
   </div>
 
   <!-- Region Map -->
-  <div class="section-collapsible" style="margin-top:12px;">
+  <div class="section-collapsible">
     <div class="section-header" onclick="toggleSection('map')" style="border-left-color:#4caf50;">
       <span class="section-toggle open" id="mapToggle">▶</span>
       <h3>🗺️ Azure Region Map</h3>
     </div>
     <div class="section-body open" id="mapBody">
-      <div class="region-map-container">
+      <div class="region-map-container" style="margin-top:0;">
         <div id="regionMap"></div>
         <div class="map-legend">
           <span><span class="map-legend-dot" style="background:#4caf50;border:1px solid #2e7d32;"></span> Available</span>
           <span><span class="map-legend-dot" style="background:#0f6cbd;border:2px solid #fff;box-shadow:0 0 4px #0f6cbd;width:12px;height:12px;"></span> Selected</span>
-          <span style="font-style:italic;">Click a marker to add/remove a region</span>
+          <span style="font-style:italic;">Click a marker to select a region</span>
         </div>
       </div>
     </div>
+  </div>
+
   </div>
 
   <!-- Freshness Banner -->
