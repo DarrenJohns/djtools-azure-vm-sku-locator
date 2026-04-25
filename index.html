@@ -712,11 +712,33 @@ async function init() {
 
     const select = document.getElementById('regionSelect');
     select.innerHTML = '<option value="">— Choose a region —</option>';
+
+    // Group regions by geographyGroup
+    const groups = {};
+    const groupOrder = ['US', 'Canada', 'Mexico', 'South America', 'Europe', 'UK', 'Middle East', 'Africa', 'Asia Pacific'];
     for (const r of allRegions) {
-      const opt = document.createElement('option');
-      opt.value = r.name;
-      opt.textContent = `${r.displayName} (${r.name})`;
-      select.appendChild(opt);
+      const g = r.geographyGroup || 'Other';
+      if (!groups[g]) groups[g] = [];
+      groups[g].push(r);
+    }
+    // Sort regions within each group
+    for (const g of Object.keys(groups)) {
+      groups[g].sort((a, b) => a.displayName.localeCompare(b.displayName));
+    }
+    // Render optgroups in preferred order, then any extras
+    const rendered = new Set();
+    for (const g of [...groupOrder, ...Object.keys(groups)]) {
+      if (rendered.has(g) || !groups[g]) continue;
+      rendered.add(g);
+      const optgroup = document.createElement('optgroup');
+      optgroup.label = g;
+      for (const r of groups[g]) {
+        const opt = document.createElement('option');
+        opt.value = r.name;
+        opt.textContent = `${r.displayName} (${r.name})`;
+        optgroup.appendChild(opt);
+      }
+      select.appendChild(optgroup);
     }
     select.value = 'newzealandnorth';
     document.getElementById('addRegionBtn').disabled = false;

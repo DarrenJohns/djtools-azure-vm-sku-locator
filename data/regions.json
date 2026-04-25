@@ -1,250 +1,312 @@
 [
   {
     "displayName": "East US",
+    "geographyGroup": "US",
     "name": "eastus"
   },
   {
     "displayName": "West US 2",
+    "geographyGroup": "US",
     "name": "westus2"
   },
   {
     "displayName": "Australia East",
+    "geographyGroup": "Asia Pacific",
     "name": "australiaeast"
   },
   {
     "displayName": "Southeast Asia",
+    "geographyGroup": "Asia Pacific",
     "name": "southeastasia"
   },
   {
     "displayName": "North Europe",
+    "geographyGroup": "Europe",
     "name": "northeurope"
   },
   {
     "displayName": "Sweden Central",
+    "geographyGroup": "Europe",
     "name": "swedencentral"
   },
   {
     "displayName": "West Europe",
+    "geographyGroup": "Europe",
     "name": "westeurope"
   },
   {
     "displayName": "UK South",
+    "geographyGroup": "UK",
     "name": "uksouth"
   },
   {
     "displayName": "Central US",
+    "geographyGroup": "US",
     "name": "centralus"
   },
   {
     "displayName": "South Africa North",
+    "geographyGroup": "Africa",
     "name": "southafricanorth"
   },
   {
     "displayName": "Central India",
+    "geographyGroup": "Asia Pacific",
     "name": "centralindia"
   },
   {
     "displayName": "East Asia",
+    "geographyGroup": "Asia Pacific",
     "name": "eastasia"
   },
   {
     "displayName": "Indonesia Central",
+    "geographyGroup": "Asia Pacific",
     "name": "indonesiacentral"
   },
   {
     "displayName": "Japan East",
+    "geographyGroup": "Asia Pacific",
     "name": "japaneast"
   },
   {
     "displayName": "Japan West",
+    "geographyGroup": "Asia Pacific",
     "name": "japanwest"
   },
   {
     "displayName": "Korea Central",
+    "geographyGroup": "Asia Pacific",
     "name": "koreacentral"
   },
   {
     "displayName": "Malaysia West",
+    "geographyGroup": "Asia Pacific",
     "name": "malaysiawest"
   },
   {
     "displayName": "New Zealand North",
+    "geographyGroup": "Asia Pacific",
     "name": "newzealandnorth"
   },
   {
     "displayName": "Canada Central",
+    "geographyGroup": "Canada",
     "name": "canadacentral"
   },
   {
     "displayName": "Austria East",
+    "geographyGroup": "Europe",
     "name": "austriaeast"
   },
   {
     "displayName": "Belgium Central",
+    "geographyGroup": "Europe",
     "name": "belgiumcentral"
   },
   {
     "displayName": "Denmark East",
+    "geographyGroup": "Europe",
     "name": "denmarkeast"
   },
   {
     "displayName": "France Central",
+    "geographyGroup": "Europe",
     "name": "francecentral"
   },
   {
     "displayName": "Germany West Central",
+    "geographyGroup": "Europe",
     "name": "germanywestcentral"
   },
   {
     "displayName": "Italy North",
+    "geographyGroup": "Europe",
     "name": "italynorth"
   },
   {
     "displayName": "Norway East",
+    "geographyGroup": "Europe",
     "name": "norwayeast"
   },
   {
     "displayName": "Poland Central",
+    "geographyGroup": "Europe",
     "name": "polandcentral"
   },
   {
     "displayName": "Spain Central",
+    "geographyGroup": "Europe",
     "name": "spaincentral"
   },
   {
     "displayName": "Switzerland North",
+    "geographyGroup": "Europe",
     "name": "switzerlandnorth"
   },
   {
     "displayName": "Mexico Central",
+    "geographyGroup": "Mexico",
     "name": "mexicocentral"
   },
   {
     "displayName": "UAE North",
+    "geographyGroup": "Middle East",
     "name": "uaenorth"
   },
   {
     "displayName": "Brazil South",
+    "geographyGroup": "South America",
     "name": "brazilsouth"
   },
   {
     "displayName": "Chile Central",
+    "geographyGroup": "South America",
     "name": "chilecentral"
   },
   {
     "displayName": "East US 2 EUAP",
+    "geographyGroup": "US",
     "name": "eastus2euap"
   },
   {
     "displayName": "Israel Central",
+    "geographyGroup": "Middle East",
     "name": "israelcentral"
   },
   {
     "displayName": "Qatar Central",
+    "geographyGroup": "Middle East",
     "name": "qatarcentral"
   },
   {
     "displayName": "East US 2",
+    "geographyGroup": "US",
     "name": "eastus2"
   },
   {
     "displayName": "East US STG",
+    "geographyGroup": "US",
     "name": "eastusstg"
   },
   {
     "displayName": "South Central US",
+    "geographyGroup": "US",
     "name": "southcentralus"
   },
   {
     "displayName": "West US 3",
+    "geographyGroup": "US",
     "name": "westus3"
   },
   {
     "displayName": "North Central US",
+    "geographyGroup": "US",
     "name": "northcentralus"
   },
   {
     "displayName": "West US",
+    "geographyGroup": "US",
     "name": "westus"
   },
   {
     "displayName": "Jio India West",
+    "geographyGroup": "Asia Pacific",
     "name": "jioindiawest"
   },
   {
     "displayName": "Central US EUAP",
+    "geographyGroup": "US",
     "name": "centraluseuap"
   },
   {
     "displayName": "South Central US STG",
+    "geographyGroup": "US",
     "name": "southcentralusstg"
   },
   {
     "displayName": "West Central US",
+    "geographyGroup": "US",
     "name": "westcentralus"
   },
   {
     "displayName": "South Africa West",
+    "geographyGroup": "Africa",
     "name": "southafricawest"
   },
   {
     "displayName": "Australia Central",
+    "geographyGroup": "Asia Pacific",
     "name": "australiacentral"
   },
   {
     "displayName": "Australia Central 2",
+    "geographyGroup": "Asia Pacific",
     "name": "australiacentral2"
   },
   {
     "displayName": "Australia Southeast",
+    "geographyGroup": "Asia Pacific",
     "name": "australiasoutheast"
   },
   {
     "displayName": "Jio India Central",
+    "geographyGroup": "Asia Pacific",
     "name": "jioindiacentral"
   },
   {
     "displayName": "Korea South",
+    "geographyGroup": "Asia Pacific",
     "name": "koreasouth"
   },
   {
     "displayName": "South India",
+    "geographyGroup": "Asia Pacific",
     "name": "southindia"
   },
   {
     "displayName": "West India",
+    "geographyGroup": "Asia Pacific",
     "name": "westindia"
   },
   {
     "displayName": "Canada East",
+    "geographyGroup": "Canada",
     "name": "canadaeast"
   },
   {
     "displayName": "France South",
+    "geographyGroup": "Europe",
     "name": "francesouth"
   },
   {
     "displayName": "Germany North",
+    "geographyGroup": "Europe",
     "name": "germanynorth"
   },
   {
     "displayName": "Norway West",
+    "geographyGroup": "Europe",
     "name": "norwaywest"
   },
   {
     "displayName": "Switzerland West",
+    "geographyGroup": "Europe",
     "name": "switzerlandwest"
   },
   {
     "displayName": "UAE Central",
+    "geographyGroup": "Middle East",
     "name": "uaecentral"
   },
   {
     "displayName": "Brazil Southeast",
+    "geographyGroup": "South America",
     "name": "brazilsoutheast"
   },
   {
     "displayName": "UK West",
+    "geographyGroup": "UK",
     "name": "ukwest"
   }
 ]
