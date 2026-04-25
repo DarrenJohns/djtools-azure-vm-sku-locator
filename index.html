@@ -6,6 +6,8 @@
 <meta name="description" content="Browse Azure VM SKU availability by region — see what virtual machine sizes are available, with filtering, sorting, and CSV export.">
 <meta name="theme-color" content="#0f6cbd">
 <title>Azure Virtual Machine SKU by Region</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='0%25' y2='100%25'><stop offset='0%25' stop-color='%230f6cbd'/><stop offset='100%25' stop-color='%23094780'/></linearGradient></defs><rect x='10' y='20' width='80' height='60' rx='8' fill='url(%23g)'/><rect x='22' y='32' width='20' height='14' rx='3' fill='white' opacity='0.9'/><rect x='48' y='32' width='20' height='14' rx='3' fill='white' opacity='0.7'/><rect x='22' y='52' width='20' height='14' rx='3' fill='white' opacity='0.7'/><rect x='48' y='52' width='20' height='14' rx='3' fill='white' opacity='0.5'/></svg>">
 <style>
   /* ── Fluent UI / Microsoft 365 Design System ── */
@@ -208,15 +210,9 @@
   .gap-item .gap-alt { color: var(--brand-primary); font-weight: 500; }
 
   /* ── Region Map ── */
-  .region-map-container { margin-top: 12px; background: var(--bg-layer1); border: 1px solid var(--border-default); border-radius: var(--radius-md); padding: 12px; overflow: hidden; }
-  .region-map-container svg { width: 100%; height: auto; display: block; }
-  .region-map-container .map-land { fill: var(--border-default); stroke: var(--bg-layer1); stroke-width: 0.3; }
-  .region-map-container .map-dot { fill: var(--text-tertiary); stroke: var(--bg-layer1); stroke-width: 0.5; cursor: pointer; transition: fill 0.2s, r 0.2s; }
-  .region-map-container .map-dot:hover { r: 4; }
-  .region-map-container .map-dot.selected { fill: var(--brand-primary); r: 5; stroke: #fff; stroke-width: 1; filter: drop-shadow(0 0 3px var(--brand-primary)); }
-  .region-map-container .map-dot.has-data { fill: var(--status-success); }
-  .region-map-container .map-label { font-size: 3.5px; fill: var(--text-primary); font-weight: 600; pointer-events: none; text-anchor: middle; }
-  .map-legend { display: flex; gap: 14px; margin-top: 6px; font-size: 11px; color: var(--text-secondary); align-items: center; flex-wrap: wrap; }
+  .region-map-container { margin-top: 12px; background: var(--bg-layer1); border: 1px solid var(--border-default); border-radius: var(--radius-md); overflow: hidden; }
+  #regionMap { height: 300px; width: 100%; z-index: 1; }
+  .map-legend { display: flex; gap: 14px; padding: 8px 12px; font-size: 11px; color: var(--text-secondary); align-items: center; flex-wrap: wrap; border-top: 1px solid var(--border-default); }
   .map-legend-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 3px; vertical-align: middle; }
 
   /* ── Responsive ── */
@@ -279,12 +275,12 @@
 
   <!-- Region Map -->
   <div class="region-map-container" id="regionMapContainer">
-    <svg id="regionMap" viewBox="0 0 360 180" preserveAspectRatio="xMidYMid meet"></svg>
+    <div id="regionMap"></div>
     <div class="map-legend">
-      <span><span class="map-legend-dot" style="background:var(--text-tertiary);"></span> Available region</span>
-      <span><span class="map-legend-dot" style="background:var(--status-success);"></span> Has SKU data</span>
-      <span><span class="map-legend-dot" style="background:var(--brand-primary);"></span> Selected</span>
-      <span style="font-style:italic;">Click a dot to add/remove a region</span>
+      <span><span class="map-legend-dot" style="background:#888;"></span> Available region</span>
+      <span><span class="map-legend-dot" style="background:#4caf50;"></span> Has SKU data</span>
+      <span><span class="map-legend-dot" style="background:#0f6cbd;border:2px solid #fff;box-shadow:0 0 4px #0f6cbd;"></span> Selected</span>
+      <span style="font-style:italic;">Click a marker to add/remove a region</span>
     </div>
   </div>
 
@@ -800,91 +796,80 @@ async function init() {
 }
 
 // ══════════════════════════════════════════════
-// REGION MAP
+// REGION MAP (Leaflet)
 // ══════════════════════════════════════════════
-// Simple equirectangular projection: lng → x, lat → y
-function lngLatToXY(lng, lat) {
-  const x = (parseFloat(lng) + 180);  // 0..360
-  const y = (90 - parseFloat(lat));    // 0..180
-  return { x, y };
+let leafletMap = null;
+let mapMarkers = {};
+
+function initMapOutline() {
+  leafletMap = L.map('regionMap', {
+    center: [20, 0],
+    zoom: 2,
+    minZoom: 2,
+    maxZoom: 6,
+    worldCopyJump: true,
+    scrollWheelZoom: true,
+  });
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    maxZoom: 6,
+  }).addTo(leafletMap);
 }
 
 function renderRegionMap() {
-  const svg = document.getElementById('regionMap');
-  // Keep the simplified world outline, only update dots
-  const dotsGroup = svg.querySelector('#mapDots');
-  if (dotsGroup) dotsGroup.remove();
+  if (!leafletMap) return;
 
-  const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-  g.id = 'mapDots';
-
-  const metadata = regionDataCache || {};
+  // Remove existing markers
+  for (const key of Object.keys(mapMarkers)) {
+    leafletMap.removeLayer(mapMarkers[key]);
+    delete mapMarkers[key];
+  }
 
   for (const r of allRegions) {
     if (!r.latitude || !r.longitude) continue;
-    const { x, y } = lngLatToXY(r.longitude, r.latitude);
+    const lat = parseFloat(r.latitude);
+    const lng = parseFloat(r.longitude);
     const isSelected = selectedRegions.includes(r.name);
-    const hasData = !!metadata[r.name];
+    const hasData = !!regionDataCache[r.name];
 
-    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    circle.setAttribute('cx', x);
-    circle.setAttribute('cy', y);
-    circle.setAttribute('r', isSelected ? '5' : '2.5');
-    circle.classList.add('map-dot');
-    if (isSelected) circle.classList.add('selected');
-    else if (hasData) circle.classList.add('has-data');
-    circle.setAttribute('data-region', r.name);
+    let color = '#888';
+    let radius = 5;
+    let borderColor = '#fff';
+    let borderWidth = 1;
+    let fillOpacity = 0.8;
+    let zIndex = 100;
 
-    const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
-    title.textContent = `${r.displayName} (${r.name})`;
-    circle.appendChild(title);
-
-    circle.addEventListener('click', () => toggleRegionFromMap(r.name));
-    g.appendChild(circle);
-
-    // Show label for selected regions
     if (isSelected) {
-      const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      label.setAttribute('x', x);
-      label.setAttribute('y', y - 7);
-      label.classList.add('map-label');
-      label.textContent = r.displayName;
-      g.appendChild(label);
+      color = '#0f6cbd';
+      radius = 9;
+      borderWidth = 3;
+      fillOpacity = 1;
+      zIndex = 1000;
+    } else if (hasData) {
+      color = '#4caf50';
+      radius = 6;
     }
+
+    const marker = L.circleMarker([lat, lng], {
+      radius: radius,
+      fillColor: color,
+      color: borderColor,
+      weight: borderWidth,
+      fillOpacity: fillOpacity,
+      pane: 'markerPane',
+    });
+
+    marker.bindTooltip(
+      `<strong>${r.displayName}</strong><br><span style="font-size:11px;color:#666;">${r.name}</span>${isSelected ? '<br><em style="color:#0f6cbd;">✓ Selected</em>' : ''}`,
+      { direction: 'top', offset: [0, -8] }
+    );
+
+    marker.on('click', () => toggleRegionFromMap(r.name));
+    marker.setZIndexOffset(zIndex);
+    marker.addTo(leafletMap);
+    mapMarkers[r.name] = marker;
   }
-
-  svg.appendChild(g);
-}
-
-function initMapOutline() {
-  // Simplified world map outline using SVG path (continental outlines)
-  const svg = document.getElementById('regionMap');
-  svg.innerHTML = `
-    <rect width="360" height="180" fill="var(--bg-surface)" rx="4"/>
-    <g class="map-land" transform="translate(0,0)">
-      <!-- Simplified continental outlines -->
-      <!-- North America -->
-      <path d="M40,25 L55,25 L65,30 L80,28 L95,32 L105,38 L110,45 L115,50 L120,58 L118,65 L112,70 L105,72 L95,78 L90,82 L82,80 L75,75 L65,72 L58,68 L52,62 L48,55 L42,48 L38,40 L35,32 Z"/>
-      <!-- Central America -->
-      <path d="M75,75 L82,80 L85,85 L88,90 L85,92 L80,88 L76,84 L74,78 Z"/>
-      <!-- South America -->
-      <path d="M88,90 L95,88 L105,92 L112,98 L115,108 L118,118 L116,128 L112,138 L105,145 L98,150 L92,148 L88,140 L85,130 L82,120 L80,110 L82,100 L85,95 Z"/>
-      <!-- Europe -->
-      <path d="M168,28 L175,25 L185,24 L195,26 L200,30 L205,28 L210,32 L205,38 L200,42 L195,45 L188,48 L182,50 L175,48 L170,44 L168,38 Z"/>
-      <!-- Africa -->
-      <path d="M170,55 L178,52 L188,52 L195,55 L200,60 L205,68 L208,78 L210,88 L208,98 L205,108 L200,118 L195,122 L188,125 L182,122 L178,115 L175,108 L172,98 L170,88 L168,78 L168,68 Z"/>
-      <!-- Asia -->
-      <path d="M195,26 L210,22 L225,20 L240,18 L255,20 L270,22 L285,25 L295,28 L300,32 L305,38 L308,45 L310,52 L305,58 L298,62 L290,65 L280,68 L270,70 L260,68 L250,65 L240,60 L232,55 L225,50 L218,48 L212,44 L208,40 L205,35 L200,30 Z"/>
-      <!-- India/SE Asia -->
-      <path d="M250,65 L258,68 L262,75 L265,82 L262,88 L258,92 L252,90 L248,85 L245,78 L246,72 Z"/>
-      <!-- SE Asia/Indonesia -->
-      <path d="M270,70 L278,72 L285,75 L292,78 L298,82 L305,80 L310,78 L312,82 L308,86 L302,88 L295,90 L288,88 L280,85 L275,80 L272,75 Z"/>
-      <!-- Australia -->
-      <path d="M288,108 L298,105 L310,105 L320,108 L325,115 L328,122 L325,130 L318,135 L308,138 L298,136 L290,130 L286,122 L285,115 Z"/>
-      <!-- NZ -->
-      <path d="M332,130 L335,128 L337,132 L336,136 L333,138 L331,134 Z"/>
-    </g>
-  `;
 }
 
 function toggleRegionFromMap(regionName) {
