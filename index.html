@@ -146,10 +146,16 @@
   .empty-state h3 { font-size: 16px; margin-bottom: 8px; color: var(--text-primary); }
 
   /* ── Freshness Banner ── */
-  .freshness-banner { background: var(--status-info-bg); border: 1px solid #b4d6fa; border-radius: var(--radius-md); padding: 12px 18px; margin-top: 12px; display: flex; align-items: center; gap: 10px; font-size: 13px; }
-  .freshness-banner .freshness-icon { font-size: 20px; flex-shrink: 0; }
+  .freshness-banner { background: var(--status-info-bg); border: 1px solid #b4d6fa; border-radius: var(--radius-md); padding: 14px 18px; margin-top: 12px; display: flex; align-items: flex-start; gap: 12px; font-size: 13px; }
+  .freshness-banner .freshness-icon { font-size: 22px; flex-shrink: 0; }
   .freshness-banner .freshness-date { font-weight: 700; color: var(--brand-primary); }
-  .freshness-banner .freshness-note { color: var(--text-secondary); font-size: 12px; }
+  .freshness-banner .freshness-note { color: var(--text-secondary); font-size: 12px; margin-top: 2px; }
+  .freshness-banner .freshness-pit { font-weight: 600; font-size: 12px; margin-top: 4px; color: var(--text-primary); }
+  .freshness-banner.stale { background: #fff3cd; border-color: #ffc107; }
+  .freshness-banner.stale .freshness-icon { color: #856404; }
+  .freshness-stale-warning { background: #dc3545; color: #fff; font-weight: 600; font-size: 12px; padding: 3px 8px; border-radius: 4px; display: inline-block; margin-top: 6px; }
+  .freshness-refresh-btn { display: inline-block; margin-top: 6px; padding: 4px 12px; background: var(--brand-primary); color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; text-decoration: none; }
+  .freshness-refresh-btn:hover { opacity: 0.9; }
 
   /* ── Family Cards ── */
   .family-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; margin-top: 8px; }
@@ -234,10 +240,15 @@
 
   <!-- Freshness Banner -->
   <div class="freshness-banner" id="freshnessBanner" style="display:none;">
-    <span class="freshness-icon">📅</span>
+    <span class="freshness-icon" id="freshnessIcon">📅</span>
     <div>
-      <div>Data current as of: <span class="freshness-date" id="freshnessDate">—</span></div>
-      <div class="freshness-note">This data is refreshed automatically on the 1st of each month. It shows general VM SKU availability — actual availability may vary by subscription. For real-time, subscription-specific data, see the CLI guidance below.</div>
+      <div>Data snapshot from: <span class="freshness-date" id="freshnessDate">—</span></div>
+      <div class="freshness-pit">⚠️ This is a point-in-time snapshot — not live data. VM SKU availability can change at any time.</div>
+      <div class="freshness-note">Data is refreshed on the 1st of each month. For real-time, subscription-specific availability use: <code>az vm list-skus --location &lt;region&gt;</code></div>
+      <div id="staleWarning" style="display:none;">
+        <span class="freshness-stale-warning" id="staleMessage">⚠️ This data may be outdated</span>
+        <a class="freshness-refresh-btn" onclick="location.reload(true)" title="Hard-refresh to fetch the latest data">🔄 Refresh Now</a>
+      </div>
     </div>
   </div>
 
@@ -661,6 +672,22 @@ async function init() {
         const meta = await metaResp.json();
         document.getElementById('freshnessDate').textContent = meta.lastUpdatedDisplay;
         document.getElementById('freshnessBanner').style.display = '';
+
+        // Check staleness: warn if data is older than 35 days
+        if (meta.lastUpdated) {
+          const lastUpdated = new Date(meta.lastUpdated);
+          const now = new Date();
+          const daysSinceUpdate = Math.floor((now - lastUpdated) / (1000 * 60 * 60 * 24));
+          if (daysSinceUpdate > 35) {
+            const banner = document.getElementById('freshnessBanner');
+            banner.classList.add('stale');
+            document.getElementById('freshnessIcon').textContent = '⚠️';
+            const staleDiv = document.getElementById('staleWarning');
+            staleDiv.style.display = '';
+            document.getElementById('staleMessage').textContent =
+              `⚠️ Data is ${daysSinceUpdate} days old — a newer refresh may be available. Please reload the page or clear your browser cache.`;
+          }
+        }
       }
     } catch (e) { /* metadata optional */ }
 
