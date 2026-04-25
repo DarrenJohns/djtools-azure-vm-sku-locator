@@ -800,8 +800,8 @@ let mapMarkers = {};
 
 function initMapOutline() {
   leafletMap = L.map('regionMap', {
-    center: [20, 0],
-    zoom: 2,
+    center: [-36.85, 174.76],
+    zoom: 4,
     minZoom: 2,
     maxZoom: 6,
     worldCopyJump: true,
@@ -895,6 +895,11 @@ function addSelectedRegion() {
   selectedRegions.push(regionName);
   renderRegionChips();
   renderRegionMap();
+  // Pan map to the newly selected region
+  const regionInfo = allRegions.find(r => r.name === regionName);
+  if (regionInfo && regionInfo.latitude && regionInfo.longitude && leafletMap) {
+    leafletMap.flyTo([parseFloat(regionInfo.latitude), parseFloat(regionInfo.longitude)], 4, { duration: 0.8 });
+  }
   loadRegionData(regionName);
   updateCLICommand();
 }
