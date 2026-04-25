@@ -277,8 +277,7 @@
   <div class="region-map-container" id="regionMapContainer">
     <div id="regionMap"></div>
     <div class="map-legend">
-      <span><span class="map-legend-dot" style="background:#ccc;border:1px solid #999;"></span> Region (no data yet)</span>
-      <span><span class="map-legend-dot" style="background:#4caf50;border:1px solid #fff;"></span> SKU data available (monthly refresh)</span>
+      <span><span class="map-legend-dot" style="background:#4caf50;border:1px solid #fff;"></span> Available</span>
       <span><span class="map-legend-dot" style="background:#0f6cbd;border:2px solid #fff;box-shadow:0 0 4px #0f6cbd;width:12px;height:12px;"></span> Selected</span>
       <span style="font-style:italic;">Click a marker to add/remove a region</span>
     </div>
@@ -832,53 +831,27 @@ function renderRegionMap() {
 
   for (const r of allRegions) {
     if (!r.latitude || !r.longitude) continue;
+    if (!availableDataRegions.has(r.name)) continue;
     const lat = parseFloat(r.latitude);
     const lng = parseFloat(r.longitude);
     const isSelected = selectedRegions.includes(r.name);
-    const hasData = availableDataRegions.has(r.name);
-
-    let color = '#ccc';
-    let radius = 4;
-    let borderColor = '#999';
-    let borderWidth = 1;
-    let fillOpacity = 0.5;
-    let zIndex = 100;
-
-    if (isSelected) {
-      color = '#0f6cbd';
-      radius = 10;
-      borderColor = '#fff';
-      borderWidth = 3;
-      fillOpacity = 1;
-      zIndex = 1000;
-    } else if (hasData) {
-      color = '#4caf50';
-      radius = 6;
-      borderColor = '#fff';
-      borderWidth = 1.5;
-      fillOpacity = 0.85;
-      zIndex = 200;
-    }
 
     const marker = L.circleMarker([lat, lng], {
-      radius: radius,
-      fillColor: color,
-      color: borderColor,
-      weight: borderWidth,
-      fillOpacity: fillOpacity,
+      radius: isSelected ? 10 : 6,
+      fillColor: isSelected ? '#0f6cbd' : '#4caf50',
+      color: '#fff',
+      weight: isSelected ? 3 : 1.5,
+      fillOpacity: isSelected ? 1 : 0.85,
       pane: 'markerPane',
     });
 
-    const statusText = isSelected ? '<br><em style="color:#0f6cbd;">✓ Selected</em>'
-      : hasData ? '<br><em style="color:#4caf50;">✓ SKU data available</em>'
-      : '<br><em style="color:#999;">No SKU data yet</em>';
     marker.bindTooltip(
-      `<strong>${r.displayName}</strong><br><span style="font-size:11px;color:#666;">${r.name}</span>${statusText}`,
+      `<strong>${r.displayName}</strong><br><span style="font-size:11px;color:#666;">${r.name}</span>${isSelected ? '<br><em style="color:#0f6cbd;">✓ Selected</em>' : ''}`,
       { direction: 'top', offset: [0, -8] }
     );
 
     marker.on('click', () => toggleRegionFromMap(r.name));
-    marker.setZIndexOffset(zIndex);
+    marker.setZIndexOffset(isSelected ? 1000 : 100);
     marker.addTo(leafletMap);
     mapMarkers[r.name] = marker;
   }
