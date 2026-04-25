@@ -1,0 +1,36 @@
+name: Deploy to Azure Storage
+
+on:
+  push:
+    branches: [main]
+    paths: ['index.html']
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Upload to Azure Blob Storage
+        run: |
+          az storage blob upload `
+            --account-name ${{ vars.STORAGE_ACCOUNT }} `
+            --container-name '$web' `
+            --name index.html `
+            --file index.html `
+            --overwrite `
+            --content-type "text/html; charset=utf-8" `
+            --auth-mode login
+        shell: pwsh
+
+      - name: Verify deployment
+        run: |
+          $url = "https://${{ vars.STORAGE_ACCOUNT }}.z44.web.core.windows.net/"
+          $response = Invoke-WebRequest -Uri $url -UseBasicParsing -TimeoutSec 30
+          if ($response.StatusCode -eq 200) {
+            Write-Host "✅ Deployment verified: $url (HTTP $($response.StatusCode))"
+          } else {
+            Write-Error "❌ Deployment check failed: HTTP $($response.StatusCode)"
+            exit 1
+          }
+        shell: pwsh

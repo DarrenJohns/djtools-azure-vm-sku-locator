@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="DJ Tools Web App — replace this with your app description">
+<meta name="theme-color" content="#0f6cbd">
+<title>DJ Tools — Web App Title</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='0%25' y2='100%25'><stop offset='0%25' stop-color='%230f6cbd'/><stop offset='100%25' stop-color='%23094780'/></linearGradient></defs><path d='M50 8 L88 28 V58 C88 76 72 90 50 96 C28 90 12 76 12 58 V28 Z' fill='url(%23g)'/><path d='M38 52 L46 60 L62 42' stroke='white' stroke-width='6' stroke-linecap='round' stroke-linejoin='round' fill='none'/></svg>">
+<style>
+  /* ── Fluent UI / Microsoft 365 Design System ── */
+  :root {
+    --brand-primary: #0f6cbd;
+    --brand-hover: #115ea3;
+    --brand-pressed: #0f548c;
+    --brand-subtle: #ebf3fc;
+    --brand-bg: #0f6cbd;
+    --bg-base: #fafafa;
+    --bg-layer1: #ffffff;
+    --bg-layer2: #f5f5f5;
+    --bg-hover: #f0f0f0;
+    --border-default: #e0e0e0;
+    --border-subtle: #f0f0f0;
+    --text-primary: #242424;
+    --text-secondary: #616161;
+    --text-tertiary: #9e9e9e;
+    --text-on-brand: #ffffff;
+    --status-danger: #c4314b;
+    --status-danger-bg: #fdf3f4;
+    --status-success: #0e7a0d;
+    --status-success-bg: #f1faf1;
+    --status-warning: #f7630c;
+    --status-warning-bg: #fff9f5;
+    --status-info-bg: #ebf3fc;
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1);
+    --shadow-md: 0 2px 4px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.08);
+    --shadow-lg: 0 8px 16px rgba(0,0,0,0.06), 0 16px 48px rgba(0,0,0,0.12);
+    --font-sans: 'Segoe UI Variable', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    --transition: 120ms cubic-bezier(0.33, 0, 0.67, 1);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-sans); background-color: var(--bg-base); color: var(--text-primary); line-height: 1.5; font-size: 14px; -webkit-font-smoothing: antialiased; min-height: 100vh; }
+  .container { max-width: 1440px; margin: 0 auto; padding: 20px 24px; }
+
+  /* ── Header ── */
+  header { background: linear-gradient(135deg, #0f6cbd 0%, #0e4a8a 100%); color: var(--text-on-brand); padding: 16px 24px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); position: relative; }
+  header svg { width: 28px; height: 28px; fill: white; }
+  header h1 { font-size: 20px; font-weight: 600; }
+  header .subtitle { font-size: 12px; opacity: 0.85; margin-left: 4px; }
+  .theme-toggle { position: absolute; right: 24px; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); color: white; border-radius: 20px; padding: 6px 14px; cursor: pointer; font-size: 16px; backdrop-filter: blur(4px); transition: background var(--transition); }
+  .theme-toggle:hover { background: rgba(255,255,255,0.25); }
+
+  /* ── Buttons ── */
+  .btn { font-family: var(--font-sans); font-size: 13px; font-weight: 500; border-radius: var(--radius-sm); padding: 6px 14px; cursor: pointer; transition: all var(--transition); border: 1px solid transparent; display: inline-flex; align-items: center; gap: 4px; }
+  .btn-primary { background: linear-gradient(180deg, #1a7fd4 0%, var(--brand-primary) 100%); color: var(--text-on-brand); box-shadow: 0 1px 3px rgba(15,108,189,0.3); }
+  .btn-primary:hover { background: linear-gradient(180deg, #1a8ae6 0%, var(--brand-hover) 100%); }
+  .btn-outline { background: var(--bg-layer1); border: 1px solid var(--border-default); color: var(--text-primary); }
+  .btn-outline:hover { background: var(--bg-hover); border-color: var(--brand-primary); }
+  .btn-success { background: linear-gradient(180deg, #13961a 0%, var(--status-success) 100%); color: white; box-shadow: 0 1px 3px rgba(14,122,13,0.3); }
+  .btn-danger { background: linear-gradient(180deg, #d9364f 0%, var(--status-danger) 100%); color: white; }
+  .btn-sm { font-size: 12px; padding: 4px 10px; }
+
+  /* ── Welcome Modal ── */
+  .welcome-overlay { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+  .welcome-overlay.active { opacity: 1; pointer-events: auto; }
+  .welcome-card { background: var(--bg-layer1); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); max-width: 540px; width: 90%; overflow: hidden; }
+  .welcome-banner { background: linear-gradient(135deg, #0f6cbd 0%, #0e4a8a 100%); color: white; padding: 28px 32px 20px; text-align: center; }
+  .welcome-banner h2 { font-size: 22px; margin-bottom: 6px; }
+  .welcome-banner p { font-size: 14px; opacity: 0.85; }
+  .welcome-body { padding: 24px 32px 28px; }
+  .welcome-body ul { list-style: none; margin-bottom: 20px; }
+  .welcome-body li { padding: 8px 0; display: flex; gap: 10px; align-items: flex-start; white-space: nowrap; }
+  .welcome-body li span { font-size: 18px; flex-shrink: 0; }
+  .welcome-body .btn { width: 100%; justify-content: center; font-size: 14px; padding: 10px; }
+
+  /* ── Drop Zone ── */
+  .drop-zone { border: 2px dashed #a0c4e8; border-radius: var(--radius-lg); padding: 48px; text-align: center; cursor: pointer; transition: all 0.2s; background: linear-gradient(180deg, #f0f7ff 0%, #fafcff 100%); }
+  .drop-zone:hover, .drop-zone.drag-over { border-color: var(--brand-primary); background: linear-gradient(180deg, #e0efff 0%, #f0f7ff 100%); box-shadow: 0 0 20px rgba(15,108,189,0.1); }
+  .drop-zone h2 { font-size: 18px; margin-bottom: 8px; color: var(--brand-primary); }
+  .drop-zone p { color: var(--text-secondary); font-size: 13px; }
+  .drop-zone input[type="file"] { display: none; }
+
+  /* ── Sections ── */
+  .section-collapsible { background: var(--bg-layer1); border: 1px solid var(--border-default); border-radius: var(--radius-md); margin-top: 16px; overflow: hidden; box-shadow: var(--shadow-sm); }
+  .section-header { display: flex; align-items: center; gap: 8px; padding: 10px 16px; cursor: pointer; user-select: none; border-left: 4px solid var(--brand-primary); background: linear-gradient(90deg, #dceafb 0%, #eef4fc 40%, var(--bg-layer1) 100%); }
+  .section-header h3 { font-size: 14px; font-weight: 600; flex: 1; }
+  .section-toggle { font-size: 11px; transition: transform 0.2s; color: var(--brand-primary); font-weight: 700; }
+  .section-toggle.open { transform: rotate(90deg); }
+  .section-body { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; padding: 0 16px; }
+  .section-body.open { max-height: 5000px; padding: 12px 16px 16px; }
+  .section-badge { font-size: 11px; font-weight: 600; padding: 2px 10px; border-radius: 10px; background: var(--brand-subtle); color: var(--brand-primary); border: 1px solid #b4d6fa; }
+
+  /* ── Toast ── */
+  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--bg-layer1); border: 1px solid var(--border-default); border-radius: var(--radius-md); padding: 10px 20px; font-size: 13px; box-shadow: var(--shadow-md); z-index: 1100; transition: transform 0.3s, opacity 0.3s; opacity: 0; }
+  .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  .toast.success { border-color: #a5d6a7; }
+  .toast.error { border-color: #ef9a9a; color: var(--status-danger); }
+  .toast.warning { border-color: #ffe0b2; color: var(--status-warning); }
+
+  /* ── Modals ── */
+  .modal-overlay { position: fixed; inset: 0; z-index: 900; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.45); opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+  .modal-overlay.active { opacity: 1; pointer-events: auto; }
+  .modal { background: var(--bg-layer1); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); width: 600px; max-width: 95vw; max-height: 90vh; display: flex; flex-direction: column; }
+  .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border-default); }
+  .modal-header h3 { font-size: 16px; font-weight: 600; }
+  .modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-secondary); padding: 4px 8px; }
+  .modal-body { padding: 16px 20px; overflow-y: auto; flex: 1; }
+  .modal-footer { padding: 12px 20px; border-top: 1px solid var(--border-default); display: flex; gap: 8px; justify-content: flex-end; }
+  .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .form-group { display: flex; flex-direction: column; gap: 4px; }
+  .form-group.full-width { grid-column: 1/-1; }
+  .form-group label { font-size: 12px; font-weight: 600; color: var(--text-secondary); }
+  .form-group input, .form-group select, .form-group textarea { font-family: var(--font-sans); font-size: 13px; padding: 6px 10px; border: 1px solid var(--border-default); border-radius: var(--radius-sm); background: var(--bg-layer1); color: var(--text-primary); }
+  .form-group .help { font-size: 11px; color: var(--text-tertiary); }
+  .form-group .required { color: var(--status-danger); }
+
+  /* ── Audit Log ── */
+  .audit-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .audit-table th { text-align: left; padding: 6px 10px; background: var(--bg-layer2); font-size: 11px; }
+  .audit-table td { padding: 4px 10px; border-bottom: 1px solid var(--border-subtle); }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <svg viewBox="0 0 24 24"><path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z"/></svg>
+  <h1>App Name</h1>
+  <span class="subtitle">Subtitle</span>
+  <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode">🌙</button>
+</header>
+
+<!-- Welcome Modal -->
+<div class="welcome-overlay active" id="welcomeModal">
+  <div class="welcome-card">
+    <div class="welcome-banner">
+      <h2>👋 Welcome to App Name</h2>
+      <p>Brief description of what this app does</p>
+    </div>
+    <div class="welcome-body">
+      <ul>
+        <li><span>📂</span> <strong>Import</strong> — Drag and drop your files</li>
+        <li><span>✏️</span> <strong>Edit</strong> — Add, modify, and manage items</li>
+        <li><span>🛡️</span> <strong>Analyse</strong> — Insights and scoring</li>
+        <li><span>⬇️</span> <strong>Export</strong> — Multiple output formats</li>
+      </ul>
+      <button class="btn btn-primary" onclick="closeWelcome()">Get Started</button>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <!-- Drop Zone -->
+  <div class="drop-zone" id="dropZone">
+    <h2>📂 Drop a file here</h2>
+    <p>or <strong>click to browse</strong> — supports .json and .csv files</p>
+    <input type="file" id="fileInput" accept=".json,.csv">
+  </div>
+
+  <!-- Main Content (hidden until data loaded) -->
+  <div id="mainContent" style="display:none;">
+
+    <!-- Example Collapsible Section -->
+    <div class="section-collapsible">
+      <div class="section-header" onclick="toggleSection('items')">
+        <span class="section-toggle" id="itemsToggle">▶</span>
+        <h3>📋 Items</h3>
+        <span class="section-badge" id="itemsBadge">0 items</span>
+      </div>
+      <div class="section-body" id="itemsBody">
+        <p style="color:var(--text-secondary);font-size:13px;">Your content goes here.</p>
+      </div>
+    </div>
+
+    <!-- Audit Log -->
+    <div class="section-collapsible" style="margin-top:16px;">
+      <div class="section-header" onclick="toggleSection('audit')">
+        <span class="section-toggle" id="auditToggle">▶</span>
+        <h3>📝 Audit Log</h3>
+        <span class="section-badge" id="auditBadge">0 entries</span>
+      </div>
+      <div class="section-body" id="auditBody">
+        <table class="audit-table">
+          <thead><tr><th>Time</th><th>Action</th><th>Details</th></tr></thead>
+          <tbody id="auditTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="toast" id="toast"></div>
+
+<!-- Footer -->
+<footer style="text-align:center;padding:24px 16px 28px;font-size:12px;color:var(--text-tertiary);border-top:1px solid var(--border-subtle);margin-top:24px;background:linear-gradient(180deg, transparent 0%, var(--bg-layer2) 100%);">
+  <span style="font-weight:600;color:var(--text-secondary);">DJ Tools</span> powered by <strong style="color:var(--brand-primary);">GitHub Copilot CLI</strong> &nbsp;·&nbsp;
+  <a href="https://github.com/features/copilot/cli/" target="_blank" rel="noopener noreferrer" style="color:var(--brand-primary);text-decoration:none;font-weight:600;">Learn more ↗</a>
+  <div style="margin-top:8px;font-size:11px;color:var(--text-tertiary);opacity:0.7;">v0.0.1-beta</div>
+</footer>
+
+<script>
+// ══════════════════════════════════════════════
+// THEME SYSTEM
+// ══════════════════════════════════════════════
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark-theme');
+  localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  document.querySelector('.theme-toggle').textContent = isDark ? '☀️' : '🌙';
+  applyTheme(isDark);
+}
+
+function applyTheme(isDark) {
+  const r = document.documentElement.style;
+  if (isDark) {
+    r.setProperty('--bg-base', '#1a1a1a');
+    r.setProperty('--bg-layer1', '#2d2d2d');
+    r.setProperty('--bg-layer2', '#252525');
+    r.setProperty('--bg-hover', '#383838');
+    r.setProperty('--border-default', '#404040');
+    r.setProperty('--border-subtle', '#333333');
+    r.setProperty('--text-primary', '#e0e0e0');
+    r.setProperty('--text-secondary', '#a0a0a0');
+    r.setProperty('--text-tertiary', '#707070');
+    r.setProperty('--status-danger-bg', '#3d1f25');
+    r.setProperty('--status-success-bg', '#1f3d1f');
+    r.setProperty('--status-warning-bg', '#3d2f1f');
+    r.setProperty('--status-info-bg', '#1f2d3d');
+  } else {
+    r.setProperty('--bg-base', '#fafafa');
+    r.setProperty('--bg-layer1', '#ffffff');
+    r.setProperty('--bg-layer2', '#f5f5f5');
+    r.setProperty('--bg-hover', '#f0f0f0');
+    r.setProperty('--border-default', '#e0e0e0');
+    r.setProperty('--border-subtle', '#f0f0f0');
+    r.setProperty('--text-primary', '#242424');
+    r.setProperty('--text-secondary', '#616161');
+    r.setProperty('--text-tertiary', '#9e9e9e');
+    r.setProperty('--status-danger-bg', '#fdf3f4');
+    r.setProperty('--status-success-bg', '#f1faf1');
+    r.setProperty('--status-warning-bg', '#fff9f5');
+    r.setProperty('--status-info-bg', '#ebf3fc');
+  }
+}
+
+// Init theme
+(function() {
+  const saved = localStorage.getItem('theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const isDark = saved === 'dark' || (!saved && prefersDark);
+  if (isDark) { document.body.classList.add('dark-theme'); applyTheme(true); document.querySelector('.theme-toggle').textContent = '☀️'; }
+})();
+
+// ══════════════════════════════════════════════
+// WELCOME MODAL
+// ══════════════════════════════════════════════
+function closeWelcome() {
+  document.getElementById('welcomeModal').classList.remove('active');
+  localStorage.setItem('welcomed', 'true');
+}
+if (localStorage.getItem('welcomed') === 'true') {
+  document.getElementById('welcomeModal').classList.remove('active');
+}
+
+// ══════════════════════════════════════════════
+// TOAST NOTIFICATIONS
+// ══════════════════════════════════════════════
+let toastTimeout;
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => t.className = 'toast', 3000);
+}
+
+// ══════════════════════════════════════════════
+// COLLAPSIBLE SECTIONS
+// ══════════════════════════════════════════════
+const sections = {
+  items: { toggle: 'itemsToggle', body: 'itemsBody' },
+  audit: { toggle: 'auditToggle', body: 'auditBody' },
+};
+
+function toggleSection(key) {
+  const s = sections[key];
+  if (!s) return;
+  const toggle = document.getElementById(s.toggle);
+  const body = document.getElementById(s.body);
+  const isOpen = body.classList.toggle('open');
+  toggle.classList.toggle('open', isOpen);
+}
+
+// ══════════════════════════════════════════════
+// HTML ESCAPING
+// ══════════════════════════════════════════════
+function escHtml(str) {
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+// ══════════════════════════════════════════════
+// FILE DROP ZONE
+// ══════════════════════════════════════════════
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+dropZone.addEventListener('click', () => fileInput.click());
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('drag-over'); if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
+fileInput.addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]); });
+
+function handleFile(file) {
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (ext !== 'json' && ext !== 'csv') { showToast('Please select a .json or .csv file', 'error'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    // TODO: Parse the file and load data
+    showToast(`Loaded ${file.name}`);
+    dropZone.style.display = 'none';
+    document.getElementById('mainContent').style.display = '';
+  };
+  reader.readAsText(file);
+}
+
+// ══════════════════════════════════════════════
+// AUDIT LOG
+// ══════════════════════════════════════════════
+const auditLog = [];
+
+function logAudit(action, details) {
+  const entry = { time: new Date().toLocaleTimeString(), action, details };
+  auditLog.push(entry);
+  renderAuditLog();
+}
+
+function renderAuditLog() {
+  const tbody = document.getElementById('auditTableBody');
+  document.getElementById('auditBadge').textContent = auditLog.length + ' entries';
+  tbody.innerHTML = auditLog.map(e =>
+    `<tr><td>${escHtml(e.time)}</td><td>${escHtml(e.action)}</td><td>${escHtml(e.details)}</td></tr>`
+  ).reverse().join('');
+}
+
+// ══════════════════════════════════════════════
+// UNDO / REDO
+// ══════════════════════════════════════════════
+const undoStack = [];
+const redoStack = [];
+
+function pushUndo() {
+  // TODO: Push current state snapshot to undoStack
+  // undoStack.push(JSON.parse(JSON.stringify(appState)));
+  redoStack.length = 0;
+}
+
+// ══════════════════════════════════════════════
+// KEYBOARD SHORTCUTS
+// ══════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey && e.key === 'z') { e.preventDefault(); /* undoAction(); */ }
+  if (e.ctrlKey && e.key === 'y') { e.preventDefault(); /* redoAction(); */ }
+});
+
+</script>
+</body>
+</html>
