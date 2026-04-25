@@ -179,6 +179,34 @@
   .family-card .card-links a:hover { text-decoration: underline; }
   .family-card .retirement-warning { background: var(--status-warning-bg); border: 1px solid #ffe0b2; border-radius: var(--radius-sm); padding: 4px 8px; font-size: 11px; color: var(--status-warning); margin-top: 6px; display: flex; align-items: center; gap: 4px; }
 
+  /* ── Workload Recommendations ── */
+  .workload-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 12px; margin-top: 8px; }
+  .workload-card { background: var(--bg-layer1); border: 1px solid var(--border-default); border-radius: var(--radius-md); padding: 14px 16px; }
+  .workload-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .workload-card-header h4 { font-size: 14px; font-weight: 600; flex: 1; margin: 0; }
+  .workload-card .workload-desc { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; }
+  .workload-card .rec-series { font-size: 12px; line-height: 1.8; }
+  .workload-card .rec-series .rec-tag { display: inline-block; background: #e0efff; color: #0f548c; padding: 1px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; margin: 1px 3px; }
+  .workload-card .rec-series .rec-tag.available { background: #e8f5e9; color: #2e7d32; }
+  .workload-card .rec-series .rec-tag.missing { background: #fce4ec; color: #c62828; text-decoration: line-through; opacity: 0.7; }
+  .workload-card .rec-note { font-size: 11px; color: var(--text-tertiary); margin-top: 6px; font-style: italic; }
+  .workload-card .workload-links { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+  .workload-card .workload-links a { font-size: 11px; color: var(--brand-primary); text-decoration: none; font-weight: 500; }
+  .workload-card .workload-links a:hover { text-decoration: underline; }
+  .workload-summary { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; font-size: 12px; }
+  .workload-summary .ws-stat { background: var(--bg-layer1); border: 1px solid var(--border-default); border-radius: var(--radius-sm); padding: 4px 10px; }
+
+  /* ── Availability Gaps ── */
+  .gap-banner { border-radius: var(--radius-md); padding: 14px 18px; margin-top: 8px; font-size: 13px; }
+  .gap-banner.has-gaps { background: #fff3cd; border: 1px solid #ffc107; }
+  .gap-banner.no-gaps { background: #e8f5e9; border: 1px solid #4caf50; }
+  .gap-list { margin-top: 8px; }
+  .gap-item { display: flex; align-items: flex-start; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--border-default); font-size: 12px; }
+  .gap-item:last-child { border-bottom: none; }
+  .gap-item .gap-family { font-weight: 600; min-width: 80px; }
+  .gap-item .gap-workloads { color: var(--text-secondary); flex: 1; }
+  .gap-item .gap-alt { color: var(--brand-primary); font-weight: 500; }
+
   /* ── Responsive ── */
   @media (max-width: 768px) {
     .region-bar { flex-direction: column; }
@@ -304,6 +332,33 @@
       <div class="section-body open" id="familiesBody">
         <p style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">Each VM SKU belongs to a family optimised for specific workloads. Select a family card to filter the table below.</p>
         <div class="family-grid" id="familyGrid"></div>
+      </div>
+    </div>
+
+    <!-- Workload Recommendations -->
+    <div class="section-collapsible" style="margin-top:12px;">
+      <div class="section-header" onclick="toggleSection('workloads')">
+        <span class="section-toggle open" id="workloadsToggle">▶</span>
+        <h3>🎯 Workload Recommendations</h3>
+        <span class="section-badge" id="workloadsBadge">0 workloads</span>
+      </div>
+      <div class="section-body open" id="workloadsBody">
+        <p style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">Recommended VM SKU families for common Azure workloads. Green tags are available in your selected region(s); <span style="text-decoration:line-through;opacity:0.7;">strikethrough</span> tags are not available.</p>
+        <div class="workload-summary" id="workloadSummary"></div>
+        <div class="workload-grid" id="workloadGrid"></div>
+      </div>
+    </div>
+
+    <!-- Availability Gaps -->
+    <div class="section-collapsible" style="margin-top:12px;">
+      <div class="section-header" onclick="toggleSection('gaps')">
+        <span class="section-toggle open" id="gapsToggle">▶</span>
+        <h3>⚠️ Availability Gaps</h3>
+        <span class="section-badge" id="gapsBadge">—</span>
+      </div>
+      <div class="section-body open" id="gapsBody">
+        <p style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">VM families recommended for key workloads that are <strong>not available</strong> in your selected region(s). Consider alternative regions or families.</p>
+        <div id="gapsContent"></div>
       </div>
     </div>
 
@@ -464,6 +519,8 @@ function showToast(msg, type = 'success') {
 const sections = {
   filters: { toggle: 'filtersToggle', body: 'filtersBody' },
   families: { toggle: 'familiesToggle', body: 'familiesBody' },
+  workloads: { toggle: 'workloadsToggle', body: 'workloadsBody' },
+  gaps: { toggle: 'gapsToggle', body: 'gapsBody' },
   skutable: { toggle: 'skutaleToggle', body: 'skutaleBody' },
   cli: { toggle: 'cliToggle', body: 'cliBody' },
 };
@@ -780,6 +837,7 @@ function rebuildSkuList() {
   }
   populateFamilyFilter();
   renderFamilyOverview();
+  renderWorkloadRecommendations();
   applyFilters();
 }
 
@@ -855,6 +913,192 @@ function filterByFamilyKey(key) {
   // Scroll to SKU table
   document.getElementById('skutaleBody')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   showToast(`Filtered to ${info.letter}-family SKUs`);
+}
+
+// ══════════════════════════════════════════════
+// WORKLOAD RECOMMENDATIONS
+// ══════════════════════════════════════════════
+const workloadRecommendations = [
+  {
+    id: 'oracle', name: 'Oracle Database', icon: '🏛️',
+    description: 'Oracle DB workloads on Azure — optimised for high memory-to-vCore ratio and storage throughput.',
+    recommendedFamilies: ['eb', 'e', 'm', 'l'],
+    preferredSeries: ['Ebdsv5', 'Ebsv5', 'Edsv5', 'Msv2', 'Lsv3'],
+    note: 'Ebdsv5/Ebsv5 recommended first for optimal 8:1 memory-to-vCore ratio. M-series for multi-TB databases.',
+    docsUrl: 'https://learn.microsoft.com/en-us/azure/virtual-machines/workloads/oracle/oracle-performance-best-practice'
+  },
+  {
+    id: 'sap', name: 'SAP / SAP HANA', icon: '🏢',
+    description: 'SAP-certified VM sizes for SAP HANA and NetWeaver workloads.',
+    recommendedFamilies: ['m', 'e', 'd'],
+    preferredSeries: ['Msv2', 'Mbsv3', 'Edsv5', 'Dasv5'],
+    note: 'M-series and Mv2 certified for SAP HANA up to 12 TB RAM. Always verify SAP certification before deployment.',
+    docsUrl: 'https://learn.microsoft.com/en-us/azure/sap/workloads/planning-guide'
+  },
+  {
+    id: 'sql-server', name: 'SQL Server', icon: '🗄️',
+    description: 'Best VM sizes for SQL Server on Azure VMs — OLTP, analytics, and data warehousing.',
+    recommendedFamilies: ['eb', 'e', 'm', 'd'],
+    preferredSeries: ['Ebdsv5', 'Edsv5', 'Mbsv3', 'Ddsv5'],
+    note: 'Ebdsv5 offers best price-performance for most SQL workloads. Use minimum 4 vCPUs. M-series for large data warehouses.',
+    docsUrl: 'https://learn.microsoft.com/en-us/azure/azure-sql/virtual-machines/windows/performance-guidelines-best-practices-vm-size'
+  },
+  {
+    id: 'ai-ml', name: 'AI / Machine Learning', icon: '🤖',
+    description: 'GPU-accelerated VM sizes for training and inference of AI/ML models.',
+    recommendedFamilies: ['nc', 'nd', 'nv'],
+    preferredSeries: ['NCads H100 v5', 'ND A100 v4', 'ND H100 v5', 'NCasT4 v3', 'NVadsA10 v5'],
+    note: 'ND-series for large-scale distributed training. NC-series for general GPU compute. NV-series for inference and visualisation.',
+    docsUrl: 'https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/gpu-accelerated/overview'
+  },
+  {
+    id: 'hpc', name: 'High Performance Computing', icon: '🔬',
+    description: 'HPC workloads — fluid dynamics, weather modelling, genomics, and engineering simulations.',
+    recommendedFamilies: ['hb', 'hc', 'hx', 'nd'],
+    preferredSeries: ['HBv4', 'HBv3', 'HX', 'ND H100 v5'],
+    note: 'HB-series for memory bandwidth. HC-series for dense computation (retiring May 2027 — migrate to HBv4/HBv5).',
+    docsUrl: 'https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/high-performance-compute/overview'
+  },
+  {
+    id: 'remote-desktop', name: 'Remote Desktop / AVD', icon: '🖥️',
+    description: 'Azure Virtual Desktop and Remote Desktop Services session host sizing.',
+    recommendedFamilies: ['d', 'e', 'nv'],
+    preferredSeries: ['Dsv5', 'Ddsv5', 'Esv5', 'NVadsA10 v5'],
+    note: 'D-series for standard knowledge workers (1 vCPU per 2-4 users). NV-series for GPU-accelerated graphics (CAD, video editing).',
+    docsUrl: 'https://learn.microsoft.com/en-us/windows-server/remote/remote-desktop-services/session-host-virtual-machine-sizing-guidelines'
+  },
+  {
+    id: 'web-apps', name: 'Web Applications', icon: '🌐',
+    description: 'Web servers, application servers, and APIs with balanced compute and memory.',
+    recommendedFamilies: ['d', 'b', 'f'],
+    preferredSeries: ['Ddsv5', 'Dasv5', 'Bsv2', 'Fsv2'],
+    note: 'D-series for production. B-series (burstable) for dev/test and low-traffic sites. F-series for CPU-intensive APIs.',
+    docsUrl: 'https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/general-purpose/overview'
+  },
+  {
+    id: 'big-data', name: 'Big Data & Analytics', icon: '📊',
+    description: 'Hadoop, Spark, Cassandra, MongoDB, and data warehousing workloads requiring high storage throughput.',
+    recommendedFamilies: ['l', 'e', 'd'],
+    preferredSeries: ['Lsv3', 'Lsv4', 'Edsv5', 'Ddsv5'],
+    note: 'L-series for high disk IOPS and throughput. E-series for in-memory analytics.',
+    docsUrl: 'https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/storage-optimized/overview'
+  },
+  {
+    id: 'gaming', name: 'Gaming & Streaming', icon: '🎮',
+    description: 'Cloud gaming, game streaming, and game server workloads.',
+    recommendedFamilies: ['nv', 'ng', 'f'],
+    preferredSeries: ['NVadsA10 v5', 'NGads V620', 'Fsv2'],
+    note: 'NV/NG-series for GPU-accelerated game streaming. F-series for dedicated game servers (CPU-bound).',
+    docsUrl: 'https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/gpu-accelerated/nv-family'
+  },
+  {
+    id: 'confidential', name: 'Confidential Computing', icon: '🔒',
+    description: 'Hardware-based TEEs for protecting data in use — ideal for regulated industries.',
+    recommendedFamilies: ['dc', 'ec'],
+    preferredSeries: ['DCasv5', 'DCadsv5', 'DCsv3', 'ECasv5', 'ECadsv5'],
+    note: 'DC-series for general-purpose confidential VMs. EC-series for memory-optimised confidential workloads.',
+    docsUrl: 'https://learn.microsoft.com/en-us/azure/confidential-computing/virtual-machine-options'
+  },
+];
+
+function renderWorkloadRecommendations() {
+  const grid = document.getElementById('workloadGrid');
+  const summary = document.getElementById('workloadSummary');
+  const gapsContent = document.getElementById('gapsContent');
+
+  // Build set of available family keys from loaded SKUs
+  const availableFamilyKeys = new Set();
+  for (const s of allSkus) {
+    const key = getFamilyKey(s.family);
+    if (key) availableFamilyKeys.add(key);
+  }
+
+  // Build set of available series display names
+  const availableSeries = new Set();
+  for (const s of allSkus) {
+    const display = getFamilyDisplay(s.family);
+    if (display) availableSeries.add(display);
+  }
+
+  if (allSkus.length === 0) {
+    grid.innerHTML = '<p style="color:var(--text-secondary);font-size:13px;">Select a region to see workload recommendations.</p>';
+    summary.innerHTML = '';
+    gapsContent.innerHTML = '<p style="color:var(--text-secondary);font-size:13px;">Select a region to check availability gaps.</p>';
+    document.getElementById('workloadsBadge').textContent = '0 workloads';
+    document.getElementById('gapsBadge').textContent = '—';
+    return;
+  }
+
+  let totalAvailable = 0;
+  let totalMissing = 0;
+  const gaps = [];
+
+  const cards = workloadRecommendations.map(wl => {
+    const seriesTags = wl.preferredSeries.map(series => {
+      const isAvail = availableSeries.has(series);
+      if (isAvail) totalAvailable++;
+      else totalMissing++;
+      return `<span class="rec-tag ${isAvail ? 'available' : 'missing'}" title="${isAvail ? 'Available' : 'Not available'} in selected region(s)">${escHtml(series)} ${isAvail ? '✓' : '✗'}</span>`;
+    }).join('');
+
+    // Check if any recommended families are completely missing
+    const missingFamilies = wl.recommendedFamilies.filter(f => !availableFamilyKeys.has(f));
+    if (missingFamilies.length > 0) {
+      const missingNames = missingFamilies.map(f => {
+        const info = familyInfo[f];
+        return info ? `${info.letter}-family` : f;
+      });
+      const altFamilies = wl.recommendedFamilies.filter(f => availableFamilyKeys.has(f));
+      const altNames = altFamilies.map(f => {
+        const info = familyInfo[f];
+        return info ? `${info.letter}-family` : f;
+      });
+      gaps.push({ workload: wl.name, icon: wl.icon, missing: missingNames, alternatives: altNames });
+    }
+
+    return `<div class="workload-card">
+      <div class="workload-card-header">
+        <h4>${wl.icon} ${escHtml(wl.name)}</h4>
+      </div>
+      <div class="workload-desc">${escHtml(wl.description)}</div>
+      <div class="rec-series"><strong>Recommended:</strong> ${seriesTags}</div>
+      <div class="rec-note">${escHtml(wl.note)}</div>
+      <div class="workload-links">
+        <a href="${wl.docsUrl}" target="_blank" rel="noopener noreferrer">📄 Azure Docs</a>
+      </div>
+    </div>`;
+  });
+
+  grid.innerHTML = cards.join('');
+  document.getElementById('workloadsBadge').textContent = `${workloadRecommendations.length} workloads`;
+
+  summary.innerHTML = `
+    <span class="ws-stat">✅ ${totalAvailable} recommended series available</span>
+    <span class="ws-stat">${totalMissing > 0 ? '⚠️' : '✅'} ${totalMissing} not available</span>
+  `;
+
+  // Render availability gaps
+  if (gaps.length === 0) {
+    gapsContent.innerHTML = `<div class="gap-banner no-gaps">
+      <strong>✅ All clear!</strong> Every recommended VM family for all tracked workloads is available in your selected region(s).
+    </div>`;
+    document.getElementById('gapsBadge').textContent = 'No gaps';
+  } else {
+    const gapHtml = gaps.map(g => `<div class="gap-item">
+      <span class="gap-family">${g.icon} ${escHtml(g.workload)}</span>
+      <span class="gap-workloads">Missing: <strong>${g.missing.join(', ')}</strong></span>
+      ${g.alternatives.length > 0
+        ? `<span class="gap-alt">Available alternatives: ${g.alternatives.join(', ')}</span>`
+        : '<span style="color:var(--status-warning);font-size:11px;">No alternatives in this region</span>'}
+    </div>`).join('');
+
+    gapsContent.innerHTML = `<div class="gap-banner has-gaps">
+      <strong>⚠️ ${gaps.length} workload${gaps.length > 1 ? 's have' : ' has'} missing VM families in your selected region(s).</strong>
+      <span style="font-size:12px;display:block;margin-top:4px;">Consider deploying to an alternative region or using the available alternative families listed below.</span>
+    </div>
+    <div class="gap-list">${gapHtml}</div>`;
+    document.getElementById('gapsBadge').textContent = `${gaps.length} gap${gaps.length > 1 ? 's' : ''}`;
+  }
 }
 
 // ══════════════════════════════════════════════
