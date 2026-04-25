@@ -277,9 +277,9 @@
   <div class="region-map-container" id="regionMapContainer">
     <div id="regionMap"></div>
     <div class="map-legend">
-      <span><span class="map-legend-dot" style="background:#888;"></span> Available region</span>
-      <span><span class="map-legend-dot" style="background:#4caf50;"></span> Has SKU data</span>
-      <span><span class="map-legend-dot" style="background:#0f6cbd;border:2px solid #fff;box-shadow:0 0 4px #0f6cbd;"></span> Selected</span>
+      <span><span class="map-legend-dot" style="background:#ccc;border:1px solid #999;"></span> Region (no data yet)</span>
+      <span><span class="map-legend-dot" style="background:#4caf50;border:1px solid #fff;"></span> SKU data available (monthly refresh)</span>
+      <span><span class="map-legend-dot" style="background:#0f6cbd;border:2px solid #fff;box-shadow:0 0 4px #0f6cbd;width:12px;height:12px;"></span> Selected</span>
       <span style="font-style:italic;">Click a marker to add/remove a region</span>
     </div>
   </div>
@@ -564,6 +564,7 @@ function escHtml(str) {
 let allRegions = [];
 let selectedRegions = [];
 let regionDataCache = {};
+let availableDataRegions = new Set();
 let allSkus = [];
 let filteredSkus = [];
 let currentSort = { field: 'name', dir: 'asc' };
@@ -769,6 +770,12 @@ async function init() {
         document.getElementById('freshnessDate').textContent = meta.lastUpdatedDisplay;
         document.getElementById('freshnessBanner').style.display = '';
 
+        // Store which regions have data from the monthly refresh
+        if (meta.availableRegions) {
+          availableDataRegions = new Set(meta.availableRegions);
+          renderRegionMap();
+        }
+
         // Check staleness: warn if data is older than 35 days
         if (meta.lastUpdated) {
           const lastUpdated = new Date(meta.lastUpdated);
@@ -828,24 +835,29 @@ function renderRegionMap() {
     const lat = parseFloat(r.latitude);
     const lng = parseFloat(r.longitude);
     const isSelected = selectedRegions.includes(r.name);
-    const hasData = !!regionDataCache[r.name];
+    const hasData = availableDataRegions.has(r.name);
 
-    let color = '#888';
-    let radius = 5;
-    let borderColor = '#fff';
+    let color = '#ccc';
+    let radius = 4;
+    let borderColor = '#999';
     let borderWidth = 1;
-    let fillOpacity = 0.8;
+    let fillOpacity = 0.5;
     let zIndex = 100;
 
     if (isSelected) {
       color = '#0f6cbd';
-      radius = 9;
+      radius = 10;
+      borderColor = '#fff';
       borderWidth = 3;
       fillOpacity = 1;
       zIndex = 1000;
     } else if (hasData) {
       color = '#4caf50';
       radius = 6;
+      borderColor = '#fff';
+      borderWidth = 1.5;
+      fillOpacity = 0.85;
+      zIndex = 200;
     }
 
     const marker = L.circleMarker([lat, lng], {
@@ -857,8 +869,11 @@ function renderRegionMap() {
       pane: 'markerPane',
     });
 
+    const statusText = isSelected ? '<br><em style="color:#0f6cbd;">✓ Selected</em>'
+      : hasData ? '<br><em style="color:#4caf50;">✓ SKU data available</em>'
+      : '<br><em style="color:#999;">No SKU data yet</em>';
     marker.bindTooltip(
-      `<strong>${r.displayName}</strong><br><span style="font-size:11px;color:#666;">${r.name}</span>${isSelected ? '<br><em style="color:#0f6cbd;">✓ Selected</em>' : ''}`,
+      `<strong>${r.displayName}</strong><br><span style="font-size:11px;color:#666;">${r.name}</span>${statusText}`,
       { direction: 'top', offset: [0, -8] }
     );
 
