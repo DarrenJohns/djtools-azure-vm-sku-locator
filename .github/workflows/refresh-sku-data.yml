@@ -13,7 +13,7 @@ jobs:
 
       - name: Get Azure regions
         run: |
-          $regions = az account list-locations --query "[?metadata.regionType=='Physical'].{name:name, displayName:displayName, geographyGroup:metadata.geographyGroup}" -o json | ConvertFrom-Json -AsHashtable
+          $regions = az account list-locations --query "[?metadata.regionType=='Physical'].{name:name, displayName:displayName, geographyGroup:metadata.geographyGroup, latitude:metadata.latitude, longitude:metadata.longitude}" -o json | ConvertFrom-Json -AsHashtable
           $regions | ConvertTo-Json -Depth 3 | Set-Content "data/regions.json" -Encoding UTF8
           Write-Host "✅ Found $($regions.Count) regions"
         shell: pwsh
