@@ -831,18 +831,16 @@ function renderRegionMap() {
 
   for (const r of allRegions) {
     if (!r.latitude || !r.longitude) continue;
-    if (!availableDataRegions.has(r.name)) continue;
     const lat = parseFloat(r.latitude);
     const lng = parseFloat(r.longitude);
     const isSelected = selectedRegions.includes(r.name);
 
     const marker = L.circleMarker([lat, lng], {
-      radius: isSelected ? 10 : 6,
+      radius: isSelected ? 12 : 7,
       fillColor: isSelected ? '#0f6cbd' : '#4caf50',
-      color: '#fff',
-      weight: isSelected ? 3 : 1.5,
-      fillOpacity: isSelected ? 1 : 0.85,
-      pane: 'markerPane',
+      color: isSelected ? '#fff' : '#2e7d32',
+      weight: isSelected ? 3 : 2,
+      fillOpacity: isSelected ? 1 : 0.8,
     });
 
     marker.bindTooltip(
@@ -851,7 +849,7 @@ function renderRegionMap() {
     );
 
     marker.on('click', () => toggleRegionFromMap(r.name));
-    marker.setZIndexOffset(isSelected ? 1000 : 100);
+    if (isSelected) marker.setZIndexOffset(1000);
     marker.addTo(leafletMap);
     mapMarkers[r.name] = marker;
   }
