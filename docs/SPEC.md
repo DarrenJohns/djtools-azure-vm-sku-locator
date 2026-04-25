@@ -1,85 +1,116 @@
-# [App Name] — Specification
+# VM SKU Per Region — Specification
 
 > Version: v0.0.1-beta
 
 ## 1. Overview
 
-<!-- Describe what this application does, who it's for, and the key problem it solves -->
+This application helps Azure VM administrators browse virtual machine SKU availability across Azure regions. It displays pre-fetched SKU data with filtering, sorting, and CSV export — no authentication required.
+
+**Target users:** Azure infrastructure administrators who need to understand what VM sizes are available in specific regions before deploying.
 
 ## 2. Architecture
 
-- **Type**: Single-file HTML web application (`index.html`)
+- **Type**: Single-file HTML web application (`index.html`) with static JSON data files
 - **Frameworks**: None — pure HTML/CSS/JavaScript
 - **Dependencies**: Zero external dependencies
+- **Data source**: Pre-fetched from Azure Resource SKUs API (`az vm list-skus`)
+- **Data refresh**: Monthly via GitHub Actions scheduled workflow
+- **Authentication**: None required — all data is pre-fetched
 - **Hosting**: Azure Blob Storage static website
 - **CI/CD**: GitHub Actions → Azure Storage deploy on push to main
 
 ## 3. Data Model
 
-<!-- Define the core data structures your app works with -->
+### Region SKU Data (per-region JSON)
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `name` | string | ✅ | Item name |
-| `description` | string | — | Optional description |
+| Field | Type | Description |
+|-------|------|-------------|
+| `name` | string | VM SKU name (e.g., `Standard_D2s_v5`) |
+| `family` | string | SKU family (e.g., `standardDSv5Family`) |
+| `tier` | string | Tier (`Standard`) |
+| `size` | string | Size identifier (e.g., `D2s_v5`) |
+| `vCPUs` | number | Number of virtual CPUs |
+| `memoryGB` | number | Memory in gigabytes |
+| `maxDataDisks` | number | Maximum data disks |
+| `maxNICs` | number | Maximum network interfaces |
+| `cpuArchitecture` | string | `x64` or `Arm64` |
+| `hyperVGenerations` | string | Supported Hyper-V generations |
+| `acceleratedNetworking` | boolean | Accelerated networking support |
+| `premiumIO` | boolean | Premium storage support |
+| `ephemeralOSDisk` | boolean | Ephemeral OS disk support |
+| `encryptionAtHost` | boolean | Encryption at host support |
+| `spotEligible` | boolean | Spot VM eligibility |
+| `zones` | string[] | Available availability zones |
+| `restrictions` | string[] | Restriction reason codes |
 
-## 4. Import
+### Metadata
 
-### Supported Formats
+| Field | Type | Description |
+|-------|------|-------------|
+| `lastUpdated` | ISO 8601 | Timestamp of last data refresh |
+| `lastUpdatedDisplay` | string | Human-readable month (e.g., "April 2026") |
+| `availableRegions` | string[] | Regions with data files |
 
-<!-- List the file formats your app can import -->
+## 4. Data Pipeline
 
-| Format | Extension | Detection |
-|--------|-----------|-----------|
-| JSON | `.json` | File extension |
-| CSV | `.csv` | File extension |
+### Refresh Process
+1. GitHub Actions cron job runs monthly
+2. Authenticates via service principal / OIDC
+3. Runs `az vm list-skus` for each region
+4. Normalizes raw capabilities into flat fields
+5. Saves per-region JSON to `data/` directory
+6. Updates `metadata.json` with refresh timestamp
+7. Commits and pushes (triggers deploy)
 
-### Import Methods
-- Drag and drop onto the import zone
-- Click to browse and select a file
+### Family Display Names
+SKU family names (e.g., `standardDSv5Family`) are mapped to user-friendly names (e.g., `Dsv5`) and Azure documentation URLs. This mapping is best-effort — unknown families fall back to the general sizes overview page.
 
-## 5. Export
+## 5. User Interface
 
-### Supported Formats
+### Region Selector
+- Dropdown of all Azure regions
+- "Add Region" button to add to selection
+- Region chips showing selected regions with remove button
+- Maximum 5 regions selectable simultaneously
 
-<!-- List the file formats your app can export -->
+### Filters
+- Text search (SKU name)
+- Family dropdown
+- Architecture dropdown (x64 / Arm64)
+- vCPU count filter
+- Reset button
 
-| Format | Extension | Description |
-|--------|-----------|-------------|
-| JSON | `.json` | Standard JSON output |
-| CSV | `.csv` | Spreadsheet-compatible |
+### SKU Table
+- Sortable by clicking column headers
+- Columns: SKU Name, Family, vCPUs, Memory, Architecture, Zones, Data Disks, Features, Region, Docs link
+- Feature indicators: AccelNet, PremIO, EphOS, EncHost, Spot
+- Capped at 500 rows for performance
 
-## 6. Validation
+### Export
+- CSV download of currently filtered results
+- Includes all fields (not just visible columns)
+- Filename includes region names and date
 
-<!-- Describe validation rules applied to user input -->
+### CLI Guidance
+- Collapsible section with `az vm list-skus` command
+- Updates dynamically based on selected region
+- Links to Azure CLI installation docs
 
-## 7. Analysis Engine
-
-<!-- Describe any analysis, scoring, or reporting features -->
-
-## 8. User Interface
-
-### Theme
+## 6. Theme
 - Light and dark mode with system detection
 - Toggle via header button
 - Preference saved to localStorage
 
-### Sections
-- Welcome modal (first visit)
-- Import zone (drag and drop)
-- Editor (main workspace)
-- Analysis (insights and scoring)
-- Export (multiple format tabs)
-
-## 9. Keyboard Shortcuts
+## 7. Keyboard Shortcuts
 
 | Shortcut | Action |
 |----------|--------|
-| `Ctrl+Z` | Undo |
-| `Ctrl+Y` | Redo |
+| `Ctrl+F` | Focus search input |
+| `Enter` | Add region (when region dropdown focused) |
 
-## 10. Deployment
+## 8. Deployment
 
 - **Hosting**: Azure Blob Storage `$web` container
 - **CI/CD**: GitHub Actions workflow on push to `main`
 - **Runner**: Self-hosted runner at `C:\actions-runner`
+- **Data files**: Deployed alongside `index.html` in `data/` directory

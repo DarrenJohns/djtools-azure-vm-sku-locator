@@ -1,33 +1,43 @@
-# Copilot Instructions — DJ Tools Web App
+# Copilot Instructions — VM SKU Per Region
 
 ## Project Overview
-This is a **single-file HTML web application** (`index.html`). It runs as a static site hosted on Azure Blob Storage with no server-side components, build tools, or dependencies.
+This is a **single-file HTML web application** (`index.html`) with pre-fetched static JSON data. It shows Azure VM SKU availability per region, helping VM administrators understand what virtual machine sizes are available. No user authentication required.
 
 ## Architecture
 - **Single file**: All HTML, CSS, and JavaScript live in `index.html`
+- **Data files**: Pre-fetched JSON in `data/` directory (one file per region, plus `regions.json` and `metadata.json`)
 - **No frameworks**: Pure vanilla HTML/CSS/JS — no React, Vue, npm, etc.
 - **No build step**: The file deploys directly to Azure Blob Storage `$web` container
+- **No authentication**: Data is pre-fetched monthly, no user login needed
 - **Static hosting**: Azure Storage static website
+
+## Data Pipeline
+- SKU data is fetched monthly via `az vm list-skus` for each region
+- Raw data is normalized to a consistent JSON schema (extracting capabilities into flat fields)
+- Key fields: name, family, vCPUs, memoryGB, cpuArchitecture, zones, acceleratedNetworking, premiumIO, ephemeralOSDisk, spotEligible, etc.
+- Family names are mapped to user-friendly display names and Azure docs URLs (best-effort)
 
 ## Git & Deployment Workflow
 - **GitHub Flow**: Always create a feature branch → PR → merge to `main`
 - **Branch naming**: Use prefixes like `feature/`, `fix/`, `docs/`, `chore/`
 - **CI/CD**: Push to `main` triggers `.github/workflows/deploy.yml` which deploys to Azure
 - **Validation**: `.github/workflows/validate.yml` runs HTML validation on PRs
-- **Self-hosted runner**: GitHub Actions uses a self-hosted runner at `C:\actions-runner` — check it's running before pushing (`Get-Process Runner.Listener`)
+- **Self-hosted runner**: GitHub Actions uses a self-hosted runner at `C:\actions-runner`
 - **OneDrive workaround**: Use `git -c gc.auto=0 push` to avoid gc/OneDrive file-locking conflicts
 
 ## Version Numbering
 - Format: `v0.0.X-beta`
-- Update version in: footer in index.html, any generator metadata, README badge
+- Update version in: footer in index.html, README badge
 - Bump version for feature changes, not doc-only changes
 
 ## Code Conventions
-- Keep everything in the single `index.html` file
+- Keep application logic in the single `index.html` file
+- Data files live in `data/` directory
 - Minimal code comments — only where clarification is needed
 - CSS uses custom properties (variables) for theming (light/dark mode)
 - JavaScript uses modern ES6+ (const/let, arrow functions, template literals, async/await)
 - No external CDN dependencies
+- Family-to-docs URL mapping is best-effort — always provide a fallback link
 
 ## Documentation
 - `README.md` — Project overview (stays in repo root)
@@ -37,7 +47,7 @@ This is a **single-file HTML web application** (`index.html`). It runs as a stat
 
 ## Documentation Updates
 Any feature added, changed, or removed requires updating these docs before merging:
-- `README.md` — Features list, format references, how-to sections
+- `README.md` — Features list, how-to sections
 - `docs/SPEC.md` — Full specification
 - `docs/howitworks.md` — Technical deep-dive
 - `docs/talktrack.md` — Demo talk track (version, recent features)
@@ -45,6 +55,7 @@ Any feature added, changed, or removed requires updating these docs before mergi
 ## Testing
 - No automated unit tests — validation is manual + HTML structure validation in CI
 - Hard refresh (`Ctrl+Shift+R`) after deployments to bypass browser cache
+- Test with at least one region to verify data loading, filtering, sorting, and export
 
 ## Runner Management
 - Check the self-hosted runner is running before any push/PR that triggers a workflow

@@ -1,70 +1,71 @@
-# Talk Track — [App Name] Demo
+# Talk Track — VM SKU Per Region Demo
 
 > Version: v0.0.1-beta
-> Duration: ~20 minutes
+> Duration: ~15 minutes
 
 ## Opening (2 min)
 
-**"Today I'll show you [App Name], a tool I built to [solve X problem]. What makes this interesting isn't just the app itself — it's how it was built: entirely with GitHub Copilot CLI, from first line of code to production deployment."**
+**"Today I'll show you VM SKU Per Region, a tool that helps Azure VM administrators quickly see what virtual machine sizes are available in any Azure region — without needing to log in or run CLI commands."**
 
 ## The Problem (2 min)
 
-<!-- Describe the problem this app solves -->
+**"If you're an Azure VM admin and need to know what VM sizes are available in a specific region, your options today are:**
+- **Run `az vm list-skus --location <region>`** — requires CLI setup, authentication, and outputs raw data
+- **Check the Azure Portal** — requires login, navigation through multiple blades
+- **Read Azure docs** — generic, doesn't show region-specific availability
 
-## Live Demo (10 min)
+**This tool gives you instant, searchable access to VM SKU availability across regions."**
 
-### Import
-- Show drag-and-drop import
-- Point out format auto-detection
-- Highlight any warnings or validation
+## Live Demo (8 min)
 
-### Edit
-- Add/edit/delete items
-- Show templates (if applicable)
-- Demonstrate undo/redo
+### Region Selection
+- Default region is New Zealand North (my home region!)
+- Show the region dropdown with 100+ Azure regions
+- Add a region, show the chip appearing
+- Add a second region to compare (e.g., Australia East)
 
-### Analyse
-- Walk through analysis features
-- Show scoring or insights
+### Filtering & Search
+- Type "D4" to find all D4-series VMs
+- Filter by Arm64 architecture
+- Filter by 8 vCPUs
+- Show the result count updating in real time
+
+### Table Features
+- Click column headers to sort (by vCPUs, memory, name)
+- Point out the feature indicators (AccelNet, PremIO, Spot)
+- Show availability zones column
+- Click a docs link to open Azure documentation
 
 ### Export
-- Show multiple format tabs
-- Download a file
-- Show copy to clipboard
+- Filter to a specific family
+- Click Export CSV
+- Show the downloaded file
 
-## How It Was Built (4 min)
+### Real-Time Data
+- Expand the CLI guidance section
+- Show the `az vm list-skus` command
+- Explain when real-time data matters (subscription restrictions)
 
-**"This entire app — the UI, the logic, the CI/CD pipeline, the documentation — was built using GitHub Copilot CLI in my terminal."**
+## How It Was Built (3 min)
+
+**"This entire app was built using GitHub Copilot CLI in my terminal."**
 
 ### Key Points
 - **Single-file architecture** — One HTML file, no frameworks, no build tools
+- **Pre-fetched data** — Monthly refresh via GitHub Actions, no user authentication
 - **Zero dependencies** — Nothing to install or update
 - **AI-assisted development** — Copilot CLI wrote the code, created the repo, set up CI/CD
-- **GitHub Flow** — Feature branches, PRs, automated deployment
-- **Production in minutes** — From code to live Azure deployment
 
-### Recent Features Built with Copilot
-<!-- Update this list as you add features -->
-- Initial app scaffold and UI
-- File import/export system
-- Analysis engine
-- CI/CD pipeline setup
-- Documentation generation
-
-## Architecture (2 min)
-
-```
-index.html → GitHub → Actions → Azure Blob Storage → Live URL
-```
-
-- No server, no database, no API
-- Self-hosted runner for GitHub Actions
-- Azure Storage static website hosting
+### Data Pipeline
+- Monthly GitHub Actions workflow runs `az vm list-skus` for all regions
+- Raw data normalized to clean JSON with flat fields
+- Deployed alongside the app as static files
 
 ## Wrap Up (2 min)
 
-**"What started as a simple idea became a production-ready tool in [timeframe]. Copilot CLI handled everything from writing the app to deploying it. The key takeaway: AI-assisted development isn't just about writing code faster — it's about shipping complete solutions."**
+**"VM SKU Per Region turns a CLI command into an instant, searchable web experience. No login needed, data refreshed monthly, and the CLI guidance is right there for when you need real-time subscription-specific data."**
 
 ### Links
 - [GitHub Copilot CLI](https://github.com/features/copilot/cli/)
-- [Azure Static Websites](https://learn.microsoft.com/en-us/azure/storage/blobs/storage-blob-static-website)
+- [Azure VM Sizes](https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/overview)
+- [Azure CLI — az vm list-skus](https://learn.microsoft.com/en-us/cli/azure/vm#az-vm-list-skus)

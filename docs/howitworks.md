@@ -1,78 +1,79 @@
-# How It Works — [App Name]
+# How It Works — VM SKU Per Region
 
 > Technical deep-dive into the application architecture and implementation.
 
 ## Architecture
 
-This is a **single-file HTML web application** — all HTML, CSS, and JavaScript live in one `index.html` file. There are no frameworks, no build tools, and no external dependencies.
+This is a **single-file HTML web application** with **static JSON data files** — all HTML, CSS, and JavaScript live in one `index.html` file, and pre-fetched VM SKU data is stored as JSON in the `data/` directory. There are no frameworks, no build tools, and no external dependencies.
 
-### Why Single-File?
-- **Zero setup**: Open the file in any browser
-- **Simple deployment**: Upload one file to Azure Blob Storage
+### Why This Approach?
+- **No authentication needed**: Data is pre-fetched, so users don't need to log in
+- **Zero setup**: Serve the directory and open in a browser
+- **Simple deployment**: Upload files to Azure Blob Storage
 - **No dependencies**: Nothing to install, update, or break
-- **Portable**: Copy the file anywhere and it works
+- **Fast**: Static JSON loads instantly, no API calls at runtime
 
-## File Import
+## Data Pipeline
 
-<!-- Describe how your app parses imported files -->
+### Source
+VM SKU data comes from the Azure Resource SKUs API, accessed via `az vm list-skus`. This is the same data source used by the Azure Portal and CLI.
 
-### Supported Formats
-- **JSON** — Parsed with `JSON.parse()`, validates structure
-- **CSV** — Custom parser handling quoted fields and multi-value cells
+### Normalization
+Raw SKU data has capabilities buried in a `capabilities[]` array of `{name, value}` pairs. The pipeline normalizes these into flat fields:
 
-### Format Detection
-The app detects file format by extension (`.json`, `.csv`).
-
-### Import Flow
-1. User drops file onto import zone (or clicks to browse)
-2. `FileReader` reads file as text
-3. Format-specific parser extracts data
-4. Data loaded into application state
-5. UI updates to show imported data
-
-## Data Model
-
-<!-- Describe how data is stored in memory -->
-
-```javascript
-let appState = {
-  name: '',
-  items: [],
-  warnings: []
-};
+```
+Raw: capabilities: [{name: "vCPUs", value: "4"}, {name: "MemoryGB", value: "16"}, ...]
+Normalized: { vCPUs: 4, memoryGB: 16, ... }
 ```
 
-## Editor
+### Key normalized fields
+- `vCPUs`, `memoryGB`, `maxDataDisks`, `maxNICs`
+- `cpuArchitecture` (x64 or Arm64)
+- `hyperVGenerations`
+- `acceleratedNetworking`, `premiumIO`, `ephemeralOSDisk`, `encryptionAtHost`
+- `spotEligible`
+- `zones` (availability zone support)
+- `restrictions` (subscription-level restrictions)
 
-<!-- Describe the editing UI and validation -->
+### Schedule
+Data is refreshed monthly via a GitHub Actions workflow. The app displays the refresh date prominently.
 
-### Validation
-- Required fields checked before saving
-- Duplicate detection
-- Range validation for numeric fields
+## Data Loading
 
-### Undo/Redo
-- State snapshots pushed to `undoStack` before each change
-- `Ctrl+Z` pops from undo stack, pushes to redo stack
-- `Ctrl+Y` pops from redo stack, pushes to undo stack
+### Lazy Loading
+The app loads region data on demand — when a user selects a region, it fetches `data/{regionName}.json`. Data is cached in memory for the session.
 
-## Analysis Engine
+### Region List
+All available Azure regions are loaded from `data/regions.json` on app initialization.
 
-<!-- Describe any analysis, scoring, or insights -->
+### Metadata
+`data/metadata.json` contains the last refresh timestamp and list of regions with available data.
 
-## Export System
+## Family Display Names
 
-<!-- Describe each export format and how it's generated -->
+SKU family names from Azure (e.g., `standardDSv5Family`) are mapped to user-friendly display names (e.g., `Dsv5`) via a lookup table in the JavaScript. Unknown families are handled with a best-effort string transformation (strip `standard` prefix and `Family` suffix).
 
-### Supported Formats
-- **JSON** — `JSON.stringify()` with formatting
-- **CSV** — Custom generator with proper escaping
+## Azure Docs Links
 
-### Export Flow
-1. User clicks "Export" button
-2. Export modal opens with format tabs
-3. Selected format generator produces output
-4. User can copy to clipboard or download as file
+Each SKU family links to the relevant Azure VM size documentation page. The mapping is best-effort — if a family isn't in the lookup table, the link falls back to the general sizes overview page at `https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/overview`.
+
+## Filtering & Sorting
+
+### Filters
+- **Text search**: Matches against SKU name and size fields
+- **Family**: Dropdown populated dynamically from loaded data
+- **Architecture**: x64 or Arm64
+- **vCPU count**: Predefined options (1, 2, 4, 8, 16, 32, 48, 64, 96+)
+
+### Sorting
+Click any column header to sort. Clicking again toggles between ascending and descending. Supports string and numeric sorting.
+
+### Performance
+Table rendering is capped at 500 rows. For larger result sets, a message indicates the cap.
+
+## CSV Export
+
+The export function generates a CSV with all normalized fields (not just the visible table columns). The file includes a BOM for proper Unicode handling in Excel. The filename includes the selected region names and current date.
 
 ## Theme System
 
@@ -88,28 +89,21 @@ let appState = {
 
 ### Dark Mode
 - Toggled via header button
-- Overrides CSS custom properties
+- Overrides CSS custom properties via JavaScript
 - Preference saved to `localStorage`
 - System preference detected on first visit via `prefers-color-scheme`
 
 ## Deployment
 
 ### Azure Blob Storage
-The app is hosted as a static website on Azure Blob Storage. The `$web` container serves `index.html` at the storage account's static website endpoint.
+The app is hosted as a static website on Azure Blob Storage. The `$web` container serves `index.html` and the `data/` directory at the storage account's static website endpoint.
 
 ### CI/CD Pipeline
 ```
 Push to main → GitHub Actions → az storage blob upload → Live
 ```
 
-The deploy workflow:
-1. Checks out the repo
-2. Uploads `index.html` to the `$web` container
-3. Verifies the deployment with an HTTP request
-
-### HTML Validation
-A separate workflow runs on PRs to validate:
-- DOCTYPE presence
-- Essential HTML tags
-- Tag balance (with threshold for JS template strings)
-- Common issues (TODO comments, console.log)
+### Data Refresh Pipeline
+```
+Monthly cron → az vm list-skus → normalize → commit → push → deploy
+```

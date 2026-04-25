@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="DJ Tools Web App — replace this with your app description">
+<meta name="description" content="Browse Azure VM SKU availability by region — see what virtual machine sizes are available, with filtering, sorting, and CSV export.">
 <meta name="theme-color" content="#0f6cbd">
-<title>DJ Tools — Web App Title</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='0%25' y2='100%25'><stop offset='0%25' stop-color='%230f6cbd'/><stop offset='100%25' stop-color='%23094780'/></linearGradient></defs><path d='M50 8 L88 28 V58 C88 76 72 90 50 96 C28 90 12 76 12 58 V28 Z' fill='url(%23g)'/><path d='M38 52 L46 60 L62 42' stroke='white' stroke-width='6' stroke-linecap='round' stroke-linejoin='round' fill='none'/></svg>">
+<title>VM SKU Per Region — Azure VM Availability Browser</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='0%25' y2='100%25'><stop offset='0%25' stop-color='%230f6cbd'/><stop offset='100%25' stop-color='%23094780'/></linearGradient></defs><rect x='10' y='20' width='80' height='60' rx='8' fill='url(%23g)'/><rect x='22' y='32' width='20' height='14' rx='3' fill='white' opacity='0.9'/><rect x='48' y='32' width='20' height='14' rx='3' fill='white' opacity='0.7'/><rect x='22' y='52' width='20' height='14' rx='3' fill='white' opacity='0.7'/><rect x='48' y='52' width='20' height='14' rx='3' fill='white' opacity='0.5'/></svg>">
 <style>
   /* ── Fluent UI / Microsoft 365 Design System ── */
   :root {
@@ -72,16 +72,9 @@
   .welcome-banner p { font-size: 14px; opacity: 0.85; }
   .welcome-body { padding: 24px 32px 28px; }
   .welcome-body ul { list-style: none; margin-bottom: 20px; }
-  .welcome-body li { padding: 8px 0; display: flex; gap: 10px; align-items: flex-start; white-space: nowrap; }
+  .welcome-body li { padding: 8px 0; display: flex; gap: 10px; align-items: flex-start; }
   .welcome-body li span { font-size: 18px; flex-shrink: 0; }
   .welcome-body .btn { width: 100%; justify-content: center; font-size: 14px; padding: 10px; }
-
-  /* ── Drop Zone ── */
-  .drop-zone { border: 2px dashed #a0c4e8; border-radius: var(--radius-lg); padding: 48px; text-align: center; cursor: pointer; transition: all 0.2s; background: linear-gradient(180deg, #f0f7ff 0%, #fafcff 100%); }
-  .drop-zone:hover, .drop-zone.drag-over { border-color: var(--brand-primary); background: linear-gradient(180deg, #e0efff 0%, #f0f7ff 100%); box-shadow: 0 0 20px rgba(15,108,189,0.1); }
-  .drop-zone h2 { font-size: 18px; margin-bottom: 8px; color: var(--brand-primary); }
-  .drop-zone p { color: var(--text-secondary); font-size: 13px; }
-  .drop-zone input[type="file"] { display: none; }
 
   /* ── Sections ── */
   .section-collapsible { background: var(--bg-layer1); border: 1px solid var(--border-default); border-radius: var(--radius-md); margin-top: 16px; overflow: hidden; box-shadow: var(--shadow-sm); }
@@ -90,7 +83,7 @@
   .section-toggle { font-size: 11px; transition: transform 0.2s; color: var(--brand-primary); font-weight: 700; }
   .section-toggle.open { transform: rotate(90deg); }
   .section-body { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; padding: 0 16px; }
-  .section-body.open { max-height: 5000px; padding: 12px 16px 16px; }
+  .section-body.open { max-height: none; padding: 12px 16px 16px; }
   .section-badge { font-size: 11px; font-weight: 600; padding: 2px 10px; border-radius: 10px; background: var(--brand-subtle); color: var(--brand-primary); border: 1px solid #b4d6fa; }
 
   /* ── Toast ── */
@@ -100,36 +93,74 @@
   .toast.error { border-color: #ef9a9a; color: var(--status-danger); }
   .toast.warning { border-color: #ffe0b2; color: var(--status-warning); }
 
-  /* ── Modals ── */
-  .modal-overlay { position: fixed; inset: 0; z-index: 900; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.45); opacity: 0; pointer-events: none; transition: opacity 0.2s; }
-  .modal-overlay.active { opacity: 1; pointer-events: auto; }
-  .modal { background: var(--bg-layer1); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); width: 600px; max-width: 95vw; max-height: 90vh; display: flex; flex-direction: column; }
-  .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border-default); }
-  .modal-header h3 { font-size: 16px; font-weight: 600; }
-  .modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-secondary); padding: 4px 8px; }
-  .modal-body { padding: 16px 20px; overflow-y: auto; flex: 1; }
-  .modal-footer { padding: 12px 20px; border-top: 1px solid var(--border-default); display: flex; gap: 8px; justify-content: flex-end; }
-  .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-  .form-group { display: flex; flex-direction: column; gap: 4px; }
-  .form-group.full-width { grid-column: 1/-1; }
-  .form-group label { font-size: 12px; font-weight: 600; color: var(--text-secondary); }
-  .form-group input, .form-group select, .form-group textarea { font-family: var(--font-sans); font-size: 13px; padding: 6px 10px; border: 1px solid var(--border-default); border-radius: var(--radius-sm); background: var(--bg-layer1); color: var(--text-primary); }
-  .form-group .help { font-size: 11px; color: var(--text-tertiary); }
-  .form-group .required { color: var(--status-danger); }
+  /* ── Region Selector ── */
+  .region-bar { background: var(--bg-layer1); border: 1px solid var(--border-default); border-radius: var(--radius-md); padding: 16px 20px; box-shadow: var(--shadow-sm); display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
+  .region-bar .form-group { flex: 1; min-width: 250px; display: flex; flex-direction: column; gap: 4px; }
+  .region-bar label { font-size: 12px; font-weight: 600; color: var(--text-secondary); }
+  .region-bar select { font-family: var(--font-sans); font-size: 13px; padding: 8px 12px; border: 1px solid var(--border-default); border-radius: var(--radius-sm); background: var(--bg-layer1); color: var(--text-primary); min-height: 38px; }
+  .region-bar select[multiple] { min-height: 80px; }
+  .region-chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .region-chip { display: inline-flex; align-items: center; gap: 4px; background: var(--brand-subtle); color: var(--brand-primary); border: 1px solid #b4d6fa; border-radius: 14px; padding: 3px 10px 3px 12px; font-size: 12px; font-weight: 500; }
+  .region-chip button { background: none; border: none; cursor: pointer; color: var(--brand-primary); font-size: 14px; padding: 0 2px; line-height: 1; opacity: 0.7; }
+  .region-chip button:hover { opacity: 1; }
+  .data-freshness { font-size: 11px; color: var(--text-tertiary); padding: 4px 0; }
+  .data-freshness strong { color: var(--text-secondary); }
 
-  /* ── Audit Log ── */
-  .audit-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-  .audit-table th { text-align: left; padding: 6px 10px; background: var(--bg-layer2); font-size: 11px; }
-  .audit-table td { padding: 4px 10px; border-bottom: 1px solid var(--border-subtle); }
+  /* ── Filters ── */
+  .filter-bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 12px; }
+  .filter-bar input, .filter-bar select { font-family: var(--font-sans); font-size: 13px; padding: 6px 10px; border: 1px solid var(--border-default); border-radius: var(--radius-sm); background: var(--bg-layer1); color: var(--text-primary); }
+  .filter-bar input[type="text"] { flex: 1; min-width: 200px; }
+  .filter-bar select { min-width: 140px; }
+  .result-count { font-size: 12px; color: var(--text-secondary); margin-left: auto; white-space: nowrap; }
+
+  /* ── SKU Table ── */
+  .sku-table-wrapper { overflow-x: auto; margin-top: 12px; border: 1px solid var(--border-default); border-radius: var(--radius-md); }
+  .sku-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .sku-table th { text-align: left; padding: 8px 12px; background: var(--bg-layer2); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; color: var(--text-secondary); cursor: pointer; user-select: none; white-space: nowrap; position: sticky; top: 0; z-index: 1; }
+  .sku-table th:hover { background: var(--bg-hover); color: var(--brand-primary); }
+  .sku-table th .sort-arrow { font-size: 10px; margin-left: 4px; opacity: 0.4; }
+  .sku-table th.sorted .sort-arrow { opacity: 1; color: var(--brand-primary); }
+  .sku-table td { padding: 6px 12px; border-bottom: 1px solid var(--border-subtle); white-space: nowrap; }
+  .sku-table tr:hover td { background: var(--bg-hover); }
+  .sku-table .sku-name { font-weight: 600; color: var(--brand-primary); }
+  .sku-table .badge { display: inline-block; font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 3px; }
+  .badge-arch { background: #e8eaed; color: #555; }
+  .badge-zone { background: var(--status-info-bg); color: var(--brand-primary); font-size: 10px; padding: 1px 5px; border-radius: 3px; margin-right: 2px; }
+  .badge-yes { color: var(--status-success); }
+  .badge-no { color: var(--text-tertiary); }
+  .sku-table a { color: var(--brand-primary); text-decoration: none; }
+  .sku-table a:hover { text-decoration: underline; }
+
+  /* ── Loading ── */
+  .loading { text-align: center; padding: 40px; color: var(--text-secondary); }
+  .loading .spinner { display: inline-block; width: 24px; height: 24px; border: 3px solid var(--border-default); border-top-color: var(--brand-primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 8px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── CLI Info Box ── */
+  .cli-box { background: var(--bg-layer2); border: 1px solid var(--border-default); border-radius: var(--radius-md); padding: 14px 18px; margin-top: 12px; font-size: 13px; }
+  .cli-box code { background: var(--bg-layer1); padding: 2px 8px; border-radius: var(--radius-sm); font-family: 'Cascadia Code', 'Consolas', monospace; font-size: 12px; border: 1px solid var(--border-subtle); display: inline-block; margin: 4px 0; }
+  .cli-box h4 { font-size: 13px; margin-bottom: 6px; }
+
+  /* ── Empty state ── */
+  .empty-state { text-align: center; padding: 48px 20px; color: var(--text-secondary); }
+  .empty-state h3 { font-size: 16px; margin-bottom: 8px; color: var(--text-primary); }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .region-bar { flex-direction: column; }
+    .filter-bar { flex-direction: column; }
+    .filter-bar input[type="text"] { width: 100%; }
+    .result-count { margin-left: 0; }
+  }
 </style>
 </head>
 <body>
 
 <!-- Header -->
 <header>
-  <svg viewBox="0 0 24 24"><path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z"/></svg>
-  <h1>App Name</h1>
-  <span class="subtitle">Subtitle</span>
+  <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
+  <h1>VM SKU Per Region</h1>
+  <span class="subtitle">Azure VM Availability Browser</span>
   <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode">🌙</button>
 </header>
 
@@ -137,60 +168,148 @@
 <div class="welcome-overlay active" id="welcomeModal">
   <div class="welcome-card">
     <div class="welcome-banner">
-      <h2>👋 Welcome to App Name</h2>
-      <p>Brief description of what this app does</p>
+      <h2>👋 Welcome to VM SKU Per Region</h2>
+      <p>Explore Azure virtual machine SKU availability across regions</p>
     </div>
     <div class="welcome-body">
       <ul>
-        <li><span>📂</span> <strong>Import</strong> — Drag and drop your files</li>
-        <li><span>✏️</span> <strong>Edit</strong> — Add, modify, and manage items</li>
-        <li><span>🛡️</span> <strong>Analyse</strong> — Insights and scoring</li>
-        <li><span>⬇️</span> <strong>Export</strong> — Multiple output formats</li>
+        <li><span>🌏</span> <strong>Select regions</strong> — Choose up to 5 Azure regions to compare</li>
+        <li><span>🔍</span> <strong>Search &amp; filter</strong> — Find SKUs by name, family, vCPUs, or memory</li>
+        <li><span>🔗</span> <strong>Azure docs</strong> — Direct links to VM size documentation</li>
+        <li><span>📥</span> <strong>Export CSV</strong> — Download filtered results for your records</li>
       </ul>
+      <p style="font-size:12px;color:var(--text-tertiary);margin-bottom:16px;">Data is refreshed monthly. For real-time availability, use <code style="font-size:11px;background:var(--bg-layer2);padding:2px 6px;border-radius:3px;">az vm list-skus</code></p>
       <button class="btn btn-primary" onclick="closeWelcome()">Get Started</button>
     </div>
   </div>
 </div>
 
 <div class="container">
-  <!-- Drop Zone -->
-  <div class="drop-zone" id="dropZone">
-    <h2>📂 Drop a file here</h2>
-    <p>or <strong>click to browse</strong> — supports .json and .csv files</p>
-    <input type="file" id="fileInput" accept=".json,.csv">
+
+  <!-- Region Selector -->
+  <div class="region-bar">
+    <div class="form-group">
+      <label for="regionSelect">🌏 Select Azure Region</label>
+      <select id="regionSelect">
+        <option value="">Loading regions...</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" onclick="addSelectedRegion()" id="addRegionBtn" disabled>Add Region</button>
+    <button class="btn btn-outline btn-sm" onclick="clearAllRegions()">Clear All</button>
   </div>
 
-  <!-- Main Content (hidden until data loaded) -->
-  <div id="mainContent" style="display:none;">
+  <!-- Selected Region Chips -->
+  <div style="margin-top:10px;">
+    <div class="region-chips" id="regionChips"></div>
+    <div class="data-freshness" id="dataFreshness"></div>
+  </div>
 
-    <!-- Example Collapsible Section -->
+  <!-- SKU Results -->
+  <div id="skuResults" style="display:none;">
+
+    <!-- Filters & Actions -->
     <div class="section-collapsible">
-      <div class="section-header" onclick="toggleSection('items')">
-        <span class="section-toggle" id="itemsToggle">▶</span>
-        <h3>📋 Items</h3>
-        <span class="section-badge" id="itemsBadge">0 items</span>
+      <div class="section-header" onclick="toggleSection('filters')">
+        <span class="section-toggle open" id="filtersToggle">▶</span>
+        <h3>🔍 Filter &amp; Search</h3>
+        <span class="section-badge" id="resultBadge">0 SKUs</span>
       </div>
-      <div class="section-body" id="itemsBody">
-        <p style="color:var(--text-secondary);font-size:13px;">Your content goes here.</p>
+      <div class="section-body open" id="filtersBody">
+        <div class="filter-bar">
+          <input type="text" id="searchInput" placeholder="Search SKU name (e.g. D4s_v5, Standard_E)" oninput="applyFilters()">
+          <select id="familyFilter" onchange="applyFilters()">
+            <option value="">All Families</option>
+          </select>
+          <select id="archFilter" onchange="applyFilters()">
+            <option value="">All Architectures</option>
+            <option value="x64">x64</option>
+            <option value="Arm64">Arm64</option>
+          </select>
+          <select id="vcpuFilter" onchange="applyFilters()">
+            <option value="">All vCPUs</option>
+            <option value="1">1 vCPU</option>
+            <option value="2">2 vCPUs</option>
+            <option value="4">4 vCPUs</option>
+            <option value="8">8 vCPUs</option>
+            <option value="16">16 vCPUs</option>
+            <option value="32">32 vCPUs</option>
+            <option value="48">48 vCPUs</option>
+            <option value="64">64 vCPUs</option>
+            <option value="96">96+ vCPUs</option>
+          </select>
+          <button class="btn btn-outline btn-sm" onclick="resetFilters()">Reset</button>
+          <button class="btn btn-success btn-sm" onclick="exportCSV()">📥 Export CSV</button>
+        </div>
+        <div style="margin-top:8px;">
+          <span class="result-count" id="resultCount"></span>
+        </div>
       </div>
     </div>
 
-    <!-- Audit Log -->
-    <div class="section-collapsible" style="margin-top:16px;">
-      <div class="section-header" onclick="toggleSection('audit')">
-        <span class="section-toggle" id="auditToggle">▶</span>
-        <h3>📝 Audit Log</h3>
-        <span class="section-badge" id="auditBadge">0 entries</span>
+    <!-- SKU Table -->
+    <div class="section-collapsible" style="margin-top:12px;">
+      <div class="section-header" onclick="toggleSection('skutable')">
+        <span class="section-toggle open" id="skutaleToggle">▶</span>
+        <h3>📋 VM SKUs</h3>
+        <span class="section-badge" id="skuTableBadge">0 SKUs</span>
       </div>
-      <div class="section-body" id="auditBody">
-        <table class="audit-table">
-          <thead><tr><th>Time</th><th>Action</th><th>Details</th></tr></thead>
-          <tbody id="auditTableBody"></tbody>
-        </table>
+      <div class="section-body open" id="skutaleBody">
+        <div class="sku-table-wrapper" style="max-height:600px;overflow-y:auto;">
+          <table class="sku-table" id="skuTable">
+            <thead>
+              <tr>
+                <th onclick="sortTable('name')">SKU Name <span class="sort-arrow">▲</span></th>
+                <th onclick="sortTable('family')">Family <span class="sort-arrow">▲</span></th>
+                <th onclick="sortTable('vCPUs')" style="text-align:right">vCPUs <span class="sort-arrow">▲</span></th>
+                <th onclick="sortTable('memoryGB')" style="text-align:right">Memory (GB) <span class="sort-arrow">▲</span></th>
+                <th onclick="sortTable('cpuArchitecture')">Arch <span class="sort-arrow">▲</span></th>
+                <th>Zones</th>
+                <th onclick="sortTable('maxDataDisks')" style="text-align:right">Data Disks <span class="sort-arrow">▲</span></th>
+                <th>Features</th>
+                <th onclick="sortTable('region')">Region <span class="sort-arrow">▲</span></th>
+                <th>Docs</th>
+              </tr>
+            </thead>
+            <tbody id="skuTableBody"></tbody>
+          </table>
+        </div>
+        <div class="empty-state" id="emptyState" style="display:none;">
+          <h3>No SKUs found</h3>
+          <p>Try adjusting your filters or selecting a different region.</p>
+        </div>
+        <div class="loading" id="loadingIndicator" style="display:none;">
+          <div class="spinner"></div>
+          <div>Loading SKU data...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CLI Guidance -->
+    <div class="section-collapsible" style="margin-top:12px;">
+      <div class="section-header" onclick="toggleSection('cli')">
+        <span class="section-toggle" id="cliToggle">▶</span>
+        <h3>💻 Need Real-Time Data?</h3>
+      </div>
+      <div class="section-body" id="cliBody">
+        <div class="cli-box">
+          <h4>Azure CLI Command</h4>
+          <p>This app shows reference data refreshed monthly. For real-time, subscription-specific VM SKU availability including restrictions, run:</p>
+          <code id="cliCommand">az vm list-skus --location newzealandnorth --resource-type virtualMachines -o table</code>
+          <p style="margin-top:8px;font-size:12px;color:var(--text-tertiary);">
+            Requires <a href="https://learn.microsoft.com/en-us/cli/azure/install-azure-cli" target="_blank" rel="noopener noreferrer" style="color:var(--brand-primary);">Azure CLI</a> and at least <strong>Reader</strong> role on your subscription.
+          </p>
+        </div>
       </div>
     </div>
 
   </div>
+
+  <!-- Initial empty state (before any region selected) -->
+  <div class="empty-state" id="initialState">
+    <h3>Select an Azure region to get started</h3>
+    <p>Choose a region from the dropdown above to browse available VM SKUs.</p>
+  </div>
+
 </div>
 
 <!-- Toast Notification -->
@@ -247,7 +366,6 @@ function applyTheme(isDark) {
   }
 }
 
-// Init theme
 (function() {
   const saved = localStorage.getItem('theme');
   const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -260,9 +378,9 @@ function applyTheme(isDark) {
 // ══════════════════════════════════════════════
 function closeWelcome() {
   document.getElementById('welcomeModal').classList.remove('active');
-  localStorage.setItem('welcomed', 'true');
+  localStorage.setItem('vmsku-welcomed', 'true');
 }
-if (localStorage.getItem('welcomed') === 'true') {
+if (localStorage.getItem('vmsku-welcomed') === 'true') {
   document.getElementById('welcomeModal').classList.remove('active');
 }
 
@@ -282,8 +400,9 @@ function showToast(msg, type = 'success') {
 // COLLAPSIBLE SECTIONS
 // ══════════════════════════════════════════════
 const sections = {
-  items: { toggle: 'itemsToggle', body: 'itemsBody' },
-  audit: { toggle: 'auditToggle', body: 'auditBody' },
+  filters: { toggle: 'filtersToggle', body: 'filtersBody' },
+  skutable: { toggle: 'skutaleToggle', body: 'skutaleBody' },
+  cli: { toggle: 'cliToggle', body: 'cliBody' },
 };
 
 function toggleSection(key) {
@@ -305,67 +424,402 @@ function escHtml(str) {
 }
 
 // ══════════════════════════════════════════════
-// FILE DROP ZONE
+// STATE
 // ══════════════════════════════════════════════
-const dropZone = document.getElementById('dropZone');
-const fileInput = document.getElementById('fileInput');
-dropZone.addEventListener('click', () => fileInput.click());
-dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
-dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
-dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('drag-over'); if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
-fileInput.addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]); });
+let allRegions = [];
+let selectedRegions = [];
+let regionDataCache = {};
+let allSkus = [];
+let filteredSkus = [];
+let currentSort = { field: 'name', dir: 'asc' };
+const MAX_REGIONS = 5;
 
-function handleFile(file) {
-  const ext = file.name.split('.').pop().toLowerCase();
-  if (ext !== 'json' && ext !== 'csv') { showToast('Please select a .json or .csv file', 'error'); return; }
-  const reader = new FileReader();
-  reader.onload = e => {
-    // TODO: Parse the file and load data
-    showToast(`Loaded ${file.name}`);
-    dropZone.style.display = 'none';
-    document.getElementById('mainContent').style.display = '';
-  };
-  reader.readAsText(file);
+// ══════════════════════════════════════════════
+// FAMILY DISPLAY NAMES & DOC LINKS
+// ══════════════════════════════════════════════
+const familyMap = {
+  'standardav2family': { display: 'Av2', category: 'general-purpose', docPath: 'general-purpose/av2-series' },
+  'standardbsfamily': { display: 'Bs', category: 'general-purpose', docPath: 'general-purpose/bs-series' },
+  'standardbsv2family': { display: 'Bsv2', category: 'general-purpose', docPath: 'general-purpose/bsv2-series' },
+  'standarddadsv5family': { display: 'Dadsv5', category: 'general-purpose', docPath: 'general-purpose/dadsv5-series' },
+  'standarddasv4family': { display: 'Dasv4', category: 'general-purpose', docPath: 'general-purpose/dasv4-series' },
+  'standarddasv5family': { display: 'Dasv5', category: 'general-purpose', docPath: 'general-purpose/dasv5-series' },
+  'standarddasv6family': { display: 'Dasv6', category: 'general-purpose', docPath: 'general-purpose/dasv6-series' },
+  'standardddsv4family': { display: 'Ddsv4', category: 'general-purpose', docPath: 'general-purpose/ddsv4-series' },
+  'standardddsv5family': { display: 'Ddsv5', category: 'general-purpose', docPath: 'general-purpose/ddsv5-series' },
+  'standarddsv3family': { display: 'Dsv3', category: 'general-purpose', docPath: 'general-purpose/dsv3-series' },
+  'standarddsv4family': { display: 'Dsv4', category: 'general-purpose', docPath: 'general-purpose/dsv4-series' },
+  'standarddsv5family': { display: 'Dsv5', category: 'general-purpose', docPath: 'general-purpose/dsv5-series' },
+  'standarddfamily': { display: 'D', category: 'general-purpose', docPath: 'general-purpose/d-family' },
+  'standarddv2family': { display: 'Dv2', category: 'general-purpose', docPath: 'general-purpose/dv2-series' },
+  'standarddv3family': { display: 'Dv3', category: 'general-purpose', docPath: 'general-purpose/dv3-series' },
+  'standarddv4family': { display: 'Dv4', category: 'general-purpose', docPath: 'general-purpose/dv4-series' },
+  'standarddv5family': { display: 'Dv5', category: 'general-purpose', docPath: 'general-purpose/dv5-series' },
+  'standardeadsv5family': { display: 'Eadsv5', category: 'memory-optimized', docPath: 'memory-optimized/eadsv5-series' },
+  'standardeasv4family': { display: 'Easv4', category: 'memory-optimized', docPath: 'memory-optimized/easv4-series' },
+  'standardeasv5family': { display: 'Easv5', category: 'memory-optimized', docPath: 'memory-optimized/easv5-series' },
+  'standardedsv4family': { display: 'Edsv4', category: 'memory-optimized', docPath: 'memory-optimized/edsv4-series' },
+  'standardedsv5family': { display: 'Edsv5', category: 'memory-optimized', docPath: 'memory-optimized/edsv5-series' },
+  'standardesv3family': { display: 'Esv3', category: 'memory-optimized', docPath: 'memory-optimized/esv3-series' },
+  'standardesv4family': { display: 'Esv4', category: 'memory-optimized', docPath: 'memory-optimized/esv4-series' },
+  'standardesv5family': { display: 'Esv5', category: 'memory-optimized', docPath: 'memory-optimized/esv5-series' },
+  'standardev3family': { display: 'Ev3', category: 'memory-optimized', docPath: 'memory-optimized/ev3-series' },
+  'standardev4family': { display: 'Ev4', category: 'memory-optimized', docPath: 'memory-optimized/ev4-series' },
+  'standardev5family': { display: 'Ev5', category: 'memory-optimized', docPath: 'memory-optimized/ev5-series' },
+  'standardfsv2family': { display: 'Fsv2', category: 'compute-optimized', docPath: 'compute-optimized/fsv2-series' },
+  'standardfsfamily': { display: 'Fs', category: 'compute-optimized', docPath: 'compute-optimized/fs-series' },
+  'standardlsv2family': { display: 'Lsv2', category: 'storage-optimized', docPath: 'storage-optimized/lsv2-series' },
+  'standardlsv3family': { display: 'Lsv3', category: 'storage-optimized', docPath: 'storage-optimized/lsv3-series' },
+  'standardmsv2family': { display: 'Msv2', category: 'memory-optimized', docPath: 'memory-optimized/msv2-series' },
+  'standardmsfamily': { display: 'Ms', category: 'memory-optimized', docPath: 'memory-optimized/ms-series' },
+  'standardncadsv5a100family': { display: 'NCadsA100v4', category: 'gpu', docPath: 'gpu/nca100v4-series' },
+  'standardncsv3family': { display: 'NCsv3', category: 'gpu', docPath: 'gpu/ncsv3-series' },
+  'standardndsmv4family': { display: 'NDsm-v4', category: 'gpu', docPath: 'gpu/ndsm-v4-series' },
+  'standardnvsv3family': { display: 'NVsv3', category: 'gpu', docPath: 'gpu/nvsv3-series' },
+  'standardnvsv4family': { display: 'NVsv4', category: 'gpu', docPath: 'gpu/nvsv4-series' },
+};
+
+function getFamilyDisplay(familyRaw) {
+  const key = familyRaw.toLowerCase();
+  if (familyMap[key]) return familyMap[key].display;
+  // Best-effort: strip 'standard' prefix and 'Family' suffix
+  let name = familyRaw.replace(/^standard/i, '').replace(/family$/i, '');
+  return name || familyRaw;
+}
+
+function getDocsUrl(familyRaw) {
+  const key = familyRaw.toLowerCase();
+  if (familyMap[key]) {
+    return `https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/${familyMap[key].docPath}`;
+  }
+  return 'https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/overview';
 }
 
 // ══════════════════════════════════════════════
-// AUDIT LOG
+// INITIALIZATION
 // ══════════════════════════════════════════════
-const auditLog = [];
+async function init() {
+  try {
+    const resp = await fetch('data/regions.json');
+    if (!resp.ok) throw new Error('Failed to load regions');
+    allRegions = await resp.json();
 
-function logAudit(action, details) {
-  const entry = { time: new Date().toLocaleTimeString(), action, details };
-  auditLog.push(entry);
-  renderAuditLog();
+    const select = document.getElementById('regionSelect');
+    select.innerHTML = '<option value="">— Choose a region —</option>';
+    for (const r of allRegions) {
+      const opt = document.createElement('option');
+      opt.value = r.name;
+      opt.textContent = `${r.displayName} (${r.name})`;
+      select.appendChild(opt);
+    }
+    select.value = 'newzealandnorth';
+    document.getElementById('addRegionBtn').disabled = false;
+
+    // Load metadata for freshness display
+    try {
+      const metaResp = await fetch('data/metadata.json');
+      if (metaResp.ok) {
+        const meta = await metaResp.json();
+        document.getElementById('dataFreshness').innerHTML =
+          `📅 Data current as of: <strong>${escHtml(meta.lastUpdatedDisplay)}</strong> · Reference data only — actual availability may vary by subscription.`;
+      }
+    } catch (e) { /* metadata optional */ }
+
+  } catch (err) {
+    showToast('Failed to load region list: ' + err.message, 'error');
+  }
 }
 
-function renderAuditLog() {
-  const tbody = document.getElementById('auditTableBody');
-  document.getElementById('auditBadge').textContent = auditLog.length + ' entries';
-  tbody.innerHTML = auditLog.map(e =>
-    `<tr><td>${escHtml(e.time)}</td><td>${escHtml(e.action)}</td><td>${escHtml(e.details)}</td></tr>`
-  ).reverse().join('');
+// ══════════════════════════════════════════════
+// REGION MANAGEMENT
+// ══════════════════════════════════════════════
+function addSelectedRegion() {
+  const select = document.getElementById('regionSelect');
+  const regionName = select.value;
+  if (!regionName) { showToast('Please select a region', 'warning'); return; }
+  if (selectedRegions.includes(regionName)) { showToast('Region already selected', 'warning'); return; }
+  if (selectedRegions.length >= MAX_REGIONS) { showToast(`Maximum ${MAX_REGIONS} regions allowed`, 'warning'); return; }
+
+  selectedRegions.push(regionName);
+  renderRegionChips();
+  loadRegionData(regionName);
+  updateCLICommand();
+}
+
+function removeRegion(regionName) {
+  selectedRegions = selectedRegions.filter(r => r !== regionName);
+  renderRegionChips();
+  rebuildSkuList();
+  updateCLICommand();
+  if (selectedRegions.length === 0) {
+    document.getElementById('skuResults').style.display = 'none';
+    document.getElementById('initialState').style.display = '';
+  }
+}
+
+function clearAllRegions() {
+  selectedRegions = [];
+  renderRegionChips();
+  allSkus = [];
+  filteredSkus = [];
+  renderTable();
+  document.getElementById('skuResults').style.display = 'none';
+  document.getElementById('initialState').style.display = '';
+}
+
+function renderRegionChips() {
+  const container = document.getElementById('regionChips');
+  container.innerHTML = selectedRegions.map(r => {
+    const displayName = allRegions.find(reg => reg.name === r)?.displayName || r;
+    return `<span class="region-chip">${escHtml(displayName)} <button onclick="removeRegion('${r}')" title="Remove">×</button></span>`;
+  }).join('');
 }
 
 // ══════════════════════════════════════════════
-// UNDO / REDO
+// DATA LOADING
 // ══════════════════════════════════════════════
-const undoStack = [];
-const redoStack = [];
+async function loadRegionData(regionName) {
+  if (regionDataCache[regionName]) {
+    rebuildSkuList();
+    return;
+  }
 
-function pushUndo() {
-  // TODO: Push current state snapshot to undoStack
-  // undoStack.push(JSON.parse(JSON.stringify(appState)));
-  redoStack.length = 0;
+  document.getElementById('skuResults').style.display = '';
+  document.getElementById('initialState').style.display = 'none';
+  document.getElementById('loadingIndicator').style.display = '';
+
+  try {
+    const resp = await fetch(`data/${regionName}.json`);
+    if (!resp.ok) throw new Error(`No data available for ${regionName}`);
+    const data = await resp.json();
+    regionDataCache[regionName] = data;
+    rebuildSkuList();
+    showToast(`Loaded ${data.skuCount} SKUs for ${data.regionDisplayName}`);
+  } catch (err) {
+    showToast(`Failed to load data for ${regionName}: ${err.message}`, 'error');
+    removeRegion(regionName);
+  } finally {
+    document.getElementById('loadingIndicator').style.display = 'none';
+  }
+}
+
+function rebuildSkuList() {
+  allSkus = [];
+  for (const regionName of selectedRegions) {
+    const data = regionDataCache[regionName];
+    if (!data) continue;
+    for (const sku of data.skus) {
+      allSkus.push({ ...sku, region: regionName, regionDisplayName: data.regionDisplayName });
+    }
+  }
+  populateFamilyFilter();
+  applyFilters();
+}
+
+// ══════════════════════════════════════════════
+// FILTERING
+// ══════════════════════════════════════════════
+function populateFamilyFilter() {
+  const families = [...new Set(allSkus.map(s => s.family))].sort();
+  const select = document.getElementById('familyFilter');
+  const current = select.value;
+  select.innerHTML = '<option value="">All Families</option>';
+  for (const f of families) {
+    const opt = document.createElement('option');
+    opt.value = f;
+    opt.textContent = getFamilyDisplay(f);
+    select.appendChild(opt);
+  }
+  select.value = current;
+}
+
+function applyFilters() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const family = document.getElementById('familyFilter').value;
+  const arch = document.getElementById('archFilter').value;
+  const vcpuVal = document.getElementById('vcpuFilter').value;
+
+  filteredSkus = allSkus.filter(s => {
+    if (search && !s.name.toLowerCase().includes(search) && !s.size.toLowerCase().includes(search)) return false;
+    if (family && s.family !== family) return false;
+    if (arch && s.cpuArchitecture !== arch) return false;
+    if (vcpuVal) {
+      const v = parseInt(vcpuVal);
+      if (v === 96) { if (s.vCPUs < 96) return false; }
+      else { if (s.vCPUs !== v) return false; }
+    }
+    return true;
+  });
+
+  sortSkus();
+  renderTable();
+}
+
+function resetFilters() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('familyFilter').value = '';
+  document.getElementById('archFilter').value = '';
+  document.getElementById('vcpuFilter').value = '';
+  applyFilters();
+}
+
+// ══════════════════════════════════════════════
+// SORTING
+// ══════════════════════════════════════════════
+function sortTable(field) {
+  if (currentSort.field === field) {
+    currentSort.dir = currentSort.dir === 'asc' ? 'desc' : 'asc';
+  } else {
+    currentSort.field = field;
+    currentSort.dir = 'asc';
+  }
+  sortSkus();
+  renderTable();
+}
+
+function sortSkus() {
+  const { field, dir } = currentSort;
+  filteredSkus.sort((a, b) => {
+    let va = a[field], vb = b[field];
+    if (typeof va === 'string') va = va.toLowerCase();
+    if (typeof vb === 'string') vb = vb.toLowerCase();
+    if (va < vb) return dir === 'asc' ? -1 : 1;
+    if (va > vb) return dir === 'asc' ? 1 : -1;
+    return 0;
+  });
+}
+
+// ══════════════════════════════════════════════
+// TABLE RENDERING
+// ══════════════════════════════════════════════
+function renderTable() {
+  const tbody = document.getElementById('skuTableBody');
+  const empty = document.getElementById('emptyState');
+  const showRegionCol = selectedRegions.length > 1;
+
+  document.getElementById('resultBadge').textContent = filteredSkus.length + ' SKUs';
+  document.getElementById('skuTableBadge').textContent = filteredSkus.length + ' SKUs';
+  document.getElementById('resultCount').textContent =
+    `Showing ${filteredSkus.length} of ${allSkus.length} SKUs across ${selectedRegions.length} region(s)`;
+
+  // Update sort arrows
+  document.querySelectorAll('.sku-table th').forEach(th => th.classList.remove('sorted'));
+
+  if (filteredSkus.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = allSkus.length > 0 ? '' : 'none';
+    return;
+  }
+  empty.style.display = 'none';
+
+  // Render in batches for performance
+  const limit = 500;
+  const skusToRender = filteredSkus.slice(0, limit);
+
+  tbody.innerHTML = skusToRender.map(s => {
+    const familyDisplay = escHtml(getFamilyDisplay(s.family));
+    const docsUrl = getDocsUrl(s.family);
+    const zones = s.zones.length > 0
+      ? s.zones.map(z => `<span class="badge badge-zone">${z}</span>`).join('')
+      : '<span class="badge-no">—</span>';
+    const features = [];
+    if (s.acceleratedNetworking) features.push('AccelNet');
+    if (s.premiumIO) features.push('PremIO');
+    if (s.ephemeralOSDisk) features.push('EphOS');
+    if (s.encryptionAtHost) features.push('EncHost');
+    if (s.spotEligible) features.push('Spot');
+    const featureStr = features.length > 0
+      ? features.map(f => `<span class="badge-yes" title="${f}">✓</span>`).join(' ')
+      : '<span class="badge-no">—</span>';
+
+    return `<tr>
+      <td class="sku-name">${escHtml(s.name)}</td>
+      <td>${familyDisplay}</td>
+      <td style="text-align:right">${s.vCPUs}</td>
+      <td style="text-align:right">${s.memoryGB}</td>
+      <td><span class="badge badge-arch">${escHtml(s.cpuArchitecture)}</span></td>
+      <td>${zones}</td>
+      <td style="text-align:right">${s.maxDataDisks}</td>
+      <td>${featureStr}</td>
+      <td>${showRegionCol ? escHtml(s.regionDisplayName) : escHtml(s.regionDisplayName)}</td>
+      <td><a href="${docsUrl}" target="_blank" rel="noopener noreferrer" title="View docs">📄</a></td>
+    </tr>`;
+  }).join('');
+
+  if (filteredSkus.length > limit) {
+    document.getElementById('resultCount').textContent += ` (showing first ${limit})`;
+  }
+}
+
+// ══════════════════════════════════════════════
+// CLI COMMAND UPDATE
+// ══════════════════════════════════════════════
+function updateCLICommand() {
+  const region = selectedRegions[selectedRegions.length - 1] || 'newzealandnorth';
+  document.getElementById('cliCommand').textContent =
+    `az vm list-skus --location ${region} --resource-type virtualMachines -o table`;
+}
+
+// ══════════════════════════════════════════════
+// CSV EXPORT
+// ══════════════════════════════════════════════
+function exportCSV() {
+  if (filteredSkus.length === 0) { showToast('No data to export', 'warning'); return; }
+
+  const headers = ['SKU Name', 'Family', 'Tier', 'Size', 'vCPUs', 'Memory (GB)', 'CPU Architecture',
+    'Hyper-V Generations', 'Max Data Disks', 'Max NICs', 'Zones', 'Accelerated Networking',
+    'Premium IO', 'Ephemeral OS Disk', 'Encryption at Host', 'Spot Eligible', 'Restrictions', 'Region', 'Region Display Name'];
+
+  const rows = filteredSkus.map(s => [
+    s.name, getFamilyDisplay(s.family), s.tier, s.size, s.vCPUs, s.memoryGB, s.cpuArchitecture,
+    s.hyperVGenerations, s.maxDataDisks, s.maxNICs, s.zones.join(';'),
+    s.acceleratedNetworking ? 'Yes' : 'No', s.premiumIO ? 'Yes' : 'No',
+    s.ephemeralOSDisk ? 'Yes' : 'No', s.encryptionAtHost ? 'Yes' : 'No',
+    s.spotEligible ? 'Yes' : 'No', s.restrictions.join(';'), s.region, s.regionDisplayName
+  ]);
+
+  const csvContent = [headers, ...rows].map(row =>
+    row.map(cell => {
+      const str = String(cell);
+      return str.includes(',') || str.includes('"') || str.includes('\n')
+        ? '"' + str.replace(/"/g, '""') + '"' : str;
+    }).join(',')
+  ).join('\n');
+
+  const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const regionNames = selectedRegions.join('-');
+  a.download = `vm-skus-${regionNames}-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast(`Exported ${filteredSkus.length} SKUs to CSV`);
 }
 
 // ══════════════════════════════════════════════
 // KEYBOARD SHORTCUTS
 // ══════════════════════════════════════════════
 document.addEventListener('keydown', e => {
-  if (e.ctrlKey && e.key === 'z') { e.preventDefault(); /* undoAction(); */ }
-  if (e.ctrlKey && e.key === 'y') { e.preventDefault(); /* redoAction(); */ }
+  if (e.ctrlKey && e.key === 'f') {
+    // Focus the search input
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput && document.getElementById('skuResults').style.display !== 'none') {
+      e.preventDefault();
+      searchInput.focus();
+    }
+  }
 });
+
+// Allow Enter key in region select to add region
+document.getElementById('regionSelect').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); addSelectedRegion(); }
+});
+
+// ══════════════════════════════════════════════
+// BOOT
+// ══════════════════════════════════════════════
+init();
 
 </script>
 </body>
