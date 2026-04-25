@@ -290,9 +290,9 @@
       <div class="region-map-container" style="margin-top:0;">
         <div id="regionMap"></div>
         <div class="map-legend">
-          <span><span class="map-legend-dot" style="background:#4caf50;border:1px solid #2e7d32;"></span> Available</span>
           <span><span class="map-legend-dot" style="background:#0f6cbd;border:2px solid #fff;box-shadow:0 0 4px #0f6cbd;width:12px;height:12px;"></span> Selected</span>
-          <span style="font-style:italic;">Click a marker to select a region</span>
+          <span><span class="map-legend-dot" style="background:#4caf50;border:1px solid #2e7d32;"></span> Data available</span>
+          <span><span class="map-legend-dot" style="background:#9e9e9e;border:1px solid #757575;opacity:0.6;"></span> No data yet</span>
         </div>
       </div>
     </div>
@@ -310,12 +310,12 @@
       <div class="freshness-banner" id="freshnessBanner" style="display:none;">
         <span class="freshness-icon" id="freshnessIcon">📅</span>
         <div>
-          <div>Data snapshot from: <span class="freshness-date" id="freshnessDate">—</span></div>
+          <div>Data snapshot from: <span class="freshness-date" id="freshnessDate">—</span> · <span id="dataCoverage" style="font-size:12px;color:var(--text-secondary);"></span></div>
           <div class="freshness-pit">⚠️ This is a point-in-time snapshot — not live data. VM SKU availability can change at any time.</div>
           <div class="freshness-note">Data is refreshed on the 1st of each month. For real-time, subscription-specific availability use: <code>az vm list-skus --location &lt;region&gt;</code></div>
           <div id="staleWarning" style="display:none;">
             <span class="freshness-stale-warning" id="staleMessage">⚠️ This data may be outdated</span>
-            <a class="freshness-refresh-btn" onclick="location.reload(true)" title="Hard-refresh to fetch the latest data">🔄 Refresh Now</a>
+            <a class="freshness-refresh-btn" onclick="location.reload(true)" title="Hard-refresh to check for newer data">🔄 Check for Latest Data</a>
           </div>
         </div>
       </div>
@@ -323,13 +323,8 @@
     </div>
   </div>
 
-  <!-- View SKU Data Button -->
-  <div id="viewSkuPrompt" style="text-align:center;margin-top:20px;">
-    <button class="btn btn-primary" onclick="loadSelectedAndShowResults()" id="viewSkuBtn" style="padding:10px 32px;font-size:15px;" disabled>
-      📋 View VM SKU Information
-    </button>
-    <p style="font-size:12px;color:var(--text-secondary);margin-top:6px;">Select a region above, then click to load VM SKU data</p>
-  </div>
+  <!-- No Data Message (shown when region has no SKU data) -->
+  <div id="noDataMessage" style="display:none;"></div>
 
   <div id="initialState" style="display:none;"></div>
 
@@ -604,7 +599,7 @@ function escHtml(str) {
 // STATE
 // ══════════════════════════════════════════════
 let allRegions = [];
-let selectedRegions = [];
+let selectedRegion = null;
 let regionDataCache = {};
 let availableDataRegions = new Set();
 let allSkus = [];
@@ -769,54 +764,26 @@ async function init() {
     if (!resp.ok) throw new Error('Failed to load regions');
     allRegions = await resp.json();
 
-    const select = document.getElementById('regionSelect');
-    select.innerHTML = '<option value="">— Choose a region —</option>';
-
-    // Group regions by geographyGroup
-    const groups = {};
-    const groupOrder = ['US', 'Canada', 'Mexico', 'South America', 'Europe', 'UK', 'Middle East', 'Africa', 'Asia Pacific'];
-    for (const r of allRegions) {
-      const g = r.geographyGroup || 'Other';
-      if (!groups[g]) groups[g] = [];
-      groups[g].push(r);
-    }
-    // Sort regions within each group
-    for (const g of Object.keys(groups)) {
-      groups[g].sort((a, b) => a.displayName.localeCompare(b.displayName));
-    }
-    // Render optgroups in preferred order, then any extras
-    const rendered = new Set();
-    for (const g of [...groupOrder, ...Object.keys(groups)]) {
-      if (rendered.has(g) || !groups[g]) continue;
-      rendered.add(g);
-      const optgroup = document.createElement('optgroup');
-      optgroup.label = g;
-      for (const r of groups[g]) {
-        const opt = document.createElement('option');
-        opt.value = r.name;
-        opt.textContent = `${r.displayName} (${r.name})`;
-        optgroup.appendChild(opt);
-      }
-      select.appendChild(optgroup);
-    }
-    select.value = 'newzealandnorth';
-    initMapOutline();
-    selectRegion('newzealandnorth');
-
-    // Load metadata for freshness display
+    // Load metadata FIRST so we know which regions have data
     try {
       const metaResp = await fetch('data/metadata.json');
       if (metaResp.ok) {
         const meta = await metaResp.json();
+        if (meta.availableRegions) {
+          availableDataRegions = new Set(meta.availableRegions);
+        }
         document.getElementById('freshnessDate').textContent = meta.lastUpdatedDisplay;
         document.getElementById('freshnessBanner').style.display = '';
         document.getElementById('freshnessLoading').style.display = 'none';
 
-        // Store which regions have data from the monthly refresh
-        if (meta.availableRegions) {
-          availableDataRegions = new Set(meta.availableRegions);
-          renderRegionMap();
-        }
+        // Show data coverage stats
+        const coverageEl = document.getElementById('dataCoverage');
+        const withData = meta.regionsWithData || meta.availableRegions?.length || 0;
+        const total = meta.physicalRegionCount || allRegions.length;
+        const failed = meta.failedRegions?.length || 0;
+        let coverageText = `${withData} of ${total} regions have SKU data`;
+        if (failed > 0) coverageText += ` (${failed} failed)`;
+        coverageEl.textContent = coverageText;
 
         // Check staleness: warn if data is older than 35 days
         if (meta.lastUpdated) {
@@ -835,6 +802,42 @@ async function init() {
         }
       }
     } catch (e) { /* metadata optional */ }
+
+    const select = document.getElementById('regionSelect');
+    select.innerHTML = '<option value="">— Choose a region —</option>';
+
+    // Group regions by geographyGroup
+    const groups = {};
+    const groupOrder = ['US', 'Canada', 'Mexico', 'South America', 'Europe', 'UK', 'Middle East', 'Africa', 'Asia Pacific'];
+    for (const r of allRegions) {
+      const g = r.geographyGroup || 'Other';
+      if (!groups[g]) groups[g] = [];
+      groups[g].push(r);
+    }
+    for (const g of Object.keys(groups)) {
+      groups[g].sort((a, b) => a.displayName.localeCompare(b.displayName));
+    }
+    const rendered = new Set();
+    for (const g of [...groupOrder, ...Object.keys(groups)]) {
+      if (rendered.has(g) || !groups[g]) continue;
+      rendered.add(g);
+      const optgroup = document.createElement('optgroup');
+      optgroup.label = g;
+      for (const r of groups[g]) {
+        const opt = document.createElement('option');
+        opt.value = r.name;
+        const hasData = availableDataRegions.has(r.name);
+        opt.textContent = hasData
+          ? `${r.displayName} (${r.name})`
+          : `${r.displayName} (${r.name}) — no data`;
+        if (!hasData) opt.style.color = '#9e9e9e';
+        optgroup.appendChild(opt);
+      }
+      select.appendChild(optgroup);
+    }
+    select.value = 'newzealandnorth';
+    initMapOutline();
+    selectRegion('newzealandnorth');
 
   } catch (err) {
     showToast('Failed to load region list: ' + err.message, 'error');
@@ -876,20 +879,26 @@ function renderRegionMap() {
     if (!r.latitude || !r.longitude) continue;
     const lat = parseFloat(r.latitude);
     const lng = parseFloat(r.longitude);
-    const isSelected = selectedRegions.includes(r.name);
+    const isSelected = selectedRegion === r.name;
+    const hasData = availableDataRegions.has(r.name);
+
+    let fillColor, borderColor, radius, weight, opacity;
+    if (isSelected) {
+      fillColor = '#0f6cbd'; borderColor = '#fff'; radius = 12; weight = 3; opacity = 1;
+    } else if (hasData) {
+      fillColor = '#4caf50'; borderColor = '#2e7d32'; radius = 7; weight = 2; opacity = 0.8;
+    } else {
+      fillColor = '#9e9e9e'; borderColor = '#757575'; radius = 5; weight = 1; opacity = 0.5;
+    }
 
     const marker = L.circleMarker([lat, lng], {
-      radius: isSelected ? 12 : 7,
-      fillColor: isSelected ? '#0f6cbd' : '#4caf50',
-      color: isSelected ? '#fff' : '#2e7d32',
-      weight: isSelected ? 3 : 2,
-      fillOpacity: isSelected ? 1 : 0.8,
+      radius, fillColor, color: borderColor, weight, fillOpacity: opacity,
     });
 
-    marker.bindTooltip(
-      `<strong>${r.displayName}</strong><br><span style="font-size:11px;color:#666;">${r.name}</span>${isSelected ? '<br><em style="color:#0f6cbd;">✓ Selected</em>' : ''}`,
-      { direction: 'top', offset: [0, -8] }
-    );
+    let tooltipHtml = `<strong>${r.displayName}</strong><br><span style="font-size:11px;color:#666;">${r.name}</span>`;
+    if (isSelected) tooltipHtml += '<br><em style="color:#0f6cbd;">✓ Selected</em>';
+    else if (!hasData) tooltipHtml += '<br><em style="color:#9e9e9e;">No SKU data available</em>';
+    marker.bindTooltip(tooltipHtml, { direction: 'top', offset: [0, -8] });
 
     marker.on('click', () => toggleRegionFromMap(r.name));
     if (isSelected) marker.setZIndexOffset(1000);
@@ -903,8 +912,11 @@ function renderRegionMap() {
 // ══════════════════════════════════════════════
 function selectRegion(regionName) {
   if (!regionName) return;
-  selectedRegions = [regionName];
+  selectedRegion = regionName;
   renderRegionMap();
+
+  // Update dropdown
+  document.getElementById('regionSelect').value = regionName;
 
   // Update badge with display name
   const regionInfo = allRegions.find(r => r.name === regionName);
@@ -915,30 +927,34 @@ function selectRegion(regionName) {
     leafletMap.flyTo([parseFloat(regionInfo.latitude), parseFloat(regionInfo.longitude)], 4, { duration: 0.8 });
   }
 
-  // Enable the View button
-  document.getElementById('viewSkuBtn').disabled = false;
-
-  // If results are already showing, auto-load data
-  if (document.getElementById('skuResults').style.display !== 'none') {
-    loadRegionData(regionName).then(() => rebuildSkuList());
-  }
   updateCLICommand();
+
+  // Auto-load SKU data
+  if (availableDataRegions.has(regionName)) {
+    document.getElementById('noDataMessage').style.display = 'none';
+    document.getElementById('skuResults').style.display = '';
+    loadRegionData(regionName);
+  } else {
+    // Show no-data message
+    document.getElementById('skuResults').style.display = 'none';
+    const noData = document.getElementById('noDataMessage');
+    const displayName = regionInfo ? regionInfo.displayName : regionName;
+    noData.innerHTML = `
+      <div style="text-align:center;padding:32px 20px;">
+        <div style="font-size:40px;margin-bottom:12px;">📭</div>
+        <h3 style="margin-bottom:8px;">No SKU data available for ${escHtml(displayName)}</h3>
+        <p style="color:var(--text-secondary);max-width:500px;margin:0 auto 16px;">
+          SKU data for this region has not been collected yet. Data is refreshed on the 1st of each month.
+          For real-time data, run:
+        </p>
+        <code style="display:inline-block;background:var(--bg-layer2);padding:8px 16px;border-radius:var(--radius-sm);font-size:13px;">az vm list-skus --location ${escHtml(regionName)} -o table</code>
+      </div>`;
+    noData.style.display = '';
+  }
 }
 
 function toggleRegionFromMap(regionName) {
-  document.getElementById('regionSelect').value = regionName;
   selectRegion(regionName);
-}
-
-async function loadSelectedAndShowResults() {
-  if (selectedRegions.length === 0) { showToast('Please select a region', 'warning'); return; }
-  document.getElementById('viewSkuPrompt').style.display = 'none';
-  document.getElementById('skuResults').style.display = '';
-  const regionName = selectedRegions[0];
-  if (!regionDataCache[regionName]) {
-    await loadRegionData(regionName);
-  }
-  rebuildSkuList();
 }
 
 // ══════════════════════════════════════════════
@@ -970,11 +986,12 @@ async function loadRegionData(regionName) {
 
 function rebuildSkuList() {
   allSkus = [];
-  for (const regionName of selectedRegions) {
-    const data = regionDataCache[regionName];
-    if (!data) continue;
-    for (const sku of data.skus) {
-      allSkus.push({ ...sku, region: regionName, regionDisplayName: data.regionDisplayName });
+  if (selectedRegion) {
+    const data = regionDataCache[selectedRegion];
+    if (data) {
+      for (const sku of data.skus) {
+        allSkus.push({ ...sku, region: selectedRegion, regionDisplayName: data.regionDisplayName });
+      }
     }
   }
   populateFamilyFilter();
@@ -1322,7 +1339,7 @@ function sortSkus() {
 function renderTable() {
   const tbody = document.getElementById('skuTableBody');
   const empty = document.getElementById('emptyState');
-  const showRegionCol = selectedRegions.length > 1;
+  const showRegionCol = false; // single region mode
 
   document.getElementById('resultBadge').textContent = filteredSkus.length + ' SKUs';
   document.getElementById('skuTableBadge').textContent = filteredSkus.length + ' SKUs';
@@ -1387,7 +1404,7 @@ function renderTable() {
 // CLI COMMAND UPDATE
 // ══════════════════════════════════════════════
 function updateCLICommand() {
-  const region = selectedRegions[selectedRegions.length - 1] || 'newzealandnorth';
+  const region = selectedRegion || 'newzealandnorth';
   document.getElementById('cliCommand').textContent =
     `az vm list-skus --location ${region} --resource-type virtualMachines -o table`;
 }
@@ -1422,7 +1439,7 @@ function exportCSV() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  const regionNames = selectedRegions.join('-');
+  const regionNames = selectedRegion || 'none';
   a.download = `vm-skus-${regionNames}-${new Date().toISOString().slice(0, 10)}.csv`;
   a.click();
   URL.revokeObjectURL(url);

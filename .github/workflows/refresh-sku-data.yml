@@ -15,7 +15,7 @@ jobs:
         run: |
           $regions = az account list-locations --query "[?metadata.regionType=='Physical'].{name:name, displayName:displayName, geographyGroup:metadata.geographyGroup, latitude:metadata.latitude, longitude:metadata.longitude}" -o json | ConvertFrom-Json -AsHashtable
           $regions | ConvertTo-Json -Depth 3 | Set-Content "data/regions.json" -Encoding UTF8
-          Write-Host "✅ Found $($regions.Count) regions"
+          Write-Host "✅ Found $($regions.Count) physical regions"
         shell: pwsh
 
       - name: Fetch SKU data for all regions
@@ -25,24 +25,27 @@ jobs:
           $successCount = 0
           $failCount = 0
           $availableRegions = @()
+          $failedRegions = @()
+          $maxRetries = 3
 
           foreach ($region in $regions) {
             $name = $region.name
             $display = $region.displayName
             Write-Host "Fetching SKUs for $display ($name)..."
 
-            try {
-              $raw = az vm list-skus --location $name --resource-type virtualMachines -o json 2>$null
-              if (-not $raw -or $raw -eq "[]") {
-                Write-Host "  ⚠ No VM SKUs for $name (skipping)"
-                $failCount++
-                continue
-              }
+            $success = $false
+            for ($attempt = 1; $attempt -le $maxRetries; $attempt++) {
+              try {
+                $raw = az vm list-skus --location $name --resource-type virtualMachines -o json 2>$null
+                if (-not $raw -or $raw -eq "[]") {
+                  Write-Host "  ⚠ No VM SKUs for $name (skipping)"
+                  break
+                }
 
-              # Save raw and normalize with Python
-              $raw | Set-Content "$dataDir/$name-raw.json" -Encoding UTF8
+                # Save raw and normalize with Python
+                $raw | Set-Content "$dataDir/$name-raw.json" -Encoding UTF8
 
-              python -c @"
+                python -c @"
 import json, sys
 from datetime import datetime
 
@@ -100,16 +103,29 @@ with open('$dataDir/$name.json', 'w', encoding='utf-8') as f:
 print(f'  Normalized {len(skus)} SKUs')
 "@
 
-              # Clean up raw file
-              Remove-Item "$dataDir/$name-raw.json" -ErrorAction SilentlyContinue
+                # Clean up raw file
+                Remove-Item "$dataDir/$name-raw.json" -ErrorAction SilentlyContinue
 
-              $successCount++
-              $availableRegions += $name
+                $successCount++
+                $availableRegions += $name
+                $success = $true
+                break
 
-            } catch {
-              Write-Host "  ❌ Failed for $name`: $_"
+              } catch {
+                Write-Host "  ⚠ Attempt $attempt/$maxRetries failed for $name`: $_"
+                Remove-Item "$dataDir/$name-raw.json" -ErrorAction SilentlyContinue
+                if ($attempt -lt $maxRetries) {
+                  $backoff = $attempt * 10
+                  Write-Host "  Retrying in ${backoff}s..."
+                  Start-Sleep -Seconds $backoff
+                }
+              }
+            }
+
+            if (-not $success) {
+              Write-Host "  ❌ Failed for $name after $maxRetries attempts"
               $failCount++
-              Remove-Item "$dataDir/$name-raw.json" -ErrorAction SilentlyContinue
+              $failedRegions += $name
             }
           }
 
@@ -121,10 +137,12 @@ print(f'  Normalized {len(skus)} SKUs')
             lastUpdated = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
             lastUpdatedDisplay = $month
             availableRegions = $availableRegions
-            totalRegions = $regions.Count
+            physicalRegionCount = $regions.Count
+            regionsWithData = $successCount
+            failedRegions = $failedRegions
           } | ConvertTo-Json
           $metadata | Set-Content "$dataDir/metadata.json" -Encoding UTF8
-          Write-Host "✅ Metadata updated: $month"
+          Write-Host "✅ Metadata updated: $month ($successCount regions with data, $failCount failed)"
         shell: pwsh
 
       - name: Upload data to Azure Blob Storage

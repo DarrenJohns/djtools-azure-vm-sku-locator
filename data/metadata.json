@@ -6,5 +6,7 @@
     "eastus",
     "newzealandnorth"
   ],
-  "totalRegions": 102
+  "physicalRegionCount": 62,
+  "regionsWithData": 3,
+  "failedRegions": []
 }
