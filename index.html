@@ -145,12 +145,41 @@
   .empty-state { text-align: center; padding: 48px 20px; color: var(--text-secondary); }
   .empty-state h3 { font-size: 16px; margin-bottom: 8px; color: var(--text-primary); }
 
+  /* ── Freshness Banner ── */
+  .freshness-banner { background: var(--status-info-bg); border: 1px solid #b4d6fa; border-radius: var(--radius-md); padding: 12px 18px; margin-top: 12px; display: flex; align-items: center; gap: 10px; font-size: 13px; }
+  .freshness-banner .freshness-icon { font-size: 20px; flex-shrink: 0; }
+  .freshness-banner .freshness-date { font-weight: 700; color: var(--brand-primary); }
+  .freshness-banner .freshness-note { color: var(--text-secondary); font-size: 12px; }
+
+  /* ── Family Cards ── */
+  .family-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; margin-top: 8px; }
+  .family-card { background: var(--bg-layer1); border: 1px solid var(--border-default); border-radius: var(--radius-md); padding: 14px 16px; transition: border-color var(--transition), box-shadow var(--transition); }
+  .family-card:hover { border-color: var(--brand-primary); box-shadow: var(--shadow-sm); }
+  .family-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .family-card-header h4 { font-size: 14px; font-weight: 600; flex: 1; }
+  .family-card .type-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
+  .type-general { background: #e0efff; color: #0f548c; }
+  .type-compute { background: #fff3e0; color: #b35900; }
+  .type-memory { background: #e8f5e9; color: #2e7d32; }
+  .type-storage { background: #f3e5f5; color: #7b1fa2; }
+  .type-gpu { background: #fce4ec; color: #c62828; }
+  .type-fpga { background: #e0f2f1; color: #00695c; }
+  .type-hpc { background: #e8eaf6; color: #283593; }
+  .family-card .workloads { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; line-height: 1.6; }
+  .family-card .workloads li { margin-left: 14px; }
+  .family-card .sku-count { font-size: 11px; color: var(--text-tertiary); margin-top: 6px; }
+  .family-card .card-links { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+  .family-card .card-links a { font-size: 11px; color: var(--brand-primary); text-decoration: none; font-weight: 500; }
+  .family-card .card-links a:hover { text-decoration: underline; }
+  .family-card .retirement-warning { background: var(--status-warning-bg); border: 1px solid #ffe0b2; border-radius: var(--radius-sm); padding: 4px 8px; font-size: 11px; color: var(--status-warning); margin-top: 6px; display: flex; align-items: center; gap: 4px; }
+
   /* ── Responsive ── */
   @media (max-width: 768px) {
     .region-bar { flex-direction: column; }
     .filter-bar { flex-direction: column; }
     .filter-bar input[type="text"] { width: 100%; }
     .result-count { margin-left: 0; }
+    .family-grid { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -201,7 +230,15 @@
   <!-- Selected Region Chips -->
   <div style="margin-top:10px;">
     <div class="region-chips" id="regionChips"></div>
-    <div class="data-freshness" id="dataFreshness"></div>
+  </div>
+
+  <!-- Freshness Banner -->
+  <div class="freshness-banner" id="freshnessBanner" style="display:none;">
+    <span class="freshness-icon">📅</span>
+    <div>
+      <div>Data current as of: <span class="freshness-date" id="freshnessDate">—</span></div>
+      <div class="freshness-note">This data is refreshed automatically on the 1st of each month. It shows general VM SKU availability — actual availability may vary by subscription. For real-time, subscription-specific data, see the CLI guidance below.</div>
+    </div>
   </div>
 
   <!-- SKU Results -->
@@ -246,6 +283,19 @@
       </div>
     </div>
 
+    <!-- Family Overview -->
+    <div class="section-collapsible" style="margin-top:12px;">
+      <div class="section-header" onclick="toggleSection('families')">
+        <span class="section-toggle open" id="familiesToggle">▶</span>
+        <h3>🏷️ VM Family Overview</h3>
+        <span class="section-badge" id="familiesBadge">0 families</span>
+      </div>
+      <div class="section-body open" id="familiesBody">
+        <p style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">Each VM SKU belongs to a family optimised for specific workloads. Select a family card to filter the table below.</p>
+        <div class="family-grid" id="familyGrid"></div>
+      </div>
+    </div>
+
     <!-- SKU Table -->
     <div class="section-collapsible" style="margin-top:12px;">
       <div class="section-header" onclick="toggleSection('skutable')">
@@ -260,6 +310,7 @@
               <tr>
                 <th onclick="sortTable('name')">SKU Name <span class="sort-arrow">▲</span></th>
                 <th onclick="sortTable('family')">Family <span class="sort-arrow">▲</span></th>
+                <th>Type</th>
                 <th onclick="sortTable('vCPUs')" style="text-align:right">vCPUs <span class="sort-arrow">▲</span></th>
                 <th onclick="sortTable('memoryGB')" style="text-align:right">Memory (GB) <span class="sort-arrow">▲</span></th>
                 <th onclick="sortTable('cpuArchitecture')">Arch <span class="sort-arrow">▲</span></th>
@@ -401,6 +452,7 @@ function showToast(msg, type = 'success') {
 // ══════════════════════════════════════════════
 const sections = {
   filters: { toggle: 'filtersToggle', body: 'filtersBody' },
+  families: { toggle: 'familiesToggle', body: 'familiesBody' },
   skutable: { toggle: 'skutaleToggle', body: 'skutaleBody' },
   cli: { toggle: 'cliToggle', body: 'cliBody' },
 };
@@ -435,48 +487,135 @@ let currentSort = { field: 'name', dir: 'asc' };
 const MAX_REGIONS = 5;
 
 // ══════════════════════════════════════════════
-// FAMILY DISPLAY NAMES & DOC LINKS
+// FAMILY INFO — TYPES, WORKLOADS, DOCS, RETIREMENT
 // ══════════════════════════════════════════════
+const typeInfo = {
+  'general-purpose': { label: 'General Purpose', css: 'type-general', icon: '⚖️', description: 'Balanced CPU-to-memory ratio. Ideal for testing, development, small-to-medium databases, and web servers.' },
+  'compute-optimized': { label: 'Compute Optimized', css: 'type-compute', icon: '⚡', description: 'High CPU-to-memory ratio. Best for CPU-intensive workloads like batch processing, analytics, and app servers.' },
+  'memory-optimized': { label: 'Memory Optimized', css: 'type-memory', icon: '🧠', description: 'High memory-to-CPU ratio. Ideal for relational databases, large caches, and in-memory analytics.' },
+  'storage-optimized': { label: 'Storage Optimized', css: 'type-storage', icon: '💾', description: 'High disk throughput and IOPS. Best for big data, SQL/NoSQL databases, and data warehousing.' },
+  'gpu': { label: 'GPU Accelerated', css: 'type-gpu', icon: '🎮', description: 'Specialised for compute-intensive, graphics-intensive, and AI/ML workloads with dedicated GPUs.' },
+  'fpga': { label: 'FPGA Accelerated', css: 'type-fpga', icon: '🔧', description: 'Custom hardware acceleration for low-latency workloads like genomics and financial computing.' },
+  'hpc': { label: 'High Performance Compute', css: 'type-hpc', icon: '🔬', description: 'Optimised for tightly-coupled parallel workloads, scientific simulations, and modelling.' },
+};
+
+const familyInfo = {
+  // ── General Purpose ──
+  'a': { type: 'general-purpose', letter: 'A', docPath: 'general-purpose/a-family', workloads: ['Entry-level & economical workloads', 'Dev/test environments', 'Low-traffic web servers'], retirement: { retiring: true, date: '11/2028', note: 'Av2/Amv2 retiring Nov 2028', migrateTo: 'Dv5/Dsv5' } },
+  'b': { type: 'general-purpose', letter: 'B', docPath: 'general-purpose/b-family', workloads: ['Burstable workloads with variable CPU', 'Dev/test & staging environments', 'Small databases & micro-services'], retirement: { retiring: true, date: '11/2028', note: 'B-series v1 retiring Nov 2028', migrateTo: 'Bsv2/Basv2' } },
+  'd': { type: 'general-purpose', letter: 'D', docPath: 'general-purpose/d-family', workloads: ['Enterprise-grade applications', 'Relational databases', 'In-memory caching', 'Data analytics'] },
+  'dc': { type: 'general-purpose', letter: 'DC', docPath: 'general-purpose/dc-family', workloads: ['Confidential computing', 'Secure enclaves', 'Data privacy workloads'] },
+
+  // ── Compute Optimized ──
+  'f': { type: 'compute-optimized', letter: 'F', docPath: 'compute-optimized/f-family', workloads: ['Batch processing', 'Medium-traffic web/app servers', 'Network appliances', 'Gaming servers'] },
+  'fx': { type: 'compute-optimized', letter: 'FX', docPath: 'compute-optimized/fx-family', workloads: ['Electronic Design Automation (EDA)', 'Large relational databases', 'Medium-to-large caches', 'In-memory analytics'] },
+
+  // ── Memory Optimized ──
+  'e': { type: 'memory-optimized', letter: 'E', docPath: 'memory-optimized/e-family', workloads: ['Relational database servers (SQL, Oracle, PostgreSQL)', 'Medium-to-large caches', 'In-memory analytics'] },
+  'eb': { type: 'memory-optimized', letter: 'Eb', docPath: 'memory-optimized/eb-family', workloads: ['High remote storage performance', 'Storage-intensive relational databases', 'Large caches requiring premium disks'] },
+  'ec': { type: 'memory-optimized', letter: 'EC', docPath: 'memory-optimized/ec-family', workloads: ['Confidential memory-optimized workloads', 'Secure database processing', 'Encrypted in-memory analytics'] },
+  'm': { type: 'memory-optimized', letter: 'M', docPath: 'memory-optimized/m-family', workloads: ['Extremely large databases', 'SAP HANA', 'Workloads requiring TB-scale memory'] },
+
+  // ── Storage Optimized ──
+  'l': { type: 'storage-optimized', letter: 'L', docPath: 'storage-optimized/l-family', workloads: ['Big Data (Cassandra, MongoDB, Cloudera)', 'SQL & NoSQL databases', 'Data warehousing', 'Large transactional databases'] },
+
+  // ── GPU Accelerated ──
+  'nc': { type: 'gpu', letter: 'NC', docPath: 'gpu-accelerated/nc-family', workloads: ['AI/ML training & inference', 'Compute-intensive GPU workloads', 'Graphics rendering'] },
+  'nd': { type: 'gpu', letter: 'ND', docPath: 'gpu-accelerated/nd-family', workloads: ['Large-scale deep learning training', 'HPC with GPU acceleration', 'Multi-GPU distributed training'] },
+  'ng': { type: 'gpu', letter: 'NG', docPath: 'gpu-accelerated/ng-family', workloads: ['Virtual desktop infrastructure (VDI)', 'Cloud gaming', 'Graphics streaming'] },
+  'nv': { type: 'gpu', letter: 'NV', docPath: 'gpu-accelerated/nv-family', workloads: ['Virtual desktop (VDI)', 'Video encoding & rendering', 'Single-precision compute'] },
+
+  // ── FPGA ──
+  'np': { type: 'fpga', letter: 'NP', docPath: 'fpga-accelerated/np-family', workloads: ['Custom hardware acceleration', 'Low-latency financial workloads', 'Genomics processing'], retirement: { retiring: true, date: '05/2027', note: 'NP-series retiring May 2027', migrateTo: 'NCads_H100_v5' } },
+
+  // ── HPC ──
+  'hb': { type: 'hpc', letter: 'HB', docPath: 'high-performance-compute/hb-family', workloads: ['Fluid dynamics', 'Weather modelling', 'Finite element analysis', 'Molecular dynamics'] },
+  'hc': { type: 'hpc', letter: 'HC', docPath: 'high-performance-compute/hc-family', workloads: ['Dense computation', 'Implicit finite element analysis', 'Weather modelling'], retirement: { retiring: true, date: '05/2027', note: 'HC-series retiring May 2027', migrateTo: 'HBv4/HBv5' } },
+  'hx': { type: 'hpc', letter: 'HX', docPath: 'high-performance-compute/hx-family', workloads: ['Large memory HPC', 'EDA simulation', 'In-memory workloads'] },
+};
+
+// Map raw Azure family strings to family info keys
+function getFamilyKey(familyRaw) {
+  const lower = familyRaw.toLowerCase().replace(/^standard/, '').replace(/family$/, '');
+  // Try exact matches for multi-letter families first
+  for (const key of ['dc', 'ec', 'eb', 'fx', 'nc', 'nd', 'ng', 'nv', 'np', 'hb', 'hc', 'hx']) {
+    if (lower.startsWith(key)) return key;
+  }
+  // Single-letter families
+  for (const key of ['a', 'b', 'd', 'e', 'f', 'l', 'm']) {
+    if (lower.startsWith(key)) return key;
+  }
+  return null;
+}
+
 const familyMap = {
-  'standardav2family': { display: 'Av2', category: 'general-purpose', docPath: 'general-purpose/av2-series' },
-  'standardbsfamily': { display: 'Bs', category: 'general-purpose', docPath: 'general-purpose/bs-series' },
-  'standardbsv2family': { display: 'Bsv2', category: 'general-purpose', docPath: 'general-purpose/bsv2-series' },
-  'standarddadsv5family': { display: 'Dadsv5', category: 'general-purpose', docPath: 'general-purpose/dadsv5-series' },
-  'standarddasv4family': { display: 'Dasv4', category: 'general-purpose', docPath: 'general-purpose/dasv4-series' },
-  'standarddasv5family': { display: 'Dasv5', category: 'general-purpose', docPath: 'general-purpose/dasv5-series' },
-  'standarddasv6family': { display: 'Dasv6', category: 'general-purpose', docPath: 'general-purpose/dasv6-series' },
-  'standardddsv4family': { display: 'Ddsv4', category: 'general-purpose', docPath: 'general-purpose/ddsv4-series' },
-  'standardddsv5family': { display: 'Ddsv5', category: 'general-purpose', docPath: 'general-purpose/ddsv5-series' },
-  'standarddsv3family': { display: 'Dsv3', category: 'general-purpose', docPath: 'general-purpose/dsv3-series' },
-  'standarddsv4family': { display: 'Dsv4', category: 'general-purpose', docPath: 'general-purpose/dsv4-series' },
-  'standarddsv5family': { display: 'Dsv5', category: 'general-purpose', docPath: 'general-purpose/dsv5-series' },
+  'standardav2family': { display: 'Av2', category: 'general-purpose', docPath: 'general-purpose/a-family' },
+  'standardbsfamily': { display: 'Bs', category: 'general-purpose', docPath: 'general-purpose/b-family' },
+  'standardbsv2family': { display: 'Bsv2', category: 'general-purpose', docPath: 'general-purpose/b-family' },
+  'standardbasv2family': { display: 'Basv2', category: 'general-purpose', docPath: 'general-purpose/b-family' },
+  'standarddadsv5family': { display: 'Dadsv5', category: 'general-purpose', docPath: 'general-purpose/d-family' },
+  'standarddasv4family': { display: 'Dasv4', category: 'general-purpose', docPath: 'general-purpose/d-family' },
+  'standarddasv5family': { display: 'Dasv5', category: 'general-purpose', docPath: 'general-purpose/d-family' },
+  'standarddasv6family': { display: 'Dasv6', category: 'general-purpose', docPath: 'general-purpose/d-family' },
+  'standardddsv4family': { display: 'Ddsv4', category: 'general-purpose', docPath: 'general-purpose/d-family' },
+  'standardddsv5family': { display: 'Ddsv5', category: 'general-purpose', docPath: 'general-purpose/d-family' },
+  'standardddsv6family': { display: 'Ddsv6', category: 'general-purpose', docPath: 'general-purpose/d-family' },
+  'standarddsv3family': { display: 'Dsv3', category: 'general-purpose', docPath: 'general-purpose/d-family' },
+  'standarddsv4family': { display: 'Dsv4', category: 'general-purpose', docPath: 'general-purpose/d-family' },
+  'standarddsv5family': { display: 'Dsv5', category: 'general-purpose', docPath: 'general-purpose/d-family' },
   'standarddfamily': { display: 'D', category: 'general-purpose', docPath: 'general-purpose/d-family' },
-  'standarddv2family': { display: 'Dv2', category: 'general-purpose', docPath: 'general-purpose/dv2-series' },
-  'standarddv3family': { display: 'Dv3', category: 'general-purpose', docPath: 'general-purpose/dv3-series' },
-  'standarddv4family': { display: 'Dv4', category: 'general-purpose', docPath: 'general-purpose/dv4-series' },
-  'standarddv5family': { display: 'Dv5', category: 'general-purpose', docPath: 'general-purpose/dv5-series' },
-  'standardeadsv5family': { display: 'Eadsv5', category: 'memory-optimized', docPath: 'memory-optimized/eadsv5-series' },
-  'standardeasv4family': { display: 'Easv4', category: 'memory-optimized', docPath: 'memory-optimized/easv4-series' },
-  'standardeasv5family': { display: 'Easv5', category: 'memory-optimized', docPath: 'memory-optimized/easv5-series' },
-  'standardedsv4family': { display: 'Edsv4', category: 'memory-optimized', docPath: 'memory-optimized/edsv4-series' },
-  'standardedsv5family': { display: 'Edsv5', category: 'memory-optimized', docPath: 'memory-optimized/edsv5-series' },
-  'standardesv3family': { display: 'Esv3', category: 'memory-optimized', docPath: 'memory-optimized/esv3-series' },
-  'standardesv4family': { display: 'Esv4', category: 'memory-optimized', docPath: 'memory-optimized/esv4-series' },
-  'standardesv5family': { display: 'Esv5', category: 'memory-optimized', docPath: 'memory-optimized/esv5-series' },
-  'standardev3family': { display: 'Ev3', category: 'memory-optimized', docPath: 'memory-optimized/ev3-series' },
-  'standardev4family': { display: 'Ev4', category: 'memory-optimized', docPath: 'memory-optimized/ev4-series' },
-  'standardev5family': { display: 'Ev5', category: 'memory-optimized', docPath: 'memory-optimized/ev5-series' },
-  'standardfsv2family': { display: 'Fsv2', category: 'compute-optimized', docPath: 'compute-optimized/fsv2-series' },
-  'standardfsfamily': { display: 'Fs', category: 'compute-optimized', docPath: 'compute-optimized/fs-series' },
-  'standardlsv2family': { display: 'Lsv2', category: 'storage-optimized', docPath: 'storage-optimized/lsv2-series' },
-  'standardlsv3family': { display: 'Lsv3', category: 'storage-optimized', docPath: 'storage-optimized/lsv3-series' },
-  'standardmsv2family': { display: 'Msv2', category: 'memory-optimized', docPath: 'memory-optimized/msv2-series' },
-  'standardmsfamily': { display: 'Ms', category: 'memory-optimized', docPath: 'memory-optimized/ms-series' },
-  'standardncadsv5a100family': { display: 'NCadsA100v4', category: 'gpu', docPath: 'gpu/nca100v4-series' },
-  'standardncsv3family': { display: 'NCsv3', category: 'gpu', docPath: 'gpu/ncsv3-series' },
-  'standardndsmv4family': { display: 'NDsm-v4', category: 'gpu', docPath: 'gpu/ndsm-v4-series' },
-  'standardnvsv3family': { display: 'NVsv3', category: 'gpu', docPath: 'gpu/nvsv3-series' },
-  'standardnvsv4family': { display: 'NVsv4', category: 'gpu', docPath: 'gpu/nvsv4-series' },
+  'standarddv2family': { display: 'Dv2', category: 'general-purpose', docPath: 'general-purpose/d-family' },
+  'standarddv3family': { display: 'Dv3', category: 'general-purpose', docPath: 'general-purpose/d-family' },
+  'standarddv4family': { display: 'Dv4', category: 'general-purpose', docPath: 'general-purpose/d-family' },
+  'standarddv5family': { display: 'Dv5', category: 'general-purpose', docPath: 'general-purpose/d-family' },
+  'standarddcasv5family': { display: 'DCasv5', category: 'general-purpose', docPath: 'general-purpose/dc-family' },
+  'standarddcadsv5family': { display: 'DCadsv5', category: 'general-purpose', docPath: 'general-purpose/dc-family' },
+  'standarddcsv3family': { display: 'DCsv3', category: 'general-purpose', docPath: 'general-purpose/dc-family' },
+  'standardeadsv5family': { display: 'Eadsv5', category: 'memory-optimized', docPath: 'memory-optimized/e-family' },
+  'standardeasv4family': { display: 'Easv4', category: 'memory-optimized', docPath: 'memory-optimized/e-family' },
+  'standardeasv5family': { display: 'Easv5', category: 'memory-optimized', docPath: 'memory-optimized/e-family' },
+  'standardeasv6family': { display: 'Easv6', category: 'memory-optimized', docPath: 'memory-optimized/e-family' },
+  'standardedsv4family': { display: 'Edsv4', category: 'memory-optimized', docPath: 'memory-optimized/e-family' },
+  'standardedsv5family': { display: 'Edsv5', category: 'memory-optimized', docPath: 'memory-optimized/e-family' },
+  'standardedsv6family': { display: 'Edsv6', category: 'memory-optimized', docPath: 'memory-optimized/e-family' },
+  'standardesv3family': { display: 'Esv3', category: 'memory-optimized', docPath: 'memory-optimized/e-family' },
+  'standardesv4family': { display: 'Esv4', category: 'memory-optimized', docPath: 'memory-optimized/e-family' },
+  'standardesv5family': { display: 'Esv5', category: 'memory-optimized', docPath: 'memory-optimized/e-family' },
+  'standardev3family': { display: 'Ev3', category: 'memory-optimized', docPath: 'memory-optimized/e-family' },
+  'standardev4family': { display: 'Ev4', category: 'memory-optimized', docPath: 'memory-optimized/e-family' },
+  'standardev5family': { display: 'Ev5', category: 'memory-optimized', docPath: 'memory-optimized/e-family' },
+  'standardebsv5family': { display: 'Ebsv5', category: 'memory-optimized', docPath: 'memory-optimized/eb-family' },
+  'standardebdsv5family': { display: 'Ebdsv5', category: 'memory-optimized', docPath: 'memory-optimized/eb-family' },
+  'standardecasv5family': { display: 'ECasv5', category: 'memory-optimized', docPath: 'memory-optimized/ec-family' },
+  'standardecadsv5family': { display: 'ECadsv5', category: 'memory-optimized', docPath: 'memory-optimized/ec-family' },
+  'standardfsv2family': { display: 'Fsv2', category: 'compute-optimized', docPath: 'compute-optimized/f-family' },
+  'standardfsfamily': { display: 'Fs', category: 'compute-optimized', docPath: 'compute-optimized/f-family' },
+  'standardffamily': { display: 'F', category: 'compute-optimized', docPath: 'compute-optimized/f-family' },
+  'standardfxfamily': { display: 'FX', category: 'compute-optimized', docPath: 'compute-optimized/fx-family' },
+  'standardlsv2family': { display: 'Lsv2', category: 'storage-optimized', docPath: 'storage-optimized/l-family' },
+  'standardlsv3family': { display: 'Lsv3', category: 'storage-optimized', docPath: 'storage-optimized/l-family' },
+  'standardlsv4family': { display: 'Lsv4', category: 'storage-optimized', docPath: 'storage-optimized/l-family' },
+  'standardmsv2family': { display: 'Msv2', category: 'memory-optimized', docPath: 'memory-optimized/m-family' },
+  'standardmsfamily': { display: 'Ms', category: 'memory-optimized', docPath: 'memory-optimized/m-family' },
+  'standardmfamily': { display: 'M', category: 'memory-optimized', docPath: 'memory-optimized/m-family' },
+  'standardmbsv3family': { display: 'Mbsv3', category: 'memory-optimized', docPath: 'memory-optimized/m-family' },
+  'standardncadsv5a100family': { display: 'NC A100 v4', category: 'gpu', docPath: 'gpu-accelerated/nc-family' },
+  'standardncadsh100v5family': { display: 'NCads H100 v5', category: 'gpu', docPath: 'gpu-accelerated/nc-family' },
+  'standardncsv3family': { display: 'NCsv3', category: 'gpu', docPath: 'gpu-accelerated/nc-family' },
+  'standardncast4v3family': { display: 'NCasT4 v3', category: 'gpu', docPath: 'gpu-accelerated/nc-family' },
+  'standardndsmv4family': { display: 'NDsm v4', category: 'gpu', docPath: 'gpu-accelerated/nd-family' },
+  'standardnda100v4family': { display: 'ND A100 v4', category: 'gpu', docPath: 'gpu-accelerated/nd-family' },
+  'standardndh100v5family': { display: 'ND H100 v5', category: 'gpu', docPath: 'gpu-accelerated/nd-family' },
+  'standardngadsv620v1family': { display: 'NGads V620', category: 'gpu', docPath: 'gpu-accelerated/ng-family' },
+  'standardnvsv3family': { display: 'NVsv3', category: 'gpu', docPath: 'gpu-accelerated/nv-family' },
+  'standardnvsv4family': { display: 'NVsv4', category: 'gpu', docPath: 'gpu-accelerated/nv-family' },
+  'standardnvadsa10v5family': { display: 'NVadsA10 v5', category: 'gpu', docPath: 'gpu-accelerated/nv-family' },
+  'standardnpsfamily': { display: 'NPs', category: 'fpga', docPath: 'fpga-accelerated/np-family' },
+  'standardhbsv4family': { display: 'HBv4', category: 'hpc', docPath: 'high-performance-compute/hb-family' },
+  'standardhbv3family': { display: 'HBv3', category: 'hpc', docPath: 'high-performance-compute/hb-family' },
+  'standardhbv2family': { display: 'HBv2', category: 'hpc', docPath: 'high-performance-compute/hb-family' },
+  'standardhcfamily': { display: 'HC', category: 'hpc', docPath: 'high-performance-compute/hc-family' },
+  'standardhxfamily': { display: 'HX', category: 'hpc', docPath: 'high-performance-compute/hx-family' },
 };
 
 function getFamilyDisplay(familyRaw) {
@@ -520,8 +659,8 @@ async function init() {
       const metaResp = await fetch('data/metadata.json');
       if (metaResp.ok) {
         const meta = await metaResp.json();
-        document.getElementById('dataFreshness').innerHTML =
-          `📅 Data current as of: <strong>${escHtml(meta.lastUpdatedDisplay)}</strong> · Reference data only — actual availability may vary by subscription.`;
+        document.getElementById('freshnessDate').textContent = meta.lastUpdatedDisplay;
+        document.getElementById('freshnessBanner').style.display = '';
       }
     } catch (e) { /* metadata optional */ }
 
@@ -613,7 +752,82 @@ function rebuildSkuList() {
     }
   }
   populateFamilyFilter();
+  renderFamilyOverview();
   applyFilters();
+}
+
+// ══════════════════════════════════════════════
+// FAMILY OVERVIEW RENDERING
+// ══════════════════════════════════════════════
+function renderFamilyOverview() {
+  const grid = document.getElementById('familyGrid');
+  // Group SKUs by family key
+  const familyCounts = {};
+  const familySeries = {};
+  for (const s of allSkus) {
+    const key = getFamilyKey(s.family);
+    if (!key) continue;
+    familyCounts[key] = (familyCounts[key] || 0) + 1;
+    if (!familySeries[key]) familySeries[key] = new Set();
+    familySeries[key].add(getFamilyDisplay(s.family));
+  }
+
+  const keys = Object.keys(familyCounts).sort((a, b) => {
+    const ta = familyInfo[a]?.type || '', tb = familyInfo[b]?.type || '';
+    if (ta !== tb) return ta.localeCompare(tb);
+    return familyCounts[b] - familyCounts[a];
+  });
+
+  document.getElementById('familiesBadge').textContent = keys.length + ' families';
+
+  if (keys.length === 0) {
+    grid.innerHTML = '<p style="color:var(--text-secondary);font-size:13px;">Select a region to see VM family information.</p>';
+    return;
+  }
+
+  grid.innerHTML = keys.map(key => {
+    const info = familyInfo[key];
+    if (!info) return '';
+    const ti = typeInfo[info.type] || {};
+    const count = familyCounts[key];
+    const series = [...(familySeries[key] || [])].sort().join(', ');
+    const docsUrl = `https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/${info.docPath}`;
+    const workloadHtml = info.workloads.map(w => `<li>${escHtml(w)}</li>`).join('');
+    const retirementHtml = info.retirement?.retiring
+      ? `<div class="retirement-warning">⚠️ ${escHtml(info.retirement.note)} — migrate to ${escHtml(info.retirement.migrateTo)}</div>`
+      : '';
+
+    return `<div class="family-card" onclick="filterByFamilyKey('${key}')" style="cursor:pointer;" title="Click to filter SKU table to ${info.letter}-family">
+      <div class="family-card-header">
+        <h4>${ti.icon || '📦'} ${escHtml(info.letter)}-family</h4>
+        <span class="type-badge ${ti.css || ''}">${escHtml(ti.label || info.type)}</span>
+      </div>
+      <ul class="workloads">${workloadHtml}</ul>
+      <div class="sku-count">${count} SKU${count !== 1 ? 's' : ''} available · Series: ${escHtml(series)}</div>
+      ${retirementHtml}
+      <div class="card-links">
+        <a href="${docsUrl}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();">📄 Azure Docs</a>
+        <a href="https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/overview" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();">📋 All Sizes Overview</a>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterByFamilyKey(key) {
+  const info = familyInfo[key];
+  if (!info) return;
+  // Find matching family values for this key
+  const matchingFamilies = [...new Set(allSkus.map(s => s.family))].filter(f => getFamilyKey(f) === key);
+  if (matchingFamilies.length === 1) {
+    document.getElementById('familyFilter').value = matchingFamilies[0];
+  } else if (matchingFamilies.length > 1) {
+    // Set to first match and let search narrow further
+    document.getElementById('familyFilter').value = matchingFamilies[0];
+  }
+  applyFilters();
+  // Scroll to SKU table
+  document.getElementById('skutaleBody')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  showToast(`Filtered to ${info.letter}-family SKUs`);
 }
 
 // ══════════════════════════════════════════════
@@ -719,6 +933,10 @@ function renderTable() {
   tbody.innerHTML = skusToRender.map(s => {
     const familyDisplay = escHtml(getFamilyDisplay(s.family));
     const docsUrl = getDocsUrl(s.family);
+    const fKey = getFamilyKey(s.family);
+    const fInfo = fKey ? familyInfo[fKey] : null;
+    const ti = fInfo ? typeInfo[fInfo.type] : null;
+    const typeBadge = ti ? `<span class="type-badge ${ti.css}">${escHtml(ti.label)}</span>` : '—';
     const zones = s.zones.length > 0
       ? s.zones.map(z => `<span class="badge badge-zone">${z}</span>`).join('')
       : '<span class="badge-no">—</span>';
@@ -735,13 +953,14 @@ function renderTable() {
     return `<tr>
       <td class="sku-name">${escHtml(s.name)}</td>
       <td>${familyDisplay}</td>
+      <td>${typeBadge}</td>
       <td style="text-align:right">${s.vCPUs}</td>
       <td style="text-align:right">${s.memoryGB}</td>
       <td><span class="badge badge-arch">${escHtml(s.cpuArchitecture)}</span></td>
       <td>${zones}</td>
       <td style="text-align:right">${s.maxDataDisks}</td>
       <td>${featureStr}</td>
-      <td>${showRegionCol ? escHtml(s.regionDisplayName) : escHtml(s.regionDisplayName)}</td>
+      <td>${escHtml(s.regionDisplayName)}</td>
       <td><a href="${docsUrl}" target="_blank" rel="noopener noreferrer" title="View docs">📄</a></td>
     </tr>`;
   }).join('');

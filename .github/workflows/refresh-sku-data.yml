@@ -1,0 +1,155 @@
+name: Refresh VM SKU Data
+
+on:
+  schedule:
+    - cron: '0 0 1 * *'  # 1st of every month at midnight UTC
+  workflow_dispatch:       # Allow manual trigger
+
+jobs:
+  refresh:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get Azure regions
+        run: |
+          $regions = az account list-locations --query "[].{name:name, displayName:displayName}" -o json | ConvertFrom-Json -AsHashtable
+          $regions | ConvertTo-Json -Depth 3 | Set-Content "data/regions.json" -Encoding UTF8
+          Write-Host "✅ Found $($regions.Count) regions"
+        shell: pwsh
+
+      - name: Fetch SKU data for all regions
+        run: |
+          $regions = Get-Content "data/regions.json" | ConvertFrom-Json -AsHashtable
+          $dataDir = "data"
+          $successCount = 0
+          $failCount = 0
+          $availableRegions = @()
+
+          foreach ($region in $regions) {
+            $name = $region.name
+            $display = $region.displayName
+            Write-Host "Fetching SKUs for $display ($name)..."
+
+            try {
+              $raw = az vm list-skus --location $name --resource-type virtualMachines -o json 2>$null
+              if (-not $raw -or $raw -eq "[]") {
+                Write-Host "  ⚠ No VM SKUs for $name (skipping)"
+                $failCount++
+                continue
+              }
+
+              # Save raw and normalize with Python
+              $raw | Set-Content "$dataDir/$name-raw.json" -Encoding UTF8
+
+              python -c @"
+import json, sys
+from datetime import datetime
+
+with open('$dataDir/$name-raw.json', encoding='utf-8') as f:
+    raw = json.load(f)
+
+def get_cap(caps, name):
+    for c in caps:
+        if c['name'] == name:
+            return c['value']
+    return None
+
+skus = []
+for item in raw:
+    if item.get('resourceType') != 'virtualMachines':
+        continue
+    caps = item.get('capabilities', [])
+    loc_info = item.get('locationInfo', [{}])[0] if item.get('locationInfo') else {}
+    zones = sorted(loc_info.get('zones', []))
+    restrictions = item.get('restrictions', [])
+    restriction_reasons = [r.get('reasonCode', '') for r in restrictions] if restrictions else []
+    skus.append({
+        'name': item['name'],
+        'family': item.get('family', ''),
+        'tier': item.get('tier', ''),
+        'size': item.get('size', ''),
+        'vCPUs': int(get_cap(caps, 'vCPUs') or 0),
+        'memoryGB': float(get_cap(caps, 'MemoryGB') or 0),
+        'maxDataDisks': int(get_cap(caps, 'MaxDataDiskCount') or 0),
+        'maxNICs': int(get_cap(caps, 'MaxNetworkInterfaces') or 0),
+        'cpuArchitecture': get_cap(caps, 'CpuArchitectureType') or 'x64',
+        'hyperVGenerations': get_cap(caps, 'HyperVGenerations') or '',
+        'acceleratedNetworking': get_cap(caps, 'AcceleratedNetworkingEnabled') == 'True',
+        'premiumIO': get_cap(caps, 'PremiumIO') == 'True',
+        'ephemeralOSDisk': get_cap(caps, 'EphemeralOSDiskSupported') == 'True',
+        'encryptionAtHost': get_cap(caps, 'EncryptionAtHostSupported') == 'True',
+        'spotEligible': get_cap(caps, 'LowPriorityCapable') == 'True',
+        'zones': zones,
+        'restrictions': restriction_reasons
+    })
+
+skus.sort(key=lambda x: (x['family'], x['vCPUs'], x['memoryGB']))
+
+output = {
+    'region': '$name',
+    'regionDisplayName': '$display',
+    'lastUpdated': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+    'skuCount': len(skus),
+    'skus': skus
+}
+
+with open('$dataDir/$name.json', 'w', encoding='utf-8') as f:
+    json.dump(output, f, indent=2)
+
+print(f'  Normalized {len(skus)} SKUs')
+"@
+
+              # Clean up raw file
+              Remove-Item "$dataDir/$name-raw.json" -ErrorAction SilentlyContinue
+
+              $successCount++
+              $availableRegions += $name
+
+            } catch {
+              Write-Host "  ❌ Failed for $name`: $_"
+              $failCount++
+              Remove-Item "$dataDir/$name-raw.json" -ErrorAction SilentlyContinue
+            }
+          }
+
+          Write-Host "`n✅ Refreshed $successCount regions, $failCount failed/skipped"
+
+          # Update metadata
+          $month = (Get-Date).ToString("MMMM yyyy")
+          $metadata = @{
+            lastUpdated = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+            lastUpdatedDisplay = $month
+            availableRegions = $availableRegions
+            totalRegions = $regions.Count
+          } | ConvertTo-Json
+          $metadata | Set-Content "$dataDir/metadata.json" -Encoding UTF8
+          Write-Host "✅ Metadata updated: $month"
+        shell: pwsh
+
+      - name: Upload data to Azure Blob Storage
+        run: |
+          az storage blob upload-batch `
+            --account-name ${{ vars.STORAGE_ACCOUNT }} `
+            --destination '$web' `
+            --source data `
+            --destination-path data `
+            --overwrite `
+            --auth-mode login
+          Write-Host "✅ Data uploaded to Azure Blob Storage"
+        shell: pwsh
+
+      - name: Commit updated data to repo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/
+          $changes = git diff --cached --name-only
+          if ($changes) {
+            git commit -m "chore: monthly VM SKU data refresh - $(Get-Date -Format 'MMMM yyyy')"
+            git -c gc.auto=0 push
+            Write-Host "✅ Data committed and pushed"
+          } else {
+            Write-Host "ℹ No data changes to commit"
+          }
+        shell: pwsh

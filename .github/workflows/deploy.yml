@@ -3,7 +3,7 @@ name: Deploy to Azure Storage
 on:
   push:
     branches: [main]
-    paths: ['index.html']
+    paths: ['index.html', 'data/**']
 
 jobs:
   deploy:
@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Upload to Azure Blob Storage
+      - name: Upload index.html to Azure Blob Storage
         run: |
           az storage blob upload `
             --account-name ${{ vars.STORAGE_ACCOUNT }} `
@@ -21,6 +21,22 @@ jobs:
             --overwrite `
             --content-type "text/html; charset=utf-8" `
             --auth-mode login
+        shell: pwsh
+
+      - name: Upload data files to Azure Blob Storage
+        run: |
+          if (Test-Path data) {
+            az storage blob upload-batch `
+              --account-name ${{ vars.STORAGE_ACCOUNT }} `
+              --destination '$web' `
+              --source data `
+              --destination-path data `
+              --overwrite `
+              --auth-mode login
+            Write-Host "✅ Data files uploaded"
+          } else {
+            Write-Host "ℹ No data directory found (skipping)"
+          }
         shell: pwsh
 
       - name: Verify deployment
