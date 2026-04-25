@@ -261,20 +261,15 @@
     <div class="section-header" onclick="toggleSection('regionsel')" style="border-left-color:#4caf50;">
       <span class="section-toggle open" id="regionselToggle">▶</span>
       <h3>🌏 Select Azure Region</h3>
-      <span class="section-badge" id="regionBadge">0 selected</span>
+      <span class="section-badge" id="regionBadge">New Zealand North</span>
     </div>
     <div class="section-body open" id="regionselBody">
       <div class="region-bar">
-        <div class="form-group" style="margin-bottom:0;">
-          <select id="regionSelect">
+        <div class="form-group" style="margin-bottom:0;flex:1;">
+          <select id="regionSelect" onchange="selectRegion(this.value)">
             <option value="">Loading regions...</option>
           </select>
         </div>
-        <button class="btn btn-primary" onclick="addSelectedRegion()" id="addRegionBtn" disabled>Add Region</button>
-        <button class="btn btn-outline btn-sm" onclick="clearAllRegions()">Clear All</button>
-      </div>
-      <div style="margin-top:10px;">
-        <div class="region-chips" id="regionChips"></div>
       </div>
     </div>
   </div>
@@ -607,7 +602,7 @@ let availableDataRegions = new Set();
 let allSkus = [];
 let filteredSkus = [];
 let currentSort = { field: 'name', dir: 'asc' };
-const MAX_REGIONS = 5;
+
 
 // ══════════════════════════════════════════════
 // FAMILY INFO — TYPES, WORKLOADS, DOCS, RETIREMENT
@@ -797,9 +792,8 @@ async function init() {
       select.appendChild(optgroup);
     }
     select.value = 'newzealandnorth';
-    document.getElementById('addRegionBtn').disabled = false;
     initMapOutline();
-    renderRegionMap();
+    selectRegion('newzealandnorth');
 
     // Load metadata for freshness display
     try {
@@ -896,97 +890,47 @@ function renderRegionMap() {
   }
 }
 
-function toggleRegionFromMap(regionName) {
-  if (selectedRegions.includes(regionName)) {
-    removeRegion(regionName);
-  } else {
-    if (selectedRegions.length >= MAX_REGIONS) {
-      showToast(`Maximum ${MAX_REGIONS} regions allowed`, 'warning');
-      return;
-    }
-    document.getElementById('regionSelect').value = regionName;
-    addSelectedRegion();
-  }
-}
-
 // ══════════════════════════════════════════════
-// REGION MANAGEMENT
+// REGION MANAGEMENT (single region)
 // ══════════════════════════════════════════════
-function addSelectedRegion() {
-  const select = document.getElementById('regionSelect');
-  const regionName = select.value;
-  if (!regionName) { showToast('Please select a region', 'warning'); return; }
-  if (selectedRegions.includes(regionName)) { showToast('Region already selected', 'warning'); return; }
-  if (selectedRegions.length >= MAX_REGIONS) { showToast(`Maximum ${MAX_REGIONS} regions allowed`, 'warning'); return; }
-
-  selectedRegions.push(regionName);
-  renderRegionChips();
+function selectRegion(regionName) {
+  if (!regionName) return;
+  selectedRegions = [regionName];
   renderRegionMap();
-  updateRegionBadge();
-  // Pan map to the newly selected region
+
+  // Update badge with display name
   const regionInfo = allRegions.find(r => r.name === regionName);
+  document.getElementById('regionBadge').textContent = regionInfo ? regionInfo.displayName : regionName;
+
+  // Pan map
   if (regionInfo && regionInfo.latitude && regionInfo.longitude && leafletMap) {
     leafletMap.flyTo([parseFloat(regionInfo.latitude), parseFloat(regionInfo.longitude)], 4, { duration: 0.8 });
   }
+
   // Enable the View button
   document.getElementById('viewSkuBtn').disabled = false;
-  // If results are already showing, auto-load data for the new region
+
+  // If results are already showing, auto-load data
   if (document.getElementById('skuResults').style.display !== 'none') {
-    loadRegionData(regionName);
+    loadRegionData(regionName).then(() => rebuildSkuList());
   }
   updateCLICommand();
 }
 
-function removeRegion(regionName) {
-  selectedRegions = selectedRegions.filter(r => r !== regionName);
-  renderRegionChips();
-  renderRegionMap();
-  updateRegionBadge();
-  rebuildSkuList();
-  updateCLICommand();
-  if (selectedRegions.length === 0) {
-    document.getElementById('skuResults').style.display = 'none';
-    document.getElementById('viewSkuPrompt').style.display = '';
-    document.getElementById('viewSkuBtn').disabled = true;
-  }
-}
-
-function clearAllRegions() {
-  selectedRegions = [];
-  renderRegionChips();
-  renderRegionMap();
-  updateRegionBadge();
-  allSkus = [];
-  filteredSkus = [];
-  renderTable();
-  document.getElementById('skuResults').style.display = 'none';
-  document.getElementById('viewSkuPrompt').style.display = '';
-  document.getElementById('viewSkuBtn').disabled = true;
-}
-
-function updateRegionBadge() {
-  document.getElementById('regionBadge').textContent = selectedRegions.length > 0
-    ? `${selectedRegions.length} selected` : '0 selected';
+function toggleRegionFromMap(regionName) {
+  document.getElementById('regionSelect').value = regionName;
+  selectRegion(regionName);
 }
 
 async function loadSelectedAndShowResults() {
-  if (selectedRegions.length === 0) { showToast('Please select at least one region', 'warning'); return; }
+  if (selectedRegions.length === 0) { showToast('Please select a region', 'warning'); return; }
   document.getElementById('viewSkuPrompt').style.display = 'none';
   document.getElementById('skuResults').style.display = '';
-  for (const regionName of selectedRegions) {
-    if (!regionDataCache[regionName]) {
-      await loadRegionData(regionName);
-    }
+  const regionName = selectedRegions[0];
+  if (!regionDataCache[regionName]) {
+    await loadRegionData(regionName);
   }
   rebuildSkuList();
-}
-
-function renderRegionChips() {
-  const container = document.getElementById('regionChips');
-  container.innerHTML = selectedRegions.map(r => {
-    const displayName = allRegions.find(reg => reg.name === r)?.displayName || r;
-    return `<span class="region-chip">${escHtml(displayName)} <button onclick="removeRegion('${r}')" title="Remove">×</button></span>`;
-  }).join('');
 }
 
 // ══════════════════════════════════════════════
@@ -1011,7 +955,6 @@ async function loadRegionData(regionName) {
     showToast(`Loaded ${data.skuCount} SKUs for ${data.regionDisplayName}`);
   } catch (err) {
     showToast(`Failed to load data for ${regionName}: ${err.message}`, 'error');
-    removeRegion(regionName);
   } finally {
     document.getElementById('loadingIndicator').style.display = 'none';
   }
@@ -1376,7 +1319,7 @@ function renderTable() {
   document.getElementById('resultBadge').textContent = filteredSkus.length + ' SKUs';
   document.getElementById('skuTableBadge').textContent = filteredSkus.length + ' SKUs';
   document.getElementById('resultCount').textContent =
-    `Showing ${filteredSkus.length} of ${allSkus.length} SKUs across ${selectedRegions.length} region(s)`;
+    `Showing ${filteredSkus.length} of ${allSkus.length} SKUs`;
 
   // Update sort arrows
   document.querySelectorAll('.sku-table th').forEach(th => th.classList.remove('sorted'));
@@ -1492,9 +1435,9 @@ document.addEventListener('keydown', e => {
   }
 });
 
-// Allow Enter key in region select to add region
+// Allow Enter key in region select
 document.getElementById('regionSelect').addEventListener('keydown', e => {
-  if (e.key === 'Enter') { e.preventDefault(); addSelectedRegion(); }
+  if (e.key === 'Enter') { e.preventDefault(); selectRegion(e.target.value); }
 });
 
 // ══════════════════════════════════════════════
