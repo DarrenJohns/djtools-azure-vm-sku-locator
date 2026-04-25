@@ -257,45 +257,78 @@
 <div class="container">
 
   <!-- Region Selector -->
-  <div class="region-bar">
-    <div class="form-group">
-      <label for="regionSelect">🌏 Select Azure Region</label>
-      <select id="regionSelect">
-        <option value="">Loading regions...</option>
-      </select>
+  <div class="section-collapsible">
+    <div class="section-header" onclick="toggleSection('regionsel')" style="border-left-color:#4caf50;">
+      <span class="section-toggle open" id="regionselToggle">▶</span>
+      <h3>🌏 Select Azure Region</h3>
+      <span class="section-badge" id="regionBadge">0 selected</span>
     </div>
-    <button class="btn btn-primary" onclick="addSelectedRegion()" id="addRegionBtn" disabled>Add Region</button>
-    <button class="btn btn-outline btn-sm" onclick="clearAllRegions()">Clear All</button>
-  </div>
-
-  <!-- Selected Region Chips -->
-  <div style="margin-top:10px;">
-    <div class="region-chips" id="regionChips"></div>
+    <div class="section-body open" id="regionselBody">
+      <div class="region-bar">
+        <div class="form-group" style="margin-bottom:0;">
+          <select id="regionSelect">
+            <option value="">Loading regions...</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" onclick="addSelectedRegion()" id="addRegionBtn" disabled>Add Region</button>
+        <button class="btn btn-outline btn-sm" onclick="clearAllRegions()">Clear All</button>
+      </div>
+      <div style="margin-top:10px;">
+        <div class="region-chips" id="regionChips"></div>
+      </div>
+    </div>
   </div>
 
   <!-- Region Map -->
-  <div class="region-map-container" id="regionMapContainer">
-    <div id="regionMap"></div>
-    <div class="map-legend">
-      <span><span class="map-legend-dot" style="background:#4caf50;border:1px solid #fff;"></span> Available</span>
-      <span><span class="map-legend-dot" style="background:#0f6cbd;border:2px solid #fff;box-shadow:0 0 4px #0f6cbd;width:12px;height:12px;"></span> Selected</span>
-      <span style="font-style:italic;">Click a marker to add/remove a region</span>
+  <div class="section-collapsible" style="margin-top:12px;">
+    <div class="section-header" onclick="toggleSection('map')" style="border-left-color:#4caf50;">
+      <span class="section-toggle open" id="mapToggle">▶</span>
+      <h3>🗺️ Azure Region Map</h3>
+    </div>
+    <div class="section-body open" id="mapBody">
+      <div class="region-map-container">
+        <div id="regionMap"></div>
+        <div class="map-legend">
+          <span><span class="map-legend-dot" style="background:#4caf50;border:1px solid #2e7d32;"></span> Available</span>
+          <span><span class="map-legend-dot" style="background:#0f6cbd;border:2px solid #fff;box-shadow:0 0 4px #0f6cbd;width:12px;height:12px;"></span> Selected</span>
+          <span style="font-style:italic;">Click a marker to add/remove a region</span>
+        </div>
+      </div>
     </div>
   </div>
 
   <!-- Freshness Banner -->
-  <div class="freshness-banner" id="freshnessBanner" style="display:none;">
-    <span class="freshness-icon" id="freshnessIcon">📅</span>
-    <div>
-      <div>Data snapshot from: <span class="freshness-date" id="freshnessDate">—</span></div>
-      <div class="freshness-pit">⚠️ This is a point-in-time snapshot — not live data. VM SKU availability can change at any time.</div>
-      <div class="freshness-note">Data is refreshed on the 1st of each month. For real-time, subscription-specific availability use: <code>az vm list-skus --location &lt;region&gt;</code></div>
-      <div id="staleWarning" style="display:none;">
-        <span class="freshness-stale-warning" id="staleMessage">⚠️ This data may be outdated</span>
-        <a class="freshness-refresh-btn" onclick="location.reload(true)" title="Hard-refresh to fetch the latest data">🔄 Refresh Now</a>
+  <div class="section-collapsible" style="margin-top:12px;">
+    <div class="section-header" onclick="toggleSection('freshness')" style="border-left-color:#ffc107;">
+      <span class="section-toggle open" id="freshnessToggle">▶</span>
+      <h3>📅 Data Freshness</h3>
+    </div>
+    <div class="section-body open" id="freshnessBody">
+      <div class="freshness-banner" id="freshnessBanner" style="display:none;">
+        <span class="freshness-icon" id="freshnessIcon">📅</span>
+        <div>
+          <div>Data snapshot from: <span class="freshness-date" id="freshnessDate">—</span></div>
+          <div class="freshness-pit">⚠️ This is a point-in-time snapshot — not live data. VM SKU availability can change at any time.</div>
+          <div class="freshness-note">Data is refreshed on the 1st of each month. For real-time, subscription-specific availability use: <code>az vm list-skus --location &lt;region&gt;</code></div>
+          <div id="staleWarning" style="display:none;">
+            <span class="freshness-stale-warning" id="staleMessage">⚠️ This data may be outdated</span>
+            <a class="freshness-refresh-btn" onclick="location.reload(true)" title="Hard-refresh to fetch the latest data">🔄 Refresh Now</a>
+          </div>
+        </div>
       </div>
+      <div id="freshnessLoading" style="font-size:12px;color:var(--text-secondary);">Loading freshness information...</div>
     </div>
   </div>
+
+  <!-- View SKU Data Button -->
+  <div id="viewSkuPrompt" style="text-align:center;margin-top:20px;">
+    <button class="btn btn-primary" onclick="loadSelectedAndShowResults()" id="viewSkuBtn" style="padding:10px 32px;font-size:15px;" disabled>
+      📋 View VM SKU Information
+    </button>
+    <p style="font-size:12px;color:var(--text-secondary);margin-top:6px;">Select a region above, then click to load VM SKU data</p>
+  </div>
+
+  <div id="initialState" style="display:none;"></div>
 
   <!-- SKU Results -->
   <div id="skuResults" style="display:none;">
@@ -531,6 +564,9 @@ function showToast(msg, type = 'success') {
 // COLLAPSIBLE SECTIONS
 // ══════════════════════════════════════════════
 const sections = {
+  regionsel: { toggle: 'regionselToggle', body: 'regionselBody' },
+  map: { toggle: 'mapToggle', body: 'mapBody' },
+  freshness: { toggle: 'freshnessToggle', body: 'freshnessBody' },
   filters: { toggle: 'filtersToggle', body: 'filtersBody' },
   families: { toggle: 'familiesToggle', body: 'familiesBody' },
   workloads: { toggle: 'workloadsToggle', body: 'workloadsBody' },
@@ -546,6 +582,10 @@ function toggleSection(key) {
   const body = document.getElementById(s.body);
   const isOpen = body.classList.toggle('open');
   toggle.classList.toggle('open', isOpen);
+  // Leaflet needs a resize when map section is toggled
+  if (key === 'map' && isOpen && leafletMap) {
+    setTimeout(() => leafletMap.invalidateSize(), 200);
+  }
 }
 
 // ══════════════════════════════════════════════
@@ -768,6 +808,7 @@ async function init() {
         const meta = await metaResp.json();
         document.getElementById('freshnessDate').textContent = meta.lastUpdatedDisplay;
         document.getElementById('freshnessBanner').style.display = '';
+        document.getElementById('freshnessLoading').style.display = 'none';
 
         // Store which regions have data from the monthly refresh
         if (meta.availableRegions) {
@@ -881,12 +922,18 @@ function addSelectedRegion() {
   selectedRegions.push(regionName);
   renderRegionChips();
   renderRegionMap();
+  updateRegionBadge();
   // Pan map to the newly selected region
   const regionInfo = allRegions.find(r => r.name === regionName);
   if (regionInfo && regionInfo.latitude && regionInfo.longitude && leafletMap) {
     leafletMap.flyTo([parseFloat(regionInfo.latitude), parseFloat(regionInfo.longitude)], 4, { duration: 0.8 });
   }
-  loadRegionData(regionName);
+  // Enable the View button
+  document.getElementById('viewSkuBtn').disabled = false;
+  // If results are already showing, auto-load data for the new region
+  if (document.getElementById('skuResults').style.display !== 'none') {
+    loadRegionData(regionName);
+  }
   updateCLICommand();
 }
 
@@ -894,11 +941,13 @@ function removeRegion(regionName) {
   selectedRegions = selectedRegions.filter(r => r !== regionName);
   renderRegionChips();
   renderRegionMap();
+  updateRegionBadge();
   rebuildSkuList();
   updateCLICommand();
   if (selectedRegions.length === 0) {
     document.getElementById('skuResults').style.display = 'none';
-    document.getElementById('initialState').style.display = '';
+    document.getElementById('viewSkuPrompt').style.display = '';
+    document.getElementById('viewSkuBtn').disabled = true;
   }
 }
 
@@ -906,11 +955,30 @@ function clearAllRegions() {
   selectedRegions = [];
   renderRegionChips();
   renderRegionMap();
+  updateRegionBadge();
   allSkus = [];
   filteredSkus = [];
   renderTable();
   document.getElementById('skuResults').style.display = 'none';
-  document.getElementById('initialState').style.display = '';
+  document.getElementById('viewSkuPrompt').style.display = '';
+  document.getElementById('viewSkuBtn').disabled = true;
+}
+
+function updateRegionBadge() {
+  document.getElementById('regionBadge').textContent = selectedRegions.length > 0
+    ? `${selectedRegions.length} selected` : '0 selected';
+}
+
+async function loadSelectedAndShowResults() {
+  if (selectedRegions.length === 0) { showToast('Please select at least one region', 'warning'); return; }
+  document.getElementById('viewSkuPrompt').style.display = 'none';
+  document.getElementById('skuResults').style.display = '';
+  for (const regionName of selectedRegions) {
+    if (!regionDataCache[regionName]) {
+      await loadRegionData(regionName);
+    }
+  }
+  rebuildSkuList();
 }
 
 function renderRegionChips() {
