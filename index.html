@@ -535,6 +535,16 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
 .shortlist-chip .remove-pin { cursor: pointer; font-size: 14px; margin-left: 2px; opacity: 0.6; }
 .shortlist-chip .remove-pin:hover { opacity: 1; color: var(--status-danger); }
 .shortlist-actions { display: flex; gap: 8px; margin-top: 10px; }
+/* Pricing table */
+.pricing-container { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border-default); }
+.pricing-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
+.pricing-table th { text-align: left; padding: 6px 10px; font-weight: 600; font-size: 11px; color: var(--text-secondary); border-bottom: 2px solid var(--border-default); white-space: nowrap; }
+.pricing-table td { padding: 6px 10px; border-bottom: 1px solid var(--border-subtle); white-space: nowrap; }
+.pricing-table tr:hover td { background: var(--bg-hover); }
+.pricing-table .price-cell { font-family: 'Cascadia Code', 'Consolas', monospace; font-size: 12px; }
+.pricing-table .price-cell.cheapest { color: var(--status-success); font-weight: 700; }
+.pricing-note { font-size: 11px; color: var(--text-tertiary); margin-top: 6px; }
+.pricing-loading { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); padding: 8px 0; }
 .pin-btn { cursor: pointer; font-size: 16px; opacity: 0.3; transition: all 0.15s; background: none; border: none; padding: 0 2px; }
 .pin-btn:hover { opacity: 0.7; transform: scale(1.2); }
 .pin-btn.pinned { opacity: 1; color: var(--brand-primary); }
@@ -986,7 +996,12 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
         <div class="shortlist-chips" id="shortlist-chips"><span style="font-size:12px;color:var(--text-tertiary);">Pin VM SKUs from the table using the ○ button to build your shortlist</span></div>
         <div class="shortlist-actions" id="shortlist-actions" style="display:none;margin-top:8px;">
           <button class="btn btn-primary btn-sm" onclick="exportShortlistCsv()">📥 Export Shortlist</button>
+          <button class="btn btn-outline btn-sm" onclick="fetchPinnedPricing()">💰 Load Pricing</button>
           <button class="btn btn-outline btn-sm" onclick="clearShortlist()">📌 Clear All Pins</button>
+        </div>
+        <div class="pricing-container" id="pricing-container" style="display:none;">
+          <p style="margin-bottom:4px;font-size:13px;font-weight:600;">💰 Pricing Comparison <span style="font-size:11px;font-weight:400;color:var(--text-tertiary);">(USD/hr, Pay-As-You-Go)</span></p>
+          <div id="pricing-content"></div>
         </div>
         <div id="multiregion-container" style="display:none;margin-top:14px;padding-top:12px;border-top:1px solid var(--border-default);">
           <p style="margin-bottom:8px;font-size:13px;font-weight:600;">🌏 Multi-Region Compare</p>
@@ -1974,6 +1989,8 @@ function renderShortlist() {
     chips.innerHTML = '<span style="font-size:12px;color:var(--text-tertiary);">Pin VM SKUs from the table using the ○ button to build your shortlist</span>';
     if (actions) actions.style.display = 'none';
     if (multiRegionContainer) multiRegionContainer.style.display = 'none';
+    const pricingCtr = document.getElementById('pricing-container');
+    if (pricingCtr) pricingCtr.style.display = 'none';
     return;
   }
   // Auto-expand section when pins are added
@@ -2016,6 +2033,121 @@ function exportShortlistCsv() {
   a.click();
   URL.revokeObjectURL(a.href);
   showToast(`Exported ${pinned.length} pinned SKUs to CSV`);
+}
+
+// === PRICING COMPARISON ===
+let _pricingCache = {}; // keyed by "region|skuName"
+
+async function fetchPinnedPricing() {
+  if (!pinnedSkus.size) { showToast('Pin some SKUs first', 'warning'); return; }
+  if (!selectedRegion) { showToast('Select a region first', 'warning'); return; }
+
+  const container = document.getElementById('pricing-container');
+  const content = document.getElementById('pricing-content');
+  if (!container || !content) return;
+
+  container.style.display = '';
+  content.innerHTML = '<div class="pricing-loading">⏳ Fetching live pricing from Azure...</div>';
+
+  const skuNames = [...pinnedSkus].sort();
+  const region = selectedRegion;
+
+  // Build filter: fetch all pinned SKUs in one call using 'or' chains
+  // API supports OData filters; batch by fetching all VM prices for the region
+  const uncached = skuNames.filter(s => !_pricingCache[`${region}|${s}`]);
+
+  if (uncached.length > 0) {
+    try {
+      // Fetch in batches of 10 SKUs to keep URL length manageable
+      for (let i = 0; i < uncached.length; i += 10) {
+        const batch = uncached.slice(i, i + 10);
+        const skuFilter = batch.map(s => `armSkuName eq '${s}'`).join(' or ');
+        const filter = `serviceName eq 'Virtual Machines' and armRegionName eq '${region}' and (${skuFilter}) and priceType eq 'Consumption'`;
+        const url = `https://prices.azure.com/api/retail/prices?$filter=${encodeURIComponent(filter)}`;
+
+        let items = [];
+        let nextUrl = url;
+        let pages = 0;
+        while (nextUrl && pages < 5) {
+          const resp = await fetch(nextUrl);
+          if (!resp.ok) break;
+          const data = await resp.json();
+          items = items.concat(data.Items || []);
+          nextUrl = data.NextPageLink || null;
+          pages++;
+        }
+
+        // Group by armSkuName
+        for (const item of items) {
+          const key = `${region}|${item.armSkuName}`;
+          if (!_pricingCache[key]) _pricingCache[key] = [];
+          _pricingCache[key].push(item);
+        }
+        // Mark SKUs with no results so we don't re-fetch
+        for (const s of batch) {
+          if (!_pricingCache[`${region}|${s}`]) _pricingCache[`${region}|${s}`] = [];
+        }
+      }
+    } catch (e) {
+      content.innerHTML = '<div style="font-size:12px;color:var(--status-danger);padding:8px 0;">⚠️ Failed to fetch pricing data. The Azure Retail Prices API may be temporarily unavailable.</div>';
+      return;
+    }
+  }
+
+  renderPricingTable(skuNames, region, content);
+}
+
+function renderPricingTable(skuNames, region, content) {
+  // Extract relevant prices per SKU
+  const rows = skuNames.map(name => {
+    const items = _pricingCache[`${region}|${name}`] || [];
+    const linux = items.find(i => !i.productName.includes('Windows') && !i.meterName.includes('Spot') && !i.meterName.includes('Low Priority') && i.type === 'Consumption');
+    const windows = items.find(i => i.productName.includes('Windows') && !i.meterName.includes('Spot') && !i.meterName.includes('Low Priority') && i.type === 'Consumption');
+    const spot = items.find(i => !i.productName.includes('Windows') && i.meterName.includes('Spot') && i.type === 'Consumption');
+    const sku = allSkus.find(s => s.size === name);
+    return { name, linux, windows, spot, sku };
+  });
+
+  // Find cheapest in each column for highlighting
+  const linuxPrices = rows.filter(r => r.linux).map(r => r.linux.retailPrice);
+  const windowsPrices = rows.filter(r => r.windows).map(r => r.windows.retailPrice);
+  const spotPrices = rows.filter(r => r.spot).map(r => r.spot.retailPrice);
+  const minLinux = linuxPrices.length ? Math.min(...linuxPrices) : null;
+  const minWindows = windowsPrices.length ? Math.min(...windowsPrices) : null;
+  const minSpot = spotPrices.length ? Math.min(...spotPrices) : null;
+
+  const fmt = (price) => price != null ? `$${price.toFixed(4)}` : '—';
+  const monthly = (price) => price != null ? `$${(price * 730).toFixed(0)}/mo` : '';
+
+  let html = `<table class="pricing-table">
+    <thead><tr>
+      <th>SKU</th><th>vCPUs</th><th>Memory</th>
+      <th>🐧 Linux/hr</th><th>🪟 Windows/hr</th><th>⚡ Spot/hr</th><th>🐧 ~Monthly</th>
+    </tr></thead><tbody>`;
+
+  for (const r of rows) {
+    const lp = r.linux ? r.linux.retailPrice : null;
+    const wp = r.windows ? r.windows.retailPrice : null;
+    const sp = r.spot ? r.spot.retailPrice : null;
+    const lClass = (lp !== null && lp === minLinux && rows.length > 1) ? ' cheapest' : '';
+    const wClass = (wp !== null && wp === minWindows && rows.length > 1) ? ' cheapest' : '';
+    const sClass = (sp !== null && sp === minSpot && rows.length > 1) ? ' cheapest' : '';
+
+    html += `<tr>
+      <td style="font-weight:600;">${escapeHtml(r.name)}</td>
+      <td>${r.sku ? r.sku.vCPUs : '—'}</td>
+      <td>${r.sku ? r.sku.memoryGB + ' GB' : '—'}</td>
+      <td class="price-cell${lClass}">${fmt(lp)}</td>
+      <td class="price-cell${wClass}">${fmt(wp)}</td>
+      <td class="price-cell${sClass}">${fmt(sp)}</td>
+      <td class="price-cell" style="color:var(--text-tertiary);">${monthly(lp)}</td>
+    </tr>`;
+  }
+
+  html += '</tbody></table>';
+  html += '<p class="pricing-note">💡 Live data from <a href="https://prices.azure.com" target="_blank" style="color:var(--brand-primary);">Azure Retail Prices API</a> · No auth required · Prices in USD · ~730 hrs/mo</p>';
+
+  content.innerHTML = html;
 }
 
 // === SNIPPET MODAL ===
