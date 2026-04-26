@@ -1,7 +1,9 @@
 name: Refresh VM SKU Data
 
 on:
-  workflow_dispatch:       # Manual trigger only
+  schedule:
+    - cron: '0 0 1 * *'    # Monthly on the 1st at 00:00 UTC
+  workflow_dispatch:       # Manual trigger
 
 jobs:
   refresh:
@@ -99,6 +101,13 @@ jobs:
           } | ConvertTo-Json
           $metadata | Set-Content "$dataDir/metadata.json" -Encoding UTF8
           Write-Host "[OK] Metadata updated: $month ($successCount regions with data, $failCount failed)"
+        shell: pwsh
+
+      - name: Refresh retirement data
+        run: |
+          pip install requests beautifulsoup4 -q
+          python scripts/update-retirements.py
+          Write-Host "[OK] Retirement data refresh complete"
         shell: pwsh
 
       - name: Upload data to Azure Blob Storage

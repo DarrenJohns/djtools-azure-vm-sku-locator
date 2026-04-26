@@ -482,6 +482,14 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
 .pin-btn { cursor: pointer; font-size: 16px; opacity: 0.3; transition: all 0.15s; background: none; border: none; padding: 0 2px; }
 .pin-btn:hover { opacity: 0.7; transform: scale(1.2); }
 .pin-btn.pinned { opacity: 1; color: var(--brand-primary); }
+/* ── Lifecycle Badges ── */
+.lifecycle-badge { display: inline-block; font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 8px; margin-left: 6px; vertical-align: middle; line-height: 1.4; }
+.lifecycle-badge.retiring { background: #fff3cd; color: #856404; border: 1px solid #ffc107; }
+.lifecycle-badge.preview { background: #d1ecf1; color: #0c5460; border: 1px solid #17a2b8; }
+.lifecycle-badge.ga { background: #d4edda; color: #155724; border: 1px solid #28a745; }
+[data-theme="dark"] .lifecycle-badge.retiring { background: #4a3c00; color: #ffc107; border-color: #6d5a00; }
+[data-theme="dark"] .lifecycle-badge.preview { background: #0a3d4a; color: #5bc0de; border-color: #17a2b8; }
+[data-theme="dark"] .lifecycle-badge.ga { background: #0d3318; color: #5cb85c; border-color: #28a745; }
 /* ── Snippet Modal ── */
 .snippet-overlay { position: fixed; inset: 0; z-index: 950; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.45); opacity: 0; pointer-events: none; transition: opacity 0.2s; }
 .snippet-overlay.active { opacity: 1; pointer-events: auto; }
@@ -1093,15 +1101,15 @@ const workloads = [
   { name: 'High Performance Compute', icon: '🔬', desc: 'Fastest and most powerful CPUs with optional high-throughput network interfaces (RDMA).', series: ['HB', 'HC', 'HX'], anchor: '#high-performance-compute' },
 ];
 
-const retirementFamilies = {
-  'StandardAv2Family': { name: 'Av2-series', date: 'November 2028' },
-  'StandardAmv2Family': { name: 'Amv2-series', date: 'November 2028' },
-  'StandardBSFamily': { name: 'B v1-series', date: 'November 2028' },
-  'StandardDSFamily': { name: 'Ds-series', date: 'November 2028' },
-  'StandardDFamily': { name: 'D-series', date: 'November 2028' },
-  'StandardDSv2Family': { name: 'Dsv2-series', date: 'November 2028' },
-  'StandardDv2Family': { name: 'Dv2-series', date: 'November 2028' },
-};
+let retirementFamilies = {};
+
+function getLifecycleBadge(sku) {
+  if (sku.family && retirementFamilies[sku.family.toLowerCase()]) {
+    const r = retirementFamilies[sku.family.toLowerCase()];
+    return `<span class="lifecycle-badge retiring" title="Retiring ${r.date}">⚠️ Retiring</span>`;
+  }
+  return '';
+}
 
 const groupOrder = ['US', 'Canada', 'Mexico', 'South America', 'Europe', 'UK', 'Middle East', 'Africa', 'Asia Pacific', 'Other'];
 
@@ -1111,7 +1119,7 @@ const columns = [
     const pinned = pinnedSkus.has(s.size);
     return `<button class="pin-btn${pinned ? ' pinned' : ''}" onclick="event.stopPropagation();togglePin('${escapeHtml(s.size)}')" title="${pinned ? 'Unpin' : 'Pin to shortlist'}">${pinned ? '📌' : '○'}</button>`;
   }},
-  { key: 'size', label: 'Size', render: (v, s) => `<a href="#" onclick="event.preventDefault();openSnippetModal('${escapeHtml(v)}')" style="color:var(--brand-primary);text-decoration:none;font-weight:600;" title="View CLI/Bicep snippets">${escapeHtml(v)}</a>` },
+  { key: 'size', label: 'Size', render: (v, s) => `<a href="#" onclick="event.preventDefault();openSnippetModal('${escapeHtml(v)}')" style="color:var(--brand-primary);text-decoration:none;font-weight:600;" title="View CLI/Bicep snippets">${escapeHtml(v)}</a>${getLifecycleBadge(s)}` },
   { key: 'vCPUs', label: 'vCPUs', width: '65px' },
   { key: 'memoryGB', label: 'Memory (GB)', width: '90px' },
   { key: 'maxDataDisks', label: 'Max Data Disks', width: '70px' },
@@ -1315,12 +1323,27 @@ function toggleSection(id) {
 // === INIT ===
 async function init() {
   try {
-    const [regionsResp, metaResp] = await Promise.all([
+    const [regionsResp, metaResp, retirementsResp] = await Promise.all([
       fetch('data/regions.json'),
-      fetch('data/metadata.json')
+      fetch('data/metadata.json'),
+      fetch('data/retirements.json').catch(() => null)
     ]);
     allRegions = await regionsResp.json();
     metadata = await metaResp.json();
+
+    // Build retirementFamilies lookup from JSON data
+    try {
+      if (retirementsResp && retirementsResp.ok) {
+        const retirementData = await retirementsResp.json();
+        retirementFamilies = {};
+        for (const r of retirementData.retirements || []) {
+          retirementFamilies[r.family.toLowerCase()] = { name: r.name, date: r.retireDate };
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to load retirement data:', e);
+      retirementFamilies = {};
+    }
     availableDataRegions = new Set(metadata.availableRegions || []);
     renderFreshness();
     buildDropdown();
@@ -1777,7 +1800,7 @@ function openSnippetModal(size) {
   const region = selectedRegion || 'eastus';
   const title = document.getElementById('snippet-title');
   const body = document.getElementById('snippet-body');
-  title.textContent = `${size} — Snippets`;
+  title.innerHTML = `${escapeHtml(size)} — Snippets ${getLifecycleBadge(sku)}`;
 
   const cli = `az vm create \\
   --resource-group <resource-group> \\
@@ -1936,7 +1959,7 @@ function buildCheckerTable(rows) {
       const rowCls = shaded ? 'row-shaded' : '';
       html += `<tr class="${rowCls} chk-group-row-${letter}">
         <td><button class="pin-btn${pinned ? ' pinned' : ''}" onclick="event.stopPropagation();togglePin('${escapeHtml(s.size)}')" title="${pinned ? 'Unpin' : 'Pin to shortlist'}">${pinned ? '📌' : '○'}</button></td>
-        <td><a href="#" onclick="event.preventDefault();openSnippetModal('${escapeHtml(s.size)}')" style="color:var(--brand-primary);text-decoration:none;font-weight:600;">${escapeHtml(s.size)}</a></td>
+        <td><a href="#" onclick="event.preventDefault();openSnippetModal('${escapeHtml(s.size)}')" style="color:var(--brand-primary);text-decoration:none;font-weight:600;">${escapeHtml(s.size)}</a>${getLifecycleBadge(s)}</td>
         <td>${s.vCPUs}</td><td>${s.memoryGB}</td><td>${s.maxDataDisks}</td><td>${s.maxNICs}</td>
         <td>${zones}</td>
         <td><span class="score-badge ${scoreClass}">${r.score}%</span></td>
@@ -2033,10 +2056,10 @@ function renderFamilyOverview() {
 
   // Retirement warnings
   const retireEl = document.getElementById('retirement-warnings');
-  const activeRetirements = families.filter(f => retirementFamilies[f]);
+  const activeRetirements = families.filter(f => retirementFamilies[f.toLowerCase()]);
   if (activeRetirements.length) {
     retireEl.innerHTML = '<div class="retirement-warning">⚠️ <strong>Retirement Notice:</strong> ' +
-      activeRetirements.map(f => `${retirementFamilies[f].name} (retiring ${retirementFamilies[f].date})`).join(', ') +
+      activeRetirements.map(f => `${retirementFamilies[f.toLowerCase()].name} (retiring ${retirementFamilies[f.toLowerCase()].date})`).join(', ') +
       '. <a href="https://learn.microsoft.com/en-us/azure/virtual-machines/sizes-previous-gen" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Learn more</a></div>';
   } else {
     retireEl.innerHTML = '';
