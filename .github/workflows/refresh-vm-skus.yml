@@ -151,6 +151,28 @@ jobs:
           Write-Host "[OK] Pricing data refresh complete"
         shell: pwsh
 
+      - name: Fetch disk SKU data
+        run: |
+          $config = Get-Content "config.json" | ConvertFrom-Json
+          $regions = $config.targetRegions
+          foreach ($region in $regions) {
+            $name = $region.name
+            $display = $region.displayName
+            Write-Host "Fetching disk SKUs for $display ($name)..."
+            $raw = az vm list-skus --location $name --resource-type disks -o json 2>$null
+            if ($raw -and $raw -ne "[]") {
+              $rawFile = "data/$name-disks-raw.json"
+              $raw | Set-Content $rawFile -Encoding UTF8
+              python scripts/normalize-disks.py $rawFile "data/$name-disks.json" "$display"
+              Remove-Item $rawFile -ErrorAction SilentlyContinue
+              Write-Host "  [OK] Disk data saved for $name"
+            } else {
+              Write-Host "  [WARN] No disk SKUs for $name"
+            }
+          }
+          Write-Host "[OK] Disk SKU data refresh complete"
+        shell: pwsh
+
       - name: Upload data to Azure Blob Storage
         run: |
           az storage blob upload-batch `

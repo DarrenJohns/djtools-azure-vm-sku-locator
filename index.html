@@ -869,6 +869,7 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
         <li><span>🌏</span> <strong>Browse</strong> — Select any Azure region to view available VM SKUs</li>
         <li><span>🔍</span> <strong>Filter</strong> — Search by size, family, vCPUs, processor type, or capability</li>
         <li><span>🎯</span> <strong>Find a Match</strong> — Specify requirements and find SKUs that fit</li>
+        <li><span>💿</span> <strong>Disk SKUs</strong> — Browse available disk types, IOPS, throughput, and burst capabilities</li>
         <li><span>📌</span> <strong>Pin &amp; Compare</strong> — Pin SKUs to a shortlist with pricing data</li>
         <li><span>🔄</span> <strong>Retirement Alerts</strong> — See which SKUs are scheduled for retirement</li>
         <li><span>📊</span> <strong>What's New</strong> — Track SKU additions and removals over time</li>
@@ -1049,9 +1050,55 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
         </div>
         <div class="checker-actions">
           <button class="btn btn-primary" onclick="runDeployChecker()">🔍 Find Matching SKUs</button>
+          <button class="btn btn-primary" onclick="exportCheckerCsv()">📥 CSV Export</button>
           <button class="btn btn-outline" onclick="resetChecker()">✖ Reset</button>
         </div>
         <div class="checker-results" id="checker-results"></div>
+      </div>
+    </div>
+
+    <!-- Disk SKUs -->
+    <div class="section" id="sec-disks">
+      <div class="section-header" onclick="toggleSection('disks')">
+        <span class="section-title">💿 Disk SKUs <span class="badge" id="disk-count" style="background:var(--brand-primary);color:white;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:600;margin-left:6px;">0</span></span>
+        <span class="section-toggle collapsed" id="toggle-disks">▼</span>
+      </div>
+      <div class="section-body collapsed" id="body-disks">
+        <div class="disk-summary-cards" id="disk-summary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px;"></div>
+        <div class="filters-row">
+          <div class="filters-search">
+            <input type="search" id="disk-search-input" placeholder="Search by disk size, type..." oninput="applyDiskFilters()">
+          </div>
+          <div class="filters-dropdowns">
+            <select id="disk-tier-filter" onchange="applyDiskFilters()">
+              <option value="">All Disk Types</option>
+            </select>
+            <select id="disk-redundancy-filter" onchange="applyDiskFilters()">
+              <option value="">All Redundancy</option>
+              <option value="LRS">LRS (Local)</option>
+              <option value="ZRS">ZRS (Zone)</option>
+            </select>
+            <select id="disk-zone-filter" onchange="applyDiskFilters()">
+              <option value="">All Zones</option>
+              <option value="1">Zone 1</option>
+              <option value="2">Zone 2</option>
+              <option value="3">Zone 3</option>
+            </select>
+            <select id="disk-iops-filter" onchange="applyDiskFilters()">
+              <option value="">All IOPS</option>
+              <option value="0-500">Up to 500</option>
+              <option value="500-5000">500–5,000</option>
+              <option value="5000-20000">5,000–20,000</option>
+              <option value="20000+">20,000+</option>
+            </select>
+            <div class="filters-actions">
+              <span class="result-count" id="disk-result-count"></span>
+              <button class="btn btn-primary" onclick="exportDiskCsv()">📥 CSV Export</button>
+              <button class="btn btn-danger" onclick="clearDiskFilters()">✖ Clear Filters</button>
+            </div>
+          </div>
+        </div>
+        <div id="disk-table-container" style="margin-top:16px;"></div>
       </div>
     </div>
 
@@ -1911,6 +1958,7 @@ function rebuildSkuList(regionName) {
   renderWorkloads();
   populateMultiRegionCheckboxes();
   loadHistory(regionName);
+  loadDiskData(regionName);
 }
 
 // === SUMMARY DASHBOARD ===
@@ -1981,6 +2029,185 @@ function renderSummary() {
       <div class="summary-label">AMD${armCount ? ' / ARM' : ''} CPUs</div>
     </div>
   `;
+}
+
+// === DISK SKUs ===
+let allDisks = [];
+let filteredDisks = [];
+const diskDataCache = {};
+
+async function loadDiskData(regionName) {
+  if (diskDataCache[regionName]) {
+    allDisks = diskDataCache[regionName].disks || [];
+    renderDiskSection();
+    return;
+  }
+  try {
+    const resp = await fetch(`data/${regionName}-disks.json`);
+    if (!resp.ok) {
+      allDisks = [];
+      renderDiskSection();
+      return;
+    }
+    const data = await resp.json();
+    diskDataCache[regionName] = data;
+    allDisks = data.disks || [];
+  } catch {
+    allDisks = [];
+  }
+  renderDiskSection();
+}
+
+function renderDiskSection() {
+  const badge = document.getElementById('disk-count');
+  if (badge) badge.textContent = allDisks.length;
+
+  if (!allDisks.length) {
+    document.getElementById('disk-summary').innerHTML = '';
+    document.getElementById('disk-table-container').innerHTML = '<p style="color:var(--text-secondary);font-size:13px;">No disk SKU data available for this region.</p>';
+    document.getElementById('disk-result-count').textContent = '';
+    return;
+  }
+
+  // Populate tier filter
+  const tierFilter = document.getElementById('disk-tier-filter');
+  const prevTier = tierFilter.value;
+  const tiers = [...new Set(allDisks.map(d => d.tierLabel))].sort();
+  let tierHtml = '<option value="">All Disk Types</option>';
+  tiers.forEach(t => { tierHtml += `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`; });
+  tierFilter.innerHTML = tierHtml;
+  if (prevTier) tierFilter.value = prevTier;
+
+  // Summary cards
+  const tierCounts = {};
+  allDisks.forEach(d => { tierCounts[d.tierLabel] = (tierCounts[d.tierLabel] || 0) + 1; });
+  const tierColors = {
+    'Premium SSD': '#0078d4',
+    'Premium SSD (ZRS)': '#005a9e',
+    'Premium SSD v2': '#8764b8',
+    'Standard SSD': '#107c10',
+    'Standard SSD (ZRS)': '#0b6a0b',
+    'Standard HDD': '#797775',
+    'Ultra Disk': '#e3008c',
+  };
+  let summaryHtml = '';
+  Object.entries(tierCounts).forEach(([label, count]) => {
+    const color = tierColors[label] || '#0078d4';
+    summaryHtml += `<div class="summary-card" style="border-top:3px solid ${color};cursor:pointer;" onclick="document.getElementById('disk-tier-filter').value='${escapeHtml(label)}';applyDiskFilters();">
+      <div class="summary-value" style="font-size:22px;color:${color};">${count}</div>
+      <div class="summary-label" style="font-size:11px;">${escapeHtml(label)}</div>
+    </div>`;
+  });
+  document.getElementById('disk-summary').innerHTML = summaryHtml;
+
+  applyDiskFilters();
+}
+
+function applyDiskFilters() {
+  const search = (document.getElementById('disk-search-input').value || '').toLowerCase();
+  const tier = document.getElementById('disk-tier-filter').value;
+  const redundancy = document.getElementById('disk-redundancy-filter').value;
+  const zone = document.getElementById('disk-zone-filter').value;
+  const iops = document.getElementById('disk-iops-filter').value;
+
+  filteredDisks = allDisks.filter(d => {
+    if (search && !(d.size.toLowerCase().includes(search) || d.tierLabel.toLowerCase().includes(search) || d.name.toLowerCase().includes(search))) return false;
+    if (tier && d.tierLabel !== tier) return false;
+    if (redundancy === 'LRS' && d.name.includes('ZRS')) return false;
+    if (redundancy === 'ZRS' && !d.name.includes('ZRS')) return false;
+    if (zone && !(d.zones && d.zones.includes(zone))) return false;
+    if (iops) {
+      const v = d.maxIOPS;
+      if (iops === '0-500' && v > 500) return false;
+      if (iops === '500-5000' && !(v >= 500 && v <= 5000)) return false;
+      if (iops === '5000-20000' && !(v >= 5000 && v <= 20000)) return false;
+      if (iops === '20000+' && v < 20000) return false;
+    }
+    return true;
+  });
+
+  document.getElementById('disk-result-count').textContent = `${filteredDisks.length} of ${allDisks.length} disks`;
+  renderDiskTable();
+}
+
+function clearDiskFilters() {
+  document.getElementById('disk-search-input').value = '';
+  document.getElementById('disk-tier-filter').value = '';
+  document.getElementById('disk-redundancy-filter').value = '';
+  document.getElementById('disk-zone-filter').value = '';
+  document.getElementById('disk-iops-filter').value = '';
+  applyDiskFilters();
+}
+
+function renderDiskTable() {
+  const container = document.getElementById('disk-table-container');
+  if (!filteredDisks.length) {
+    container.innerHTML = '<p style="color:var(--text-secondary);font-size:13px;">No disks match the current filters.</p>';
+    return;
+  }
+
+  // Group by tier
+  const groups = {};
+  filteredDisks.forEach(d => {
+    const key = d.tierLabel;
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(d);
+  });
+
+  let html = '<div class="table-group-actions"><button class="btn btn-outline" onclick="expandDiskGroups()">▼ Expand All</button><button class="btn btn-outline" onclick="collapseDiskGroups()">▶ Collapse All</button></div>';
+  html += '<table class="checker-table"><thead><tr>';
+  html += '<th>Size</th><th>Type</th><th>Capacity (GiB)</th><th>Max IOPS</th><th>Throughput (MB/s)</th><th>Burst IOPS</th><th>Burst MB/s</th><th>Max Shares</th><th>Zones</th>';
+  html += '</tr></thead><tbody>';
+
+  const tierOrder = ['Premium SSD', 'Premium SSD (ZRS)', 'Premium SSD v2', 'Standard SSD', 'Standard SSD (ZRS)', 'Standard HDD', 'Ultra Disk'];
+  const sortedKeys = Object.keys(groups).sort((a, b) => {
+    const ia = tierOrder.indexOf(a), ib = tierOrder.indexOf(b);
+    return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
+  });
+
+  sortedKeys.forEach((key, gi) => {
+    const grp = groups[key];
+    const shaded = gi % 2 === 0;
+    const gid = key.replace(/[^a-zA-Z0-9]/g, '');
+    html += `<tr class="group-header-row${shaded ? ' shaded' : ''}" onclick="toggleDiskGroup('${gid}')"><td colspan="9"><span class="group-toggle collapsed" id="disk-grp-toggle-${gid}">▶</span> ${escapeHtml(key)} <span class="group-badge">${grp.length}</span></td></tr>`;
+    grp.forEach(d => {
+      const zones = d.zones && d.zones.length ? escapeHtml(d.zones.join(', ')) : '—';
+      const burst = d.burstIOPS ? d.burstIOPS.toLocaleString() : '—';
+      const burstMB = d.burstThroughputMBps ? d.burstThroughputMBps : '—';
+      html += `<tr class="${shaded ? 'row-shaded' : ''} disk-grp-row-${gid}" style="display:none;">
+        <td style="font-weight:600;">${escapeHtml(d.size)}</td>
+        <td>${escapeHtml(d.tierLabel)}</td>
+        <td>${d.maxSizeGiB.toLocaleString()}</td>
+        <td>${d.maxIOPS.toLocaleString()}</td>
+        <td>${d.maxThroughputMBps}</td>
+        <td>${burst}</td>
+        <td>${burstMB}</td>
+        <td>${d.maxShares}</td>
+        <td>${zones}</td>
+      </tr>`;
+    });
+  });
+
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+function toggleDiskGroup(gid) {
+  const rows = document.querySelectorAll('.disk-grp-row-' + gid);
+  const toggle = document.getElementById('disk-grp-toggle-' + gid);
+  const isHidden = rows.length > 0 && rows[0].style.display === 'none';
+  rows.forEach(r => r.style.display = isHidden ? '' : 'none');
+  if (toggle) { toggle.classList.toggle('collapsed', !isHidden); toggle.textContent = isHidden ? '▼' : '▶'; }
+}
+
+function expandDiskGroups() {
+  document.querySelectorAll('[class*="disk-grp-row-"]').forEach(r => r.style.display = '');
+  document.querySelectorAll('[id^="disk-grp-toggle-"]').forEach(t => { t.classList.remove('collapsed'); t.textContent = '▼'; });
+}
+
+function collapseDiskGroups() {
+  document.querySelectorAll('[class*="disk-grp-row-"]').forEach(r => r.style.display = 'none');
+  document.querySelectorAll('[id^="disk-grp-toggle-"]').forEach(t => { t.classList.add('collapsed'); t.textContent = '▶'; });
 }
 
 // === FILTERS ===
@@ -2465,11 +2692,13 @@ function runDeployChecker() {
   const checkerBadge = document.getElementById('checker-match-count');
 
   if (exact.length > 0) {
+    lastCheckerResults = exact;
     container.innerHTML = `<div class="checker-summary has-matches">${exact.length} of ${allSkus.length} SKUs match your requirements</div>` + buildCheckerTable(exact);
     collapseCheckerGroups();
     if (checkerBadge) checkerBadge.textContent = exact.length;
   } else {
     const top5 = scored.sort((a, b) => b.score - a.score || a.sku.vCPUs - b.sku.vCPUs).filter(r => r.score > 0).slice(0, 5);
+    lastCheckerResults = top5;
     container.innerHTML =
       `<div class="checker-summary no-matches">0 of ${allSkus.length} SKUs match all requirements — consider relaxing some filters</div>` +
       (top5.length ? '<p style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">Closest matches:</p>' + buildCheckerTable(top5) : '');
@@ -2785,6 +3014,68 @@ function exportCsv() {
   a.click();
   URL.revokeObjectURL(url);
   showToast(`Exported ${filteredSkus.length} SKUs to CSV`);
+}
+
+// Store last checker results for export
+let lastCheckerResults = [];
+
+function exportCheckerCsv() {
+  if (!lastCheckerResults.length) { showToast('Run a search first', 'warning'); return; }
+  const headers = ['Size', 'Processor', 'vCPUs', 'Memory (GB)', 'Max Data Disks', 'Max NICs', 'Zones', 'Match Score'];
+  const rows = lastCheckerResults.map(r => {
+    const s = r.sku;
+    return [
+      s.size,
+      getProcessorType(s.size),
+      s.vCPUs,
+      s.memoryGB,
+      s.maxDataDisks,
+      s.maxNICs,
+      (s.zones || []).join('; '),
+      r.score + '%'
+    ];
+  });
+
+  let csv = headers.map(h => `"${h}"`).join(',') + '\n';
+  rows.forEach(r => { csv += r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',') + '\n'; });
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `azure-checker-${selectedRegion || 'export'}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast(`Exported ${lastCheckerResults.length} matching SKUs to CSV`);
+}
+
+function exportDiskCsv() {
+  if (!filteredDisks.length) { showToast('No disk data to export', 'warning'); return; }
+  const headers = ['Size', 'Type', 'Redundancy', 'Capacity (GiB)', 'Max IOPS', 'Throughput (MB/s)', 'Burst IOPS', 'Burst MB/s', 'Max Shares', 'Zones'];
+  const rows = filteredDisks.map(d => [
+    d.size,
+    d.tierLabel,
+    d.name.includes('ZRS') ? 'ZRS' : 'LRS',
+    d.maxSizeGiB,
+    d.maxIOPS,
+    d.maxThroughputMBps,
+    d.burstIOPS || '',
+    d.burstThroughputMBps || '',
+    d.maxShares,
+    (d.zones || []).join('; ')
+  ]);
+
+  let csv = headers.map(h => `"${h}"`).join(',') + '\n';
+  rows.forEach(r => { csv += r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',') + '\n'; });
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `azure-disks-${selectedRegion || 'export'}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast(`Exported ${filteredDisks.length} disk SKUs to CSV`);
 }
 
 // === CLI COPY ===
