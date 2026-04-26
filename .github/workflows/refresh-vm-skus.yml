@@ -1,0 +1,176 @@
+name: Refresh VM SKU Data
+
+on:
+  schedule:
+    - cron: '0 0 1 * *'  # 1st of every month at midnight UTC
+  workflow_dispatch:       # Allow manual trigger
+
+jobs:
+  refresh:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get all Azure regions and target regions from config
+        run: |
+          # Fetch all physical regions for the map/dropdown
+          $allRegions = az account list-locations --query "[?metadata.regionType=='Physical'].{name:name, displayName:displayName, geographyGroup:metadata.geographyGroup, latitude:metadata.latitude, longitude:metadata.longitude}" -o json | ConvertFrom-Json -AsHashtable
+          $allRegions | ConvertTo-Json -Depth 3 | Set-Content "data/regions.json" -Encoding UTF8
+          Write-Host "[OK] Found $($allRegions.Count) physical regions"
+
+          # Read target regions from config.json
+          $config = Get-Content "config.json" | ConvertFrom-Json
+          $targetRegions = $config.targetRegions
+          Write-Host "[OK] Target regions: $($targetRegions.Count) ($($targetRegions.name -join ', '))"
+        shell: pwsh
+
+      - name: Fetch SKU data for target regions
+        id: fetch
+        run: |
+          $config = Get-Content "config.json" | ConvertFrom-Json
+          $regions = $config.targetRegions
+          $allRegions = Get-Content "data/regions.json" | ConvertFrom-Json -AsHashtable
+          $dataDir = "data"
+          $successCount = 0
+          $failCount = 0
+          $availableRegions = @()
+          $failedRegions = @()
+          $maxRetries = 3
+
+          foreach ($region in $regions) {
+            $name = $region.name
+            $display = $region.displayName
+            Write-Host "Fetching SKUs for $display ($name)..."
+
+            $success = $false
+            for ($attempt = 1; $attempt -le $maxRetries; $attempt++) {
+              try {
+                $raw = az vm list-skus --location $name --resource-type virtualMachines -o json 2>$null
+                if (-not $raw -or $raw -eq "[]") {
+                  Write-Host "  [WARN] No VM SKUs for $name (skipping)"
+                  break
+                }
+
+                # Save raw and normalize with Python script
+                $raw | Set-Content "$dataDir/$name-raw.json" -Encoding UTF8
+                python scripts/normalize-skus.py "$dataDir/$name-raw.json" "$dataDir/$name.json" "$display"
+
+                # Clean up raw file
+                Remove-Item "$dataDir/$name-raw.json" -ErrorAction SilentlyContinue
+
+                $successCount++
+                $availableRegions += $name
+                $success = $true
+                break
+
+              } catch {
+                Write-Host "  [WARN] Attempt $attempt/$maxRetries failed for $name`: $_"
+                Remove-Item "$dataDir/$name-raw.json" -ErrorAction SilentlyContinue
+                if ($attempt -lt $maxRetries) {
+                  $backoff = $attempt * 10
+                  Write-Host "  Retrying in ${backoff}s..."
+                  Start-Sleep -Seconds $backoff
+                }
+              }
+            }
+
+            if (-not $success) {
+              Write-Host "  [FAIL] Failed for $name after $maxRetries attempts"
+              $failCount++
+              $failedRegions += $name
+            }
+          }
+
+          Write-Host "`n[OK] Refreshed $successCount regions, $failCount failed/skipped"
+
+          # Save results for summary step
+          "success_count=$successCount" >> $env:GITHUB_OUTPUT
+          "fail_count=$failCount" >> $env:GITHUB_OUTPUT
+          "available=$($availableRegions -join ',')" >> $env:GITHUB_OUTPUT
+          "failed=$($failedRegions -join ',')" >> $env:GITHUB_OUTPUT
+
+          # Update metadata
+          $month = (Get-Date).ToString("MMMM yyyy")
+          $metadata = @{
+            lastUpdated = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+            lastUpdatedDisplay = $month
+            availableRegions = $availableRegions
+            physicalRegionCount = $allRegions.Count
+            regionsWithData = $successCount
+            failedRegions = $failedRegions
+          } | ConvertTo-Json
+          $metadata | Set-Content "$dataDir/metadata.json" -Encoding UTF8
+          Write-Host "[OK] Metadata updated: $month ($successCount regions with data, $failCount failed)"
+        shell: pwsh
+
+      - name: Upload data to Azure Blob Storage
+        run: |
+          az storage blob upload-batch `
+            --account-name ${{ vars.STORAGE_ACCOUNT }} `
+            --destination '$web' `
+            --source data `
+            --destination-path data `
+            --overwrite `
+            --auth-mode login
+          Write-Host "[OK] Data uploaded to Azure Blob Storage"
+        shell: pwsh
+
+      - name: Commit updated data to repo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/
+          $changes = git diff --cached --name-only
+          if ($changes) {
+            git commit -m "chore: monthly VM SKU data refresh - $(Get-Date -Format 'MMMM yyyy')"
+            git -c gc.auto=0 push
+            Write-Host "[OK] Data committed and pushed"
+          } else {
+            Write-Host "[INFO] No data changes to commit"
+          }
+        shell: pwsh
+
+      - name: Post workflow summary
+        if: always()
+        run: |
+          $date = Get-Date -Format "dd MMMM yyyy HH:mm UTC"
+          $success = "${{ steps.fetch.outputs.success_count }}"
+          $fail = "${{ steps.fetch.outputs.fail_count }}"
+          $available = "${{ steps.fetch.outputs.available }}"
+          $failed = "${{ steps.fetch.outputs.failed }}"
+
+          $summary = @"
+          ## [REPORT] VM SKU Data Refresh Report
+          **Date:** $date
+
+          | Metric | Value |
+          |--------|-------|
+          | [OK] Regions updated | $success |
+          | [FAIL] Regions failed | $fail |
+
+          ### Regions Updated
+          "@
+
+          if ($available) {
+            foreach ($r in $available.Split(',')) {
+              $summary += "`n- [OK] ``$r``"
+            }
+          } else {
+            $summary += "`n- _None_"
+          }
+
+          $summary += "`n`n### Regions Failed"
+          if ($failed) {
+            foreach ($r in $failed.Split(',')) {
+              $summary += "`n- [FAIL] ``$r``"
+            }
+          } else {
+            $summary += "`n- _None_ [NONE]"
+          }
+
+          $summary += "`n`n---`n_Notification recipient: darren.johns@microsoft.com_"
+          $summary += "`n_To add/remove regions, edit ``config.json``_"
+
+          $summary | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+          Write-Host "[OK] Workflow summary posted"
+        shell: pwsh
