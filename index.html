@@ -193,24 +193,24 @@ body {
   cursor: pointer;
 }
 /* Freshness detail overlay */
-.freshness-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 500; background: rgba(0,0,0,0.3); justify-content: center; align-items: flex-start; padding-top: 80px; }
+.freshness-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 9999; background: rgba(0,0,0,0.4); justify-content: center; align-items: center; }
 .freshness-overlay.show { display: flex; }
 .freshness-card {
   background: var(--bg-layer1);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-  padding: 20px 24px;
-  max-width: 380px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+  padding: 24px 28px;
+  max-width: 420px;
   width: 90%;
   animation: fadeInUp 0.2s ease;
 }
-.freshness-card h4 { font-size: 14px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-.freshness-card table { width: 100%; font-size: 12px; border-collapse: collapse; }
-.freshness-card td { padding: 6px 8px; border-bottom: 1px solid var(--border-subtle); }
+.freshness-card h4 { font-size: 15px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.freshness-card table { width: 100%; font-size: 13px; border-collapse: collapse; }
+.freshness-card td { padding: 8px 10px; border-bottom: 1px solid var(--border-subtle); vertical-align: middle; }
 .freshness-card td:first-child { font-weight: 600; white-space: nowrap; }
 .freshness-card td:last-child { text-align: right; color: var(--text-secondary); }
-.freshness-card .note { font-size: 11px; color: var(--text-tertiary); margin-top: 12px; line-height: 1.5; }
+.freshness-card .note { font-size: 11px; color: var(--text-tertiary); margin-top: 14px; line-height: 1.5; }
 .freshness-badge.fresh { background: #e6f4ea; color: #137333; border: 1px solid #a8dab5; }
 .freshness-badge.aging { background: #fef7e0; color: #7c6900; border: 1px solid #f9d849; }
 .freshness-badge.stale { background: #fce8e6; color: #c5221f; border: 1px solid #f28b82; }
@@ -1705,7 +1705,8 @@ function renderFreshnessFlyout() {
   if (!detail) return;
 
   const regionData = regionDataCache[selectedRegion];
-  const skuDate = regionData && regionData.lastUpdated ? formatFlyoutDate(regionData.lastUpdated) : '—';
+  const skuDateRaw = regionData && regionData.lastUpdated;
+  const skuDate = formatFlyoutDate(skuDateRaw) !== '—' ? formatFlyoutDate(skuDateRaw) : (metadata.lastUpdatedDisplay || '—');
   const skuCount = allSkus ? allSkus.length : 0;
 
   const hasPricing = _pricingCache && _pricingCache._region === selectedRegion;
