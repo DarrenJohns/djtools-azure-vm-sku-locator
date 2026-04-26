@@ -11,16 +11,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Get Azure regions
+      - name: Get all Azure regions and target regions from config
         run: |
-          $regions = az account list-locations --query "[?metadata.regionType=='Physical'].{name:name, displayName:displayName, geographyGroup:metadata.geographyGroup, latitude:metadata.latitude, longitude:metadata.longitude}" -o json | ConvertFrom-Json -AsHashtable
-          $regions | ConvertTo-Json -Depth 3 | Set-Content "data/regions.json" -Encoding UTF8
-          Write-Host "✅ Found $($regions.Count) physical regions"
+          # Fetch all physical regions for the map/dropdown
+          $allRegions = az account list-locations --query "[?metadata.regionType=='Physical'].{name:name, displayName:displayName, geographyGroup:metadata.geographyGroup, latitude:metadata.latitude, longitude:metadata.longitude}" -o json | ConvertFrom-Json -AsHashtable
+          $allRegions | ConvertTo-Json -Depth 3 | Set-Content "data/regions.json" -Encoding UTF8
+          Write-Host "✅ Found $($allRegions.Count) physical regions"
+
+          # Read target regions from config.json
+          $config = Get-Content "config.json" | ConvertFrom-Json
+          $targetRegions = $config.targetRegions
+          Write-Host "✅ Target regions: $($targetRegions.Count) ($($targetRegions.name -join ', '))"
         shell: pwsh
 
-      - name: Fetch SKU data for all regions
+      - name: Fetch SKU data for target regions
+        id: fetch
         run: |
-          $regions = Get-Content "data/regions.json" | ConvertFrom-Json -AsHashtable
+          $config = Get-Content "config.json" | ConvertFrom-Json
+          $regions = $config.targetRegions
+          $allRegions = Get-Content "data/regions.json" | ConvertFrom-Json -AsHashtable
           $dataDir = "data"
           $successCount = 0
           $failCount = 0
@@ -131,13 +140,19 @@ print(f'  Normalized {len(skus)} SKUs')
 
           Write-Host "`n✅ Refreshed $successCount regions, $failCount failed/skipped"
 
+          # Save results for summary step
+          "success_count=$successCount" >> $env:GITHUB_OUTPUT
+          "fail_count=$failCount" >> $env:GITHUB_OUTPUT
+          "available=$($availableRegions -join ',')" >> $env:GITHUB_OUTPUT
+          "failed=$($failedRegions -join ',')" >> $env:GITHUB_OUTPUT
+
           # Update metadata
           $month = (Get-Date).ToString("MMMM yyyy")
           $metadata = @{
             lastUpdated = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
             lastUpdatedDisplay = $month
             availableRegions = $availableRegions
-            physicalRegionCount = $regions.Count
+            physicalRegionCount = $allRegions.Count
             regionsWithData = $successCount
             failedRegions = $failedRegions
           } | ConvertTo-Json
@@ -170,4 +185,49 @@ print(f'  Normalized {len(skus)} SKUs')
           } else {
             Write-Host "ℹ No data changes to commit"
           }
+        shell: pwsh
+
+      - name: Post workflow summary
+        if: always()
+        run: |
+          $date = Get-Date -Format "dd MMMM yyyy HH:mm UTC"
+          $success = "${{ steps.fetch.outputs.success_count }}"
+          $fail = "${{ steps.fetch.outputs.fail_count }}"
+          $available = "${{ steps.fetch.outputs.available }}"
+          $failed = "${{ steps.fetch.outputs.failed }}"
+
+          $summary = @"
+          ## 📊 VM SKU Data Refresh Report
+          **Date:** $date
+
+          | Metric | Value |
+          |--------|-------|
+          | ✅ Regions updated | $success |
+          | ❌ Regions failed | $fail |
+
+          ### Regions Updated
+          "@
+
+          if ($available) {
+            foreach ($r in $available.Split(',')) {
+              $summary += "`n- ✅ ``$r``"
+            }
+          } else {
+            $summary += "`n- _None_"
+          }
+
+          $summary += "`n`n### Regions Failed"
+          if ($failed) {
+            foreach ($r in $failed.Split(',')) {
+              $summary += "`n- ❌ ``$r``"
+            }
+          } else {
+            $summary += "`n- _None_ 🎉"
+          }
+
+          $summary += "`n`n---`n_Notification recipient: darren.johns@microsoft.com_"
+          $summary += "`n_To add/remove regions, edit ``config.json``_"
+
+          $summary | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+          Write-Host "✅ Workflow summary posted"
         shell: pwsh

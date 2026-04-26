@@ -1,603 +1,505 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Browse Azure VM SKU availability by region — see what virtual machine sizes are available, with filtering, sorting, and CSV export.">
-<meta name="theme-color" content="#0f6cbd">
-<title>Azure Virtual Machine SKU by Region</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<title>Azure VM SKU by Region</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='0%25' y2='100%25'><stop offset='0%25' stop-color='%230f6cbd'/><stop offset='100%25' stop-color='%23094780'/></linearGradient></defs><rect x='10' y='20' width='80' height='60' rx='8' fill='url(%23g)'/><rect x='22' y='32' width='20' height='14' rx='3' fill='white' opacity='0.9'/><rect x='48' y='32' width='20' height='14' rx='3' fill='white' opacity='0.7'/><rect x='22' y='52' width='20' height='14' rx='3' fill='white' opacity='0.7'/><rect x='48' y='52' width='20' height='14' rx='3' fill='white' opacity='0.5'/></svg>">
 <style>
-  /* ── Fluent UI / Microsoft 365 Design System ── */
-  :root {
-    --brand-primary: #0f6cbd;
-    --brand-hover: #115ea3;
-    --brand-pressed: #0f548c;
-    --brand-subtle: #ebf3fc;
-    --brand-bg: #0f6cbd;
-    --bg-base: #fafafa;
-    --bg-layer1: #ffffff;
-    --bg-layer2: #f5f5f5;
-    --bg-hover: #f0f0f0;
-    --border-default: #e0e0e0;
-    --border-subtle: #f0f0f0;
-    --text-primary: #242424;
-    --text-secondary: #616161;
-    --text-tertiary: #9e9e9e;
-    --text-on-brand: #ffffff;
-    --status-danger: #c4314b;
-    --status-danger-bg: #fdf3f4;
-    --status-success: #0e7a0d;
-    --status-success-bg: #f1faf1;
-    --status-warning: #f7630c;
-    --status-warning-bg: #fff9f5;
-    --status-info-bg: #ebf3fc;
-    --radius-sm: 4px;
-    --radius-md: 8px;
-    --radius-lg: 12px;
-    --shadow-sm: 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1);
-    --shadow-md: 0 2px 4px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.08);
-    --shadow-lg: 0 8px 16px rgba(0,0,0,0.06), 0 16px 48px rgba(0,0,0,0.12);
-    --font-sans: 'Segoe UI Variable', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-    --transition: 120ms cubic-bezier(0.33, 0, 0.67, 1);
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: var(--font-sans); background-color: var(--bg-base); color: var(--text-primary); line-height: 1.5; font-size: 14px; -webkit-font-smoothing: antialiased; min-height: 100vh; }
-  .container { max-width: 1440px; margin: 0 auto; padding: 20px 24px; }
-
-  /* ── Header ── */
-  header { background: linear-gradient(135deg, #0f6cbd 0%, #0e4a8a 100%); color: var(--text-on-brand); padding: 16px 24px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); position: relative; }
-  header svg { width: 28px; height: 28px; fill: white; }
-  header h1 { font-size: 20px; font-weight: 600; }
-  header .subtitle { font-size: 12px; opacity: 0.85; margin-left: 4px; }
-  .theme-toggle { position: absolute; right: 24px; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); color: white; border-radius: 20px; padding: 6px 14px; cursor: pointer; font-size: 16px; backdrop-filter: blur(4px); transition: background var(--transition); }
-  .theme-toggle:hover { background: rgba(255,255,255,0.25); }
-
-  /* ── Buttons ── */
-  .btn { font-family: var(--font-sans); font-size: 13px; font-weight: 500; border-radius: var(--radius-sm); padding: 6px 14px; cursor: pointer; transition: all var(--transition); border: 1px solid transparent; display: inline-flex; align-items: center; gap: 4px; }
-  .btn-primary { background: linear-gradient(180deg, #1a7fd4 0%, var(--brand-primary) 100%); color: var(--text-on-brand); box-shadow: 0 1px 3px rgba(15,108,189,0.3); }
-  .btn-primary:hover { background: linear-gradient(180deg, #1a8ae6 0%, var(--brand-hover) 100%); }
-  .btn-outline { background: var(--bg-layer1); border: 1px solid var(--border-default); color: var(--text-primary); }
-  .btn-outline:hover { background: var(--bg-hover); border-color: var(--brand-primary); }
-  .btn-success { background: linear-gradient(180deg, #13961a 0%, var(--status-success) 100%); color: white; box-shadow: 0 1px 3px rgba(14,122,13,0.3); }
-  .btn-danger { background: linear-gradient(180deg, #d9364f 0%, var(--status-danger) 100%); color: white; }
-  .btn-sm { font-size: 12px; padding: 4px 10px; }
-
-  /* ── Welcome Modal ── */
-  .welcome-overlay { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
-  .welcome-overlay.active { opacity: 1; pointer-events: auto; }
-  .welcome-card { background: var(--bg-layer1); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); max-width: 540px; width: 90%; overflow: hidden; }
-  .welcome-banner { background: linear-gradient(135deg, #0f6cbd 0%, #0e4a8a 100%); color: white; padding: 28px 32px 20px; text-align: center; }
-  .welcome-banner h2 { font-size: 22px; margin-bottom: 6px; }
-  .welcome-banner p { font-size: 14px; opacity: 0.85; }
-  .welcome-body { padding: 24px 32px 28px; }
-  .welcome-body ul { list-style: none; margin-bottom: 20px; }
-  .welcome-body li { padding: 8px 0; display: flex; gap: 10px; align-items: flex-start; }
-  .welcome-body li span { font-size: 18px; flex-shrink: 0; }
-  .welcome-body .btn { width: 100%; justify-content: center; font-size: 14px; padding: 10px; }
-
-  /* ── Sections ── */
-  .section-collapsible { background: var(--bg-layer1); border: 1px solid var(--border-default); border-radius: var(--radius-md); margin-top: 16px; overflow: hidden; box-shadow: var(--shadow-sm); }
-  .section-header { display: flex; align-items: center; gap: 8px; padding: 10px 16px; cursor: pointer; user-select: none; border-left: 4px solid var(--brand-primary); background: linear-gradient(90deg, #dceafb 0%, #eef4fc 40%, var(--bg-layer1) 100%); }
-  .section-header h3 { font-size: 14px; font-weight: 600; flex: 1; }
-  .section-toggle { font-size: 11px; transition: transform 0.2s; color: var(--brand-primary); font-weight: 700; }
-  .section-toggle.open { transform: rotate(90deg); }
-  .section-body { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; padding: 0 16px; }
-  .section-body.open { max-height: none; padding: 12px 16px 16px; }
-  .section-badge { font-size: 11px; font-weight: 600; padding: 2px 10px; border-radius: 10px; background: var(--brand-subtle); color: var(--brand-primary); border: 1px solid #b4d6fa; }
-
-  /* ── Toast ── */
-  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--bg-layer1); border: 1px solid var(--border-default); border-radius: var(--radius-md); padding: 10px 20px; font-size: 13px; box-shadow: var(--shadow-md); z-index: 1100; transition: transform 0.3s, opacity 0.3s; opacity: 0; }
-  .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-  .toast.success { border-color: #a5d6a7; }
-  .toast.error { border-color: #ef9a9a; color: var(--status-danger); }
-  .toast.warning { border-color: #ffe0b2; color: var(--status-warning); }
-
-  /* ── Region Selector ── */
-  .region-bar { background: var(--bg-layer1); border: 1px solid var(--border-default); border-radius: var(--radius-md); padding: 16px 20px; box-shadow: var(--shadow-sm); display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
-  .region-bar .form-group { flex: 1; min-width: 250px; display: flex; flex-direction: column; gap: 4px; }
-  .region-bar label { font-size: 12px; font-weight: 600; color: var(--text-secondary); }
-  .region-bar select { font-family: var(--font-sans); font-size: 13px; padding: 8px 12px; border: 1px solid var(--border-default); border-radius: var(--radius-sm); background: var(--bg-layer1); color: var(--text-primary); min-height: 38px; }
-  .region-bar select[multiple] { min-height: 80px; }
-  .region-chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-  .region-chip { display: inline-flex; align-items: center; gap: 4px; background: var(--brand-subtle); color: var(--brand-primary); border: 1px solid #b4d6fa; border-radius: 14px; padding: 3px 10px 3px 12px; font-size: 12px; font-weight: 500; }
-  .region-chip button { background: none; border: none; cursor: pointer; color: var(--brand-primary); font-size: 14px; padding: 0 2px; line-height: 1; opacity: 0.7; }
-  .region-chip button:hover { opacity: 1; }
-  .data-freshness { font-size: 11px; color: var(--text-tertiary); padding: 4px 0; }
-  .data-freshness strong { color: var(--text-secondary); }
-
-  /* ── Filters ── */
-  .filter-bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 12px; }
-  .filter-bar input, .filter-bar select { font-family: var(--font-sans); font-size: 13px; padding: 6px 10px; border: 1px solid var(--border-default); border-radius: var(--radius-sm); background: var(--bg-layer1); color: var(--text-primary); }
-  .filter-bar input[type="text"] { flex: 1; min-width: 200px; }
-  .filter-bar select { min-width: 140px; }
-  .result-count { font-size: 12px; color: var(--text-secondary); margin-left: auto; white-space: nowrap; }
-
-  /* ── SKU Table ── */
-  .sku-table-wrapper { overflow-x: auto; margin-top: 12px; border: 1px solid var(--border-default); border-radius: var(--radius-md); }
-  .sku-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .sku-table th { text-align: left; padding: 8px 12px; background: var(--bg-layer2); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; color: var(--text-secondary); cursor: pointer; user-select: none; white-space: nowrap; position: sticky; top: 0; z-index: 1; }
-  .sku-table th:hover { background: var(--bg-hover); color: var(--brand-primary); }
-  .sku-table th .sort-arrow { font-size: 10px; margin-left: 4px; opacity: 0.4; }
-  .sku-table th.sorted .sort-arrow { opacity: 1; color: var(--brand-primary); }
-  .sku-table td { padding: 6px 12px; border-bottom: 1px solid var(--border-subtle); white-space: nowrap; }
-  .sku-table tr:hover td { background: var(--bg-hover); }
-  .sku-table .sku-name { font-weight: 600; color: var(--brand-primary); }
-  .sku-table .badge { display: inline-block; font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 3px; }
-  .badge-arch { background: #e8eaed; color: #555; }
-  .badge-zone { background: var(--status-info-bg); color: var(--brand-primary); font-size: 10px; padding: 1px 5px; border-radius: 3px; margin-right: 2px; }
-  .badge-yes { color: var(--status-success); }
-  .badge-no { color: var(--text-tertiary); }
-  .sku-table a { color: var(--brand-primary); text-decoration: none; }
-  .sku-table a:hover { text-decoration: underline; }
-
-  /* ── Loading ── */
-  .loading { text-align: center; padding: 40px; color: var(--text-secondary); }
-  .loading .spinner { display: inline-block; width: 24px; height: 24px; border: 3px solid var(--border-default); border-top-color: var(--brand-primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 8px; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* ── CLI Info Box ── */
-  .cli-box { background: var(--bg-layer2); border: 1px solid var(--border-default); border-radius: var(--radius-md); padding: 14px 18px; margin-top: 12px; font-size: 13px; }
-  .cli-box code { background: var(--bg-layer1); padding: 2px 8px; border-radius: var(--radius-sm); font-family: 'Cascadia Code', 'Consolas', monospace; font-size: 12px; border: 1px solid var(--border-subtle); display: inline-block; margin: 4px 0; }
-  .cli-box h4 { font-size: 13px; margin-bottom: 6px; }
-
-  /* ── Empty state ── */
-  .empty-state { text-align: center; padding: 48px 20px; color: var(--text-secondary); }
-  .empty-state h3 { font-size: 16px; margin-bottom: 8px; color: var(--text-primary); }
-
-  /* ── Freshness Banner ── */
-  .freshness-banner { background: var(--status-info-bg); border: 1px solid #b4d6fa; border-radius: var(--radius-md); padding: 14px 18px; margin-top: 12px; display: flex; align-items: flex-start; gap: 12px; font-size: 13px; }
-  .freshness-banner .freshness-icon { font-size: 22px; flex-shrink: 0; }
-  .freshness-banner .freshness-date { font-weight: 700; color: var(--brand-primary); }
-  .freshness-banner .freshness-note { color: var(--text-secondary); font-size: 12px; margin-top: 2px; }
-  .freshness-banner .freshness-pit { font-weight: 600; font-size: 12px; margin-top: 4px; color: var(--text-primary); }
-  .freshness-banner.stale { background: #fff3cd; border-color: #ffc107; }
-  .freshness-banner.stale .freshness-icon { color: #856404; }
-  .freshness-stale-warning { background: #dc3545; color: #fff; font-weight: 600; font-size: 12px; padding: 3px 8px; border-radius: 4px; display: inline-block; margin-top: 6px; }
-  .freshness-refresh-btn { display: inline-block; margin-top: 6px; padding: 4px 12px; background: var(--brand-primary); color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; text-decoration: none; }
-  .freshness-refresh-btn:hover { opacity: 0.9; }
-
-  /* ── Family Cards ── */
-  .family-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; margin-top: 8px; }
-  .family-card { background: var(--bg-layer1); border: 1px solid var(--border-default); border-radius: var(--radius-md); padding: 14px 16px; transition: border-color var(--transition), box-shadow var(--transition); }
-  .family-card:hover { border-color: var(--brand-primary); box-shadow: var(--shadow-sm); }
-  .family-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-  .family-card-header h4 { font-size: 14px; font-weight: 600; flex: 1; }
-  .family-card .type-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
-  .type-general { background: #e0efff; color: #0f548c; }
-  .type-compute { background: #fff3e0; color: #b35900; }
-  .type-memory { background: #e8f5e9; color: #2e7d32; }
-  .type-storage { background: #f3e5f5; color: #7b1fa2; }
-  .type-gpu { background: #fce4ec; color: #c62828; }
-  .type-fpga { background: #e0f2f1; color: #00695c; }
-  .type-hpc { background: #e8eaf6; color: #283593; }
-  .family-card .workloads { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; line-height: 1.6; }
-  .family-card .workloads li { margin-left: 14px; }
-  .family-card .sku-count { font-size: 11px; color: var(--text-tertiary); margin-top: 6px; }
-  .family-card .card-links { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
-  .family-card .card-links a { font-size: 11px; color: var(--brand-primary); text-decoration: none; font-weight: 500; }
-  .family-card .card-links a:hover { text-decoration: underline; }
-  .family-card .retirement-warning { background: var(--status-warning-bg); border: 1px solid #ffe0b2; border-radius: var(--radius-sm); padding: 4px 8px; font-size: 11px; color: var(--status-warning); margin-top: 6px; display: flex; align-items: center; gap: 4px; }
-
-  /* ── Workload Recommendations ── */
-  .workload-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 12px; margin-top: 8px; }
-  .workload-card { background: var(--bg-layer1); border: 1px solid var(--border-default); border-radius: var(--radius-md); padding: 14px 16px; }
-  .workload-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-  .workload-card-header h4 { font-size: 14px; font-weight: 600; flex: 1; margin: 0; }
-  .workload-card .workload-desc { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; }
-  .workload-card .rec-series { font-size: 12px; line-height: 1.8; }
-  .workload-card .rec-series .rec-tag { display: inline-block; background: #e0efff; color: #0f548c; padding: 1px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; margin: 1px 3px; }
-  .workload-card .rec-series .rec-tag.available { background: #e8f5e9; color: #2e7d32; }
-  .workload-card .rec-series .rec-tag.missing { background: #fce4ec; color: #c62828; text-decoration: line-through; opacity: 0.7; }
-  .workload-card .rec-note { font-size: 11px; color: var(--text-tertiary); margin-top: 6px; font-style: italic; }
-  .workload-card .workload-links { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
-  .workload-card .workload-links a { font-size: 11px; color: var(--brand-primary); text-decoration: none; font-weight: 500; }
-  .workload-card .workload-links a:hover { text-decoration: underline; }
-  .workload-summary { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; font-size: 12px; }
-  .workload-summary .ws-stat { background: var(--bg-layer1); border: 1px solid var(--border-default); border-radius: var(--radius-sm); padding: 4px 10px; }
-
-  /* ── Availability Gaps ── */
-  .gap-banner { border-radius: var(--radius-md); padding: 14px 18px; margin-top: 8px; font-size: 13px; }
-  .gap-banner.has-gaps { background: #fff3cd; border: 1px solid #ffc107; }
-  .gap-banner.no-gaps { background: #e8f5e9; border: 1px solid #4caf50; }
-  .gap-list { margin-top: 8px; }
-  .gap-item { display: flex; align-items: flex-start; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--border-default); font-size: 12px; }
-  .gap-item:last-child { border-bottom: none; }
-  .gap-item .gap-family { font-weight: 600; min-width: 80px; }
-  .gap-item .gap-workloads { color: var(--text-secondary); flex: 1; }
-  .gap-item .gap-alt { color: var(--brand-primary); font-weight: 500; }
-
-  /* ── Region Map ── */
-  .region-map-container { margin-top: 12px; background: var(--bg-layer1); border: 1px solid var(--border-default); border-radius: var(--radius-md); overflow: hidden; }
-  #regionMap { height: 300px; width: 100%; z-index: 1; }
-  .map-legend { display: flex; gap: 14px; padding: 8px 12px; font-size: 11px; color: var(--text-secondary); align-items: center; flex-wrap: wrap; border-top: 1px solid var(--border-default); }
-  .map-legend-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 3px; vertical-align: middle; }
-
-  /* ── Responsive ── */
-  @media (max-width: 900px) {
-    .region-grid { grid-template-columns: 1fr !important; }
-  }
-  @media (max-width: 768px) {
-    .region-bar { flex-direction: column; }
-    .filter-bar { flex-direction: column; }
-    .filter-bar input[type="text"] { width: 100%; }
-    .result-count { margin-left: 0; }
-    .family-grid { grid-template-columns: 1fr; }
-  }
+:root, [data-theme="light"] {
+  --brand-primary: #0f6cbd;
+  --brand-hover: #115ea3;
+  --brand-gradient: linear-gradient(135deg, #0f6cbd 0%, #115ea3 100%);
+  --bg-base: #fafafa;
+  --bg-layer1: #ffffff;
+  --bg-layer2: #f5f5f5;
+  --border-default: #e0e0e0;
+  --text-primary: #242424;
+  --text-secondary: #616161;
+  --text-on-brand: #ffffff;
+  --status-danger: #c4314b;
+  --status-success: #0e7a0d;
+  --status-warning: #f7630c;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1);
+  --shadow-md: 0 2px 4px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.12);
+  --font-sans: 'Segoe UI Variable', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+[data-theme="dark"] {
+  --brand-primary: #479ef5;
+  --brand-hover: #62abf5;
+  --brand-gradient: linear-gradient(135deg, #1b3a5c 0%, #0f2d4a 100%);
+  --bg-base: #1a1a1a;
+  --bg-layer1: #2d2d2d;
+  --bg-layer2: #383838;
+  --border-default: #484848;
+  --text-primary: #e0e0e0;
+  --text-secondary: #a0a0a0;
+  --text-on-brand: #ffffff;
+  --status-danger: #e87575;
+  --status-success: #54b054;
+  --status-warning: #f5a623;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.2), 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md: 0 2px 4px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.4);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-sans);
+  background: var(--bg-base);
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+.header {
+  background: var(--brand-gradient);
+  color: var(--text-on-brand);
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--shadow-md);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+.header h1 { font-size: 20px; font-weight: 600; }
+.theme-toggle {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: var(--text-on-brand);
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 14px;
+  font-family: var(--font-sans);
+  transition: background 0.2s;
+}
+.theme-toggle:hover { background: rgba(255,255,255,0.25); }
+.container { max-width: 1400px; margin: 0 auto; padding: 16px 24px; }
+.section {
+  background: var(--bg-layer1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  cursor: pointer;
+  user-select: none;
+  background: var(--bg-layer2);
+  border-bottom: 1px solid var(--border-default);
+  transition: background 0.15s;
+}
+.section-header:hover { filter: brightness(0.97); }
+.section-title { font-size: 15px; font-weight: 600; }
+.section-toggle {
+  transition: transform 0.2s;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.section-toggle.collapsed { transform: rotate(-90deg); }
+.section-body { padding: 16px; }
+.section-body.collapsed { display: none; }
+.region-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 16px;
+}
+@media (max-width: 900px) {
+  .region-grid { grid-template-columns: 1fr; }
+}
+select, input[type="text"], input[type="search"] {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  background: var(--bg-layer1);
+  color: var(--text-primary);
+  width: 100%;
+}
+select:focus, input:focus { outline: 2px solid var(--brand-primary); outline-offset: -1px; }
+.badge {
+  display: inline-block;
+  background: var(--brand-primary);
+  color: var(--text-on-brand);
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  margin-top: 8px;
+}
+.btn {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-default);
+  background: var(--bg-layer1);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn:hover { background: var(--bg-layer2); }
+.btn-primary {
+  background: var(--brand-primary);
+  color: var(--text-on-brand);
+  border-color: var(--brand-primary);
+}
+.btn-primary:hover { background: var(--brand-hover); }
+#map { height: 360px; border-radius: var(--radius-sm); }
+.map-legend {
+  display: flex; gap: 16px; margin-top: 8px; font-size: 13px; color: var(--text-secondary); flex-wrap: wrap;
+}
+.map-legend-item { display: flex; align-items: center; gap: 4px; }
+.map-legend-dot {
+  width: 12px; height: 12px; border-radius: 50%; display: inline-block;
+}
+.no-data-box {
+  text-align: center;
+  padding: 40px 24px;
+  background: var(--bg-layer1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  margin-bottom: 16px;
+}
+.no-data-box .icon { font-size: 48px; margin-bottom: 12px; }
+.filters-row {
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+}
+.filters-row select, .filters-row input { width: auto; min-width: 160px; flex: 1 1 160px; }
+.result-count { font-size: 13px; color: var(--text-secondary); white-space: nowrap; }
+.family-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+}
+.family-card {
+  background: var(--bg-layer2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+.family-card:hover { box-shadow: var(--shadow-md); border-color: var(--brand-primary); }
+.family-card .fname { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+.family-card .fcount { font-size: 12px; color: var(--text-secondary); }
+.type-badge {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+.retirement-warning {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 13px;
+  margin-top: 10px;
+  color: #664d03;
+}
+[data-theme="dark"] .retirement-warning { background: #3d3200; border-color: #665200; color: #ffc107; }
+.workload-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+.workload-card {
+  background: var(--bg-layer2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+}
+.workload-card .wl-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.workload-card .wl-icon { font-size: 24px; }
+.workload-card .wl-name { font-weight: 600; font-size: 14px; }
+.workload-card .wl-desc { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; }
+.wl-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.wl-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.wl-tag.available { background: #d4edda; color: #155724; }
+.wl-tag.unavailable { background: #f8d7da; color: #721c24; text-decoration: line-through; }
+[data-theme="dark"] .wl-tag.available { background: #1a3a1a; color: #54b054; }
+[data-theme="dark"] .wl-tag.unavailable { background: #3a1a1a; color: #e87575; }
+.sku-table-wrap { overflow-x: auto; }
+table.sku-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+table.sku-table thead { position: sticky; top: 0; z-index: 2; }
+table.sku-table th {
+  background: var(--bg-layer2);
+  border-bottom: 2px solid var(--border-default);
+  padding: 8px 10px;
+  text-align: left;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+}
+table.sku-table th:hover { color: var(--brand-primary); }
+table.sku-table td {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border-default);
+  white-space: nowrap;
+}
+table.sku-table tbody tr:nth-child(even) { background: var(--bg-layer2); }
+table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
+.sort-arrow { font-size: 10px; margin-left: 3px; }
+.restriction-badge {
+  background: var(--status-warning);
+  color: #fff;
+  padding: 1px 6px;
+  border-radius: 8px;
+  font-size: 11px;
+  margin-right: 4px;
+}
+.cli-box {
+  background: var(--bg-layer2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  font-family: 'Cascadia Code', 'Consolas', monospace;
+  font-size: 13px;
+  position: relative;
+  overflow-x: auto;
+}
+.cli-box .copy-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 12px;
+}
+.toast-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.toast {
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: #fff;
+  box-shadow: var(--shadow-md);
+  animation: toastIn 0.3s ease;
+  max-width: 320px;
+}
+.toast.success { background: var(--status-success); }
+.toast.error { background: var(--status-danger); }
+.toast.warning { background: var(--status-warning); }
+@keyframes toastIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.loading-indicator {
+  text-align: center;
+  padding: 24px;
+  color: var(--text-secondary);
+}
+.loading-indicator::after {
+  content: '';
+  display: inline-block;
+  width: 20px; height: 20px;
+  border: 2px solid var(--border-default);
+  border-top-color: var(--brand-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.freshness-warning {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  color: #664d03;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+[data-theme="dark"] .freshness-warning { background: #3d3200; border-color: #665200; color: #ffc107; }
+.hidden { display: none !important; }
 </style>
 </head>
 <body>
 
-<!-- Header -->
-<header>
-  <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
+<header class="header">
   <h1>Azure Virtual Machine SKU by Region</h1>
-  <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode">🌙</button>
+  <button class="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark theme">🌙 Theme</button>
 </header>
-
-<!-- Welcome Modal -->
-<div class="welcome-overlay active" id="welcomeModal">
-  <div class="welcome-card">
-    <div class="welcome-banner">
-      <h2>👋 Welcome to Azure Virtual Machine SKU by Region</h2>
-      <p>Explore Azure virtual machine SKU availability across regions</p>
-    </div>
-    <div class="welcome-body">
-      <ul>
-        <li><span>🌏</span> <strong>Select regions</strong> — Choose up to 5 Azure regions to compare</li>
-        <li><span>🔍</span> <strong>Search &amp; filter</strong> — Find SKUs by name, family, vCPUs, or memory</li>
-        <li><span>🔗</span> <strong>Azure docs</strong> — Direct links to VM size documentation</li>
-        <li><span>📥</span> <strong>Export CSV</strong> — Download filtered results for your records</li>
-      </ul>
-      <p style="font-size:12px;color:var(--text-tertiary);margin-bottom:16px;">Data is refreshed monthly. For real-time availability, use <code style="font-size:11px;background:var(--bg-layer2);padding:2px 6px;border-radius:3px;">az vm list-skus</code></p>
-      <button class="btn btn-primary" onclick="closeWelcome()">Get Started</button>
-    </div>
-  </div>
-</div>
 
 <div class="container">
 
-  <!-- Region Selection Row -->
-  <div class="region-grid" style="display:grid; grid-template-columns:1fr 2fr; gap:12px; align-items:start;">
-
-  <!-- Region Selector -->
-  <div class="section-collapsible">
-    <div class="section-header" onclick="toggleSection('regionsel')" style="border-left-color:#4caf50;">
-      <span class="section-toggle open" id="regionselToggle">▶</span>
-      <h3>🌏 Select Azure Region</h3>
-      <span class="section-badge" id="regionBadge">New Zealand North</span>
-    </div>
-    <div class="section-body open" id="regionselBody">
-      <div class="region-bar">
-        <div class="form-group" style="margin-bottom:0;flex:1;">
-          <select id="regionSelect" onchange="selectRegion(this.value)">
-            <option value="">Loading regions...</option>
-          </select>
-        </div>
+  <!-- Region Selection Grid -->
+  <div class="region-grid">
+    <!-- LEFT: Region Dropdown -->
+    <div class="section" id="sec-dropdown">
+      <div class="section-header" onclick="toggleSection('dropdown')">
+        <span class="section-title">🌏 Select Azure Region</span>
+        <span class="section-toggle" id="toggle-dropdown">▼</span>
+      </div>
+      <div class="section-body" id="body-dropdown">
+        <select id="region-select" onchange="selectRegion(this.value)">
+          <option value="">Loading regions...</option>
+        </select>
+        <div id="region-badge"></div>
       </div>
     </div>
-  </div>
-
-  <!-- Region Map -->
-  <div class="section-collapsible">
-    <div class="section-header" onclick="toggleSection('map')" style="border-left-color:#4caf50;">
-      <span class="section-toggle open" id="mapToggle">▶</span>
-      <h3>🗺️ Azure Region Map</h3>
-    </div>
-    <div class="section-body open" id="mapBody">
-      <div class="region-map-container" style="margin-top:0;">
-        <div id="regionMap"></div>
+    <!-- RIGHT: Map -->
+    <div class="section" id="sec-map">
+      <div class="section-header" onclick="toggleSection('map')">
+        <span class="section-title">🗺️ Azure Region Map</span>
+        <span class="section-toggle" id="toggle-map">▼</span>
+      </div>
+      <div class="section-body" id="body-map">
+        <div id="map"></div>
         <div class="map-legend">
-          <span><span class="map-legend-dot" style="background:#0f6cbd;border:2px solid #fff;box-shadow:0 0 4px #0f6cbd;width:12px;height:12px;"></span> Selected</span>
-          <span><span class="map-legend-dot" style="background:#4caf50;border:1px solid #2e7d32;"></span> Data available</span>
-          <span><span class="map-legend-dot" style="background:#9e9e9e;border:1px solid #757575;opacity:0.6;"></span> No data yet</span>
+          <span class="map-legend-item"><span class="map-legend-dot" style="background:#0f6cbd;border:2px solid #fff;"></span> Selected</span>
+          <span class="map-legend-item"><span class="map-legend-dot" style="background:#0e7a0d;border:2px solid #065e06;"></span> Data available</span>
+          <span class="map-legend-item"><span class="map-legend-dot" style="background:#999;border:2px solid #666;"></span> No data yet</span>
         </div>
       </div>
     </div>
   </div>
 
-  </div>
-
-  <!-- Freshness Banner -->
-  <div class="section-collapsible" style="margin-top:12px;">
-    <div class="section-header" onclick="toggleSection('freshness')" style="border-left-color:#ffc107;">
-      <span class="section-toggle open" id="freshnessToggle">▶</span>
-      <h3>📅 Data Freshness</h3>
-    </div>
-    <div class="section-body open" id="freshnessBody">
-      <div class="freshness-banner" id="freshnessBanner" style="display:none;">
-        <span class="freshness-icon" id="freshnessIcon">📅</span>
-        <div>
-          <div>Data snapshot from: <span class="freshness-date" id="freshnessDate">—</span> · <span id="dataCoverage" style="font-size:12px;color:var(--text-secondary);"></span></div>
-          <div class="freshness-pit">⚠️ This is a point-in-time snapshot — not live data. VM SKU availability can change at any time.</div>
-          <div class="freshness-note">Data is refreshed on the 1st of each month. For real-time, subscription-specific availability use: <code>az vm list-skus --location &lt;region&gt;</code></div>
-          <div id="staleWarning" style="display:none;">
-            <span class="freshness-stale-warning" id="staleMessage">⚠️ This data may be outdated</span>
-            <a class="freshness-refresh-btn" onclick="location.reload(true)" title="Hard-refresh to check for newer data">🔄 Check for Latest Data</a>
-          </div>
-        </div>
-      </div>
-      <div id="freshnessLoading" style="font-size:12px;color:var(--text-secondary);">Loading freshness information...</div>
+  <!-- No-Data Message -->
+  <div class="no-data-box hidden" id="no-data-msg">
+    <div class="icon">📭</div>
+    <h3 id="no-data-title">No SKU data available</h3>
+    <p id="no-data-desc" style="margin-top:8px;color:var(--text-secondary);font-size:14px;"></p>
+    <div class="cli-box" style="margin-top:12px;display:inline-block;text-align:left;">
+      <code id="no-data-cli"></code>
     </div>
   </div>
 
-  <!-- No Data Message (shown when region has no SKU data) -->
-  <div id="noDataMessage" style="display:none;"></div>
+  <!-- View SKU Details Button (shown after region selection, before data loads) -->
+  <div id="view-sku-prompt" style="text-align:center;margin-top:24px;">
+    <p style="color:var(--text-secondary);font-size:14px;margin-bottom:12px;" id="view-sku-hint">Select a region above to view VM SKU details</p>
+    <button class="btn btn-primary" id="view-sku-btn" onclick="showSkuDetails()" style="padding:12px 36px;font-size:15px;" disabled>
+      📋 View VM SKU Details
+    </button>
+  </div>
 
-  <div id="initialState" style="display:none;"></div>
-
-  <!-- SKU Results -->
-  <div id="skuResults" style="display:none;">
-
-    <!-- Filters & Actions -->
-    <div class="section-collapsible">
+  <!-- SKU Results (hidden until user clicks View) -->
+  <div id="sku-results" class="hidden">
+    <!-- Filters -->
+    <div class="section" id="sec-filters">
       <div class="section-header" onclick="toggleSection('filters')">
-        <span class="section-toggle open" id="filtersToggle">▶</span>
-        <h3>🔍 Filter &amp; Search</h3>
-        <span class="section-badge" id="resultBadge">0 SKUs</span>
+        <span class="section-title">🔍 Filters &amp; Actions</span>
+        <span class="section-toggle" id="toggle-filters">▼</span>
       </div>
-      <div class="section-body open" id="filtersBody">
-        <div class="filter-bar">
-          <input type="text" id="searchInput" placeholder="Search SKU name (e.g. D4s_v5, Standard_E)" oninput="applyFilters()">
-          <select id="familyFilter" onchange="applyFilters()">
-            <option value="">All Families</option>
-          </select>
-          <select id="archFilter" onchange="applyFilters()">
+      <div class="section-body" id="body-filters">
+        <div class="filters-row">
+          <input type="search" id="search-input" placeholder="Search SKU name, family, size..." oninput="applyFilters()">
+          <select id="family-filter" onchange="applyFilters()"><option value="">All Families</option></select>
+          <select id="arch-filter" onchange="applyFilters()">
             <option value="">All Architectures</option>
             <option value="x64">x64</option>
             <option value="Arm64">Arm64</option>
           </select>
-          <select id="vcpuFilter" onchange="applyFilters()">
+          <select id="vcpu-filter" onchange="applyFilters()">
             <option value="">All vCPUs</option>
-            <option value="1">1 vCPU</option>
-            <option value="2">2 vCPUs</option>
-            <option value="4">4 vCPUs</option>
-            <option value="8">8 vCPUs</option>
-            <option value="16">16 vCPUs</option>
-            <option value="32">32 vCPUs</option>
-            <option value="48">48 vCPUs</option>
-            <option value="64">64 vCPUs</option>
-            <option value="96">96+ vCPUs</option>
+            <option value="1-2">1-2 vCPUs</option>
+            <option value="4-8">4-8 vCPUs</option>
+            <option value="16-32">16-32 vCPUs</option>
+            <option value="64+">64+ vCPUs</option>
           </select>
-          <button class="btn btn-outline btn-sm" onclick="resetFilters()">Reset</button>
-          <button class="btn btn-success btn-sm" onclick="exportCSV()">📥 Export CSV</button>
-        </div>
-        <div style="margin-top:8px;">
-          <span class="result-count" id="resultCount"></span>
+          <span class="result-count" id="result-count"></span>
+          <button class="btn btn-primary" onclick="exportCsv()">📥 CSV Export</button>
+          <button class="btn" onclick="clearFilters()">✖ Clear Filters</button>
         </div>
       </div>
     </div>
 
     <!-- Family Overview -->
-    <div class="section-collapsible" style="margin-top:12px;">
+    <div class="section" id="sec-families">
       <div class="section-header" onclick="toggleSection('families')">
-        <span class="section-toggle open" id="familiesToggle">▶</span>
-        <h3>🏷️ VM Family Overview</h3>
-        <span class="section-badge" id="familiesBadge">0 families</span>
+        <span class="section-title">👨‍👩‍👧‍👦 VM Family Overview</span>
+        <span class="section-toggle" id="toggle-families">▼</span>
       </div>
-      <div class="section-body open" id="familiesBody">
-        <p style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">Each VM SKU belongs to a family optimised for specific workloads. Select a family card to filter the table below.</p>
-        <div class="family-grid" id="familyGrid"></div>
+      <div class="section-body" id="body-families">
+        <div class="family-grid" id="family-grid"></div>
+        <div id="retirement-warnings"></div>
       </div>
     </div>
 
     <!-- Workload Recommendations -->
-    <div class="section-collapsible" style="margin-top:12px;">
+    <div class="section" id="sec-workloads">
       <div class="section-header" onclick="toggleSection('workloads')">
-        <span class="section-toggle open" id="workloadsToggle">▶</span>
-        <h3>🎯 Workload Recommendations</h3>
-        <span class="section-badge" id="workloadsBadge">0 workloads</span>
+        <span class="section-title">💼 Workload Recommendations</span>
+        <span class="section-toggle" id="toggle-workloads">▼</span>
       </div>
-      <div class="section-body open" id="workloadsBody">
-        <p style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">Recommended VM SKU families for common Azure workloads. Green tags are available in your selected region(s); <span style="text-decoration:line-through;opacity:0.7;">strikethrough</span> tags are not available.</p>
-        <div class="workload-summary" id="workloadSummary"></div>
-        <div class="workload-grid" id="workloadGrid"></div>
-      </div>
-    </div>
-
-    <!-- Availability Gaps -->
-    <div class="section-collapsible" style="margin-top:12px;">
-      <div class="section-header" onclick="toggleSection('gaps')">
-        <span class="section-toggle open" id="gapsToggle">▶</span>
-        <h3>⚠️ Availability Gaps</h3>
-        <span class="section-badge" id="gapsBadge">—</span>
-      </div>
-      <div class="section-body open" id="gapsBody">
-        <p style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">VM families recommended for key workloads that are <strong>not available</strong> in your selected region(s). Consider alternative regions or families.</p>
-        <div id="gapsContent"></div>
+      <div class="section-body" id="body-workloads">
+        <div class="workload-grid" id="workload-grid"></div>
       </div>
     </div>
 
     <!-- SKU Table -->
-    <div class="section-collapsible" style="margin-top:12px;">
-      <div class="section-header" onclick="toggleSection('skutable')">
-        <span class="section-toggle open" id="skutaleToggle">▶</span>
-        <h3>📋 VM SKUs</h3>
-        <span class="section-badge" id="skuTableBadge">0 SKUs</span>
+    <div class="section" id="sec-table">
+      <div class="section-header" onclick="toggleSection('table')">
+        <span class="section-title">📋 SKU Data Table</span>
+        <span class="section-toggle" id="toggle-table">▼</span>
       </div>
-      <div class="section-body open" id="skutaleBody">
-        <div class="sku-table-wrapper" style="max-height:600px;overflow-y:auto;">
-          <table class="sku-table" id="skuTable">
-            <thead>
-              <tr>
-                <th onclick="sortTable('name')">SKU Name <span class="sort-arrow">▲</span></th>
-                <th onclick="sortTable('family')">Family <span class="sort-arrow">▲</span></th>
-                <th>Type</th>
-                <th onclick="sortTable('vCPUs')" style="text-align:right">vCPUs <span class="sort-arrow">▲</span></th>
-                <th onclick="sortTable('memoryGB')" style="text-align:right">Memory (GB) <span class="sort-arrow">▲</span></th>
-                <th onclick="sortTable('cpuArchitecture')">Arch <span class="sort-arrow">▲</span></th>
-                <th>Zones</th>
-                <th onclick="sortTable('maxDataDisks')" style="text-align:right">Data Disks <span class="sort-arrow">▲</span></th>
-                <th>Features</th>
-                <th onclick="sortTable('region')">Region <span class="sort-arrow">▲</span></th>
-                <th>Docs</th>
-              </tr>
-            </thead>
-            <tbody id="skuTableBody"></tbody>
+      <div class="section-body" id="body-table">
+        <div class="sku-table-wrap">
+          <table class="sku-table" id="sku-table">
+            <thead><tr id="table-head"></tr></thead>
+            <tbody id="table-body"></tbody>
           </table>
         </div>
-        <div class="empty-state" id="emptyState" style="display:none;">
-          <h3>No SKUs found</h3>
-          <p>Try adjusting your filters or selecting a different region.</p>
-        </div>
-        <div class="loading" id="loadingIndicator" style="display:none;">
-          <div class="spinner"></div>
-          <div>Loading SKU data...</div>
-        </div>
+        <div id="table-empty" class="hidden" style="text-align:center;padding:24px;color:var(--text-secondary);">No SKUs match the current filters.</div>
       </div>
     </div>
 
-    <!-- CLI Guidance -->
-    <div class="section-collapsible" style="margin-top:12px;">
+    <!-- CLI Reference -->
+    <div class="section" id="sec-cli">
       <div class="section-header" onclick="toggleSection('cli')">
-        <span class="section-toggle" id="cliToggle">▶</span>
-        <h3>💻 Need Real-Time Data?</h3>
+        <span class="section-title">⌨️ CLI Reference</span>
+        <span class="section-toggle collapsed" id="toggle-cli">▼</span>
       </div>
-      <div class="section-body" id="cliBody">
+      <div class="section-body collapsed" id="body-cli">
+        <p style="margin-bottom:8px;font-size:13px;color:var(--text-secondary);">Use the Azure CLI to get live SKU data:</p>
         <div class="cli-box">
-          <h4>Azure CLI Command</h4>
-          <p>This app shows reference data refreshed monthly. For real-time, subscription-specific VM SKU availability including restrictions, run:</p>
-          <code id="cliCommand">az vm list-skus --location newzealandnorth --resource-type virtualMachines -o table</code>
-          <p style="margin-top:8px;font-size:12px;color:var(--text-tertiary);">
-            Requires <a href="https://learn.microsoft.com/en-us/cli/azure/install-azure-cli" target="_blank" rel="noopener noreferrer" style="color:var(--brand-primary);">Azure CLI</a> and at least <strong>Reader</strong> role on your subscription.
-          </p>
+          <code id="cli-command">az vm list-skus --location &lt;region&gt; -o table</code>
+          <button class="btn copy-btn" onclick="copyCliCommand()">📋 Copy</button>
         </div>
+        <p style="margin-top:10px;font-size:13px;">
+          <a href="https://learn.microsoft.com/en-us/cli/azure/vm?view=azure-cli-latest#az-vm-list-skus" target="_blank" rel="noopener" style="color:var(--brand-primary);">📖 Azure CLI documentation</a>
+        </p>
       </div>
     </div>
-
   </div>
-
-  <!-- Initial empty state (before any region selected) -->
-  <div id="initialState" style="display:none;"></div>
-
 </div>
 
-<!-- Toast Notification -->
-<div class="toast" id="toast"></div>
-
-<!-- Footer -->
-<footer style="text-align:center;padding:24px 16px 28px;font-size:12px;color:var(--text-tertiary);border-top:1px solid var(--border-subtle);margin-top:24px;background:linear-gradient(180deg, transparent 0%, var(--bg-layer2) 100%);">
-  <span style="font-weight:600;color:var(--text-secondary);">DJ Tools</span> powered by <strong style="color:var(--brand-primary);">GitHub Copilot CLI</strong> &nbsp;·&nbsp;
-  <a href="https://github.com/features/copilot/cli/" target="_blank" rel="noopener noreferrer" style="color:var(--brand-primary);text-decoration:none;font-weight:600;">Learn more ↗</a>
-  <div style="margin-top:8px;font-size:11px;color:var(--text-tertiary);opacity:0.7;">v0.0.1-beta</div>
+<footer style="text-align:center;padding:16px 24px;font-size:12px;color:var(--text-secondary);border-top:1px solid var(--border-default);margin-top:32px;">
+  <span id="freshness-footer">Loading data freshness...</span>
 </footer>
 
+<div class="toast-container" id="toast-container"></div>
+
 <script>
-// ══════════════════════════════════════════════
-// THEME SYSTEM
-// ══════════════════════════════════════════════
-function toggleTheme() {
-  const isDark = document.body.classList.toggle('dark-theme');
-  localStorage.setItem('theme', isDark ? 'dark' : 'light');
-  document.querySelector('.theme-toggle').textContent = isDark ? '☀️' : '🌙';
-  applyTheme(isDark);
-}
-
-function applyTheme(isDark) {
-  const r = document.documentElement.style;
-  if (isDark) {
-    r.setProperty('--bg-base', '#1a1a1a');
-    r.setProperty('--bg-layer1', '#2d2d2d');
-    r.setProperty('--bg-layer2', '#252525');
-    r.setProperty('--bg-hover', '#383838');
-    r.setProperty('--border-default', '#404040');
-    r.setProperty('--border-subtle', '#333333');
-    r.setProperty('--text-primary', '#e0e0e0');
-    r.setProperty('--text-secondary', '#a0a0a0');
-    r.setProperty('--text-tertiary', '#707070');
-    r.setProperty('--status-danger-bg', '#3d1f25');
-    r.setProperty('--status-success-bg', '#1f3d1f');
-    r.setProperty('--status-warning-bg', '#3d2f1f');
-    r.setProperty('--status-info-bg', '#1f2d3d');
-  } else {
-    r.setProperty('--bg-base', '#fafafa');
-    r.setProperty('--bg-layer1', '#ffffff');
-    r.setProperty('--bg-layer2', '#f5f5f5');
-    r.setProperty('--bg-hover', '#f0f0f0');
-    r.setProperty('--border-default', '#e0e0e0');
-    r.setProperty('--border-subtle', '#f0f0f0');
-    r.setProperty('--text-primary', '#242424');
-    r.setProperty('--text-secondary', '#616161');
-    r.setProperty('--text-tertiary', '#9e9e9e');
-    r.setProperty('--status-danger-bg', '#fdf3f4');
-    r.setProperty('--status-success-bg', '#f1faf1');
-    r.setProperty('--status-warning-bg', '#fff9f5');
-    r.setProperty('--status-info-bg', '#ebf3fc');
-  }
-}
-
-(function() {
-  const saved = localStorage.getItem('theme');
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const isDark = saved === 'dark' || (!saved && prefersDark);
-  if (isDark) { document.body.classList.add('dark-theme'); applyTheme(true); document.querySelector('.theme-toggle').textContent = '☀️'; }
-})();
-
-// ══════════════════════════════════════════════
-// WELCOME MODAL
-// ══════════════════════════════════════════════
-function closeWelcome() {
-  document.getElementById('welcomeModal').classList.remove('active');
-  localStorage.setItem('vmsku-welcomed', 'true');
-}
-if (localStorage.getItem('vmsku-welcomed') === 'true') {
-  document.getElementById('welcomeModal').classList.remove('active');
-}
-
-// ══════════════════════════════════════════════
-// TOAST NOTIFICATIONS
-// ══════════════════════════════════════════════
-let toastTimeout;
-function showToast(msg, type = 'success') {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast show ' + type;
-  clearTimeout(toastTimeout);
-  toastTimeout = setTimeout(() => t.className = 'toast', 3000);
-}
-
-// ══════════════════════════════════════════════
-// COLLAPSIBLE SECTIONS
-// ══════════════════════════════════════════════
-const sections = {
-  regionsel: { toggle: 'regionselToggle', body: 'regionselBody' },
-  map: { toggle: 'mapToggle', body: 'mapBody' },
-  freshness: { toggle: 'freshnessToggle', body: 'freshnessBody' },
-  filters: { toggle: 'filtersToggle', body: 'filtersBody' },
-  families: { toggle: 'familiesToggle', body: 'familiesBody' },
-  workloads: { toggle: 'workloadsToggle', body: 'workloadsBody' },
-  gaps: { toggle: 'gapsToggle', body: 'gapsBody' },
-  skutable: { toggle: 'skutaleToggle', body: 'skutaleBody' },
-  cli: { toggle: 'cliToggle', body: 'cliBody' },
-};
-
-function toggleSection(key) {
-  const s = sections[key];
-  if (!s) return;
-  const toggle = document.getElementById(s.toggle);
-  const body = document.getElementById(s.body);
-  const isOpen = body.classList.toggle('open');
-  toggle.classList.toggle('open', isOpen);
-  // Leaflet needs a resize when map section is toggled
-  if (key === 'map' && isOpen && leafletMap) {
-    setTimeout(() => leafletMap.invalidateSize(), 200);
-  }
-}
-
-// ══════════════════════════════════════════════
-// HTML ESCAPING
-// ══════════════════════════════════════════════
-function escHtml(str) {
-  const d = document.createElement('div');
-  d.textContent = str;
-  return d.innerHTML;
-}
-
-// ══════════════════════════════════════════════
-// STATE
-// ══════════════════════════════════════════════
+// === STATE ===
 let allRegions = [];
 let selectedRegion = null;
 let regionDataCache = {};
@@ -605,871 +507,591 @@ let availableDataRegions = new Set();
 let allSkus = [];
 let filteredSkus = [];
 let currentSort = { field: 'name', dir: 'asc' };
+let leafletMap = null;
+let mapMarkers = [];
+let metadata = null;
 
-
-// ══════════════════════════════════════════════
-// FAMILY INFO — TYPES, WORKLOADS, DOCS, RETIREMENT
-// ══════════════════════════════════════════════
-const typeInfo = {
-  'general-purpose': { label: 'General Purpose', css: 'type-general', icon: '⚖️', description: 'Balanced CPU-to-memory ratio. Ideal for testing, development, small-to-medium databases, and web servers.' },
-  'compute-optimized': { label: 'Compute Optimized', css: 'type-compute', icon: '⚡', description: 'High CPU-to-memory ratio. Best for CPU-intensive workloads like batch processing, analytics, and app servers.' },
-  'memory-optimized': { label: 'Memory Optimized', css: 'type-memory', icon: '🧠', description: 'High memory-to-CPU ratio. Ideal for relational databases, large caches, and in-memory analytics.' },
-  'storage-optimized': { label: 'Storage Optimized', css: 'type-storage', icon: '💾', description: 'High disk throughput and IOPS. Best for big data, SQL/NoSQL databases, and data warehousing.' },
-  'gpu': { label: 'GPU Accelerated', css: 'type-gpu', icon: '🎮', description: 'Specialised for compute-intensive, graphics-intensive, and AI/ML workloads with dedicated GPUs.' },
-  'fpga': { label: 'FPGA Accelerated', css: 'type-fpga', icon: '🔧', description: 'Custom hardware acceleration for low-latency workloads like genomics and financial computing.' },
-  'hpc': { label: 'High Performance Compute', css: 'type-hpc', icon: '🔬', description: 'Optimised for tightly-coupled parallel workloads, scientific simulations, and modelling.' },
-};
-
-const familyInfo = {
-  // ── General Purpose ──
-  'a': { type: 'general-purpose', letter: 'A', docPath: 'general-purpose/a-family', workloads: ['Entry-level & economical workloads', 'Dev/test environments', 'Low-traffic web servers'], retirement: { retiring: true, date: '11/2028', note: 'Av2/Amv2 retiring Nov 2028', migrateTo: 'Dv5/Dsv5' } },
-  'b': { type: 'general-purpose', letter: 'B', docPath: 'general-purpose/b-family', workloads: ['Burstable workloads with variable CPU', 'Dev/test & staging environments', 'Small databases & micro-services'], retirement: { retiring: true, date: '11/2028', note: 'B-series v1 retiring Nov 2028', migrateTo: 'Bsv2/Basv2' } },
-  'd': { type: 'general-purpose', letter: 'D', docPath: 'general-purpose/d-family', workloads: ['Enterprise-grade applications', 'Relational databases', 'In-memory caching', 'Data analytics'] },
-  'dc': { type: 'general-purpose', letter: 'DC', docPath: 'general-purpose/dc-family', workloads: ['Confidential computing', 'Secure enclaves', 'Data privacy workloads'] },
-
-  // ── Compute Optimized ──
-  'f': { type: 'compute-optimized', letter: 'F', docPath: 'compute-optimized/f-family', workloads: ['Batch processing', 'Medium-traffic web/app servers', 'Network appliances', 'Gaming servers'] },
-  'fx': { type: 'compute-optimized', letter: 'FX', docPath: 'compute-optimized/fx-family', workloads: ['Electronic Design Automation (EDA)', 'Large relational databases', 'Medium-to-large caches', 'In-memory analytics'] },
-
-  // ── Memory Optimized ──
-  'e': { type: 'memory-optimized', letter: 'E', docPath: 'memory-optimized/e-family', workloads: ['Relational database servers (SQL, Oracle, PostgreSQL)', 'Medium-to-large caches', 'In-memory analytics'] },
-  'eb': { type: 'memory-optimized', letter: 'Eb', docPath: 'memory-optimized/eb-family', workloads: ['High remote storage performance', 'Storage-intensive relational databases', 'Large caches requiring premium disks'] },
-  'ec': { type: 'memory-optimized', letter: 'EC', docPath: 'memory-optimized/ec-family', workloads: ['Confidential memory-optimized workloads', 'Secure database processing', 'Encrypted in-memory analytics'] },
-  'm': { type: 'memory-optimized', letter: 'M', docPath: 'memory-optimized/m-family', workloads: ['Extremely large databases', 'SAP HANA', 'Workloads requiring TB-scale memory'] },
-
-  // ── Storage Optimized ──
-  'l': { type: 'storage-optimized', letter: 'L', docPath: 'storage-optimized/l-family', workloads: ['Big Data (Cassandra, MongoDB, Cloudera)', 'SQL & NoSQL databases', 'Data warehousing', 'Large transactional databases'] },
-
-  // ── GPU Accelerated ──
-  'nc': { type: 'gpu', letter: 'NC', docPath: 'gpu-accelerated/nc-family', workloads: ['AI/ML training & inference', 'Compute-intensive GPU workloads', 'Graphics rendering'] },
-  'nd': { type: 'gpu', letter: 'ND', docPath: 'gpu-accelerated/nd-family', workloads: ['Large-scale deep learning training', 'HPC with GPU acceleration', 'Multi-GPU distributed training'] },
-  'ng': { type: 'gpu', letter: 'NG', docPath: 'gpu-accelerated/ng-family', workloads: ['Virtual desktop infrastructure (VDI)', 'Cloud gaming', 'Graphics streaming'] },
-  'nv': { type: 'gpu', letter: 'NV', docPath: 'gpu-accelerated/nv-family', workloads: ['Virtual desktop (VDI)', 'Video encoding & rendering', 'Single-precision compute'] },
-
-  // ── FPGA ──
-  'np': { type: 'fpga', letter: 'NP', docPath: 'fpga-accelerated/np-family', workloads: ['Custom hardware acceleration', 'Low-latency financial workloads', 'Genomics processing'], retirement: { retiring: true, date: '05/2027', note: 'NP-series retiring May 2027', migrateTo: 'NCads_H100_v5' } },
-
-  // ── HPC ──
-  'hb': { type: 'hpc', letter: 'HB', docPath: 'high-performance-compute/hb-family', workloads: ['Fluid dynamics', 'Weather modelling', 'Finite element analysis', 'Molecular dynamics'] },
-  'hc': { type: 'hpc', letter: 'HC', docPath: 'high-performance-compute/hc-family', workloads: ['Dense computation', 'Implicit finite element analysis', 'Weather modelling'], retirement: { retiring: true, date: '05/2027', note: 'HC-series retiring May 2027', migrateTo: 'HBv4/HBv5' } },
-  'hx': { type: 'hpc', letter: 'HX', docPath: 'high-performance-compute/hx-family', workloads: ['Large memory HPC', 'EDA simulation', 'In-memory workloads'] },
-};
-
-// Map raw Azure family strings to family info keys
-function getFamilyKey(familyRaw) {
-  const lower = familyRaw.toLowerCase().replace(/^standard/, '').replace(/family$/, '');
-  // Try exact matches for multi-letter families first
-  for (const key of ['dc', 'ec', 'eb', 'fx', 'nc', 'nd', 'ng', 'nv', 'np', 'hb', 'hc', 'hx']) {
-    if (lower.startsWith(key)) return key;
-  }
-  // Single-letter families
-  for (const key of ['a', 'b', 'd', 'e', 'f', 'l', 'm']) {
-    if (lower.startsWith(key)) return key;
-  }
-  return null;
-}
-
+// === FAMILY MAPPING ===
 const familyMap = {
-  'standardav2family': { display: 'Av2', category: 'general-purpose', docPath: 'general-purpose/a-family' },
-  'standardbsfamily': { display: 'Bs', category: 'general-purpose', docPath: 'general-purpose/b-family' },
-  'standardbsv2family': { display: 'Bsv2', category: 'general-purpose', docPath: 'general-purpose/b-family' },
-  'standardbasv2family': { display: 'Basv2', category: 'general-purpose', docPath: 'general-purpose/b-family' },
-  'standarddadsv5family': { display: 'Dadsv5', category: 'general-purpose', docPath: 'general-purpose/d-family' },
-  'standarddasv4family': { display: 'Dasv4', category: 'general-purpose', docPath: 'general-purpose/d-family' },
-  'standarddasv5family': { display: 'Dasv5', category: 'general-purpose', docPath: 'general-purpose/d-family' },
-  'standarddasv6family': { display: 'Dasv6', category: 'general-purpose', docPath: 'general-purpose/d-family' },
-  'standardddsv4family': { display: 'Ddsv4', category: 'general-purpose', docPath: 'general-purpose/d-family' },
-  'standardddsv5family': { display: 'Ddsv5', category: 'general-purpose', docPath: 'general-purpose/d-family' },
-  'standardddsv6family': { display: 'Ddsv6', category: 'general-purpose', docPath: 'general-purpose/d-family' },
-  'standarddsv3family': { display: 'Dsv3', category: 'general-purpose', docPath: 'general-purpose/d-family' },
-  'standarddsv4family': { display: 'Dsv4', category: 'general-purpose', docPath: 'general-purpose/d-family' },
-  'standarddsv5family': { display: 'Dsv5', category: 'general-purpose', docPath: 'general-purpose/d-family' },
-  'standarddfamily': { display: 'D', category: 'general-purpose', docPath: 'general-purpose/d-family' },
-  'standarddv2family': { display: 'Dv2', category: 'general-purpose', docPath: 'general-purpose/d-family' },
-  'standarddv3family': { display: 'Dv3', category: 'general-purpose', docPath: 'general-purpose/d-family' },
-  'standarddv4family': { display: 'Dv4', category: 'general-purpose', docPath: 'general-purpose/d-family' },
-  'standarddv5family': { display: 'Dv5', category: 'general-purpose', docPath: 'general-purpose/d-family' },
-  'standarddcasv5family': { display: 'DCasv5', category: 'general-purpose', docPath: 'general-purpose/dc-family' },
-  'standarddcadsv5family': { display: 'DCadsv5', category: 'general-purpose', docPath: 'general-purpose/dc-family' },
-  'standarddcsv3family': { display: 'DCsv3', category: 'general-purpose', docPath: 'general-purpose/dc-family' },
-  'standardeadsv5family': { display: 'Eadsv5', category: 'memory-optimized', docPath: 'memory-optimized/e-family' },
-  'standardeasv4family': { display: 'Easv4', category: 'memory-optimized', docPath: 'memory-optimized/e-family' },
-  'standardeasv5family': { display: 'Easv5', category: 'memory-optimized', docPath: 'memory-optimized/e-family' },
-  'standardeasv6family': { display: 'Easv6', category: 'memory-optimized', docPath: 'memory-optimized/e-family' },
-  'standardedsv4family': { display: 'Edsv4', category: 'memory-optimized', docPath: 'memory-optimized/e-family' },
-  'standardedsv5family': { display: 'Edsv5', category: 'memory-optimized', docPath: 'memory-optimized/e-family' },
-  'standardedsv6family': { display: 'Edsv6', category: 'memory-optimized', docPath: 'memory-optimized/e-family' },
-  'standardesv3family': { display: 'Esv3', category: 'memory-optimized', docPath: 'memory-optimized/e-family' },
-  'standardesv4family': { display: 'Esv4', category: 'memory-optimized', docPath: 'memory-optimized/e-family' },
-  'standardesv5family': { display: 'Esv5', category: 'memory-optimized', docPath: 'memory-optimized/e-family' },
-  'standardev3family': { display: 'Ev3', category: 'memory-optimized', docPath: 'memory-optimized/e-family' },
-  'standardev4family': { display: 'Ev4', category: 'memory-optimized', docPath: 'memory-optimized/e-family' },
-  'standardev5family': { display: 'Ev5', category: 'memory-optimized', docPath: 'memory-optimized/e-family' },
-  'standardebsv5family': { display: 'Ebsv5', category: 'memory-optimized', docPath: 'memory-optimized/eb-family' },
-  'standardebdsv5family': { display: 'Ebdsv5', category: 'memory-optimized', docPath: 'memory-optimized/eb-family' },
-  'standardecasv5family': { display: 'ECasv5', category: 'memory-optimized', docPath: 'memory-optimized/ec-family' },
-  'standardecadsv5family': { display: 'ECadsv5', category: 'memory-optimized', docPath: 'memory-optimized/ec-family' },
-  'standardfsv2family': { display: 'Fsv2', category: 'compute-optimized', docPath: 'compute-optimized/f-family' },
-  'standardfsfamily': { display: 'Fs', category: 'compute-optimized', docPath: 'compute-optimized/f-family' },
-  'standardffamily': { display: 'F', category: 'compute-optimized', docPath: 'compute-optimized/f-family' },
-  'standardfxfamily': { display: 'FX', category: 'compute-optimized', docPath: 'compute-optimized/fx-family' },
-  'standardlsv2family': { display: 'Lsv2', category: 'storage-optimized', docPath: 'storage-optimized/l-family' },
-  'standardlsv3family': { display: 'Lsv3', category: 'storage-optimized', docPath: 'storage-optimized/l-family' },
-  'standardlsv4family': { display: 'Lsv4', category: 'storage-optimized', docPath: 'storage-optimized/l-family' },
-  'standardmsv2family': { display: 'Msv2', category: 'memory-optimized', docPath: 'memory-optimized/m-family' },
-  'standardmsfamily': { display: 'Ms', category: 'memory-optimized', docPath: 'memory-optimized/m-family' },
-  'standardmfamily': { display: 'M', category: 'memory-optimized', docPath: 'memory-optimized/m-family' },
-  'standardmbsv3family': { display: 'Mbsv3', category: 'memory-optimized', docPath: 'memory-optimized/m-family' },
-  'standardncadsv5a100family': { display: 'NC A100 v4', category: 'gpu', docPath: 'gpu-accelerated/nc-family' },
-  'standardncadsh100v5family': { display: 'NCads H100 v5', category: 'gpu', docPath: 'gpu-accelerated/nc-family' },
-  'standardncsv3family': { display: 'NCsv3', category: 'gpu', docPath: 'gpu-accelerated/nc-family' },
-  'standardncast4v3family': { display: 'NCasT4 v3', category: 'gpu', docPath: 'gpu-accelerated/nc-family' },
-  'standardndsmv4family': { display: 'NDsm v4', category: 'gpu', docPath: 'gpu-accelerated/nd-family' },
-  'standardnda100v4family': { display: 'ND A100 v4', category: 'gpu', docPath: 'gpu-accelerated/nd-family' },
-  'standardndh100v5family': { display: 'ND H100 v5', category: 'gpu', docPath: 'gpu-accelerated/nd-family' },
-  'standardngadsv620v1family': { display: 'NGads V620', category: 'gpu', docPath: 'gpu-accelerated/ng-family' },
-  'standardnvsv3family': { display: 'NVsv3', category: 'gpu', docPath: 'gpu-accelerated/nv-family' },
-  'standardnvsv4family': { display: 'NVsv4', category: 'gpu', docPath: 'gpu-accelerated/nv-family' },
-  'standardnvadsa10v5family': { display: 'NVadsA10 v5', category: 'gpu', docPath: 'gpu-accelerated/nv-family' },
-  'standardnpsfamily': { display: 'NPs', category: 'fpga', docPath: 'fpga-accelerated/np-family' },
-  'standardhbsv4family': { display: 'HBv4', category: 'hpc', docPath: 'high-performance-compute/hb-family' },
-  'standardhbv3family': { display: 'HBv3', category: 'hpc', docPath: 'high-performance-compute/hb-family' },
-  'standardhbv2family': { display: 'HBv2', category: 'hpc', docPath: 'high-performance-compute/hb-family' },
-  'standardhcfamily': { display: 'HC', category: 'hpc', docPath: 'high-performance-compute/hc-family' },
-  'standardhxfamily': { display: 'HX', category: 'hpc', docPath: 'high-performance-compute/hx-family' },
+  StandardAv2Family: { display: 'Av2-series', type: 'General Purpose' },
+  StandardAmv2Family: { display: 'Amv2-series', type: 'General Purpose' },
+  StandardBSFamily: { display: 'B-series', type: 'General Purpose' },
+  StandardBSv2Family: { display: 'Bsv2-series', type: 'General Purpose' },
+  StandardBSv3Family: { display: 'Bsv3-series', type: 'General Purpose' },
+  StandardBPSFamily: { display: 'Bps-series', type: 'General Purpose' },
+  StandardDSFamily: { display: 'Ds-series', type: 'General Purpose' },
+  StandardDSv2Family: { display: 'Dsv2-series', type: 'General Purpose' },
+  StandardDv2Family: { display: 'Dv2-series', type: 'General Purpose' },
+  StandardDFamily: { display: 'D-series', type: 'General Purpose' },
+  StandardDSv3Family: { display: 'Dsv3-series', type: 'General Purpose' },
+  StandardDv3Family: { display: 'Dv3-series', type: 'General Purpose' },
+  StandardDSv4Family: { display: 'Dsv4-series', type: 'General Purpose' },
+  StandardDv4Family: { display: 'Dv4-series', type: 'General Purpose' },
+  StandardDSv5Family: { display: 'Dsv5-series', type: 'General Purpose' },
+  StandardDv5Family: { display: 'Dv5-series', type: 'General Purpose' },
+  StandardDDSv4Family: { display: 'Ddsv4-series', type: 'General Purpose' },
+  StandardDDv4Family: { display: 'Ddv4-series', type: 'General Purpose' },
+  StandardDDSv5Family: { display: 'Ddsv5-series', type: 'General Purpose' },
+  StandardDDv5Family: { display: 'Ddv5-series', type: 'General Purpose' },
+  StandardDASv4Family: { display: 'Dasv4-series', type: 'General Purpose' },
+  StandardDAv4Family: { display: 'Dav4-series', type: 'General Purpose' },
+  StandardDASv5Family: { display: 'Dasv5-series', type: 'General Purpose' },
+  StandardDADSv5Family: { display: 'Dadsv5-series', type: 'General Purpose' },
+  StandardDASv6Family: { display: 'Dasv6-series', type: 'General Purpose' },
+  StandardDALSv6Family: { display: 'Dalsv6-series', type: 'General Purpose' },
+  StandardDPSv5Family: { display: 'Dpsv5-series', type: 'General Purpose' },
+  StandardDPDSv5Family: { display: 'Dpdsv5-series', type: 'General Purpose' },
+  StandardDPSv6Family: { display: 'Dpsv6-series', type: 'General Purpose' },
+  StandardDPLSv6Family: { display: 'Dplsv6-series', type: 'General Purpose' },
+  StandardDPLDSv6Family: { display: 'Dpldsv6-series', type: 'General Purpose' },
+  StandardDPDSv6Family: { display: 'Dpdsv6-series', type: 'General Purpose' },
+  StandardDDSv6Family: { display: 'Ddsv6-series', type: 'General Purpose' },
+  StandardDSv6Family: { display: 'Dsv6-series', type: 'General Purpose' },
+  StandardDLSv6Family: { display: 'Dlsv6-series', type: 'General Purpose' },
+  StandardDLDSv6Family: { display: 'Dldsv6-series', type: 'General Purpose' },
+  StandardESv3Family: { display: 'Esv3-series', type: 'Memory Optimized' },
+  StandardEv3Family: { display: 'Ev3-series', type: 'Memory Optimized' },
+  StandardESv4Family: { display: 'Esv4-series', type: 'Memory Optimized' },
+  StandardEv4Family: { display: 'Ev4-series', type: 'Memory Optimized' },
+  StandardESv5Family: { display: 'Esv5-series', type: 'Memory Optimized' },
+  StandardEv5Family: { display: 'Ev5-series', type: 'Memory Optimized' },
+  StandardEDSv4Family: { display: 'Edsv4-series', type: 'Memory Optimized' },
+  StandardEDv4Family: { display: 'Edv4-series', type: 'Memory Optimized' },
+  StandardEDSv5Family: { display: 'Edsv5-series', type: 'Memory Optimized' },
+  StandardEDv5Family: { display: 'Edv5-series', type: 'Memory Optimized' },
+  StandardEASv4Family: { display: 'Easv4-series', type: 'Memory Optimized' },
+  StandardEAv4Family: { display: 'Eav4-series', type: 'Memory Optimized' },
+  StandardEASv5Family: { display: 'Easv5-series', type: 'Memory Optimized' },
+  StandardEADSv5Family: { display: 'Eadsv5-series', type: 'Memory Optimized' },
+  StandardEASv6Family: { display: 'Easv6-series', type: 'Memory Optimized' },
+  StandardEALSv6Family: { display: 'Ealsv6-series', type: 'Memory Optimized' },
+  StandardEDSv6Family: { display: 'Edsv6-series', type: 'Memory Optimized' },
+  StandardESv6Family: { display: 'Esv6-series', type: 'Memory Optimized' },
+  StandardELSv6Family: { display: 'Elsv6-series', type: 'Memory Optimized' },
+  StandardELDSv6Family: { display: 'Eldsv6-series', type: 'Memory Optimized' },
+  StandardEPSv5Family: { display: 'Epsv5-series', type: 'Memory Optimized' },
+  StandardEPDSv5Family: { display: 'Epdsv5-series', type: 'Memory Optimized' },
+  StandardEPSv6Family: { display: 'Epsv6-series', type: 'Memory Optimized' },
+  StandardEBSv5Family: { display: 'Ebsv5-series', type: 'Memory Optimized' },
+  StandardEBDSv5Family: { display: 'Ebdsv5-series', type: 'Memory Optimized' },
+  StandardMSFamily: { display: 'M-series', type: 'Memory Optimized' },
+  StandardMSv2Family: { display: 'Msv2-series', type: 'Memory Optimized' },
+  StandardMDSMediumMemoryv2Family: { display: 'Mdsv2-series', type: 'Memory Optimized' },
+  StandardMSMediumMemoryv2Family: { display: 'Msv2-series (MM)', type: 'Memory Optimized' },
+  StandardMSv3Family: { display: 'Msv3-series', type: 'Memory Optimized' },
+  StandardMDSv3Family: { display: 'Mdsv3-series', type: 'Memory Optimized' },
+  StandardMBSv3Family: { display: 'Mbsv3-series', type: 'Memory Optimized' },
+  StandardFSFamily: { display: 'Fs-series', type: 'Compute Optimized' },
+  StandardFSv2Family: { display: 'Fsv2-series', type: 'Compute Optimized' },
+  StandardFv2Family: { display: 'Fv2-series', type: 'Compute Optimized' },
+  StandardFXMDVSFamily: { display: 'FX-series', type: 'Compute Optimized' },
+  StandardFSv6Family: { display: 'Fsv6-series', type: 'Compute Optimized' },
+  StandardFALSv6Family: { display: 'Falsv6-series', type: 'Compute Optimized' },
+  StandardLSFamily: { display: 'Ls-series', type: 'Storage Optimized' },
+  StandardLSv2Family: { display: 'Lsv2-series', type: 'Storage Optimized' },
+  StandardLASv3Family: { display: 'Lasv3-series', type: 'Storage Optimized' },
+  StandardLSv3Family: { display: 'Lsv3-series', type: 'Storage Optimized' },
+  StandardNCSv3Family: { display: 'NCsv3-series', type: 'GPU Accelerated' },
+  StandardNCSv2Family: { display: 'NCsv2-series', type: 'GPU Accelerated' },
+  StandardNCFamily: { display: 'NC-series', type: 'GPU Accelerated' },
+  StandardNCADSA100v4Family: { display: 'NCA100v4-series', type: 'GPU Accelerated' },
+  StandardNCADSA10v4Family: { display: 'NCADSA10v4-series', type: 'GPU Accelerated' },
+  StandardNCASv3Family: { display: 'NCasv3-series', type: 'GPU Accelerated' },
+  StandardNVFamily: { display: 'NV-series', type: 'GPU Accelerated' },
+  StandardNVSv2Family: { display: 'NVsv2-series', type: 'GPU Accelerated' },
+  StandardNVSv3Family: { display: 'NVsv3-series', type: 'GPU Accelerated' },
+  StandardNVSv4Family: { display: 'NVsv4-series', type: 'GPU Accelerated' },
+  StandardNVADSA10v5Family: { display: 'NVadsA10v5-series', type: 'GPU Accelerated' },
+  StandardNDSFamily: { display: 'NDs-series', type: 'GPU Accelerated' },
+  StandardNDSv2Family: { display: 'NDsv2-series', type: 'GPU Accelerated' },
+  StandardNDASv4Family: { display: 'NDasv4-series', type: 'GPU Accelerated' },
+  StandardNDSv3Family: { display: 'NDsv3-series', type: 'GPU Accelerated' },
+  StandardNGADSV620v1Family: { display: 'NGadsV620-series', type: 'GPU Accelerated' },
+  StandardHBSFamily: { display: 'HB-series', type: 'HPC' },
+  StandardHBSv2Family: { display: 'HBv2-series', type: 'HPC' },
+  StandardHBSv3Family: { display: 'HBv3-series', type: 'HPC' },
+  StandardHBSv4Family: { display: 'HBv4-series', type: 'HPC' },
+  StandardHCSFamily: { display: 'HC-series', type: 'HPC' },
+  StandardHFamily: { display: 'H-series', type: 'HPC' },
+  StandardDCSv2Family: { display: 'DCsv2-series', type: 'Confidential' },
+  StandardDCSv3Family: { display: 'DCsv3-series', type: 'Confidential' },
+  StandardDCDSv3Family: { display: 'DCdsv3-series', type: 'Confidential' },
+  StandardDCADSv5Family: { display: 'DCadsv5-series', type: 'Confidential' },
+  StandardDCASv5Family: { display: 'DCasv5-series', type: 'Confidential' },
+  StandardECSv5Family: { display: 'ECsv5-series', type: 'Confidential' },
+  StandardECDSv5Family: { display: 'ECdsv5-series', type: 'Confidential' },
+  StandardECASv5Family: { display: 'ECasv5-series', type: 'Confidential' },
+  StandardECADSv5Family: { display: 'ECadsv5-series', type: 'Confidential' },
 };
 
-function getFamilyDisplay(familyRaw) {
-  const key = familyRaw.toLowerCase();
-  if (familyMap[key]) return familyMap[key].display;
-  // Best-effort: strip 'standard' prefix and 'Family' suffix
-  let name = familyRaw.replace(/^standard/i, '').replace(/family$/i, '');
-  return name || familyRaw;
+const typeColors = {
+  'General Purpose': '#0f6cbd',
+  'Compute Optimized': '#e97548',
+  'Memory Optimized': '#8764b8',
+  'Storage Optimized': '#038387',
+  'GPU Accelerated': '#c4314b',
+  'HPC': '#4f52b2',
+  'Confidential': '#7a7574',
+};
+
+const workloads = [
+  { name: 'Oracle Database', icon: '🗄️', desc: 'Memory-optimized for Oracle workloads', series: ['E', 'M', 'Mv2'] },
+  { name: 'SAP HANA', icon: '📊', desc: 'SAP HANA certified VMs', series: ['M', 'Mv2', 'E'] },
+  { name: 'SQL Server', icon: '🗃️', desc: 'Optimized for SQL Server', series: ['E', 'M', 'D'] },
+  { name: 'AI/ML & GPU', icon: '🤖', desc: 'GPU-accelerated compute', series: ['NC', 'ND', 'NV'] },
+  { name: 'HPC', icon: '⚡', desc: 'High-performance computing', series: ['HB', 'HC', 'H'] },
+  { name: 'Virtual Desktop (AVD)', icon: '🖥️', desc: 'Azure Virtual Desktop', series: ['D', 'B'] },
+  { name: 'Web Applications', icon: '🌐', desc: 'General-purpose web hosting', series: ['B', 'D', 'F'] },
+  { name: 'Big Data', icon: '📈', desc: 'Analytics & big data', series: ['E', 'L'] },
+  { name: 'Gaming', icon: '🎮', desc: 'GPU for game streaming', series: ['NV', 'NC'] },
+  { name: 'Confidential Computing', icon: '🔒', desc: 'Hardware-based TEEs', series: ['DC', 'EC'] },
+];
+
+const retirementFamilies = {
+  'StandardAv2Family': { name: 'Av2-series', date: 'November 2028' },
+  'StandardAmv2Family': { name: 'Amv2-series', date: 'November 2028' },
+  'StandardBSFamily': { name: 'B v1-series', date: 'November 2028' },
+  'StandardDSFamily': { name: 'Ds-series', date: 'November 2028' },
+  'StandardDFamily': { name: 'D-series', date: 'November 2028' },
+  'StandardDSv2Family': { name: 'Dsv2-series', date: 'November 2028' },
+  'StandardDv2Family': { name: 'Dv2-series', date: 'November 2028' },
+};
+
+const groupOrder = ['US', 'Canada', 'Mexico', 'South America', 'Europe', 'UK', 'Middle East', 'Africa', 'Asia Pacific', 'Other'];
+
+// === TABLE COLUMNS ===
+const columns = [
+  { key: 'name', label: 'SKU Name' },
+  { key: 'family', label: 'Family', render: v => getFamilyDisplay(v) },
+  { key: 'tier', label: 'Tier' },
+  { key: 'size', label: 'Size' },
+  { key: 'vCPUs', label: 'vCPUs' },
+  { key: 'memoryGB', label: 'Memory (GB)' },
+  { key: 'maxDataDisks', label: 'Max Data Disks' },
+  { key: 'maxNICs', label: 'Max NICs' },
+  { key: 'cpuArchitecture', label: 'Architecture' },
+  { key: 'hyperVGenerations', label: 'Hyper-V' },
+  { key: 'zones', label: 'Zones', render: v => v && v.length ? v.join(', ') : '—' },
+  { key: 'acceleratedNetworking', label: 'Accel Networking', render: v => v ? '✅' : '❌' },
+  { key: 'premiumIO', label: 'Premium IO', render: v => v ? '✅' : '❌' },
+  { key: 'ephemeralOSDisk', label: 'Ephemeral OS', render: v => v ? '✅' : '❌' },
+  { key: 'encryptionAtHost', label: 'Encryption at Host', render: v => v ? '✅' : '❌' },
+  { key: 'spotEligible', label: 'Spot Eligible', render: v => v ? '✅' : '❌' },
+  { key: 'restrictions', label: 'Restrictions', render: v => {
+    if (!v || !v.length) return '—';
+    return v.map(r => `<span class="restriction-badge">${escapeHtml(typeof r === 'string' ? r : (r.reasonCode || r.type || JSON.stringify(r)))}</span>`).join(' ');
+  }},
+];
+
+// === HELPERS ===
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-function getDocsUrl(familyRaw) {
-  const key = familyRaw.toLowerCase();
-  if (familyMap[key]) {
-    return `https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/${familyMap[key].docPath}`;
+function getFamilyDisplay(family) {
+  if (!family) return '—';
+  const mapped = familyMap[family];
+  if (mapped) return mapped.display;
+  let name = family.replace(/^Standard/, '').replace(/Family$/, '');
+  return name + '-series';
+}
+
+function getFamilyType(family) {
+  const mapped = familyMap[family];
+  return mapped ? mapped.type : 'General Purpose';
+}
+
+function showToast(msg, type='success') {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000);
+}
+
+function toggleTheme() {
+  const html = document.documentElement;
+  const current = html.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  document.querySelector('.theme-toggle').textContent = next === 'dark' ? '☀️ Theme' : '🌙 Theme';
+  if (leafletMap) leafletMap.invalidateSize();
+}
+
+function toggleSection(id) {
+  const body = document.getElementById('body-' + id);
+  const toggle = document.getElementById('toggle-' + id);
+  body.classList.toggle('collapsed');
+  toggle.classList.toggle('collapsed');
+  if (id === 'map' && leafletMap) {
+    setTimeout(() => leafletMap.invalidateSize(), 100);
   }
-  return 'https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/overview';
 }
 
-// ══════════════════════════════════════════════
-// INITIALIZATION
-// ══════════════════════════════════════════════
+// === INIT ===
 async function init() {
   try {
-    const resp = await fetch('data/regions.json');
-    if (!resp.ok) throw new Error('Failed to load regions');
-    allRegions = await resp.json();
-
-    // Load metadata FIRST so we know which regions have data
-    try {
-      const metaResp = await fetch('data/metadata.json');
-      if (metaResp.ok) {
-        const meta = await metaResp.json();
-        if (meta.availableRegions) {
-          availableDataRegions = new Set(meta.availableRegions);
-        }
-        document.getElementById('freshnessDate').textContent = meta.lastUpdatedDisplay;
-        document.getElementById('freshnessBanner').style.display = '';
-        document.getElementById('freshnessLoading').style.display = 'none';
-
-        // Show data coverage stats
-        const coverageEl = document.getElementById('dataCoverage');
-        const withData = meta.regionsWithData || meta.availableRegions?.length || 0;
-        const total = meta.physicalRegionCount || allRegions.length;
-        const failed = meta.failedRegions?.length || 0;
-        let coverageText = `${withData} of ${total} regions have SKU data`;
-        if (failed > 0) coverageText += ` (${failed} failed)`;
-        coverageEl.textContent = coverageText;
-
-        // Check staleness: warn if data is older than 35 days
-        if (meta.lastUpdated) {
-          const lastUpdated = new Date(meta.lastUpdated);
-          const now = new Date();
-          const daysSinceUpdate = Math.floor((now - lastUpdated) / (1000 * 60 * 60 * 24));
-          if (daysSinceUpdate > 35) {
-            const banner = document.getElementById('freshnessBanner');
-            banner.classList.add('stale');
-            document.getElementById('freshnessIcon').textContent = '⚠️';
-            const staleDiv = document.getElementById('staleWarning');
-            staleDiv.style.display = '';
-            document.getElementById('staleMessage').textContent =
-              `⚠️ Data is ${daysSinceUpdate} days old — a newer refresh may be available. Please reload the page or clear your browser cache.`;
-          }
-        }
-      }
-    } catch (e) { /* metadata optional */ }
-
-    const select = document.getElementById('regionSelect');
-    select.innerHTML = '<option value="">— Choose a region —</option>';
-
-    // Group regions by geographyGroup
-    const groups = {};
-    const groupOrder = ['US', 'Canada', 'Mexico', 'South America', 'Europe', 'UK', 'Middle East', 'Africa', 'Asia Pacific'];
-    for (const r of allRegions) {
-      const g = r.geographyGroup || 'Other';
-      if (!groups[g]) groups[g] = [];
-      groups[g].push(r);
-    }
-    for (const g of Object.keys(groups)) {
-      groups[g].sort((a, b) => a.displayName.localeCompare(b.displayName));
-    }
-    const rendered = new Set();
-    for (const g of [...groupOrder, ...Object.keys(groups)]) {
-      if (rendered.has(g) || !groups[g]) continue;
-      rendered.add(g);
-      const optgroup = document.createElement('optgroup');
-      optgroup.label = g;
-      for (const r of groups[g]) {
-        const opt = document.createElement('option');
-        opt.value = r.name;
-        const hasData = availableDataRegions.has(r.name);
-        opt.textContent = hasData
-          ? `${r.displayName} (${r.name})`
-          : `${r.displayName} (${r.name}) — no data`;
-        if (!hasData) opt.style.color = '#9e9e9e';
-        optgroup.appendChild(opt);
-      }
-      select.appendChild(optgroup);
-    }
-    select.value = 'newzealandnorth';
-    initMapOutline();
+    const [regionsResp, metaResp] = await Promise.all([
+      fetch('data/regions.json'),
+      fetch('data/metadata.json')
+    ]);
+    allRegions = await regionsResp.json();
+    metadata = await metaResp.json();
+    availableDataRegions = new Set(metadata.availableRegions || []);
+    renderFreshness();
+    buildDropdown();
+    initMap();
     selectRegion('newzealandnorth');
-
-  } catch (err) {
-    showToast('Failed to load region list: ' + err.message, 'error');
+  } catch (e) {
+    showToast('Failed to load data: ' + e.message, 'error');
   }
 }
 
-// ══════════════════════════════════════════════
-// REGION MAP (Leaflet)
-// ══════════════════════════════════════════════
-let leafletMap = null;
-let mapMarkers = {};
+function renderFreshness() {
+  const el = document.getElementById('freshness-footer');
+  const lastUpdated = metadata.lastUpdated ? new Date(metadata.lastUpdated) : null;
+  const daysSince = lastUpdated ? Math.floor((Date.now() - lastUpdated.getTime()) / 86400000) : null;
+  let text = `Data last updated: ${metadata.lastUpdatedDisplay || 'Unknown'}`;
+  if (daysSince !== null && daysSince > 35) {
+    text += ` · ⚠️ ${daysSince} days ago — may be outdated`;
+  }
+  text += ` · ${metadata.regionsWithData || 0} of ${metadata.physicalRegionCount || 0} regions`;
+  el.textContent = text;
+}
 
-function initMapOutline() {
-  leafletMap = L.map('regionMap', {
-    center: [-36.85, 174.76],
-    zoom: 4,
-    minZoom: 2,
-    maxZoom: 6,
-    worldCopyJump: true,
-    scrollWheelZoom: true,
+function buildDropdown() {
+  const sel = document.getElementById('region-select');
+  const grouped = {};
+  allRegions.forEach(r => {
+    const g = r.geographyGroup || 'Other';
+    if (!grouped[g]) grouped[g] = [];
+    grouped[g].push(r);
   });
+  // Sort within groups
+  Object.values(grouped).forEach(arr => arr.sort((a, b) => a.displayName.localeCompare(b.displayName)));
 
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-    maxZoom: 6,
-  }).addTo(leafletMap);
+  let html = '';
+  groupOrder.forEach(g => {
+    const regions = grouped[g];
+    if (!regions || !regions.length) return;
+    html += `<optgroup label="${escapeHtml(g)}">`;
+    regions.forEach(r => {
+      const hasData = availableDataRegions.has(r.name);
+      const label = `${r.displayName} (${r.name})${hasData ? '' : ' — no data'}`;
+      html += `<option value="${escapeHtml(r.name)}" ${!hasData ? 'style="color:#999"' : ''}>${escapeHtml(label)}</option>`;
+    });
+    html += '</optgroup>';
+    delete grouped[g];
+  });
+  // Any remaining groups
+  Object.keys(grouped).sort().forEach(g => {
+    const regions = grouped[g];
+    if (!regions || !regions.length) return;
+    html += `<optgroup label="${escapeHtml(g)}">`;
+    regions.forEach(r => {
+      const hasData = availableDataRegions.has(r.name);
+      const label = `${r.displayName} (${r.name})${hasData ? '' : ' — no data'}`;
+      html += `<option value="${escapeHtml(r.name)}" ${!hasData ? 'style="color:#999"' : ''}>${escapeHtml(label)}</option>`;
+    });
+    html += '</optgroup>';
+  });
+  sel.innerHTML = html;
 }
 
-function renderRegionMap() {
-  if (!leafletMap) return;
+// === MAP ===
+function initMap() {
+  leafletMap = L.map('map', { worldCopyJump: true }).setView([-36.85, 174.76], 4);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors',
+    maxZoom: 18,
+  }).addTo(leafletMap);
+  renderMarkers();
+}
 
-  // Remove existing markers
-  for (const key of Object.keys(mapMarkers)) {
-    leafletMap.removeLayer(mapMarkers[key]);
-    delete mapMarkers[key];
-  }
-
-  for (const r of allRegions) {
-    if (!r.latitude || !r.longitude) continue;
+function renderMarkers() {
+  mapMarkers.forEach(m => leafletMap.removeLayer(m));
+  mapMarkers = [];
+  allRegions.forEach(r => {
+    if (!r.latitude || !r.longitude) return;
     const lat = parseFloat(r.latitude);
     const lng = parseFloat(r.longitude);
-    const isSelected = selectedRegion === r.name;
+    if (isNaN(lat) || isNaN(lng)) return;
+    const isSelected = r.name === selectedRegion;
     const hasData = availableDataRegions.has(r.name);
+    let color, borderColor, radius, opacity;
+    if (isSelected) { color = '#0f6cbd'; borderColor = '#ffffff'; radius = 12; opacity = 1; }
+    else if (hasData) { color = '#0e7a0d'; borderColor = '#065e06'; radius = 7; opacity = 0.8; }
+    else { color = '#999999'; borderColor = '#666666'; radius = 5; opacity = 0.5; }
 
-    let fillColor, borderColor, radius, weight, opacity;
-    if (isSelected) {
-      fillColor = '#0f6cbd'; borderColor = '#fff'; radius = 12; weight = 3; opacity = 1;
-    } else if (hasData) {
-      fillColor = '#4caf50'; borderColor = '#2e7d32'; radius = 7; weight = 2; opacity = 0.8;
-    } else {
-      fillColor = '#9e9e9e'; borderColor = '#757575'; radius = 5; weight = 1; opacity = 0.5;
-    }
-
+    const status = isSelected ? 'Selected' : hasData ? 'Data available' : 'No data yet';
     const marker = L.circleMarker([lat, lng], {
-      radius, fillColor, color: borderColor, weight, fillOpacity: opacity,
-    });
-
-    let tooltipHtml = `<strong>${r.displayName}</strong><br><span style="font-size:11px;color:#666;">${r.name}</span>`;
-    if (isSelected) tooltipHtml += '<br><em style="color:#0f6cbd;">✓ Selected</em>';
-    else if (!hasData) tooltipHtml += '<br><em style="color:#9e9e9e;">No SKU data available</em>';
-    marker.bindTooltip(tooltipHtml, { direction: 'top', offset: [0, -8] });
-
-    marker.on('click', () => toggleRegionFromMap(r.name));
-    if (isSelected) marker.setZIndexOffset(1000);
-    marker.addTo(leafletMap);
-    mapMarkers[r.name] = marker;
-  }
+      radius, fillColor: color, color: borderColor, weight: 2, fillOpacity: opacity, opacity: 1,
+    }).addTo(leafletMap);
+    marker.bindTooltip(`<strong>${escapeHtml(r.displayName)}</strong><br>${escapeHtml(r.name)}<br><em>${status}</em>`, { direction: 'top' });
+    marker.on('click', () => selectRegion(r.name));
+    mapMarkers.push(marker);
+  });
 }
 
-// ══════════════════════════════════════════════
-// REGION MANAGEMENT (single region)
-// ══════════════════════════════════════════════
+// === REGION SELECTION ===
 function selectRegion(regionName) {
-  if (!regionName) return;
   selectedRegion = regionName;
-  renderRegionMap();
-
-  // Update dropdown
-  document.getElementById('regionSelect').value = regionName;
-
-  // Update badge with display name
-  const regionInfo = allRegions.find(r => r.name === regionName);
-  document.getElementById('regionBadge').textContent = regionInfo ? regionInfo.displayName : regionName;
+  const sel = document.getElementById('region-select');
+  sel.value = regionName;
+  const region = allRegions.find(r => r.name === regionName);
+  const displayName = region ? region.displayName : regionName;
+  document.getElementById('region-badge').innerHTML = `<span class="badge">${escapeHtml(displayName)}</span>`;
 
   // Pan map
-  if (regionInfo && regionInfo.latitude && regionInfo.longitude && leafletMap) {
-    leafletMap.flyTo([parseFloat(regionInfo.latitude), parseFloat(regionInfo.longitude)], 4, { duration: 0.8 });
+  if (leafletMap && region && region.latitude && region.longitude) {
+    leafletMap.setView([parseFloat(region.latitude), parseFloat(region.longitude)], 5, { animate: true });
   }
+  renderMarkers();
 
-  updateCLICommand();
+  // Update CLI command
+  document.getElementById('cli-command').textContent = `az vm list-skus --location ${regionName} -o table`;
 
-  // Auto-load SKU data
   if (availableDataRegions.has(regionName)) {
-    document.getElementById('noDataMessage').style.display = 'none';
-    document.getElementById('skuResults').style.display = '';
-    loadRegionData(regionName);
+    document.getElementById('no-data-msg').classList.add('hidden');
+    document.getElementById('view-sku-prompt').style.display = '';
+    document.getElementById('view-sku-btn').disabled = false;
+    document.getElementById('view-sku-hint').textContent = `View VM SKU details for ${displayName}`;
+
+    // If SKU results are already showing (user switching regions), auto-reload
+    if (!document.getElementById('sku-results').classList.contains('hidden')) {
+      loadRegionData(regionName);
+    }
   } else {
-    // Show no-data message
-    document.getElementById('skuResults').style.display = 'none';
-    const noData = document.getElementById('noDataMessage');
-    const displayName = regionInfo ? regionInfo.displayName : regionName;
-    noData.innerHTML = `
-      <div style="text-align:center;padding:32px 20px;">
-        <div style="font-size:40px;margin-bottom:12px;">📭</div>
-        <h3 style="margin-bottom:8px;">No SKU data available for ${escHtml(displayName)}</h3>
-        <p style="color:var(--text-secondary);max-width:500px;margin:0 auto 16px;">
-          SKU data for this region has not been collected yet. Data is refreshed on the 1st of each month.
-          For real-time data, run:
-        </p>
-        <code style="display:inline-block;background:var(--bg-layer2);padding:8px 16px;border-radius:var(--radius-sm);font-size:13px;">az vm list-skus --location ${escHtml(regionName)} -o table</code>
-      </div>`;
-    noData.style.display = '';
+    document.getElementById('view-sku-prompt').style.display = 'none';
+    document.getElementById('sku-results').classList.add('hidden');
+    document.getElementById('no-data-msg').classList.remove('hidden');
+    document.getElementById('no-data-title').textContent = `No SKU data available for ${displayName}`;
+    document.getElementById('no-data-desc').textContent = 'SKU data has not been collected for this region yet. You can use the Azure CLI to get live data:';
+    document.getElementById('no-data-cli').textContent = `az vm list-skus --location ${regionName} -o table`;
   }
 }
 
-function toggleRegionFromMap(regionName) {
-  selectRegion(regionName);
+function showSkuDetails() {
+  if (!selectedRegion || !availableDataRegions.has(selectedRegion)) return;
+  document.getElementById('view-sku-prompt').style.display = 'none';
+  document.getElementById('sku-results').classList.remove('hidden');
+  loadRegionData(selectedRegion);
 }
 
-// ══════════════════════════════════════════════
-// DATA LOADING
-// ══════════════════════════════════════════════
 async function loadRegionData(regionName) {
   if (regionDataCache[regionName]) {
-    rebuildSkuList();
+    rebuildSkuList(regionName);
     return;
   }
-
-  document.getElementById('skuResults').style.display = '';
-  document.getElementById('initialState').style.display = 'none';
-  document.getElementById('loadingIndicator').style.display = '';
+  const tableBody = document.getElementById('table-body');
+  tableBody.innerHTML = '<tr><td colspan="17"><div class="loading-indicator">Loading SKU data</div></td></tr>';
 
   try {
     const resp = await fetch(`data/${regionName}.json`);
-    if (!resp.ok) throw new Error(`No data available for ${regionName}`);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     const data = await resp.json();
     regionDataCache[regionName] = data;
-    rebuildSkuList();
-    showToast(`Loaded ${data.skuCount} SKUs for ${data.regionDisplayName}`);
-  } catch (err) {
-    showToast(`Failed to load data for ${regionName}: ${err.message}`, 'error');
-  } finally {
-    document.getElementById('loadingIndicator').style.display = 'none';
+    rebuildSkuList(regionName);
+  } catch (e) {
+    showToast(`Failed to load data for ${regionName}: ${e.message}`, 'error');
+    tableBody.innerHTML = `<tr><td colspan="17" style="text-align:center;padding:24px;color:var(--status-danger);">Error loading data: ${escapeHtml(e.message)}</td></tr>`;
   }
 }
 
-function rebuildSkuList() {
-  allSkus = [];
-  if (selectedRegion) {
-    const data = regionDataCache[selectedRegion];
-    if (data) {
-      for (const sku of data.skus) {
-        allSkus.push({ ...sku, region: selectedRegion, regionDisplayName: data.regionDisplayName });
-      }
-    }
-  }
-  populateFamilyFilter();
+function rebuildSkuList(regionName) {
+  const data = regionDataCache[regionName];
+  if (!data) return;
+  allSkus = data.skus || [];
+
+  // Populate family filter
+  const familySet = new Set(allSkus.map(s => s.family));
+  const familyFilter = document.getElementById('family-filter');
+  const prevVal = familyFilter.value;
+  let familyHtml = '<option value="">All Families</option>';
+  [...familySet].sort((a, b) => getFamilyDisplay(a).localeCompare(getFamilyDisplay(b)))
+    .forEach(f => { familyHtml += `<option value="${escapeHtml(f)}">${escapeHtml(getFamilyDisplay(f))}</option>`; });
+  familyFilter.innerHTML = familyHtml;
+  if (prevVal && familySet.has(prevVal)) familyFilter.value = prevVal;
+
+  applyFilters();
   renderFamilyOverview();
-  renderWorkloadRecommendations();
-  applyFilters();
+  renderWorkloads();
 }
 
-// ══════════════════════════════════════════════
-// FAMILY OVERVIEW RENDERING
-// ══════════════════════════════════════════════
-function renderFamilyOverview() {
-  const grid = document.getElementById('familyGrid');
-  // Group SKUs by family key
-  const familyCounts = {};
-  const familySeries = {};
-  for (const s of allSkus) {
-    const key = getFamilyKey(s.family);
-    if (!key) continue;
-    familyCounts[key] = (familyCounts[key] || 0) + 1;
-    if (!familySeries[key]) familySeries[key] = new Set();
-    familySeries[key].add(getFamilyDisplay(s.family));
-  }
-
-  const keys = Object.keys(familyCounts).sort((a, b) => {
-    const ta = familyInfo[a]?.type || '', tb = familyInfo[b]?.type || '';
-    if (ta !== tb) return ta.localeCompare(tb);
-    return familyCounts[b] - familyCounts[a];
-  });
-
-  document.getElementById('familiesBadge').textContent = keys.length + ' families';
-
-  if (keys.length === 0) {
-    grid.innerHTML = '<p style="color:var(--text-secondary);font-size:13px;">Select a region to see VM family information.</p>';
-    return;
-  }
-
-  grid.innerHTML = keys.map(key => {
-    const info = familyInfo[key];
-    if (!info) return '';
-    const ti = typeInfo[info.type] || {};
-    const count = familyCounts[key];
-    const series = [...(familySeries[key] || [])].sort().join(', ');
-    const docsUrl = `https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/${info.docPath}`;
-    const workloadHtml = info.workloads.map(w => `<li>${escHtml(w)}</li>`).join('');
-    const retirementHtml = info.retirement?.retiring
-      ? `<div class="retirement-warning">⚠️ ${escHtml(info.retirement.note)} — migrate to ${escHtml(info.retirement.migrateTo)}</div>`
-      : '';
-
-    return `<div class="family-card" onclick="filterByFamilyKey('${key}')" style="cursor:pointer;" title="Click to filter SKU table to ${info.letter}-family">
-      <div class="family-card-header">
-        <h4>${ti.icon || '📦'} ${escHtml(info.letter)}-family</h4>
-        <span class="type-badge ${ti.css || ''}">${escHtml(ti.label || info.type)}</span>
-      </div>
-      <ul class="workloads">${workloadHtml}</ul>
-      <div class="sku-count">${count} SKU${count !== 1 ? 's' : ''} available · Series: ${escHtml(series)}</div>
-      ${retirementHtml}
-      <div class="card-links">
-        <a href="${docsUrl}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();">📄 Azure Docs</a>
-        <a href="https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/overview" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();">📋 All Sizes Overview</a>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function filterByFamilyKey(key) {
-  const info = familyInfo[key];
-  if (!info) return;
-  // Find matching family values for this key
-  const matchingFamilies = [...new Set(allSkus.map(s => s.family))].filter(f => getFamilyKey(f) === key);
-  if (matchingFamilies.length === 1) {
-    document.getElementById('familyFilter').value = matchingFamilies[0];
-  } else if (matchingFamilies.length > 1) {
-    // Set to first match and let search narrow further
-    document.getElementById('familyFilter').value = matchingFamilies[0];
-  }
-  applyFilters();
-  // Scroll to SKU table
-  document.getElementById('skutaleBody')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  showToast(`Filtered to ${info.letter}-family SKUs`);
-}
-
-// ══════════════════════════════════════════════
-// WORKLOAD RECOMMENDATIONS
-// ══════════════════════════════════════════════
-const workloadRecommendations = [
-  {
-    id: 'oracle', name: 'Oracle Database', icon: '🏛️',
-    description: 'Oracle DB workloads on Azure — optimised for high memory-to-vCore ratio and storage throughput.',
-    recommendedFamilies: ['eb', 'e', 'm', 'l'],
-    preferredSeries: ['Ebdsv5', 'Ebsv5', 'Edsv5', 'Msv2', 'Lsv3'],
-    note: 'Ebdsv5/Ebsv5 recommended first for optimal 8:1 memory-to-vCore ratio. M-series for multi-TB databases.',
-    docsUrl: 'https://learn.microsoft.com/en-us/azure/virtual-machines/workloads/oracle/oracle-performance-best-practice'
-  },
-  {
-    id: 'sap', name: 'SAP / SAP HANA', icon: '🏢',
-    description: 'SAP-certified VM sizes for SAP HANA and NetWeaver workloads.',
-    recommendedFamilies: ['m', 'e', 'd'],
-    preferredSeries: ['Msv2', 'Mbsv3', 'Edsv5', 'Dasv5'],
-    note: 'M-series and Mv2 certified for SAP HANA up to 12 TB RAM. Always verify SAP certification before deployment.',
-    docsUrl: 'https://learn.microsoft.com/en-us/azure/sap/workloads/planning-guide'
-  },
-  {
-    id: 'sql-server', name: 'SQL Server', icon: '🗄️',
-    description: 'Best VM sizes for SQL Server on Azure VMs — OLTP, analytics, and data warehousing.',
-    recommendedFamilies: ['eb', 'e', 'm', 'd'],
-    preferredSeries: ['Ebdsv5', 'Edsv5', 'Mbsv3', 'Ddsv5'],
-    note: 'Ebdsv5 offers best price-performance for most SQL workloads. Use minimum 4 vCPUs. M-series for large data warehouses.',
-    docsUrl: 'https://learn.microsoft.com/en-us/azure/azure-sql/virtual-machines/windows/performance-guidelines-best-practices-vm-size'
-  },
-  {
-    id: 'ai-ml', name: 'AI / Machine Learning', icon: '🤖',
-    description: 'GPU-accelerated VM sizes for training and inference of AI/ML models.',
-    recommendedFamilies: ['nc', 'nd', 'nv'],
-    preferredSeries: ['NCads H100 v5', 'ND A100 v4', 'ND H100 v5', 'NCasT4 v3', 'NVadsA10 v5'],
-    note: 'ND-series for large-scale distributed training. NC-series for general GPU compute. NV-series for inference and visualisation.',
-    docsUrl: 'https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/gpu-accelerated/overview'
-  },
-  {
-    id: 'hpc', name: 'High Performance Computing', icon: '🔬',
-    description: 'HPC workloads — fluid dynamics, weather modelling, genomics, and engineering simulations.',
-    recommendedFamilies: ['hb', 'hc', 'hx', 'nd'],
-    preferredSeries: ['HBv4', 'HBv3', 'HX', 'ND H100 v5'],
-    note: 'HB-series for memory bandwidth. HC-series for dense computation (retiring May 2027 — migrate to HBv4/HBv5).',
-    docsUrl: 'https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/high-performance-compute/overview'
-  },
-  {
-    id: 'remote-desktop', name: 'Remote Desktop / AVD', icon: '🖥️',
-    description: 'Azure Virtual Desktop and Remote Desktop Services session host sizing.',
-    recommendedFamilies: ['d', 'e', 'nv'],
-    preferredSeries: ['Dsv5', 'Ddsv5', 'Esv5', 'NVadsA10 v5'],
-    note: 'D-series for standard knowledge workers (1 vCPU per 2-4 users). NV-series for GPU-accelerated graphics (CAD, video editing).',
-    docsUrl: 'https://learn.microsoft.com/en-us/windows-server/remote/remote-desktop-services/session-host-virtual-machine-sizing-guidelines'
-  },
-  {
-    id: 'web-apps', name: 'Web Applications', icon: '🌐',
-    description: 'Web servers, application servers, and APIs with balanced compute and memory.',
-    recommendedFamilies: ['d', 'b', 'f'],
-    preferredSeries: ['Ddsv5', 'Dasv5', 'Bsv2', 'Fsv2'],
-    note: 'D-series for production. B-series (burstable) for dev/test and low-traffic sites. F-series for CPU-intensive APIs.',
-    docsUrl: 'https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/general-purpose/overview'
-  },
-  {
-    id: 'big-data', name: 'Big Data & Analytics', icon: '📊',
-    description: 'Hadoop, Spark, Cassandra, MongoDB, and data warehousing workloads requiring high storage throughput.',
-    recommendedFamilies: ['l', 'e', 'd'],
-    preferredSeries: ['Lsv3', 'Lsv4', 'Edsv5', 'Ddsv5'],
-    note: 'L-series for high disk IOPS and throughput. E-series for in-memory analytics.',
-    docsUrl: 'https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/storage-optimized/overview'
-  },
-  {
-    id: 'gaming', name: 'Gaming & Streaming', icon: '🎮',
-    description: 'Cloud gaming, game streaming, and game server workloads.',
-    recommendedFamilies: ['nv', 'ng', 'f'],
-    preferredSeries: ['NVadsA10 v5', 'NGads V620', 'Fsv2'],
-    note: 'NV/NG-series for GPU-accelerated game streaming. F-series for dedicated game servers (CPU-bound).',
-    docsUrl: 'https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/gpu-accelerated/nv-family'
-  },
-  {
-    id: 'confidential', name: 'Confidential Computing', icon: '🔒',
-    description: 'Hardware-based TEEs for protecting data in use — ideal for regulated industries.',
-    recommendedFamilies: ['dc', 'ec'],
-    preferredSeries: ['DCasv5', 'DCadsv5', 'DCsv3', 'ECasv5', 'ECadsv5'],
-    note: 'DC-series for general-purpose confidential VMs. EC-series for memory-optimised confidential workloads.',
-    docsUrl: 'https://learn.microsoft.com/en-us/azure/confidential-computing/virtual-machine-options'
-  },
-];
-
-function renderWorkloadRecommendations() {
-  const grid = document.getElementById('workloadGrid');
-  const summary = document.getElementById('workloadSummary');
-  const gapsContent = document.getElementById('gapsContent');
-
-  // Build set of available family keys from loaded SKUs
-  const availableFamilyKeys = new Set();
-  for (const s of allSkus) {
-    const key = getFamilyKey(s.family);
-    if (key) availableFamilyKeys.add(key);
-  }
-
-  // Build set of available series display names
-  const availableSeries = new Set();
-  for (const s of allSkus) {
-    const display = getFamilyDisplay(s.family);
-    if (display) availableSeries.add(display);
-  }
-
-  if (allSkus.length === 0) {
-    grid.innerHTML = '<p style="color:var(--text-secondary);font-size:13px;">Select a region to see workload recommendations.</p>';
-    summary.innerHTML = '';
-    gapsContent.innerHTML = '<p style="color:var(--text-secondary);font-size:13px;">Select a region to check availability gaps.</p>';
-    document.getElementById('workloadsBadge').textContent = '0 workloads';
-    document.getElementById('gapsBadge').textContent = '—';
-    return;
-  }
-
-  let totalAvailable = 0;
-  let totalMissing = 0;
-  const gaps = [];
-
-  const cards = workloadRecommendations.map(wl => {
-    const seriesTags = wl.preferredSeries.map(series => {
-      const isAvail = availableSeries.has(series);
-      if (isAvail) totalAvailable++;
-      else totalMissing++;
-      return `<span class="rec-tag ${isAvail ? 'available' : 'missing'}" title="${isAvail ? 'Available' : 'Not available'} in selected region(s)">${escHtml(series)} ${isAvail ? '✓' : '✗'}</span>`;
-    }).join('');
-
-    // Check if any recommended families are completely missing
-    const missingFamilies = wl.recommendedFamilies.filter(f => !availableFamilyKeys.has(f));
-    if (missingFamilies.length > 0) {
-      const missingNames = missingFamilies.map(f => {
-        const info = familyInfo[f];
-        return info ? `${info.letter}-family` : f;
-      });
-      const altFamilies = wl.recommendedFamilies.filter(f => availableFamilyKeys.has(f));
-      const altNames = altFamilies.map(f => {
-        const info = familyInfo[f];
-        return info ? `${info.letter}-family` : f;
-      });
-      gaps.push({ workload: wl.name, icon: wl.icon, missing: missingNames, alternatives: altNames });
-    }
-
-    return `<div class="workload-card">
-      <div class="workload-card-header">
-        <h4>${wl.icon} ${escHtml(wl.name)}</h4>
-      </div>
-      <div class="workload-desc">${escHtml(wl.description)}</div>
-      <div class="rec-series"><strong>Recommended:</strong> ${seriesTags}</div>
-      <div class="rec-note">${escHtml(wl.note)}</div>
-      <div class="workload-links">
-        <a href="${wl.docsUrl}" target="_blank" rel="noopener noreferrer">📄 Azure Docs</a>
-      </div>
-    </div>`;
-  });
-
-  grid.innerHTML = cards.join('');
-  document.getElementById('workloadsBadge').textContent = `${workloadRecommendations.length} workloads`;
-
-  summary.innerHTML = `
-    <span class="ws-stat">✅ ${totalAvailable} recommended series available</span>
-    <span class="ws-stat">${totalMissing > 0 ? '⚠️' : '✅'} ${totalMissing} not available</span>
-  `;
-
-  // Render availability gaps
-  if (gaps.length === 0) {
-    gapsContent.innerHTML = `<div class="gap-banner no-gaps">
-      <strong>✅ All clear!</strong> Every recommended VM family for all tracked workloads is available in your selected region(s).
-    </div>`;
-    document.getElementById('gapsBadge').textContent = 'No gaps';
-  } else {
-    const gapHtml = gaps.map(g => `<div class="gap-item">
-      <span class="gap-family">${g.icon} ${escHtml(g.workload)}</span>
-      <span class="gap-workloads">Missing: <strong>${g.missing.join(', ')}</strong></span>
-      ${g.alternatives.length > 0
-        ? `<span class="gap-alt">Available alternatives: ${g.alternatives.join(', ')}</span>`
-        : '<span style="color:var(--status-warning);font-size:11px;">No alternatives in this region</span>'}
-    </div>`).join('');
-
-    gapsContent.innerHTML = `<div class="gap-banner has-gaps">
-      <strong>⚠️ ${gaps.length} workload${gaps.length > 1 ? 's have' : ' has'} missing VM families in your selected region(s).</strong>
-      <span style="font-size:12px;display:block;margin-top:4px;">Consider deploying to an alternative region or using the available alternative families listed below.</span>
-    </div>
-    <div class="gap-list">${gapHtml}</div>`;
-    document.getElementById('gapsBadge').textContent = `${gaps.length} gap${gaps.length > 1 ? 's' : ''}`;
-  }
-}
-
-// ══════════════════════════════════════════════
-// FILTERING
-// ══════════════════════════════════════════════
-function populateFamilyFilter() {
-  const families = [...new Set(allSkus.map(s => s.family))].sort();
-  const select = document.getElementById('familyFilter');
-  const current = select.value;
-  select.innerHTML = '<option value="">All Families</option>';
-  for (const f of families) {
-    const opt = document.createElement('option');
-    opt.value = f;
-    opt.textContent = getFamilyDisplay(f);
-    select.appendChild(opt);
-  }
-  select.value = current;
-}
-
+// === FILTERS ===
 function applyFilters() {
-  const search = document.getElementById('searchInput').value.toLowerCase();
-  const family = document.getElementById('familyFilter').value;
-  const arch = document.getElementById('archFilter').value;
-  const vcpuVal = document.getElementById('vcpuFilter').value;
+  const search = (document.getElementById('search-input').value || '').toLowerCase();
+  const family = document.getElementById('family-filter').value;
+  const arch = document.getElementById('arch-filter').value;
+  const vcpu = document.getElementById('vcpu-filter').value;
 
   filteredSkus = allSkus.filter(s => {
-    if (search && !s.name.toLowerCase().includes(search) && !s.size.toLowerCase().includes(search)) return false;
+    if (search && !(s.name.toLowerCase().includes(search) || (s.family||'').toLowerCase().includes(search) || (s.size||'').toLowerCase().includes(search))) return false;
     if (family && s.family !== family) return false;
     if (arch && s.cpuArchitecture !== arch) return false;
-    if (vcpuVal) {
-      const v = parseInt(vcpuVal);
-      if (v === 96) { if (s.vCPUs < 96) return false; }
-      else { if (s.vCPUs !== v) return false; }
+    if (vcpu) {
+      const v = s.vCPUs;
+      if (vcpu === '1-2' && !(v >= 1 && v <= 2)) return false;
+      if (vcpu === '4-8' && !(v >= 4 && v <= 8)) return false;
+      if (vcpu === '16-32' && !(v >= 16 && v <= 32)) return false;
+      if (vcpu === '64+' && v < 64) return false;
     }
     return true;
   });
 
-  sortSkus();
+  // Sort
+  filteredSkus.sort((a, b) => {
+    let va = a[currentSort.field], vb = b[currentSort.field];
+    if (va == null) va = '';
+    if (vb == null) vb = '';
+    if (typeof va === 'number' && typeof vb === 'number') return currentSort.dir === 'asc' ? va - vb : vb - va;
+    return currentSort.dir === 'asc' ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va));
+  });
+
+  document.getElementById('result-count').textContent = `${filteredSkus.length} of ${allSkus.length} SKUs`;
   renderTable();
 }
 
-function resetFilters() {
-  document.getElementById('searchInput').value = '';
-  document.getElementById('familyFilter').value = '';
-  document.getElementById('archFilter').value = '';
-  document.getElementById('vcpuFilter').value = '';
+function clearFilters() {
+  document.getElementById('search-input').value = '';
+  document.getElementById('family-filter').value = '';
+  document.getElementById('arch-filter').value = '';
+  document.getElementById('vcpu-filter').value = '';
   applyFilters();
 }
 
-// ══════════════════════════════════════════════
-// SORTING
-// ══════════════════════════════════════════════
-function sortTable(field) {
+function sortBy(field) {
   if (currentSort.field === field) {
     currentSort.dir = currentSort.dir === 'asc' ? 'desc' : 'asc';
   } else {
     currentSort.field = field;
     currentSort.dir = 'asc';
   }
-  sortSkus();
-  renderTable();
+  applyFilters();
 }
 
-function sortSkus() {
-  const { field, dir } = currentSort;
-  filteredSkus.sort((a, b) => {
-    let va = a[field], vb = b[field];
-    if (typeof va === 'string') va = va.toLowerCase();
-    if (typeof vb === 'string') vb = vb.toLowerCase();
-    if (va < vb) return dir === 'asc' ? -1 : 1;
-    if (va > vb) return dir === 'asc' ? 1 : -1;
-    return 0;
-  });
-}
-
-// ══════════════════════════════════════════════
-// TABLE RENDERING
-// ══════════════════════════════════════════════
+// === TABLE RENDERING ===
 function renderTable() {
-  const tbody = document.getElementById('skuTableBody');
-  const empty = document.getElementById('emptyState');
-  const showRegionCol = false; // single region mode
-
-  document.getElementById('resultBadge').textContent = filteredSkus.length + ' SKUs';
-  document.getElementById('skuTableBadge').textContent = filteredSkus.length + ' SKUs';
-  document.getElementById('resultCount').textContent =
-    `Showing ${filteredSkus.length} of ${allSkus.length} SKUs`;
-
-  // Update sort arrows
-  document.querySelectorAll('.sku-table th').forEach(th => th.classList.remove('sorted'));
-
-  if (filteredSkus.length === 0) {
-    tbody.innerHTML = '';
-    empty.style.display = allSkus.length > 0 ? '' : 'none';
-    return;
-  }
-  empty.style.display = 'none';
-
-  // Render in batches for performance
-  const limit = 500;
-  const skusToRender = filteredSkus.slice(0, limit);
-
-  tbody.innerHTML = skusToRender.map(s => {
-    const familyDisplay = escHtml(getFamilyDisplay(s.family));
-    const docsUrl = getDocsUrl(s.family);
-    const fKey = getFamilyKey(s.family);
-    const fInfo = fKey ? familyInfo[fKey] : null;
-    const ti = fInfo ? typeInfo[fInfo.type] : null;
-    const typeBadge = ti ? `<span class="type-badge ${ti.css}">${escHtml(ti.label)}</span>` : '—';
-    const zones = s.zones.length > 0
-      ? s.zones.map(z => `<span class="badge badge-zone">${z}</span>`).join('')
-      : '<span class="badge-no">—</span>';
-    const features = [];
-    if (s.acceleratedNetworking) features.push('AccelNet');
-    if (s.premiumIO) features.push('PremIO');
-    if (s.ephemeralOSDisk) features.push('EphOS');
-    if (s.encryptionAtHost) features.push('EncHost');
-    if (s.spotEligible) features.push('Spot');
-    const featureStr = features.length > 0
-      ? features.map(f => `<span class="badge-yes" title="${f}">✓</span>`).join(' ')
-      : '<span class="badge-no">—</span>';
-
-    return `<tr>
-      <td class="sku-name">${escHtml(s.name)}</td>
-      <td>${familyDisplay}</td>
-      <td>${typeBadge}</td>
-      <td style="text-align:right">${s.vCPUs}</td>
-      <td style="text-align:right">${s.memoryGB}</td>
-      <td><span class="badge badge-arch">${escHtml(s.cpuArchitecture)}</span></td>
-      <td>${zones}</td>
-      <td style="text-align:right">${s.maxDataDisks}</td>
-      <td>${featureStr}</td>
-      <td>${escHtml(s.regionDisplayName)}</td>
-      <td><a href="${docsUrl}" target="_blank" rel="noopener noreferrer" title="View docs">📄</a></td>
-    </tr>`;
+  // Header
+  const head = document.getElementById('table-head');
+  head.innerHTML = columns.map(c => {
+    const arrow = currentSort.field === c.key ? `<span class="sort-arrow">${currentSort.dir === 'asc' ? '▲' : '▼'}</span>` : '';
+    return `<th onclick="sortBy('${c.key}')">${escapeHtml(c.label)}${arrow}</th>`;
   }).join('');
 
-  if (filteredSkus.length > limit) {
-    document.getElementById('resultCount').textContent += ` (showing first ${limit})`;
+  const tbody = document.getElementById('table-body');
+  const emptyEl = document.getElementById('table-empty');
+
+  if (!filteredSkus.length) {
+    tbody.innerHTML = '';
+    emptyEl.classList.remove('hidden');
+    return;
+  }
+  emptyEl.classList.add('hidden');
+
+  tbody.innerHTML = filteredSkus.map(s => {
+    return '<tr>' + columns.map(c => {
+      const val = s[c.key];
+      const rendered = c.render ? c.render(val) : escapeHtml(val);
+      return `<td>${rendered}</td>`;
+    }).join('') + '</tr>';
+  }).join('');
+}
+
+// === FAMILY OVERVIEW ===
+function renderFamilyOverview() {
+  const familyCounts = {};
+  allSkus.forEach(s => {
+    familyCounts[s.family] = (familyCounts[s.family] || 0) + 1;
+  });
+
+  const grid = document.getElementById('family-grid');
+  const families = Object.keys(familyCounts).sort((a, b) => getFamilyDisplay(a).localeCompare(getFamilyDisplay(b)));
+
+  grid.innerHTML = families.map(f => {
+    const display = getFamilyDisplay(f);
+    const type = getFamilyType(f);
+    const color = typeColors[type] || '#666';
+    return `<div class="family-card" onclick="filterByFamily('${escapeHtml(f)}')">
+      <div class="fname">${escapeHtml(display)}<span class="type-badge" style="background:${color}">${escapeHtml(type)}</span></div>
+      <div class="fcount">${familyCounts[f]} SKU${familyCounts[f] > 1 ? 's' : ''}</div>
+    </div>`;
+  }).join('');
+
+  // Retirement warnings
+  const retireEl = document.getElementById('retirement-warnings');
+  const activeRetirements = families.filter(f => retirementFamilies[f]);
+  if (activeRetirements.length) {
+    retireEl.innerHTML = '<div class="retirement-warning">⚠️ <strong>Retirement Notice:</strong> ' +
+      activeRetirements.map(f => `${retirementFamilies[f].name} (retiring ${retirementFamilies[f].date})`).join(', ') +
+      '. <a href="https://learn.microsoft.com/en-us/azure/virtual-machines/sizes-previous-gen" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Learn more</a></div>';
+  } else {
+    retireEl.innerHTML = '';
   }
 }
 
-// ══════════════════════════════════════════════
-// CLI COMMAND UPDATE
-// ══════════════════════════════════════════════
-function updateCLICommand() {
-  const region = selectedRegion || 'newzealandnorth';
-  document.getElementById('cliCommand').textContent =
-    `az vm list-skus --location ${region} --resource-type virtualMachines -o table`;
+function filterByFamily(family) {
+  document.getElementById('family-filter').value = family;
+  applyFilters();
+  document.getElementById('sec-table').scrollIntoView({ behavior: 'smooth' });
 }
 
-// ══════════════════════════════════════════════
-// CSV EXPORT
-// ══════════════════════════════════════════════
-function exportCSV() {
-  if (filteredSkus.length === 0) { showToast('No data to export', 'warning'); return; }
+// === WORKLOAD RECOMMENDATIONS ===
+function renderWorkloads() {
+  const familyNames = new Set(allSkus.map(s => getFamilyDisplay(s.family).toLowerCase()));
+  const grid = document.getElementById('workload-grid');
 
-  const headers = ['SKU Name', 'Family', 'Tier', 'Size', 'vCPUs', 'Memory (GB)', 'CPU Architecture',
-    'Hyper-V Generations', 'Max Data Disks', 'Max NICs', 'Zones', 'Accelerated Networking',
-    'Premium IO', 'Ephemeral OS Disk', 'Encryption at Host', 'Spot Eligible', 'Restrictions', 'Region', 'Region Display Name'];
+  grid.innerHTML = workloads.map(wl => {
+    const tags = wl.series.map(s => {
+      const seriesLower = s.toLowerCase();
+      const available = [...familyNames].some(fn => fn.startsWith(seriesLower));
+      return `<span class="wl-tag ${available ? 'available' : 'unavailable'}">${escapeHtml(s)}-series</span>`;
+    }).join('');
 
-  const rows = filteredSkus.map(s => [
-    s.name, getFamilyDisplay(s.family), s.tier, s.size, s.vCPUs, s.memoryGB, s.cpuArchitecture,
-    s.hyperVGenerations, s.maxDataDisks, s.maxNICs, s.zones.join(';'),
-    s.acceleratedNetworking ? 'Yes' : 'No', s.premiumIO ? 'Yes' : 'No',
-    s.ephemeralOSDisk ? 'Yes' : 'No', s.encryptionAtHost ? 'Yes' : 'No',
-    s.spotEligible ? 'Yes' : 'No', s.restrictions.join(';'), s.region, s.regionDisplayName
-  ]);
+    return `<div class="workload-card">
+      <div class="wl-header"><span class="wl-icon">${wl.icon}</span><span class="wl-name">${escapeHtml(wl.name)}</span></div>
+      <div class="wl-desc">${escapeHtml(wl.desc)}</div>
+      <div class="wl-tags">${tags}</div>
+    </div>`;
+  }).join('');
+}
 
-  const csvContent = [headers, ...rows].map(row =>
-    row.map(cell => {
-      const str = String(cell);
-      return str.includes(',') || str.includes('"') || str.includes('\n')
-        ? '"' + str.replace(/"/g, '""') + '"' : str;
-    }).join(',')
-  ).join('\n');
+// === CSV EXPORT ===
+function exportCsv() {
+  if (!filteredSkus.length) { showToast('No data to export', 'warning'); return; }
+  const headers = columns.map(c => c.label);
+  const rows = filteredSkus.map(s => columns.map(c => {
+    const v = s[c.key];
+    if (Array.isArray(v)) return v.join('; ');
+    if (typeof v === 'boolean') return v ? 'Yes' : 'No';
+    if (v == null) return '';
+    return String(v);
+  }));
 
-  const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+  let csv = headers.map(h => `"${h.replace(/"/g, '""')}"`).join(',') + '\n';
+  rows.forEach(r => { csv += r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',') + '\n'; });
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  const regionNames = selectedRegion || 'none';
-  a.download = `vm-skus-${regionNames}-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.download = `azure-skus-${selectedRegion || 'export'}.csv`;
   a.click();
   URL.revokeObjectURL(url);
   showToast(`Exported ${filteredSkus.length} SKUs to CSV`);
 }
 
-// ══════════════════════════════════════════════
-// KEYBOARD SHORTCUTS
-// ══════════════════════════════════════════════
-document.addEventListener('keydown', e => {
-  if (e.ctrlKey && e.key === 'f') {
-    // Focus the search input
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput && document.getElementById('skuResults').style.display !== 'none') {
-      e.preventDefault();
-      searchInput.focus();
-    }
-  }
-});
+// === CLI COPY ===
+function copyCliCommand() {
+  const cmd = document.getElementById('cli-command').textContent;
+  navigator.clipboard.writeText(cmd).then(() => showToast('Copied to clipboard!'))
+    .catch(() => showToast('Copy failed', 'error'));
+}
 
-// Allow Enter key in region select
-document.getElementById('regionSelect').addEventListener('keydown', e => {
-  if (e.key === 'Enter') { e.preventDefault(); selectRegion(e.target.value); }
-});
-
-// ══════════════════════════════════════════════
-// BOOT
-// ══════════════════════════════════════════════
-init();
-
+// === STARTUP ===
+document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>

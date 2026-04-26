@@ -1,0 +1,8 @@
+{
+  "targetRegions": [
+    { "name": "australiaeast", "displayName": "Australia East" },
+    { "name": "newzealandnorth", "displayName": "New Zealand North" }
+  ],
+  "defaultRegion": "newzealandnorth",
+  "refreshNote": "Add or remove regions here. The monthly GitHub Actions workflow reads this file to determine which regions to fetch SKU data for."
+}
