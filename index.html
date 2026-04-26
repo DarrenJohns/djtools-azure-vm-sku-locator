@@ -983,6 +983,12 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
               <option value="16-32">16-32 vCPUs</option>
               <option value="64+">64+ vCPUs</option>
             </select>
+            <select id="processor-filter" onchange="applyFilters()">
+              <option value="">All Processors</option>
+              <option value="Intel">Intel</option>
+              <option value="AMD">AMD</option>
+              <option value="ARM">ARM</option>
+            </select>
             <div class="filters-actions">
               <span class="result-count" id="result-count"></span>
               <button class="btn btn-primary" onclick="exportCsv()">📥 CSV Export</button>
@@ -1025,6 +1031,14 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
           <div class="form-field"><label>Min NICs</label><input type="number" id="chk-nics" min="0" placeholder="e.g. 2"></div>
         </div>
         <div class="checker-checks">
+          <label style="display:inline-flex;align-items:center;gap:4px;">Processor:
+            <select id="chk-processor" style="padding:2px 6px;border-radius:4px;border:1px solid var(--border);font-size:13px;">
+              <option value="">Any</option>
+              <option value="Intel">Intel</option>
+              <option value="AMD">AMD</option>
+              <option value="ARM">ARM</option>
+            </select>
+          </label>
           <label><input type="checkbox" id="chk-accelnet"> Accelerated Networking</label>
           <label><input type="checkbox" id="chk-premiumio"> Premium IO</label>
           <label><input type="checkbox" id="chk-ephemeral"> Ephemeral OS Disk</label>
@@ -1085,52 +1099,60 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
         <span class="section-toggle collapsed" id="toggle-naming">▼</span>
       </div>
       <div class="section-body collapsed" id="body-naming">
-        <p style="margin-bottom:12px;font-size:13px;color:var(--text-secondary);line-height:1.6;">
-          Azure VM SKU names encode key specifications into a structured format. Understanding the pattern helps you quickly identify a VM's capabilities without looking up every detail.
+        <p style="margin-bottom:14px;font-size:13px;color:var(--text-secondary);line-height:1.6;">
+          Azure VM SKU names encode key specifications into a structured format. Hover over each segment to learn what it means.
         </p>
-        <div style="background:var(--bg-layer2);border:1px solid var(--border-default);border-radius:var(--radius-md);padding:14px 18px;margin-bottom:14px;font-family:'Cascadia Code','Consolas',monospace;">
-          <div style="font-size:16px;font-weight:700;letter-spacing:2px;margin-bottom:8px;color:var(--brand-primary);">Standard_E16ads_v5</div>
-          <div style="font-size:12px;line-height:2;color:var(--text-secondary);">
-            <span style="color:var(--text-tertiary);">Standard_</span> → Prefix (always present)<br>
-            <strong style="color:#d63384;">E</strong> → Family (<strong>Memory-optimized</strong>)<br>
-            <strong style="color:#0d6efd;">16</strong> → vCPUs<br>
-            <strong style="color:#198754;">a</strong> → AMD processor<br>
-            <strong style="color:#fd7e14;">d</strong> → Local temp disk<br>
-            <strong style="color:#6f42c1;">s</strong> → Premium Storage capable<br>
-            <span style="color:var(--text-tertiary);">_</span><strong style="color:#20c997;">v5</strong> → Generation / version
+
+        <!-- Interactive name decoder -->
+        <div style="background:var(--bg-layer2);border:1px solid var(--border-default);border-radius:var(--radius-md);padding:18px 22px;margin-bottom:16px;text-align:center;">
+          <div style="font-family:'Cascadia Code','Consolas',monospace;font-size:20px;font-weight:700;letter-spacing:1px;display:inline-flex;align-items:baseline;gap:0;">
+            <span style="color:var(--text-tertiary);cursor:help;" title="Prefix — always present">Standard_</span><span style="color:#d63384;cursor:help;border-bottom:2px dashed #d63384;" title="Family: E = Memory-optimized">E</span><span style="color:#0d6efd;cursor:help;border-bottom:2px dashed #0d6efd;" title="vCPU count">16</span><span style="color:#198754;cursor:help;border-bottom:2px dashed #198754;" title="Processor: a = AMD">a</span><span style="color:#fd7e14;cursor:help;border-bottom:2px dashed #fd7e14;" title="Feature: d = local temp disk">d</span><span style="color:#6f42c1;cursor:help;border-bottom:2px dashed #6f42c1;" title="Feature: s = Premium Storage capable">s</span><span style="color:var(--text-tertiary);">_</span><span style="color:#20c997;cursor:help;border-bottom:2px dashed #20c997;" title="Generation / version">v5</span>
+          </div>
+          <div style="display:flex;justify-content:center;gap:4px;margin-top:10px;flex-wrap:wrap;font-size:11px;">
+            <span style="background:#d63384;color:white;padding:2px 8px;border-radius:10px;">Family</span>
+            <span style="background:#0d6efd;color:white;padding:2px 8px;border-radius:10px;">vCPUs</span>
+            <span style="background:#198754;color:white;padding:2px 8px;border-radius:10px;">Processor</span>
+            <span style="background:#fd7e14;color:white;padding:2px 8px;border-radius:10px;">Features</span>
+            <span style="background:#6f42c1;color:white;padding:2px 8px;border-radius:10px;">Storage</span>
+            <span style="background:#20c997;color:white;padding:2px 8px;border-radius:10px;">Version</span>
           </div>
         </div>
 
-        <p style="margin-bottom:8px;font-size:13px;font-weight:600;">VM Family Prefixes</p>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px;margin-bottom:14px;font-size:12px;">
-          <div style="padding:6px 10px;background:var(--bg-layer2);border-radius:6px;border-left:3px solid #0d6efd;"><strong>A</strong> — Entry-level / dev-test</div>
-          <div style="padding:6px 10px;background:var(--bg-layer2);border-radius:6px;border-left:3px solid #198754;"><strong>B</strong> — Burstable (economical)</div>
-          <div style="padding:6px 10px;background:var(--bg-layer2);border-radius:6px;border-left:3px solid #6f42c1;"><strong>D</strong> — General purpose</div>
-          <div style="padding:6px 10px;background:var(--bg-layer2);border-radius:6px;border-left:3px solid #d63384;"><strong>E</strong> — Memory-optimized</div>
-          <div style="padding:6px 10px;background:var(--bg-layer2);border-radius:6px;border-left:3px solid #fd7e14;"><strong>F</strong> — Compute-optimized</div>
-          <div style="padding:6px 10px;background:var(--bg-layer2);border-radius:6px;border-left:3px solid #20c997;"><strong>L</strong> — Storage-optimized</div>
-          <div style="padding:6px 10px;background:var(--bg-layer2);border-radius:6px;border-left:3px solid #dc3545;"><strong>M</strong> — Memory-intensive (large)</div>
-          <div style="padding:6px 10px;background:var(--bg-layer2);border-radius:6px;border-left:3px solid #ffc107;"><strong>N</strong> — GPU-enabled</div>
-          <div style="padding:6px 10px;background:var(--bg-layer2);border-radius:6px;border-left:3px solid #0dcaf0;"><strong>H</strong> — High Performance Compute</div>
-        </div>
-
-        <p style="margin-bottom:8px;font-size:13px;font-weight:600;">Common Suffixes</p>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px;margin-bottom:14px;font-size:12px;">
-          <div style="padding:6px 10px;background:var(--bg-layer2);border-radius:6px;"><strong>a</strong> — AMD processor</div>
-          <div style="padding:6px 10px;background:var(--bg-layer2);border-radius:6px;"><strong>p</strong> — ARM (Ampere) processor</div>
-          <div style="padding:6px 10px;background:var(--bg-layer2);border-radius:6px;"><strong>d</strong> — Local temp disk included</div>
-          <div style="padding:6px 10px;background:var(--bg-layer2);border-radius:6px;"><strong>s</strong> — Premium Storage capable</div>
-          <div style="padding:6px 10px;background:var(--bg-layer2);border-radius:6px;"><strong>l</strong> — Low memory variant</div>
-          <div style="padding:6px 10px;background:var(--bg-layer2);border-radius:6px;"><strong>t</strong> — Tiny / constrained memory</div>
-          <div style="padding:6px 10px;background:var(--bg-layer2);border-radius:6px;"><strong>i</strong> — Isolated (dedicated host)</div>
-          <div style="padding:6px 10px;background:var(--bg-layer2);border-radius:6px;"><strong>b</strong> — Block storage performance</div>
+        <!-- Two-column layout: Families + Suffixes -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px;">
+          <div>
+            <p style="margin-bottom:8px;font-size:13px;font-weight:600;">Family Prefixes</p>
+            <table style="width:100%;font-size:12px;border-collapse:collapse;">
+              <tr><td style="padding:4px 8px;border-bottom:1px solid var(--border-subtle);"><strong style="color:#0d6efd;">A</strong></td><td style="padding:4px 8px;border-bottom:1px solid var(--border-subtle);">Entry-level / dev-test</td></tr>
+              <tr><td style="padding:4px 8px;border-bottom:1px solid var(--border-subtle);"><strong style="color:#198754;">B</strong></td><td style="padding:4px 8px;border-bottom:1px solid var(--border-subtle);">Burstable (economical)</td></tr>
+              <tr><td style="padding:4px 8px;border-bottom:1px solid var(--border-subtle);"><strong style="color:#6f42c1;">D</strong></td><td style="padding:4px 8px;border-bottom:1px solid var(--border-subtle);">General purpose</td></tr>
+              <tr><td style="padding:4px 8px;border-bottom:1px solid var(--border-subtle);"><strong style="color:#d63384;">E</strong></td><td style="padding:4px 8px;border-bottom:1px solid var(--border-subtle);">Memory-optimized</td></tr>
+              <tr><td style="padding:4px 8px;border-bottom:1px solid var(--border-subtle);"><strong style="color:#fd7e14;">F</strong></td><td style="padding:4px 8px;border-bottom:1px solid var(--border-subtle);">Compute-optimized</td></tr>
+              <tr><td style="padding:4px 8px;border-bottom:1px solid var(--border-subtle);"><strong style="color:#20c997;">L</strong></td><td style="padding:4px 8px;border-bottom:1px solid var(--border-subtle);">Storage-optimized</td></tr>
+              <tr><td style="padding:4px 8px;border-bottom:1px solid var(--border-subtle);"><strong style="color:#dc3545;">M</strong></td><td style="padding:4px 8px;border-bottom:1px solid var(--border-subtle);">Memory-intensive (large)</td></tr>
+              <tr><td style="padding:4px 8px;border-bottom:1px solid var(--border-subtle);"><strong style="color:#ffc107;">N</strong></td><td style="padding:4px 8px;border-bottom:1px solid var(--border-subtle);">GPU-enabled</td></tr>
+              <tr><td style="padding:4px 8px;"><strong style="color:#0dcaf0;">H</strong></td><td style="padding:4px 8px;">High Performance Compute</td></tr>
+            </table>
+          </div>
+          <div>
+            <p style="margin-bottom:8px;font-size:13px;font-weight:600;">Common Suffixes</p>
+            <table style="width:100%;font-size:12px;border-collapse:collapse;">
+              <tr><td style="padding:4px 8px;border-bottom:1px solid var(--border-subtle);"><strong>a</strong></td><td style="padding:4px 8px;border-bottom:1px solid var(--border-subtle);">AMD processor</td></tr>
+              <tr><td style="padding:4px 8px;border-bottom:1px solid var(--border-subtle);"><strong>p</strong></td><td style="padding:4px 8px;border-bottom:1px solid var(--border-subtle);">ARM (Ampere) processor</td></tr>
+              <tr><td style="padding:4px 8px;border-bottom:1px solid var(--border-subtle);"><strong>d</strong></td><td style="padding:4px 8px;border-bottom:1px solid var(--border-subtle);">Local temp disk included</td></tr>
+              <tr><td style="padding:4px 8px;border-bottom:1px solid var(--border-subtle);"><strong>s</strong></td><td style="padding:4px 8px;border-bottom:1px solid var(--border-subtle);">Premium Storage capable</td></tr>
+              <tr><td style="padding:4px 8px;border-bottom:1px solid var(--border-subtle);"><strong>l</strong></td><td style="padding:4px 8px;border-bottom:1px solid var(--border-subtle);">Low memory variant</td></tr>
+              <tr><td style="padding:4px 8px;border-bottom:1px solid var(--border-subtle);"><strong>t</strong></td><td style="padding:4px 8px;border-bottom:1px solid var(--border-subtle);">Tiny / constrained memory</td></tr>
+              <tr><td style="padding:4px 8px;border-bottom:1px solid var(--border-subtle);"><strong>i</strong></td><td style="padding:4px 8px;border-bottom:1px solid var(--border-subtle);">Isolated (dedicated host)</td></tr>
+              <tr><td style="padding:4px 8px;"><strong>b</strong></td><td style="padding:4px 8px;">Block storage performance</td></tr>
+            </table>
+          </div>
         </div>
 
         <p style="font-size:12px;color:var(--text-secondary);line-height:1.6;">
           📖 Learn more:
           <a href="https://learn.microsoft.com/en-us/azure/virtual-machines/vm-naming-conventions" target="_blank" rel="noopener" style="color:var(--brand-primary);">VM naming conventions</a> ·
-          <a href="https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/overview" target="_blank" rel="noopener" style="color:var(--brand-primary);">VM sizes overview</a> ·
-          <a href="https://azure.microsoft.com/en-us/pricing/details/virtual-machines/linux/" target="_blank" rel="noopener" style="color:var(--brand-primary);">VM pricing</a>
+          <a href="https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/overview" target="_blank" rel="noopener" style="color:var(--brand-primary);">VM sizes overview</a>
         </p>
       </div>
     </div>
@@ -1400,6 +1422,7 @@ const columns = [
     return `<button class="pin-btn${pinned ? ' pinned' : ''}" onclick="event.stopPropagation();togglePin('${escapeHtml(s.size)}')" title="${pinned ? 'Unpin' : 'Pin to shortlist'}">${pinned ? '📌' : '○'}</button>`;
   }},
   { key: 'size', label: 'Size', render: (v, s) => `<a href="#" onclick="event.preventDefault();openSnippetModal('${escapeHtml(v)}')" style="color:var(--brand-primary);text-decoration:none;font-weight:600;" title="View CLI/Bicep snippets">${escapeHtml(v)}</a>${getLifecycleBadge(s)}` },
+  { key: '_processor', label: 'Processor', width: '75px', render: (v, s) => getProcessorType(s.size) },
   { key: 'vCPUs', label: 'vCPUs', width: '65px' },
   { key: 'memoryGB', label: 'Memory (GB)', width: '90px' },
   { key: 'maxDataDisks', label: 'Max Data Disks', width: '70px' },
@@ -1413,6 +1436,13 @@ const columns = [
 ];
 
 // === HELPERS ===
+function getProcessorType(size) {
+  const suffixes = (size || '').replace(/_v\d+$/i, '').replace(/^[A-Z]\d+[-]?\d*/i, '');
+  if (/p/i.test(suffixes)) return 'ARM';
+  if (/a/i.test(suffixes)) return 'AMD';
+  return 'Intel';
+}
+
 const hiddenColumns = new Set();
 const alwaysVisibleColumns = new Set(['_pin', 'size']);
 
@@ -1902,6 +1932,10 @@ function renderSummary() {
   const premiumIO = allSkus.filter(s => s.premiumIO).length;
   const spotCount = allSkus.filter(s => s.spotEligible).length;
 
+  const intelCount = allSkus.filter(s => getProcessorType(s.size) === 'Intel').length;
+  const amdCount = allSkus.filter(s => getProcessorType(s.size) === 'AMD').length;
+  const armCount = allSkus.filter(s => getProcessorType(s.size) === 'ARM').length;
+
   let trendBadge = '';
   if (_historyData) {
     const prevCount = (_historyData.skus || []).length;
@@ -1936,14 +1970,14 @@ function renderSummary() {
       <div class="summary-label">Memory (GB)</div>
     </div>
     <div class="summary-card" data-accent="teal">
-      <div class="summary-icon">🚀</div>
-      <div class="summary-value">${accelNet}</div>
-      <div class="summary-label">Accel Networking</div>
+      <div class="summary-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="6" width="12" height="12" rx="1"/><line x1="9" y1="1" x2="9" y2="6"/><line x1="15" y1="1" x2="15" y2="6"/><line x1="9" y1="18" x2="9" y2="23"/><line x1="15" y1="18" x2="15" y2="23"/><line x1="1" y1="9" x2="6" y2="9"/><line x1="1" y1="15" x2="6" y2="15"/><line x1="18" y1="9" x2="23" y2="9"/><line x1="18" y1="15" x2="23" y2="15"/></svg></div>
+      <div class="summary-value">${intelCount}</div>
+      <div class="summary-label">Intel CPUs</div>
     </div>
     <div class="summary-card" data-accent="red">
-      <div class="summary-icon">💎</div>
-      <div class="summary-value">${premiumIO}</div>
-      <div class="summary-label">Premium Storage</div>
+      <div class="summary-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="6" width="12" height="12" rx="1"/><line x1="9" y1="1" x2="9" y2="6"/><line x1="15" y1="1" x2="15" y2="6"/><line x1="9" y1="18" x2="9" y2="23"/><line x1="15" y1="18" x2="15" y2="23"/><line x1="1" y1="9" x2="6" y2="9"/><line x1="1" y1="15" x2="6" y2="15"/><line x1="18" y1="9" x2="23" y2="9"/><line x1="18" y1="15" x2="23" y2="15"/></svg></div>
+      <div class="summary-value">${amdCount}${armCount ? ` <span style="font-size:16px;opacity:.6;">/ ${armCount} ARM</span>` : ''}</div>
+      <div class="summary-label">AMD${armCount ? ' / ARM' : ''} CPUs</div>
     </div>
   `;
 }
@@ -1955,6 +1989,7 @@ function applyFilters() {
   const version = document.getElementById('version-filter').value;
   const familyType = document.getElementById('familytype-filter').value;
   const vcpu = document.getElementById('vcpu-filter').value;
+  const processor = document.getElementById('processor-filter').value;
 
   filteredSkus = allSkus.filter(s => {
     if (search && !(s.name.toLowerCase().includes(search) || (s.family||'').toLowerCase().includes(search) || (s.size||'').toLowerCase().includes(search))) return false;
@@ -1965,6 +2000,7 @@ function applyFilters() {
       if (skuVer !== version) return false;
     }
     if (familyType && getFamilyType(s.family) !== familyType) return false;
+    if (processor && getProcessorType(s.size) !== processor) return false;
     if (vcpu) {
       const v = s.vCPUs;
       if (vcpu === '1-2' && !(v >= 1 && v <= 2)) return false;
@@ -1996,6 +2032,7 @@ function clearFilters() {
   document.getElementById('version-filter').value = '';
   document.getElementById('familytype-filter').value = '';
   document.getElementById('vcpu-filter').value = '';
+  document.getElementById('processor-filter').value = '';
   applyFilters();
 }
 
@@ -2396,6 +2433,7 @@ function runDeployChecker() {
   const reqEncrypt = document.getElementById('chk-encrypthost').checked;
   const reqSpot = document.getElementById('chk-spot').checked;
   const reqZoneRedundant = document.getElementById('chk-zoneredundant').checked;
+  const reqProcessor = document.getElementById('chk-processor').value;
 
   // Build list of all requirements for scoring
   const requirements = [];
@@ -2409,6 +2447,7 @@ function runDeployChecker() {
   if (reqEncrypt) requirements.push({ name: 'Encrypt Host', test: s => s.encryptionAtHost });
   if (reqSpot) requirements.push({ name: 'Spot', test: s => s.spotEligible });
   if (reqZoneRedundant) requirements.push({ name: 'Available in All Zones', test: s => (s.zones && s.zones.length >= 3) });
+  if (reqProcessor) requirements.push({ name: 'Processor', test: s => getProcessorType(s.size) === reqProcessor });
 
   if (!requirements.length) { showToast('Specify at least one requirement', 'warning'); return; }
 
@@ -2452,14 +2491,14 @@ function buildCheckerTable(rows) {
   sortedLetters.forEach((l, i) => { letterShade[l] = i % 2 === 0; });
 
   let html = '<div class="table-group-actions" style="margin-top:4px;"><button class="btn btn-outline" onclick="expandCheckerGroups()">▼ Expand All</button><button class="btn btn-outline" onclick="collapseCheckerGroups()">▶ Collapse All</button><button class="btn btn-outline" onclick="clearShortlist()" id="clear-pins-chk-btn" ' + (pinnedSkus.size ? '' : 'disabled') + '>📌 Clear All Pins</button></div>';
-  html += '<table class="checker-table"><thead><tr><th style="width:36px;">📌</th><th>Size</th><th>vCPUs</th><th>Memory (GB)</th><th>Max Data Disks</th><th>Max NICs</th><th>Zones</th><th>Match Score</th></tr></thead><tbody>';
+  html += '<table class="checker-table"><thead><tr><th style="width:36px;">📌</th><th>Size</th><th>Processor</th><th>vCPUs</th><th>Memory (GB)</th><th>Max Data Disks</th><th>Max NICs</th><th>Zones</th><th>Match Score</th></tr></thead><tbody>';
 
   sortedLetters.forEach(letter => {
     const grp = groups[letter];
     const shaded = letterShade[letter];
     const groupCls = shaded ? 'group-header-row shaded' : 'group-header-row';
     html += `<tr class="${groupCls}" onclick="toggleCheckerGroup('${letter}')">
-      <td colspan="8"><span class="group-toggle" id="chk-group-toggle-${letter}">▼</span> ${letter} Series <span class="group-badge">${grp.length} SKU${grp.length !== 1 ? 's' : ''}</span></td>
+      <td colspan="9"><span class="group-toggle" id="chk-group-toggle-${letter}">▼</span> ${letter} Series <span class="group-badge">${grp.length} SKU${grp.length !== 1 ? 's' : ''}</span></td>
     </tr>`;
     grp.forEach(r => {
       const s = r.sku;
@@ -2470,6 +2509,7 @@ function buildCheckerTable(rows) {
       html += `<tr class="${rowCls} chk-group-row-${letter}">
         <td><button class="pin-btn${pinned ? ' pinned' : ''}" onclick="event.stopPropagation();togglePin('${escapeHtml(s.size)}')" title="${pinned ? 'Unpin' : 'Pin to shortlist'}">${pinned ? '📌' : '○'}</button></td>
         <td><a href="#" onclick="event.preventDefault();openSnippetModal('${escapeHtml(s.size)}')" style="color:var(--brand-primary);text-decoration:none;font-weight:600;">${escapeHtml(s.size)}</a>${getLifecycleBadge(s)}</td>
+        <td>${getProcessorType(s.size)}</td>
         <td>${s.vCPUs}</td><td>${s.memoryGB}</td><td>${s.maxDataDisks}</td><td>${s.maxNICs}</td>
         <td>${zones}</td>
         <td><span class="score-badge ${scoreClass}">${r.score}%</span></td>
@@ -2501,6 +2541,7 @@ function collapseCheckerGroups() {
 function resetChecker() {
   ['chk-vcpus','chk-memory','chk-disks','chk-nics'].forEach(id => document.getElementById(id).value = '');
   ['chk-accelnet','chk-premiumio','chk-ephemeral','chk-encrypthost','chk-spot','chk-zoneredundant'].forEach(id => document.getElementById(id).checked = false);
+  document.getElementById('chk-processor').value = '';
   document.getElementById('checker-results').innerHTML = '';
   const checkerBadge = document.getElementById('checker-match-count');
   if (checkerBadge) checkerBadge.textContent = '0';
