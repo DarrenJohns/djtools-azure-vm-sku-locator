@@ -51,6 +51,31 @@ jobs:
                   break
                 }
 
+                # Archive existing data before overwriting
+                $existingFile = "$dataDir/$name.json"
+                if (Test-Path $existingFile) {
+                  try {
+                    $existingData = Get-Content $existingFile | ConvertFrom-Json
+                    $lastUpdated = $existingData.lastUpdated
+                    if ($lastUpdated) {
+                      $archiveDate = ([DateTime]$lastUpdated).ToString("yyyy-MM")
+                    } else {
+                      $archiveDate = (Get-Date).AddMonths(-1).ToString("yyyy-MM")
+                    }
+                    $historyDir = "$dataDir/history"
+                    if (-not (Test-Path $historyDir)) { New-Item -ItemType Directory -Path $historyDir -Force | Out-Null }
+                    $archivePath = "$historyDir/$name-$archiveDate.json"
+                    if (-not (Test-Path $archivePath)) {
+                      Copy-Item $existingFile $archivePath
+                      Write-Host "  [OK] Archived previous data to $archivePath"
+                    } else {
+                      Write-Host "  [INFO] Archive already exists: $archivePath"
+                    }
+                  } catch {
+                    Write-Host "  [WARN] Could not archive previous data: $_"
+                  }
+                }
+
                 # Save raw and normalize with Python script
                 $raw | Set-Content "$dataDir/$name-raw.json" -Encoding UTF8
                 python scripts/normalize-skus.py "$dataDir/$name-raw.json" "$dataDir/$name.json" "$display"

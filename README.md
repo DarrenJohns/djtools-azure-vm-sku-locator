@@ -14,13 +14,20 @@
 
 | Category | Features |
 |----------|----------|
-| **Browse** | Select up to 5 Azure regions to view available VM SKUs |
-| **Search** | Filter by SKU name, family, vCPU count, CPU architecture |
-| **Compare** | View SKUs across multiple regions side by side |
-| **Details** | vCPUs, memory, data disks, zones, accelerated networking, Premium IO, ephemeral OS disk, Spot eligibility |
-| **Docs** | Direct links to Azure VM size documentation for each SKU family |
-| **Export** | Download filtered results as CSV |
-| **CLI** | Guidance for real-time data via `az vm list-skus` |
+| **Browse** | Select an Azure region to view available VM SKUs |
+| **Search & Filter** | Filter by SKU name, size, version, family type, vCPU range |
+| **Find a Match** | Specify requirements (vCPUs, memory, disks, NICs + feature checkboxes) and get ranked matches with percentage scores |
+| **Pinned Shortlist** | Pin SKUs, view as chips with specs, export shortlist to CSV |
+| **Multi-Region Compare** | Compare pinned SKU availability across up to 5 other regions |
+| **Column Chooser** | Show/hide table columns via ⚙️ Columns button |
+| **Snippet Modal** | Click any SKU to see Azure CLI, PowerShell, and Bicep deployment snippets |
+| **Workload Recommendations** | Cards with series availability badges per workload type |
+| **What's New** | SKUs added/removed since last monthly refresh with trend badges |
+| **Retirement Badges** | ⚠️ warnings on SKUs from families being retired |
+| **Region Proximity** | Suggests nearby regions when no results found |
+| **Export** | Download filtered results or pinned shortlist as CSV |
+| **Theme** | Light/dark mode with system detection |
+| **Keyboard Shortcuts** | `T` (theme), `F` (focus search), `C` (clear), `X` (export), `?` (shortcuts panel) |
 
 ## 🚀 Getting Started
 
@@ -39,9 +46,12 @@ python -m http.server 8090
 
 1. **Select a region** — Choose an Azure region from the dropdown (default: New Zealand North)
 2. **Browse SKUs** — View the sortable, filterable table of available VM sizes
-3. **Filter** — Search by name, filter by family, architecture, or vCPU count
-4. **Export** — Download filtered results as CSV
-5. **Real-time data** — Use the CLI guidance section for subscription-specific availability
+3. **Filter** — Search by name, size, version, family type, or vCPU range
+4. **Find a Match** — Specify your requirements and get ranked results with percentage scores
+5. **Pin & Compare** — Pin SKUs to your shortlist, then compare availability across up to 5 other regions
+6. **Snippets** — Click any SKU to see Azure CLI, PowerShell, and Bicep deployment snippets
+7. **Export** — Download filtered results or your pinned shortlist as CSV
+8. **Real-time data** — For subscription-specific availability, use `az vm list-skus`
 
 ### Data Freshness
 
@@ -61,6 +71,8 @@ This requires Azure CLI and at least **Reader** role on your subscription.
 | **Frameworks** | None — pure HTML/CSS/JS |
 | **Dependencies** | Zero |
 | **Data source** | Pre-fetched from `az vm list-skus`, normalized to JSON |
+| **Configuration** | `config.json` defines target regions for data refresh |
+| **Scripts** | `scripts/normalize-skus.py` and `scripts/update-retirements.py` for data pipeline |
 | **Data refresh** | Monthly via GitHub Actions scheduled workflow |
 | **Authentication** | None required — data is pre-fetched |
 | **Build step** | None — file deploys directly |
@@ -71,14 +83,20 @@ This requires Azure CLI and at least **Reader** role on your subscription.
 
 ```
 ├── index.html                          # The entire application
+├── config.json                         # Target regions configuration
 ├── data/
 │   ├── regions.json                    # List of all Azure regions
 │   ├── metadata.json                   # Last refresh timestamp
+│   ├── retirements.json                # VM family retirement data
 │   ├── newzealandnorth.json            # SKU data for New Zealand North
 │   ├── australiaeast.json              # SKU data for Australia East
-│   └── eastus.json                     # SKU data for East US
-├── README.md                           # This file
-├── TEMPLATE-GUIDE.md                   # Setup guide (delete after setup)
+│   └── history/                        # Monthly snapshots for trends
+│       └── .gitkeep
+├── scripts/
+│   ├── normalize-skus.py               # Raw SKU data normalizer
+│   └── update-retirements.py           # Retirement data scraper
+├── README.md
+├── TEMPLATE-GUIDE.md
 ├── docs/
 │   ├── SPEC.md                         # Application specification
 │   ├── howitworks.md                   # Technical deep-dive
@@ -86,13 +104,10 @@ This requires Azure CLI and at least **Reader** role on your subscription.
 └── .github/
     ├── copilot-instructions.md         # AI assistant conventions
     ├── pull_request_template.md        # PR checklist
-    ├── workflows/
-    │   ├── deploy.yml                  # Deploy to Azure on push to main
-    │   ├── validate.yml                # HTML validation on PRs
-    │   └── refresh-sku-data.yml        # Monthly SKU data refresh
-    └── ISSUE_TEMPLATE/
-        ├── bug_report.yml
-        └── feature_request.yml
+    └── workflows/
+        ├── deploy.yml                  # Deploy to Azure on push to main
+        ├── validate.yml                # HTML validation on PRs
+        └── refresh-vm-skus.yml         # Monthly SKU data refresh + retirement + history
 ```
 
 ## 📖 Documentation

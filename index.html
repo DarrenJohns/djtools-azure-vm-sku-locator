@@ -383,6 +383,61 @@ select:focus, input:focus { outline: 2px solid var(--brand-primary); outline-off
   color: #664d03;
 }
 [data-theme="dark"] .retirement-warning { background: #3d3200; border-color: #665200; color: #ffc107; }
+.proximity-suggestion {
+  margin-top: 12px;
+  padding: 12px 16px;
+  background: var(--brand-subtle);
+  border: 1px solid var(--brand-primary);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+}
+[data-theme="dark"] .proximity-suggestion {
+  background: #1a2a3a;
+  border-color: #2a5a8a;
+}
+/* ── What's New ── */
+.whatsnew-summary { padding: 4px 0; }
+.whatsnew-trend {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--bg-layer2);
+  border-radius: var(--radius-sm);
+  margin-bottom: 12px;
+}
+.whatsnew-group { margin-bottom: 8px; }
+.whatsnew-group-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  cursor: pointer;
+  font-size: 13px;
+  user-select: none;
+}
+.whatsnew-group-header:hover { color: var(--brand-primary); }
+.whatsnew-chips { display: flex; flex-wrap: wrap; gap: 4px; padding: 8px 0; }
+.whatsnew-chip {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+}
+.whatsnew-chip.added {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #28a745;
+}
+.whatsnew-chip.removed {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #dc3545;
+  text-decoration: line-through;
+}
+[data-theme="dark"] .whatsnew-chip.added { background: #0d3318; color: #5cb85c; border-color: #28a745; }
+[data-theme="dark"] .whatsnew-chip.removed { background: #3a1a1a; color: #e87575; border-color: #dc3545; }
 .workload-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -758,9 +813,13 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
     <div class="welcome-body">
       <ul>
         <li><span>🌏</span> <strong>Browse</strong> — Select any Azure region to view available VM SKUs</li>
-        <li><span>🔍</span> <strong>Filter</strong> — Search by size, version, family type, or vCPUs</li>
+        <li><span>🔍</span> <strong>Filter</strong> — Search by size, family, vCPUs, or capability</li>
+        <li><span>🎯</span> <strong>Find a Match</strong> — Specify requirements and find SKUs that fit</li>
+        <li><span>📌</span> <strong>Pin &amp; Compare</strong> — Pin SKUs to a shortlist for side-by-side review</li>
+        <li><span>⚠️</span> <strong>Retirement Alerts</strong> — See which SKUs are scheduled for retirement</li>
+        <li><span>📊</span> <strong>What's New</strong> — Track SKU additions and removals over time</li>
+        <li><span>💡</span> <strong>Nearby Regions</strong> — Get suggestions for alternative regions</li>
         <li><span>📥</span> <strong>Export</strong> — Download filtered results as CSV</li>
-        <li><span>💼</span> <strong>Recommendations</strong> — Workload guidance from Azure documentation</li>
         <li><span>⌨️</span> <strong>Shortcuts</strong> — Press <strong>?</strong> anytime for keyboard shortcuts</li>
       </ul>
       <button class="btn btn-primary" onclick="closeWelcome()">Get Started</button>
@@ -820,6 +879,19 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
   <div id="sku-results" class="hidden">
     <!-- Summary Dashboard -->
     <div id="sku-summary" class="summary-grid"></div>
+
+    <!-- What's New -->
+    <div class="section" id="sec-whatsnew">
+      <div class="section-header" onclick="toggleSection('whatsnew')">
+        <span class="section-title">📊 What's New <span class="badge" id="whatsnew-count" style="background:var(--brand-primary);color:white;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:600;margin-left:6px;">0</span></span>
+        <span class="section-toggle collapsed" id="toggle-whatsnew">▼</span>
+      </div>
+      <div class="section-body collapsed" id="body-whatsnew">
+        <div id="whatsnew-content">
+          <span style="font-size:12px;color:var(--text-tertiary);">Loading history...</span>
+        </div>
+      </div>
+    </div>
 
     <!-- See What's Available -->
     <div class="section" id="sec-filters">
@@ -1156,6 +1228,45 @@ function getLifecycleBadge(sku) {
 
 const groupOrder = ['US', 'Canada', 'Mexico', 'South America', 'Europe', 'UK', 'Middle East', 'Africa', 'Asia Pacific', 'Other'];
 
+const regionProximity = {
+  'newzealandnorth': ['australiaeast', 'australiasoutheast', 'australiacentral'],
+  'australiaeast': ['australiasoutheast', 'australiacentral', 'newzealandnorth'],
+  'australiasoutheast': ['australiaeast', 'australiacentral', 'newzealandnorth'],
+  'australiacentral': ['australiaeast', 'australiasoutheast', 'newzealandnorth'],
+};
+
+function getProximitySuggestion(currentRegion, context) {
+  const nearby = regionProximity[currentRegion] || [];
+  const withData = nearby.filter(r => availableDataRegions.has(r));
+  if (!withData.length) return '';
+  
+  const action = context === 'checker' ? 'switchRegionAndRecheck' : 'selectRegion';
+  const regionDisplay = withData.map(r => {
+    const reg = allRegions.find(ar => ar.name === r);
+    const label = reg ? reg.displayName : r;
+    return `<button class="btn btn-outline btn-sm" onclick="${action}('${escapeHtml(r)}')" style="margin:2px;">🌏 ${escapeHtml(label)}</button>`;
+  }).join(' ');
+  
+  return `<div class="proximity-suggestion">
+    <strong>💡 Try a nearby region:</strong>
+    <span style="font-size:12px;color:var(--text-secondary);margin-left:4px;">These regions may have SKUs matching your criteria</span>
+    <div style="margin-top:8px;">${regionDisplay}</div>
+  </div>`;
+}
+
+async function switchRegionAndRecheck(regionName) {
+  selectRegion(regionName);
+  // Wait for region data to load, then re-run checker
+  const waitForData = () => {
+    if (regionDataCache[regionName]) {
+      runDeployChecker();
+    } else {
+      setTimeout(waitForData, 200);
+    }
+  };
+  setTimeout(waitForData, 200);
+}
+
 // === TABLE COLUMNS ===
 const columns = [
   { key: '_pin', label: '📌', width: '36px', render: (v, s) => {
@@ -1220,7 +1331,7 @@ document.addEventListener('click', () => {
 
 function escapeHtml(s) {
   if (s == null) return '';
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
 // Build case-insensitive lookup
@@ -1597,6 +1708,7 @@ function rebuildSkuList(regionName) {
   renderSummary();
   renderWorkloads();
   populateMultiRegionCheckboxes();
+  loadHistory(regionName);
 }
 
 // === SUMMARY DASHBOARD ===
@@ -1615,11 +1727,23 @@ function renderSummary() {
   const minMem = Math.min(...mems);
   const maxMem = Math.max(...mems);
 
+  let trendBadge = '';
+  if (_historyData) {
+    const prevCount = (_historyData.skus || []).length;
+    const delta = total - prevCount;
+    if (delta !== 0) {
+      const sign = delta > 0 ? '+' : '';
+      const color = delta > 0 ? 'var(--status-success)' : 'var(--status-danger)';
+      trendBadge = `<div style="font-size:11px;font-weight:600;color:${color};margin-top:2px;">${sign}${delta} since last refresh</div>`;
+    }
+  }
+
   grid.innerHTML = `
     <div class="summary-card">
       <div class="summary-value">${total}</div>
       <div class="summary-label">Total VM SKUs</div>
       <div class="summary-detail">${families.size} families</div>
+      ${trendBadge}
     </div>
     <div class="summary-card">
       <div class="summary-value">${minCPU}–${maxCPU}</div>
@@ -1711,6 +1835,7 @@ function renderTable() {
   if (!filteredSkus.length) {
     tbody.innerHTML = '';
     emptyEl.classList.remove('hidden');
+    emptyEl.innerHTML = 'No SKUs match the current filters.' + getProximitySuggestion(selectedRegion);
     return;
   }
   emptyEl.classList.add('hidden');
@@ -2024,11 +2149,12 @@ function runDeployChecker() {
     collapseCheckerGroups();
     if (checkerBadge) checkerBadge.textContent = exact.length;
   } else {
-    const top5 = scored.sort((a, b) => b.score - a.score || a.sku.vCPUs - b.sku.vCPUs).slice(0, 5);
+    const top5 = scored.sort((a, b) => b.score - a.score || a.sku.vCPUs - b.sku.vCPUs).filter(r => r.score > 0).slice(0, 5);
     container.innerHTML =
       `<div class="checker-summary no-matches">0 of ${allSkus.length} SKUs match all requirements — consider relaxing some filters</div>` +
       (top5.length ? '<p style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">Closest matches:</p>' + buildCheckerTable(top5) : '');
     collapseCheckerGroups();
+    container.innerHTML += getProximitySuggestion(selectedRegion, 'checker');
     if (checkerBadge) checkerBadge.textContent = '0';
   }
 }
@@ -2344,6 +2470,124 @@ function copyCliCommand() {
   const cmd = document.getElementById('cli-command').textContent;
   navigator.clipboard.writeText(cmd).then(() => showToast('Copied to clipboard!'))
     .catch(() => showToast('Copy failed', 'error'));
+}
+
+// === HISTORY / WHAT'S NEW ===
+let _historyData = null;
+
+async function loadHistory(regionName) {
+  _historyData = null;
+  const content = document.getElementById('whatsnew-content');
+  if (!content) return;
+  
+  const currentData = regionDataCache[regionName];
+  let prevDate;
+  try {
+    if (currentData && currentData.lastUpdated) {
+      const d = new Date(currentData.lastUpdated);
+      if (!isNaN(d.getTime())) {
+        d.setMonth(d.getMonth() - 1);
+        prevDate = d.toISOString().substring(0, 7);
+      }
+    }
+  } catch (e) { /* invalid date format */ }
+  if (!prevDate) {
+    const d = new Date();
+    d.setMonth(d.getMonth() - 1);
+    prevDate = d.toISOString().substring(0, 7);
+  }
+  
+  try {
+    const resp = await fetch(`data/history/${regionName}-${prevDate}.json`);
+    if (!resp.ok) {
+      content.innerHTML = `<div style="font-size:12px;color:var(--text-tertiary);padding:8px 0;">
+        <strong>📊 History tracking starts next month</strong><br>
+        After the next scheduled refresh, you'll see which SKUs were added or removed from this region.
+      </div>`;
+      const whatsNewBadge1 = document.getElementById('whatsnew-count');
+      if (whatsNewBadge1) whatsNewBadge1.textContent = '0';
+      renderSummary();
+      return;
+    }
+    const historyJson = await resp.json();
+    _historyData = historyJson;
+    
+    const prevSizes = new Set((historyJson.skus || []).map(s => s.size));
+    const currentSizes = new Set((allSkus || []).map(s => s.size));
+    
+    const added = [...currentSizes].filter(s => !prevSizes.has(s)).sort();
+    const removed = [...prevSizes].filter(s => !currentSizes.has(s)).sort();
+    const prevCount = prevSizes.size;
+    const currentCount = currentSizes.size;
+    const delta = currentCount - prevCount;
+    
+    let html = '<div class="whatsnew-summary">';
+    
+    const trendIcon = delta > 0 ? '📈' : delta < 0 ? '📉' : '➡️';
+    const trendColor = delta > 0 ? 'var(--status-success)' : delta < 0 ? 'var(--status-danger)' : 'var(--text-secondary)';
+    const trendSign = delta > 0 ? '+' : '';
+    html += `<div class="whatsnew-trend">
+      <span style="font-size:20px;">${trendIcon}</span>
+      <div>
+        <div style="font-size:16px;font-weight:700;color:${trendColor};">${trendSign}${delta} SKUs</div>
+        <div style="font-size:11px;color:var(--text-secondary);">${prevCount} → ${currentCount} since last refresh</div>
+      </div>
+    </div>`;
+    
+    if (added.length > 0) {
+      html += `<div class="whatsnew-group">
+        <div class="whatsnew-group-header" onclick="toggleWhatsnewGroup('added')">
+          <span class="group-toggle" id="whatsnew-toggle-added">▶</span>
+          <span style="color:var(--status-success);font-weight:600;">🆕 ${added.length} New SKU${added.length !== 1 ? 's' : ''} Added</span>
+        </div>
+        <div class="whatsnew-group-body" id="whatsnew-body-added" style="display:none;">
+          <div class="whatsnew-chips">${added.map(s => `<span class="whatsnew-chip added">${escapeHtml(s)}</span>`).join('')}</div>
+        </div>
+      </div>`;
+    }
+    
+    if (removed.length > 0) {
+      html += `<div class="whatsnew-group">
+        <div class="whatsnew-group-header" onclick="toggleWhatsnewGroup('removed')">
+          <span class="group-toggle" id="whatsnew-toggle-removed">▶</span>
+          <span style="color:var(--status-danger);font-weight:600;">🚫 ${removed.length} SKU${removed.length !== 1 ? 's' : ''} Removed</span>
+        </div>
+        <div class="whatsnew-group-body" id="whatsnew-body-removed" style="display:none;">
+          <div class="whatsnew-chips">${removed.map(s => `<span class="whatsnew-chip removed">${escapeHtml(s)}</span>`).join('')}</div>
+        </div>
+      </div>`;
+    }
+    
+    if (added.length === 0 && removed.length === 0) {
+      html += '<div style="font-size:12px;color:var(--text-tertiary);padding:4px 0;">No changes since the last refresh.</div>';
+    }
+    
+    html += '</div>';
+    content.innerHTML = html;
+    
+    const whatsNewBadge = document.getElementById('whatsnew-count');
+    if (whatsNewBadge) whatsNewBadge.textContent = added.length + removed.length;
+    
+    renderSummary();
+    
+  } catch (e) {
+    content.innerHTML = `<div style="font-size:12px;color:var(--text-tertiary);padding:8px 0;">
+      <strong>📊 History tracking starts next month</strong><br>
+      After the next scheduled refresh, you'll see which SKUs were added or removed from this region.
+    </div>`;
+    const whatsNewBadge2 = document.getElementById('whatsnew-count');
+    if (whatsNewBadge2) whatsNewBadge2.textContent = '0';
+    renderSummary();
+  }
+}
+
+function toggleWhatsnewGroup(id) {
+  const body = document.getElementById('whatsnew-body-' + id);
+  const toggle = document.getElementById('whatsnew-toggle-' + id);
+  if (!body || !toggle) return;
+  const hidden = body.style.display === 'none';
+  body.style.display = hidden ? '' : 'none';
+  toggle.textContent = hidden ? '▼' : '▶';
 }
 
 // === STARTUP ===
