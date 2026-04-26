@@ -16,12 +16,12 @@ jobs:
           # Fetch all physical regions for the map/dropdown
           $allRegions = az account list-locations --query "[?metadata.regionType=='Physical'].{name:name, displayName:displayName, geographyGroup:metadata.geographyGroup, latitude:metadata.latitude, longitude:metadata.longitude}" -o json | ConvertFrom-Json -AsHashtable
           $allRegions | ConvertTo-Json -Depth 3 | Set-Content "data/regions.json" -Encoding UTF8
-          Write-Host "✅ Found $($allRegions.Count) physical regions"
+          Write-Host "[OK] Found $($allRegions.Count) physical regions"
 
           # Read target regions from config.json
           $config = Get-Content "config.json" | ConvertFrom-Json
           $targetRegions = $config.targetRegions
-          Write-Host "✅ Target regions: $($targetRegions.Count) ($($targetRegions.name -join ', '))"
+          Write-Host "[OK] Target regions: $($targetRegions.Count) ($($targetRegions.name -join ', '))"
         shell: pwsh
 
       - name: Fetch SKU data for target regions
@@ -47,7 +47,7 @@ jobs:
               try {
                 $raw = az vm list-skus --location $name --resource-type virtualMachines -o json 2>$null
                 if (-not $raw -or $raw -eq "[]") {
-                  Write-Host "  ⚠ No VM SKUs for $name (skipping)"
+                  Write-Host "  [WARN] No VM SKUs for $name (skipping)"
                   break
                 }
 
@@ -121,7 +121,7 @@ print(f'  Normalized {len(skus)} SKUs')
                 break
 
               } catch {
-                Write-Host "  ⚠ Attempt $attempt/$maxRetries failed for $name`: $_"
+                Write-Host "  [WARN] Attempt $attempt/$maxRetries failed for $name`: $_"
                 Remove-Item "$dataDir/$name-raw.json" -ErrorAction SilentlyContinue
                 if ($attempt -lt $maxRetries) {
                   $backoff = $attempt * 10
@@ -132,13 +132,13 @@ print(f'  Normalized {len(skus)} SKUs')
             }
 
             if (-not $success) {
-              Write-Host "  ❌ Failed for $name after $maxRetries attempts"
+              Write-Host "  [FAIL] Failed for $name after $maxRetries attempts"
               $failCount++
               $failedRegions += $name
             }
           }
 
-          Write-Host "`n✅ Refreshed $successCount regions, $failCount failed/skipped"
+          Write-Host "`n[OK] Refreshed $successCount regions, $failCount failed/skipped"
 
           # Save results for summary step
           "success_count=$successCount" >> $env:GITHUB_OUTPUT
@@ -157,7 +157,7 @@ print(f'  Normalized {len(skus)} SKUs')
             failedRegions = $failedRegions
           } | ConvertTo-Json
           $metadata | Set-Content "$dataDir/metadata.json" -Encoding UTF8
-          Write-Host "✅ Metadata updated: $month ($successCount regions with data, $failCount failed)"
+          Write-Host "[OK] Metadata updated: $month ($successCount regions with data, $failCount failed)"
         shell: pwsh
 
       - name: Upload data to Azure Blob Storage
@@ -169,7 +169,7 @@ print(f'  Normalized {len(skus)} SKUs')
             --destination-path data `
             --overwrite `
             --auth-mode login
-          Write-Host "✅ Data uploaded to Azure Blob Storage"
+          Write-Host "[OK] Data uploaded to Azure Blob Storage"
         shell: pwsh
 
       - name: Commit updated data to repo
@@ -181,9 +181,9 @@ print(f'  Normalized {len(skus)} SKUs')
           if ($changes) {
             git commit -m "chore: monthly VM SKU data refresh - $(Get-Date -Format 'MMMM yyyy')"
             git -c gc.auto=0 push
-            Write-Host "✅ Data committed and pushed"
+            Write-Host "[OK] Data committed and pushed"
           } else {
-            Write-Host "ℹ No data changes to commit"
+            Write-Host "[INFO] No data changes to commit"
           }
         shell: pwsh
 
@@ -197,20 +197,20 @@ print(f'  Normalized {len(skus)} SKUs')
           $failed = "${{ steps.fetch.outputs.failed }}"
 
           $summary = @"
-          ## 📊 VM SKU Data Refresh Report
+          ## [REPORT] VM SKU Data Refresh Report
           **Date:** $date
 
           | Metric | Value |
           |--------|-------|
-          | ✅ Regions updated | $success |
-          | ❌ Regions failed | $fail |
+          | [OK] Regions updated | $success |
+          | [FAIL] Regions failed | $fail |
 
           ### Regions Updated
           "@
 
           if ($available) {
             foreach ($r in $available.Split(',')) {
-              $summary += "`n- ✅ ``$r``"
+              $summary += "`n- [OK] ``$r``"
             }
           } else {
             $summary += "`n- _None_"
@@ -219,15 +219,15 @@ print(f'  Normalized {len(skus)} SKUs')
           $summary += "`n`n### Regions Failed"
           if ($failed) {
             foreach ($r in $failed.Split(',')) {
-              $summary += "`n- ❌ ``$r``"
+              $summary += "`n- [FAIL] ``$r``"
             }
           } else {
-            $summary += "`n- _None_ 🎉"
+            $summary += "`n- _None_ [NONE]"
           }
 
           $summary += "`n`n---`n_Notification recipient: darren.johns@microsoft.com_"
           $summary += "`n_To add/remove regions, edit ``config.json``_"
 
           $summary | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
-          Write-Host "✅ Workflow summary posted"
+          Write-Host "[OK] Workflow summary posted"
         shell: pwsh
