@@ -51,6 +51,7 @@
   --border-subtle: #333333;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
+html { overflow-y: scroll; }
 body {
   font-family: var(--font-sans);
   background-color: var(--bg-base);
@@ -490,6 +491,37 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
 [data-theme="dark"] .lifecycle-badge.retiring { background: #4a3c00; color: #ffc107; border-color: #6d5a00; }
 [data-theme="dark"] .lifecycle-badge.preview { background: #0a3d4a; color: #5bc0de; border-color: #17a2b8; }
 [data-theme="dark"] .lifecycle-badge.ga { background: #0d3318; color: #5cb85c; border-color: #28a745; }
+/* ── Column Chooser ── */
+.col-chooser-wrap { position: relative; display: inline-block; }
+.col-chooser-dropdown {
+  display: none; position: absolute; top: 100%; left: 0; z-index: 100;
+  background: var(--bg-layer1); border: 1px solid var(--border-default);
+  border-radius: var(--radius-md); box-shadow: var(--shadow-md);
+  padding: 8px 0; min-width: 200px; max-height: 320px; overflow-y: auto;
+}
+.col-chooser-dropdown.open { display: block; }
+.col-chooser-dropdown label {
+  display: flex; align-items: center; gap: 8px; padding: 5px 14px;
+  font-size: 12px; cursor: pointer; white-space: nowrap;
+}
+.col-chooser-dropdown label:hover { background: var(--bg-layer2); }
+.col-chooser-dropdown hr { margin: 4px 0; border: none; border-top: 1px solid var(--border-default); }
+.col-chooser-dropdown .col-chooser-reset {
+  display: block; width: calc(100% - 16px); margin: 4px 8px; padding: 4px 8px;
+  font-size: 11px; text-align: center; cursor: pointer;
+  background: var(--bg-layer2); border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm); color: var(--text-secondary);
+}
+.col-chooser-dropdown .col-chooser-reset:hover { background: var(--brand-subtle); color: var(--brand-primary); }
+/* ── Multi-Region Compare ── */
+.region-matrix { width: 100%; border-collapse: collapse; font-size: 13px; }
+.region-matrix th, .region-matrix td { padding: 8px 12px; border: 1px solid var(--border-default); text-align: center; }
+.region-matrix th { background: var(--bg-layer2); font-weight: 600; font-size: 12px; }
+.region-matrix td:first-child { text-align: left; font-weight: 600; color: var(--brand-primary); }
+.region-matrix .avail { color: var(--status-success); font-size: 16px; }
+.region-matrix .unavail { color: var(--status-danger); font-size: 16px; }
+.region-matrix .region-summary { font-size: 11px; color: var(--text-tertiary); font-weight: 400; }
+.region-matrix tr:nth-child(even) { background: var(--bg-layer2); }
 /* ── Snippet Modal ── */
 .snippet-overlay { position: fixed; inset: 0; z-index: 950; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.45); opacity: 0; pointer-events: none; transition: opacity 0.2s; }
 .snippet-overlay.active { opacity: 1; pointer-events: auto; }
@@ -792,8 +824,8 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
     <!-- See What's Available -->
     <div class="section" id="sec-filters">
       <div class="section-header" onclick="toggleSection('filters')">
-        <span class="section-title">🔍 See What's Available</span>
-        <span class="section-toggle collapsed" id="toggle-filters">▶</span>
+        <span class="section-title">🔍 See What's Available <span class="badge" id="available-count" style="background:var(--brand-primary);color:white;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:600;margin-left:6px;"></span></span>
+        <span class="section-toggle collapsed" id="toggle-filters">▼</span>
       </div>
       <div class="section-body collapsed" id="body-filters">
         <div class="filters-row">
@@ -827,6 +859,10 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
             <button class="btn btn-outline" onclick="expandAllGroups()">▼ Expand All</button>
             <button class="btn btn-outline" onclick="collapseAllGroups()">▶ Collapse All</button>
             <button class="btn btn-outline" onclick="clearShortlist()" id="clear-pins-btn" disabled>📌 Clear All Pins</button>
+            <div class="col-chooser-wrap">
+              <button class="btn btn-outline" onclick="toggleColumnChooser(event)">⚙️ Columns</button>
+              <div class="col-chooser-dropdown" id="col-chooser-dropdown"></div>
+            </div>
           </div>
           <div class="sku-table-wrap">
             <table class="sku-table" id="sku-table">
@@ -842,7 +878,7 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
     <!-- Find a Match -->
     <div class="section" id="sec-checker">
       <div class="section-header" onclick="toggleSection('checker')">
-        <span class="section-title">🎯 Find a Match</span>
+        <span class="section-title">🎯 Find a Match <span class="badge" id="checker-match-count" style="background:var(--brand-primary);color:white;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:600;margin-left:6px;">0</span></span>
         <span class="section-toggle collapsed" id="toggle-checker">▼</span>
       </div>
       <div class="section-body collapsed" id="body-checker">
@@ -870,15 +906,22 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
 
     <!-- Pinned Shortlist -->
     <div class="section" id="sec-shortlist">
-      <div class="section-header">
-        <span class="section-title">📌 Pinned Shortlist</span>
-        <span class="badge" id="shortlist-count" style="background:var(--brand-primary);color:white;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:600;">0</span>
+      <div class="section-header" onclick="toggleSection('shortlist')">
+        <span class="section-title">📌 Pinned Shortlist <span class="badge" id="shortlist-count" style="background:var(--brand-primary);color:white;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:600;margin-left:6px;">0</span></span>
+        <span class="section-toggle collapsed" id="toggle-shortlist">▼</span>
       </div>
-      <div class="section-body" id="shortlist-panel">
+      <div class="section-body collapsed" id="body-shortlist">
         <div class="shortlist-chips" id="shortlist-chips"><span style="font-size:12px;color:var(--text-tertiary);">Pin VM SKUs from the table using the ○ button to build your shortlist</span></div>
         <div class="shortlist-actions" id="shortlist-actions" style="display:none;margin-top:8px;">
           <button class="btn btn-primary btn-sm" onclick="exportShortlistCsv()">📥 Export Shortlist</button>
           <button class="btn btn-outline btn-sm" onclick="clearShortlist()">📌 Clear All Pins</button>
+        </div>
+        <div id="multiregion-container" style="display:none;margin-top:14px;padding-top:12px;border-top:1px solid var(--border-default);">
+          <p style="margin-bottom:8px;font-size:13px;font-weight:600;">🌏 Multi-Region Compare</p>
+          <p style="margin-bottom:10px;font-size:12px;color:var(--text-secondary);">Check if your pinned SKUs are available in other regions. Select up to 5.</p>
+          <div id="multiregion-checkboxes" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;"></div>
+          <button class="btn btn-primary btn-sm" onclick="runMultiRegionCompare()" id="multiregion-btn">🔍 Compare Across Regions</button>
+          <div id="multiregion-results" style="margin-top:12px;"></div>
         </div>
       </div>
     </div>
@@ -1133,6 +1176,48 @@ const columns = [
 ];
 
 // === HELPERS ===
+const hiddenColumns = new Set();
+const alwaysVisibleColumns = new Set(['_pin', 'size']);
+
+function getVisibleColumns() {
+  return columns.filter(c => !hiddenColumns.has(c.key));
+}
+
+function toggleColumnChooser(e) {
+  e.stopPropagation();
+  const dropdown = document.getElementById('col-chooser-dropdown');
+  const isOpen = dropdown.classList.contains('open');
+  if (isOpen) { dropdown.classList.remove('open'); return; }
+
+  let html = '';
+  columns.forEach(c => {
+    if (alwaysVisibleColumns.has(c.key)) return;
+    const checked = !hiddenColumns.has(c.key) ? 'checked' : '';
+    html += `<label><input type="checkbox" ${checked} onchange="toggleColumn('${c.key}')"> ${c.label}</label>`;
+  });
+  html += '<hr><button class="col-chooser-reset" onclick="resetColumns()">Reset All</button>';
+  dropdown.innerHTML = html;
+  dropdown.classList.add('open');
+}
+
+function toggleColumn(key) {
+  if (hiddenColumns.has(key)) { hiddenColumns.delete(key); } else { hiddenColumns.add(key); }
+  renderTable();
+}
+
+function resetColumns() {
+  hiddenColumns.clear();
+  document.getElementById('col-chooser-dropdown').classList.remove('open');
+  renderTable();
+  showToast('All columns restored');
+}
+
+// Close column chooser when clicking outside
+document.addEventListener('click', () => {
+  const dd = document.getElementById('col-chooser-dropdown');
+  if (dd) dd.classList.remove('open');
+});
+
 function escapeHtml(s) {
   if (s == null) return '';
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -1511,6 +1596,7 @@ function rebuildSkuList(regionName) {
   applyFilters();
   renderSummary();
   renderWorkloads();
+  populateMultiRegionCheckboxes();
 }
 
 // === SUMMARY DASHBOARD ===
@@ -1583,6 +1669,8 @@ function applyFilters() {
   });
 
   document.getElementById('result-count').textContent = `${filteredSkus.length} of ${allSkus.length} SKUs`;
+  const availBadge = document.getElementById('available-count');
+  if (availBadge) availBadge.textContent = allSkus.length;
   renderTable();
 }
 
@@ -1607,9 +1695,10 @@ function sortBy(field) {
 
 // === TABLE RENDERING ===
 function renderTable() {
+  const visCols = getVisibleColumns();
   // Header
   const head = document.getElementById('table-head');
-  head.innerHTML = columns.map(c => {
+  head.innerHTML = visCols.map(c => {
     const arrow = currentSort.field === c.key ? `<span class="sort-arrow">${currentSort.dir === 'asc' ? '▲' : '▼'}</span>` : '';
     const cls = c.vertical ? ' class="vertical-header"' : '';
     const style = c.width ? ` style="width:${c.width}"` : '';
@@ -1637,7 +1726,7 @@ function renderTable() {
   const letterShade = {};
   sortedLetters.forEach((l, i) => { letterShade[l] = i % 2 === 0; });
 
-  const colSpan = columns.length;
+  const colSpan = visCols.length;
   let html = '';
   sortedLetters.forEach(letter => {
     const rows = groups[letter];
@@ -1652,7 +1741,7 @@ function renderTable() {
     </tr>`;
     rows.forEach(s => {
       const rowCls = shaded ? 'row-shaded' : '';
-      html += `<tr class="${rowCls} group-row-${letter}">` + columns.map(c => {
+      html += `<tr class="${rowCls} group-row-${letter}">` + visCols.map(c => {
         const val = s[c.key];
         const rendered = c.render ? c.render(val, s) : escapeHtml(val);
         const cls = c.vertical ? ' class="icon-cell"' : '';
@@ -1742,9 +1831,10 @@ function togglePin(size) {
 }
 
 function renderShortlist() {
-  const panel = document.getElementById('shortlist-panel');
+  const body = document.getElementById('body-shortlist');
   const chips = document.getElementById('shortlist-chips');
   const count = document.getElementById('shortlist-count');
+  const toggle = document.getElementById('toggle-shortlist');
   const clearBtn = document.getElementById('clear-pins-btn');
 
   const actions = document.getElementById('shortlist-actions');
@@ -1753,17 +1843,27 @@ function renderShortlist() {
   if (clearChkBtn) clearChkBtn.disabled = !pinnedSkus.size;
   count.textContent = pinnedSkus.size;
 
+  const multiRegionContainer = document.getElementById('multiregion-container');
+
   if (pinnedSkus.size === 0) {
     chips.innerHTML = '<span style="font-size:12px;color:var(--text-tertiary);">Pin VM SKUs from the table using the ○ button to build your shortlist</span>';
     if (actions) actions.style.display = 'none';
+    if (multiRegionContainer) multiRegionContainer.style.display = 'none';
     return;
   }
+  // Auto-expand section when pins are added
+  if (body && body.classList.contains('collapsed')) {
+    body.classList.remove('collapsed');
+    if (toggle) toggle.classList.remove('collapsed');
+  }
   if (actions) actions.style.display = '';
+  if (multiRegionContainer) multiRegionContainer.style.display = '';
 
   chips.innerHTML = [...pinnedSkus].sort().map(size => {
     const sku = filteredSkus.find(s => s.size === size) || allSkus.find(s => s.size === size);
     const info = sku ? ` · ${sku.vCPUs}vCPU · ${sku.memoryGB}GB` : '';
-    return `<span class="shortlist-chip">${escapeHtml(size)}<span style="color:var(--text-secondary);font-weight:400;">${info}</span><span class="remove-pin" onclick="togglePin('${escapeHtml(size)}')" title="Remove">×</span></span>`;
+    const badge = sku ? getLifecycleBadge(sku) : '';
+    return `<span class="shortlist-chip">${escapeHtml(size)}<span style="color:var(--text-secondary);font-weight:400;">${info}</span>${badge}<span class="remove-pin" onclick="togglePin('${escapeHtml(size)}')" title="Remove">×</span></span>`;
   }).join('');
 }
 
@@ -1917,15 +2017,19 @@ function runDeployChecker() {
   const exact = scored.filter(r => r.score === 100).sort((a, b) => a.sku.vCPUs - b.sku.vCPUs);
   const container = document.getElementById('checker-results');
 
+  const checkerBadge = document.getElementById('checker-match-count');
+
   if (exact.length > 0) {
     container.innerHTML = `<div class="checker-summary has-matches">${exact.length} of ${allSkus.length} SKUs match your requirements</div>` + buildCheckerTable(exact);
     collapseCheckerGroups();
+    if (checkerBadge) checkerBadge.textContent = exact.length;
   } else {
     const top5 = scored.sort((a, b) => b.score - a.score || a.sku.vCPUs - b.sku.vCPUs).slice(0, 5);
     container.innerHTML =
       `<div class="checker-summary no-matches">0 of ${allSkus.length} SKUs match all requirements — consider relaxing some filters</div>` +
       (top5.length ? '<p style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">Closest matches:</p>' + buildCheckerTable(top5) : '');
     collapseCheckerGroups();
+    if (checkerBadge) checkerBadge.textContent = '0';
   }
 }
 
@@ -1992,6 +2096,117 @@ function resetChecker() {
   ['chk-vcpus','chk-memory','chk-disks','chk-nics'].forEach(id => document.getElementById(id).value = '');
   ['chk-accelnet','chk-premiumio','chk-ephemeral','chk-encrypthost','chk-spot','chk-zoneredundant'].forEach(id => document.getElementById(id).checked = false);
   document.getElementById('checker-results').innerHTML = '';
+  const checkerBadge = document.getElementById('checker-match-count');
+  if (checkerBadge) checkerBadge.textContent = '0';
+}
+
+// === MULTI-REGION COMPARE ===
+function populateMultiRegionCheckboxes() {
+  const container = document.getElementById('multiregion-checkboxes');
+  if (!container) return;
+  const availableRegions = metadata.availableRegions || [];
+  // Exclude current region, show others as checkboxes
+  const otherRegions = availableRegions.filter(r => r !== selectedRegion);
+  if (otherRegions.length === 0) {
+    container.innerHTML = '<span style="font-size:12px;color:var(--text-tertiary);">No other regions available. Add more in config.json and run the refresh workflow.</span>';
+    return;
+  }
+  // Get display names from allRegions
+  container.innerHTML = otherRegions.map(r => {
+    const display = allRegions.find(ar => ar.name === r);
+    const label = display ? display.displayName : r;
+    return `<label style="font-size:12px;display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border:1px solid var(--border-default);border-radius:var(--radius-sm);cursor:pointer;background:var(--bg-layer2);">
+      <input type="checkbox" class="mr-region-cb" value="${escapeHtml(r)}" onchange="checkMultiRegionLimit(this)"> ${escapeHtml(label)}
+    </label>`;
+  }).join('');
+}
+
+function checkMultiRegionLimit(el) {
+  const checked = document.querySelectorAll('.mr-region-cb:checked');
+  if (checked.length > 5) {
+    el.checked = false;
+    showToast('Maximum 5 regions for comparison', 'warning');
+  }
+}
+
+async function runMultiRegionCompare() {
+  if (!pinnedSkus.size) { showToast('Pin some SKUs first', 'warning'); return; }
+  const container = document.getElementById('multiregion-results');
+
+  // Get selected regions from checkboxes
+  const selectedRegions = [...document.querySelectorAll('.mr-region-cb:checked')].map(cb => cb.value);
+  if (selectedRegions.length === 0) {
+    showToast('Select at least one region to compare', 'warning');
+    return;
+  }
+
+  container.innerHTML = '<div class="loading-indicator">Loading region data...</div>';
+
+  // Load selected region data
+  const regionData = {};
+  for (const region of selectedRegions) {
+    if (regionDataCache[region]) {
+      regionData[region] = regionDataCache[region];
+    } else {
+      try {
+        const resp = await fetch(`data/${region}.json`);
+        if (resp.ok) {
+          const data = await resp.json();
+          regionDataCache[region] = data;
+          regionData[region] = data;
+        }
+      } catch (e) { /* skip failed regions */ }
+    }
+  }
+
+  const regionNames = Object.keys(regionData);
+  if (regionNames.length === 0) {
+    container.innerHTML = '<p style="color:var(--status-danger);font-size:13px;">Could not load data for selected regions.</p>';
+    return;
+  }
+
+  // Build SKU availability lookup per region
+  const regionSkuSets = {};
+  regionNames.forEach(r => {
+    regionSkuSets[r] = new Set((regionData[r].skus || []).map(s => s.size));
+  });
+
+  // Get display names
+  const regionDisplayNames = {};
+  regionNames.forEach(r => {
+    regionDisplayNames[r] = regionData[r].regionDisplayName || r;
+  });
+
+  const pinnedList = [...pinnedSkus].sort();
+
+  // Build matrix table
+  let html = '<table class="region-matrix"><thead><tr><th>VM Size</th>';
+  regionNames.forEach(r => {
+    html += `<th>${escapeHtml(regionDisplayNames[r])}</th>`;
+  });
+  html += '<th>Available In</th></tr></thead><tbody>';
+
+  pinnedList.forEach(size => {
+    html += `<tr><td>${escapeHtml(size)}</td>`;
+    let availCount = 0;
+    regionNames.forEach(r => {
+      const avail = regionSkuSets[r].has(size);
+      if (avail) availCount++;
+      html += `<td class="${avail ? 'avail' : 'unavail'}">${avail ? '✅' : '❌'}</td>`;
+    });
+    html += `<td><span class="region-summary" style="color:${availCount === regionNames.length ? 'var(--status-success)' : 'var(--status-warning)'}; font-weight:600;">${availCount}/${regionNames.length}</span></td>`;
+    html += '</tr>';
+  });
+
+  html += '</tbody></table>';
+
+  // Summary
+  const allAvailCount = pinnedList.filter(size => regionNames.every(r => regionSkuSets[r].has(size))).length;
+  const summary = allAvailCount === pinnedList.length
+    ? `<div class="checker-summary has-matches">✅ All ${pinnedList.length} pinned SKUs are available in all ${regionNames.length} selected regions</div>`
+    : `<div class="checker-summary no-matches">⚠️ ${allAvailCount} of ${pinnedList.length} pinned SKUs are available in all ${regionNames.length} selected regions</div>`;
+
+  container.innerHTML = summary + html;
 }
 
 // === FAMILY OVERVIEW ===
