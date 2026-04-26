@@ -3,13 +3,24 @@ name: Deploy to Azure Storage
 on:
   push:
     branches: [main]
-    paths: ['index.html', 'data/**']
+    paths: ['index.html', 'data/**', 'config.json']
+
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
   deploy:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Upload index.html to Azure Blob Storage
         run: |
@@ -36,6 +47,20 @@ jobs:
             Write-Host "✅ Data files uploaded"
           } else {
             Write-Host "ℹ No data directory found (skipping)"
+          }
+        shell: pwsh
+
+      - name: Upload config.json to Azure Blob Storage
+        run: |
+          if (Test-Path config.json) {
+            az storage blob upload `
+              --account-name ${{ vars.STORAGE_ACCOUNT }} `
+              --container-name '$web' `
+              --name config.json `
+              --file config.json `
+              --overwrite `
+              --content-type "application/json" `
+              --auth-mode login
           }
         shell: pwsh
 
