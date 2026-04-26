@@ -264,7 +264,7 @@ select:focus, input:focus { outline: 2px solid var(--brand-primary); outline-off
 .btn-danger:hover { background: #a8293f; }
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 12px;
   margin-bottom: 16px;
 }
@@ -272,29 +272,53 @@ select:focus, input:focus { outline: 2px solid var(--brand-primary); outline-off
   background: var(--bg-layer1);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
-  padding: 16px;
-  text-align: center;
+  padding: 14px 16px;
   box-shadow: var(--shadow-sm);
+  border-top: 3px solid var(--brand-primary);
+  position: relative;
+}
+.summary-card .summary-icon {
+  font-size: 22px;
+  margin-bottom: 4px;
 }
 .summary-card .summary-value {
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 700;
-  color: var(--brand-primary);
+  color: var(--text-primary);
   line-height: 1.2;
 }
 .summary-card .summary-label {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-secondary);
-  margin-top: 4px;
+  margin-top: 2px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  font-weight: 500;
 }
 .summary-card .summary-detail {
   font-size: 11px;
-  color: var(--text-secondary);
-  margin-top: 6px;
+  color: var(--text-tertiary);
+  margin-top: 4px;
   line-height: 1.4;
 }
+.summary-card[data-accent="blue"] { border-top-color: #0d6efd; }
+.summary-card[data-accent="blue"] .summary-value { color: #0d6efd; }
+.summary-card[data-accent="green"] { border-top-color: #198754; }
+.summary-card[data-accent="green"] .summary-value { color: #198754; }
+.summary-card[data-accent="purple"] { border-top-color: #6f42c1; }
+.summary-card[data-accent="purple"] .summary-value { color: #6f42c1; }
+.summary-card[data-accent="orange"] { border-top-color: #fd7e14; }
+.summary-card[data-accent="orange"] .summary-value { color: #fd7e14; }
+.summary-card[data-accent="teal"] { border-top-color: #20c997; }
+.summary-card[data-accent="teal"] .summary-value { color: #20c997; }
+.summary-card[data-accent="red"] { border-top-color: #dc3545; }
+.summary-card[data-accent="red"] .summary-value { color: #dc3545; }
+[data-theme="dark"] .summary-card[data-accent="blue"] .summary-value { color: #6ea8fe; }
+[data-theme="dark"] .summary-card[data-accent="green"] .summary-value { color: #75b798; }
+[data-theme="dark"] .summary-card[data-accent="purple"] .summary-value { color: #a98eda; }
+[data-theme="dark"] .summary-card[data-accent="orange"] .summary-value { color: #feb272; }
+[data-theme="dark"] .summary-card[data-accent="teal"] .summary-value { color: #79dfc1; }
+[data-theme="dark"] .summary-card[data-accent="red"] .summary-value { color: #ea868f; }
 .no-data-box {
   text-align: center;
   padding: 40px 24px;
@@ -1873,6 +1897,10 @@ function renderSummary() {
   const minMem = Math.min(...mems);
   const maxMem = Math.max(...mems);
 
+  const accelNet = allSkus.filter(s => s.acceleratedNetworking).length;
+  const premiumIO = allSkus.filter(s => s.premiumIO).length;
+  const spotCount = allSkus.filter(s => s.spotEligible).length;
+
   let trendBadge = '';
   if (_historyData) {
     const prevCount = (_historyData.skus || []).length;
@@ -1885,19 +1913,36 @@ function renderSummary() {
   }
 
   grid.innerHTML = `
-    <div class="summary-card">
+    <div class="summary-card" data-accent="blue">
+      <div class="summary-icon">🖥️</div>
       <div class="summary-value">${total}</div>
       <div class="summary-label">Total VM SKUs</div>
-      <div class="summary-detail">${families.size} families</div>
       ${trendBadge}
     </div>
-    <div class="summary-card">
+    <div class="summary-card" data-accent="purple">
+      <div class="summary-icon">📦</div>
+      <div class="summary-value">${families.size}</div>
+      <div class="summary-label">VM Families</div>
+    </div>
+    <div class="summary-card" data-accent="green">
+      <div class="summary-icon">⚡</div>
       <div class="summary-value">${minCPU}–${maxCPU}</div>
       <div class="summary-label">vCPU Range</div>
     </div>
-    <div class="summary-card">
-      <div class="summary-value">${minMem}–${maxMem.toLocaleString()} GB</div>
-      <div class="summary-label">Memory Range</div>
+    <div class="summary-card" data-accent="orange">
+      <div class="summary-icon">🧠</div>
+      <div class="summary-value">${minMem}–${maxMem.toLocaleString()}</div>
+      <div class="summary-label">Memory (GB)</div>
+    </div>
+    <div class="summary-card" data-accent="teal">
+      <div class="summary-icon">🚀</div>
+      <div class="summary-value">${accelNet}</div>
+      <div class="summary-label">Accel Networking</div>
+    </div>
+    <div class="summary-card" data-accent="red">
+      <div class="summary-icon">💎</div>
+      <div class="summary-value">${premiumIO}</div>
+      <div class="summary-label">Premium Storage</div>
     </div>
   `;
 }
