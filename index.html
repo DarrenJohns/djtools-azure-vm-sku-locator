@@ -2036,7 +2036,7 @@ function exportShortlistCsv() {
 }
 
 // === PRICING COMPARISON ===
-let _pricingCache = {}; // keyed by "region|skuName"
+let _pricingCache = null; // { skuName: { linux, windows, spot } }
 
 async function fetchPinnedPricing() {
   if (!pinnedSkus.size) { showToast('Pin some SKUs first', 'warning'); return; }
@@ -2047,71 +2047,41 @@ async function fetchPinnedPricing() {
   if (!container || !content) return;
 
   container.style.display = '';
-  content.innerHTML = '<div class="pricing-loading">⏳ Fetching live pricing from Azure...</div>';
+  content.innerHTML = '<div class="pricing-loading">⏳ Loading pricing data...</div>';
 
-  const skuNames = [...pinnedSkus].sort();
-  const region = selectedRegion;
-
-  // Build filter: fetch all pinned SKUs in one call using 'or' chains
-  // API supports OData filters; batch by fetching all VM prices for the region
-  const uncached = skuNames.filter(s => !_pricingCache[`${region}|${s}`]);
-
-  if (uncached.length > 0) {
+  // Load pricing file if not cached for this region
+  if (!_pricingCache || _pricingCache._region !== selectedRegion) {
     try {
-      // Fetch in batches of 10 SKUs to keep URL length manageable
-      for (let i = 0; i < uncached.length; i += 10) {
-        const batch = uncached.slice(i, i + 10);
-        const skuFilter = batch.map(s => `armSkuName eq '${s}'`).join(' or ');
-        const filter = `serviceName eq 'Virtual Machines' and armRegionName eq '${region}' and (${skuFilter}) and priceType eq 'Consumption'`;
-        const url = `https://prices.azure.com/api/retail/prices?$filter=${encodeURIComponent(filter)}`;
-
-        let items = [];
-        let nextUrl = url;
-        let pages = 0;
-        while (nextUrl && pages < 5) {
-          const resp = await fetch(nextUrl);
-          if (!resp.ok) break;
-          const data = await resp.json();
-          items = items.concat(data.Items || []);
-          nextUrl = data.NextPageLink || null;
-          pages++;
-        }
-
-        // Group by armSkuName
-        for (const item of items) {
-          const key = `${region}|${item.armSkuName}`;
-          if (!_pricingCache[key]) _pricingCache[key] = [];
-          _pricingCache[key].push(item);
-        }
-        // Mark SKUs with no results so we don't re-fetch
-        for (const s of batch) {
-          if (!_pricingCache[`${region}|${s}`]) _pricingCache[`${region}|${s}`] = [];
-        }
+      const resp = await fetch(`data/${selectedRegion}-pricing.json`);
+      if (!resp.ok) {
+        content.innerHTML = '<div style="font-size:12px;color:var(--text-tertiary);padding:8px 0;">💰 Pricing data not yet available for this region. It will be generated on the next scheduled data refresh.</div>';
+        return;
       }
+      const data = await resp.json();
+      _pricingCache = data.prices || {};
+      _pricingCache._region = selectedRegion;
+      _pricingCache._lastUpdated = data.lastUpdated;
     } catch (e) {
-      content.innerHTML = '<div style="font-size:12px;color:var(--status-danger);padding:8px 0;">⚠️ Failed to fetch pricing data. The Azure Retail Prices API may be temporarily unavailable.</div>';
+      content.innerHTML = '<div style="font-size:12px;color:var(--status-danger);padding:8px 0;">⚠️ Failed to load pricing data.</div>';
       return;
     }
   }
 
-  renderPricingTable(skuNames, region, content);
+  const skuNames = [...pinnedSkus].sort();
+  renderPricingTable(skuNames, content);
 }
 
-function renderPricingTable(skuNames, region, content) {
-  // Extract relevant prices per SKU
+function renderPricingTable(skuNames, content) {
   const rows = skuNames.map(name => {
-    const items = _pricingCache[`${region}|${name}`] || [];
-    const linux = items.find(i => !i.productName.includes('Windows') && !i.meterName.includes('Spot') && !i.meterName.includes('Low Priority') && i.type === 'Consumption');
-    const windows = items.find(i => i.productName.includes('Windows') && !i.meterName.includes('Spot') && !i.meterName.includes('Low Priority') && i.type === 'Consumption');
-    const spot = items.find(i => !i.productName.includes('Windows') && i.meterName.includes('Spot') && i.type === 'Consumption');
+    const prices = _pricingCache[name] || {};
     const sku = allSkus.find(s => s.size === name);
-    return { name, linux, windows, spot, sku };
+    return { name, linux: prices.linux, windows: prices.windows, spot: prices.spot, sku };
   });
 
   // Find cheapest in each column for highlighting
-  const linuxPrices = rows.filter(r => r.linux).map(r => r.linux.retailPrice);
-  const windowsPrices = rows.filter(r => r.windows).map(r => r.windows.retailPrice);
-  const spotPrices = rows.filter(r => r.spot).map(r => r.spot.retailPrice);
+  const linuxPrices = rows.filter(r => r.linux != null).map(r => r.linux);
+  const windowsPrices = rows.filter(r => r.windows != null).map(r => r.windows);
+  const spotPrices = rows.filter(r => r.spot != null).map(r => r.spot);
   const minLinux = linuxPrices.length ? Math.min(...linuxPrices) : null;
   const minWindows = windowsPrices.length ? Math.min(...windowsPrices) : null;
   const minSpot = spotPrices.length ? Math.min(...spotPrices) : null;
@@ -2126,9 +2096,9 @@ function renderPricingTable(skuNames, region, content) {
     </tr></thead><tbody>`;
 
   for (const r of rows) {
-    const lp = r.linux ? r.linux.retailPrice : null;
-    const wp = r.windows ? r.windows.retailPrice : null;
-    const sp = r.spot ? r.spot.retailPrice : null;
+    const lp = r.linux != null ? r.linux : null;
+    const wp = r.windows != null ? r.windows : null;
+    const sp = r.spot != null ? r.spot : null;
     const lClass = (lp !== null && lp === minLinux && rows.length > 1) ? ' cheapest' : '';
     const wClass = (wp !== null && wp === minWindows && rows.length > 1) ? ' cheapest' : '';
     const sClass = (sp !== null && sp === minSpot && rows.length > 1) ? ' cheapest' : '';
@@ -2145,7 +2115,8 @@ function renderPricingTable(skuNames, region, content) {
   }
 
   html += '</tbody></table>';
-  html += '<p class="pricing-note">💡 Live data from <a href="https://prices.azure.com" target="_blank" style="color:var(--brand-primary);">Azure Retail Prices API</a> · No auth required · Prices in USD · ~730 hrs/mo</p>';
+  const updated = _pricingCache._lastUpdated ? ` · Updated ${new Date(_pricingCache._lastUpdated).toLocaleDateString()}` : '';
+  html += `<p class="pricing-note">💡 Data from <a href="https://prices.azure.com" target="_blank" style="color:var(--brand-primary);">Azure Retail Prices API</a> · USD pay-as-you-go · ~730 hrs/mo${updated}</p>`;
 
   content.innerHTML = html;
 }

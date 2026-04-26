@@ -135,6 +135,22 @@ jobs:
           Write-Host "[OK] Retirement data refresh complete"
         shell: pwsh
 
+      - name: Fetch pricing data
+        run: |
+          $config = Get-Content "config.json" | ConvertFrom-Json
+          $regions = $config.targetRegions
+          foreach ($region in $regions) {
+            $name = $region.name
+            $dataFile = "data/$name.json"
+            $pricingFile = "data/$name-pricing.json"
+            if (Test-Path $dataFile) {
+              Write-Host "Fetching pricing for $name..."
+              python scripts/fetch-pricing.py $dataFile $pricingFile
+            }
+          }
+          Write-Host "[OK] Pricing data refresh complete"
+        shell: pwsh
+
       - name: Upload data to Azure Blob Storage
         run: |
           az storage blob upload-batch `
