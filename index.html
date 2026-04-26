@@ -2198,7 +2198,7 @@ function renderPricingTable(skuNames, content) {
 
   html += '</tbody></table>';
   const updated = _pricingCache._lastUpdated ? ` · Updated ${new Date(_pricingCache._lastUpdated).toLocaleDateString()}` : '';
-  html += `<p class="pricing-note">💡 Data from <a href="https://prices.azure.com" target="_blank" style="color:var(--brand-primary);">Azure Retail Prices API</a> · USD pay-as-you-go · ~730 hrs/mo${updated}</p>`;
+  html += `<p class="pricing-note">💡 Data from <a href="https://prices.azure.com" target="_blank" style="color:var(--brand-primary);">Azure Retail Prices API</a> · USD pay-as-you-go · ~730 hrs/mo${updated}<br>— indicates the SKU is not yet priced in this region (may be in preview or not commercially available)</p>`;
 
   content.innerHTML = html;
 }
