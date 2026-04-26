@@ -191,31 +191,26 @@ body {
   gap: 4px;
   margin-left: 8px;
   cursor: pointer;
-  position: relative;
 }
-.freshness-flyout {
-  display: none;
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 0;
+/* Freshness detail overlay */
+.freshness-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 500; background: rgba(0,0,0,0.3); justify-content: center; align-items: flex-start; padding-top: 80px; }
+.freshness-overlay.show { display: flex; }
+.freshness-card {
   background: var(--bg-layer1);
   border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
-  padding: 12px 16px;
-  min-width: 280px;
-  z-index: 200;
-  font-weight: 400;
-  color: var(--text-primary);
-  white-space: normal;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 20px 24px;
+  max-width: 380px;
+  width: 90%;
+  animation: fadeInUp 0.2s ease;
 }
-.freshness-flyout.show { display: block; }
-.freshness-flyout h5 { font-size: 12px; font-weight: 700; margin-bottom: 8px; color: var(--text-primary); }
-.freshness-flyout table { width: 100%; font-size: 11px; border-collapse: collapse; }
-.freshness-flyout td { padding: 3px 6px; border-bottom: 1px solid var(--border-subtle); }
-.freshness-flyout td:first-child { font-weight: 600; white-space: nowrap; }
-.freshness-flyout td:last-child { text-align: right; color: var(--text-secondary); }
-.freshness-flyout .flyout-note { font-size: 10px; color: var(--text-tertiary); margin-top: 8px; line-height: 1.4; }
+.freshness-card h4 { font-size: 14px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.freshness-card table { width: 100%; font-size: 12px; border-collapse: collapse; }
+.freshness-card td { padding: 6px 8px; border-bottom: 1px solid var(--border-subtle); }
+.freshness-card td:first-child { font-weight: 600; white-space: nowrap; }
+.freshness-card td:last-child { text-align: right; color: var(--text-secondary); }
+.freshness-card .note { font-size: 11px; color: var(--text-tertiary); margin-top: 12px; line-height: 1.5; }
 .freshness-badge.fresh { background: #e6f4ea; color: #137333; border: 1px solid #a8dab5; }
 .freshness-badge.aging { background: #fef7e0; color: #7c6900; border: 1px solid #f9d849; }
 .freshness-badge.stale { background: #fce8e6; color: #c5221f; border: 1px solid #f28b82; }
@@ -897,8 +892,15 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
   <span class="current-region" id="current-region-label"></span>
   <span class="freshness-badge" id="freshness-badge" style="display:none;" onclick="toggleFreshnessFlyout(event)">
     <span id="freshness-label"></span>
-    <div class="freshness-flyout" id="freshness-flyout"></div>
   </span>
+</div>
+
+<!-- Freshness Detail Overlay -->
+<div class="freshness-overlay" id="freshness-overlay" onclick="closeFreshnessFlyout()">
+  <div class="freshness-card" onclick="event.stopPropagation()">
+    <h4>📋 Data Refresh Summary <button class="btn btn-outline btn-sm" style="margin-left:auto;" onclick="closeFreshnessFlyout()">✕</button></h4>
+    <div id="freshness-detail"></div>
+  </div>
 </div>
 
 <div class="container">
@@ -1614,35 +1616,30 @@ function renderFreshness() {
     badge.className = 'freshness-badge ' + cls;
     badge.title = 'Click for data refresh details';
     badge.style.display = '';
-
-    // Render flyout content
-    renderFreshnessFlyout();
   }
 }
 
 function renderFreshnessFlyout() {
-  const flyout = document.getElementById('freshness-flyout');
-  if (!flyout) return;
+  const detail = document.getElementById('freshness-detail');
+  if (!detail) return;
 
   const regionData = regionDataCache[selectedRegion];
   const skuDate = regionData && regionData.lastUpdated ? formatFlyoutDate(regionData.lastUpdated) : '—';
   const skuCount = allSkus ? allSkus.length : 0;
 
-  // Check pricing data availability
   const hasPricing = _pricingCache && _pricingCache._region === selectedRegion;
   const pricingDate = hasPricing && _pricingCache._lastUpdated ? formatFlyoutDate(_pricingCache._lastUpdated) : null;
 
-  let html = `<h5>📋 Data Refresh Summary</h5>
-    <table>
+  let html = `<table>
       <tr><td>🖥️ VM SKU Data</td><td>${skuCount} SKUs · ${skuDate}</td></tr>
-      <tr><td>💰 Pricing Data</td><td>${pricingDate || 'Load via shortlist'}</td></tr>
+      <tr><td>💰 Pricing Data</td><td>${pricingDate || 'Load via pinned shortlist'}</td></tr>
       <tr><td>⚠️ Retirement Alerts</td><td>${skuDate}</td></tr>
       <tr><td>📊 History Snapshots</td><td>Archived monthly</td></tr>
       <tr><td>🌏 Region List</td><td>${allRegions ? allRegions.length + ' regions' : '—'}</td></tr>
     </table>
-    <div class="flyout-note">All data is refreshed monthly via GitHub Actions workflow or manual trigger. Pricing sourced from the Azure Retail Prices API (no auth required).</div>`;
+    <div class="note">All data is refreshed monthly via GitHub Actions workflow or manual trigger. Pricing sourced from the Azure Retail Prices API (no auth required).</div>`;
 
-  flyout.innerHTML = html;
+  detail.innerHTML = html;
 }
 
 function formatFlyoutDate(dateStr) {
@@ -1655,20 +1652,15 @@ function formatFlyoutDate(dateStr) {
 
 function toggleFreshnessFlyout(e) {
   e.stopPropagation();
-  const flyout = document.getElementById('freshness-flyout');
-  if (!flyout) return;
-  flyout.classList.toggle('show');
-  // Close on outside click
-  if (flyout.classList.contains('show')) {
-    setTimeout(() => {
-      document.addEventListener('click', closeFreshnessFlyout, { once: true });
-    }, 0);
-  }
+  const overlay = document.getElementById('freshness-overlay');
+  if (!overlay) return;
+  renderFreshnessFlyout();
+  overlay.classList.toggle('show');
 }
 
 function closeFreshnessFlyout() {
-  const flyout = document.getElementById('freshness-flyout');
-  if (flyout) flyout.classList.remove('show');
+  const overlay = document.getElementById('freshness-overlay');
+  if (overlay) overlay.classList.remove('show');
 }
 
 function buildDropdown() {
