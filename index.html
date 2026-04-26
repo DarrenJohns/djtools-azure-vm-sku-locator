@@ -867,11 +867,12 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
     <div class="welcome-body">
       <ul>
         <li><span>🌏</span> <strong>Browse</strong> — Select any Azure region to view available VM SKUs</li>
-        <li><span>🔍</span> <strong>Filter</strong> — Search by size, family, vCPUs, or capability</li>
+        <li><span>🔍</span> <strong>Filter</strong> — Search by size, family, vCPUs, processor type, or capability</li>
         <li><span>🎯</span> <strong>Find a Match</strong> — Specify requirements and find SKUs that fit</li>
-        <li><span>📌</span> <strong>Pin &amp; Compare</strong> — Pin SKUs to a shortlist for side-by-side review</li>
-        <li><span>⚠️</span> <strong>Retirement Alerts</strong> — See which SKUs are scheduled for retirement</li>
+        <li><span>📌</span> <strong>Pin &amp; Compare</strong> — Pin SKUs to a shortlist with pricing data</li>
+        <li><span>🔄</span> <strong>Retirement Alerts</strong> — See which SKUs are scheduled for retirement</li>
         <li><span>📊</span> <strong>What's New</strong> — Track SKU additions and removals over time</li>
+        <li><span>🔤</span> <strong>Naming Guide</strong> — Interactive decoder for Azure VM naming conventions</li>
         <li><span>💡</span> <strong>Nearby Regions</strong> — Get suggestions for alternative regions</li>
         <li><span>📥</span> <strong>Export</strong> — Download filtered results as CSV</li>
         <li><span>⌨️</span> <strong>Shortcuts</strong> — Press <strong>?</strong> anytime for keyboard shortcuts</li>
@@ -1369,7 +1370,7 @@ let retirementFamilies = {};
 function getLifecycleBadge(sku) {
   if (sku.family && retirementFamilies[sku.family.toLowerCase()]) {
     const r = retirementFamilies[sku.family.toLowerCase()];
-    return `<span class="lifecycle-badge retiring" title="Retiring ${r.date}">⚠️ Retiring</span>`;
+    return `<span class="lifecycle-badge retiring" title="Retiring ${r.date}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:-1px;margin-right:2px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Retiring</span>`;
   }
   return '';
 }
