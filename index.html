@@ -190,7 +190,32 @@ body {
   align-items: center;
   gap: 4px;
   margin-left: 8px;
+  cursor: pointer;
+  position: relative;
 }
+.freshness-flyout {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  background: var(--bg-layer1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  padding: 12px 16px;
+  min-width: 280px;
+  z-index: 200;
+  font-weight: 400;
+  color: var(--text-primary);
+  white-space: normal;
+}
+.freshness-flyout.show { display: block; }
+.freshness-flyout h5 { font-size: 12px; font-weight: 700; margin-bottom: 8px; color: var(--text-primary); }
+.freshness-flyout table { width: 100%; font-size: 11px; border-collapse: collapse; }
+.freshness-flyout td { padding: 3px 6px; border-bottom: 1px solid var(--border-subtle); }
+.freshness-flyout td:first-child { font-weight: 600; white-space: nowrap; }
+.freshness-flyout td:last-child { text-align: right; color: var(--text-secondary); }
+.freshness-flyout .flyout-note { font-size: 10px; color: var(--text-tertiary); margin-top: 8px; line-height: 1.4; }
 .freshness-badge.fresh { background: #e6f4ea; color: #137333; border: 1px solid #a8dab5; }
 .freshness-badge.aging { background: #fef7e0; color: #7c6900; border: 1px solid #f9d849; }
 .freshness-badge.stale { background: #fce8e6; color: #c5221f; border: 1px solid #f28b82; }
@@ -870,7 +895,10 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
     <option value="">Loading regions...</option>
   </select>
   <span class="current-region" id="current-region-label"></span>
-  <span class="freshness-badge" id="freshness-badge" style="display:none;"></span>
+  <span class="freshness-badge" id="freshness-badge" style="display:none;" onclick="toggleFreshnessFlyout(event)">
+    <span id="freshness-label"></span>
+    <div class="freshness-flyout" id="freshness-flyout"></div>
+  </span>
 </div>
 
 <div class="container">
@@ -1582,11 +1610,65 @@ function renderFreshness() {
       label = `🔴 ${daysSince}d ago`;
       cls = 'stale';
     }
-    badge.textContent = label;
+    badge.querySelector('#freshness-label').textContent = label + ' ▾';
     badge.className = 'freshness-badge ' + cls;
-    badge.title = `Data last refreshed: ${metadata.lastUpdatedDisplay || lastUpdated.toLocaleDateString()}`;
+    badge.title = 'Click for data refresh details';
     badge.style.display = '';
+
+    // Render flyout content
+    renderFreshnessFlyout();
   }
+}
+
+function renderFreshnessFlyout() {
+  const flyout = document.getElementById('freshness-flyout');
+  if (!flyout) return;
+
+  const regionData = regionDataCache[selectedRegion];
+  const skuDate = regionData && regionData.lastUpdated ? formatFlyoutDate(regionData.lastUpdated) : '—';
+  const skuCount = allSkus ? allSkus.length : 0;
+
+  // Check pricing data availability
+  const hasPricing = _pricingCache && _pricingCache._region === selectedRegion;
+  const pricingDate = hasPricing && _pricingCache._lastUpdated ? formatFlyoutDate(_pricingCache._lastUpdated) : null;
+
+  let html = `<h5>📋 Data Refresh Summary</h5>
+    <table>
+      <tr><td>🖥️ VM SKU Data</td><td>${skuCount} SKUs · ${skuDate}</td></tr>
+      <tr><td>💰 Pricing Data</td><td>${pricingDate || 'Load via shortlist'}</td></tr>
+      <tr><td>⚠️ Retirement Alerts</td><td>${skuDate}</td></tr>
+      <tr><td>📊 History Snapshots</td><td>Archived monthly</td></tr>
+      <tr><td>🌏 Region List</td><td>${allRegions ? allRegions.length + ' regions' : '—'}</td></tr>
+    </table>
+    <div class="flyout-note">All data is refreshed monthly via GitHub Actions workflow or manual trigger. Pricing sourced from the Azure Retail Prices API (no auth required).</div>`;
+
+  flyout.innerHTML = html;
+}
+
+function formatFlyoutDate(dateStr) {
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return '—';
+    return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+  } catch { return '—'; }
+}
+
+function toggleFreshnessFlyout(e) {
+  e.stopPropagation();
+  const flyout = document.getElementById('freshness-flyout');
+  if (!flyout) return;
+  flyout.classList.toggle('show');
+  // Close on outside click
+  if (flyout.classList.contains('show')) {
+    setTimeout(() => {
+      document.addEventListener('click', closeFreshnessFlyout, { once: true });
+    }, 0);
+  }
+}
+
+function closeFreshnessFlyout() {
+  const flyout = document.getElementById('freshness-flyout');
+  if (flyout) flyout.classList.remove('show');
 }
 
 function buildDropdown() {
