@@ -1054,6 +1054,63 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
       </div>
     </div>
 
+    <!-- VM Naming Convention -->
+    <div class="section" id="sec-naming">
+      <div class="section-header" onclick="toggleSection('naming')">
+        <span class="section-title">🔤 Azure VM Naming Convention</span>
+        <span class="section-toggle collapsed" id="toggle-naming">▼</span>
+      </div>
+      <div class="section-body collapsed" id="body-naming">
+        <p style="margin-bottom:12px;font-size:13px;color:var(--text-secondary);line-height:1.6;">
+          Azure VM SKU names encode key specifications into a structured format. Understanding the pattern helps you quickly identify a VM's capabilities without looking up every detail.
+        </p>
+        <div style="background:var(--bg-layer2);border:1px solid var(--border-default);border-radius:var(--radius-md);padding:14px 18px;margin-bottom:14px;font-family:'Cascadia Code','Consolas',monospace;">
+          <div style="font-size:16px;font-weight:700;letter-spacing:2px;margin-bottom:8px;color:var(--brand-primary);">Standard_E16ads_v5</div>
+          <div style="font-size:12px;line-height:2;color:var(--text-secondary);">
+            <span style="color:var(--text-tertiary);">Standard_</span> → Prefix (always present)<br>
+            <strong style="color:#d63384;">E</strong> → Family (<strong>Memory-optimized</strong>)<br>
+            <strong style="color:#0d6efd;">16</strong> → vCPUs<br>
+            <strong style="color:#198754;">a</strong> → AMD processor<br>
+            <strong style="color:#fd7e14;">d</strong> → Local temp disk<br>
+            <strong style="color:#6f42c1;">s</strong> → Premium Storage capable<br>
+            <span style="color:var(--text-tertiary);">_</span><strong style="color:#20c997;">v5</strong> → Generation / version
+          </div>
+        </div>
+
+        <p style="margin-bottom:8px;font-size:13px;font-weight:600;">VM Family Prefixes</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px;margin-bottom:14px;font-size:12px;">
+          <div style="padding:6px 10px;background:var(--bg-layer2);border-radius:6px;border-left:3px solid #0d6efd;"><strong>A</strong> — Entry-level / dev-test</div>
+          <div style="padding:6px 10px;background:var(--bg-layer2);border-radius:6px;border-left:3px solid #198754;"><strong>B</strong> — Burstable (economical)</div>
+          <div style="padding:6px 10px;background:var(--bg-layer2);border-radius:6px;border-left:3px solid #6f42c1;"><strong>D</strong> — General purpose</div>
+          <div style="padding:6px 10px;background:var(--bg-layer2);border-radius:6px;border-left:3px solid #d63384;"><strong>E</strong> — Memory-optimized</div>
+          <div style="padding:6px 10px;background:var(--bg-layer2);border-radius:6px;border-left:3px solid #fd7e14;"><strong>F</strong> — Compute-optimized</div>
+          <div style="padding:6px 10px;background:var(--bg-layer2);border-radius:6px;border-left:3px solid #20c997;"><strong>L</strong> — Storage-optimized</div>
+          <div style="padding:6px 10px;background:var(--bg-layer2);border-radius:6px;border-left:3px solid #dc3545;"><strong>M</strong> — Memory-intensive (large)</div>
+          <div style="padding:6px 10px;background:var(--bg-layer2);border-radius:6px;border-left:3px solid #ffc107;"><strong>N</strong> — GPU-enabled</div>
+          <div style="padding:6px 10px;background:var(--bg-layer2);border-radius:6px;border-left:3px solid #0dcaf0;"><strong>H</strong> — High Performance Compute</div>
+        </div>
+
+        <p style="margin-bottom:8px;font-size:13px;font-weight:600;">Common Suffixes</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px;margin-bottom:14px;font-size:12px;">
+          <div style="padding:6px 10px;background:var(--bg-layer2);border-radius:6px;"><strong>a</strong> — AMD processor</div>
+          <div style="padding:6px 10px;background:var(--bg-layer2);border-radius:6px;"><strong>p</strong> — ARM (Ampere) processor</div>
+          <div style="padding:6px 10px;background:var(--bg-layer2);border-radius:6px;"><strong>d</strong> — Local temp disk included</div>
+          <div style="padding:6px 10px;background:var(--bg-layer2);border-radius:6px;"><strong>s</strong> — Premium Storage capable</div>
+          <div style="padding:6px 10px;background:var(--bg-layer2);border-radius:6px;"><strong>l</strong> — Low memory variant</div>
+          <div style="padding:6px 10px;background:var(--bg-layer2);border-radius:6px;"><strong>t</strong> — Tiny / constrained memory</div>
+          <div style="padding:6px 10px;background:var(--bg-layer2);border-radius:6px;"><strong>i</strong> — Isolated (dedicated host)</div>
+          <div style="padding:6px 10px;background:var(--bg-layer2);border-radius:6px;"><strong>b</strong> — Block storage performance</div>
+        </div>
+
+        <p style="font-size:12px;color:var(--text-secondary);line-height:1.6;">
+          📖 Learn more:
+          <a href="https://learn.microsoft.com/en-us/azure/virtual-machines/vm-naming-conventions" target="_blank" rel="noopener" style="color:var(--brand-primary);">VM naming conventions</a> ·
+          <a href="https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/overview" target="_blank" rel="noopener" style="color:var(--brand-primary);">VM sizes overview</a> ·
+          <a href="https://azure.microsoft.com/en-us/pricing/details/virtual-machines/linux/" target="_blank" rel="noopener" style="color:var(--brand-primary);">VM pricing</a>
+        </p>
+      </div>
+    </div>
+
     <!-- How to Query SKU Data -->
     <div class="section" id="sec-cli">
       <div class="section-header" onclick="toggleSection('cli')">
