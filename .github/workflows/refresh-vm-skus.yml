@@ -1,9 +1,7 @@
 name: Refresh VM SKU Data
 
 on:
-  schedule:
-    - cron: '0 0 1 * *'  # 1st of every month at midnight UTC
-  workflow_dispatch:       # Allow manual trigger
+  workflow_dispatch:       # Manual trigger only
 
 jobs:
   refresh:
