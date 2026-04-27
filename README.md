@@ -88,6 +88,56 @@ All data is refreshed **monthly** from Azure APIs. Check the Data Refresh Summar
 
 ---
 
+## 🗂️ Project Structure
+
+```
+vm-sku-per-region/
+├── index.html                    # The app (single file, zero dependencies)
+├── config.json                   # Region configuration
+├── README.md                     # This file
+├── LICENSE                       # MIT license
+├── SECURITY.md                   # Security reporting policy
+├── data/
+│   ├── regions.json              # Available regions list
+│   ├── metadata.json             # Data refresh timestamps
+│   ├── retirements.json          # VM family retirement dates
+│   ├── <region>.json             # VM SKU data per region
+│   ├── <region>-disks.json       # Disk SKU data per region
+│   ├── <region>-pricing.json     # Pricing data per region
+│   └── history/                  # Monthly SKU snapshots for What's New
+├── scripts/
+│   ├── normalize-skus.py         # VM SKU data pipeline
+│   ├── normalize-disks.py        # Disk SKU data pipeline
+│   ├── fetch-pricing.py          # Pricing data fetcher
+│   └── update-retirements.py     # Retirement date scraper
+├── docs/
+│   ├── SPEC.md                   # App specification
+│   ├── howitworks.md             # Technical documentation
+│   └── talktrack.md              # Demo talk track
+├── .github/
+│   ├── workflows/
+│   │   ├── deploy.yml            # CI/CD: auto-deploy to Azure SWA
+│   │   ├── refresh-vm-skus.yml   # Monthly data refresh pipeline
+│   │   └── validate.yml          # HTML validation on pull requests
+│   ├── ISSUE_TEMPLATE/
+│   │   ├── bug_report.yml        # Structured bug report form
+│   │   └── feature_request.yml   # Feature request form
+│   ├── pull_request_template.md  # PR checklist template
+│   └── copilot-instructions.md   # Copilot CLI context
+└── .gitignore
+```
+
+---
+
+## 🤝 Contributing
+
+1. Create a branch from `main` (`feature/`, `fix/`, or `docs/` prefix)
+2. Make your changes and test locally in the browser
+3. Open a Pull Request — the PR template will guide you
+4. After review and approval, merge to `main` → auto-deploys to Azure
+
+---
+
 ## 📄 License
 
 MIT License — see [LICENSE](LICENSE) for details.
