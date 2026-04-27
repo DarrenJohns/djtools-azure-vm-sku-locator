@@ -1,20 +1,21 @@
-# Talk Track — VM SKU Per Region Demo
+# Talk Track — Azure VM SKU by Region Demo
 
-> Version: v0.2.0
 > Duration: ~20 minutes
+
+🔗 **[vmsku.djtools.co.nz](https://vmsku.djtools.co.nz)**
 
 ## Opening (2 min)
 
-**"Today I'll show you VM SKU Per Region — what started as a simple SKU browser has grown into a comprehensive VM planning tool for Azure. It lets you browse, filter, match, compare, and plan VM deployments across any Azure region — all without logging in or running CLI commands."**
+**"Today I'll show you Azure VM SKU by Region — a comprehensive VM and disk planning tool for Azure. It lets you browse, filter, match, and compare VM and disk SKUs across any Azure region — all without logging in or running CLI commands."**
 
 ## The Problem (2 min)
 
-**"If you're an Azure VM admin and need to know what VM sizes are available in a specific region, your options today are:**
-- **Run `az vm list-skus --location <region>`** — requires CLI setup, authentication, and outputs raw data
-- **Check the Azure Portal** — requires login, navigation through multiple blades
-- **Read Azure docs** — generic, doesn't show region-specific availability
+**"If you're an Azure VM admin and need to know what VM sizes or disk types are available in a specific region, your options today are:**
+- **Azure Portal** — requires login, navigation through multiple blades
+- **Azure CLI** — requires setup, authentication, outputs raw data
+- **Azure docs** — generic, doesn't show region-specific availability
 
-**This tool gives you instant, searchable access to VM SKU availability across regions — plus matching, comparing, and deployment-ready code snippets."**
+**This tool gives you instant, searchable access to VM and disk SKU availability — plus matching, comparing, pricing, and deployment-ready code."**
 
 ## Live Demo (13 min)
 
@@ -22,109 +23,94 @@
 
 **"Let's start by picking a region."**
 
-- Default region is New Zealand North (my home region!)
-- Show the region dropdown — regions are grouped by geography for easy navigation
-- Point out the summary dashboard cards at the top: **Total SKUs**, **vCPU Range**, **Memory Range**
-- Call out the **Data Freshness** badge — it's color-coded green/yellow/red so you know how current the data is
+- Default region is New Zealand North
+- Show the region dropdown — regions are grouped by geography
+- Point out the KPI dashboard cards: **Total SKUs**, **vCPU Range**, **Memory Range**, **Intel/AMD/ARM counts**
+- Call out the **Data Freshness** badge — color-coded green/yellow/red
 
-### Browse SKUs — "See What's Available" (2 min)
+### Browse VM SKUs — "See What's Available" (2 min)
 
-**"Now let's see what's actually available in this region."**
+**"Now let's see what's actually available."**
 
-- Expand the collapsible **Browse SKUs** section
-- Show the full SKU table — results are letter-grouped for easy scanning
-- Type in the search box to filter (e.g., "D4" to find all D4-series VMs)
-- Show the filter dropdowns: **Size**, **Version**, **Family Type**, **vCPU Range**
-- Click the **⚙️ Columns** button to open the Column Chooser — customize which columns are visible
-- Click a SKU size name to pop open the **Snippet Modal** — ready-to-paste code for CLI, PowerShell, and Bicep
+- Expand the **Browse SKUs** section
+- Show the full table — results are letter-grouped
+- Demo the filters: **text search**, **family type**, **vCPU range**, **processor type** (Intel/AMD/ARM)
+- Click **⚙️ Columns** to customize visible columns
+- Click a SKU name for the **Snippet Modal** — CLI, PowerShell, and Bicep code ready to copy
+- Point out **retirement badges** on affected SKUs
 
 **"So you can go from browsing to deploying in seconds."**
 
-### Retirement Badges (1 min)
+### Find a Match (2 min)
 
-**"One thing to watch for — see these ⚠️ Retiring badges?"**
+**"What if you don't know which SKU you need?"**
 
-- Point out the retirement warning badges on affected SKUs
-- Explain that retirement data is refreshed monthly from official Azure announcements
-- **"This saves you from accidentally planning a deployment on a SKU that's being retired."**
-
-### Find a Match — Deployment Checker (2 min)
-
-**"What if you don't know which SKU you need? Let's say you have requirements and want the tool to find the best fit."**
-
-- Set requirements: e.g., minimum **4 vCPUs**, **16 GB memory**
+- Set requirements: **4 vCPUs**, **16 GB memory**, **AMD processor**
 - Check **Accelerated Networking** and **Premium IO**
 - Click **Find a Match**
-- Show the ranked results with **percentage match scores**
-- **"The checker scores each SKU against your requirements and ranks them — 100% means it meets everything you asked for. Lower scores show where a SKU falls short."**
+- Show ranked results with **percentage match scores**
 
-### Pin & Compare (3 min)
+**"100% means it meets everything. Lower scores show where a SKU falls short."**
 
-**"Now here's where it gets really useful for planning. Let's pin a few candidates."**
+### Pin & Compare (2 min)
 
-- Pin 2–3 SKUs from the table or the checker results
-- Show the **Pinned Shortlist** section auto-expanding at the bottom
-- Point out the SKU chips showing key specs at a glance
-- Demo **Multi-Region Compare**: select 2–3 regions (e.g., New Zealand North, Australia East, Southeast Asia)
-- Show the **✅/❌ availability matrix** — instantly see which SKUs are available where
-- Click **Export CSV** to download the pinned shortlist
+**"Let's pin a few candidates and compare across regions."**
 
-**"So if you're planning a multi-region deployment, you can see availability side by side and export the shortlist for your team."**
+- Pin 2–3 SKUs from the table or checker results
+- Show the **Pinned Shortlist** with spec chips
+- Demo **Multi-Region Compare**: select Australia East and Southeast Asia
+- Show the **✅/❌ availability matrix**
+- Click **Export CSV** to download
 
-### What's New (1 min)
+**"Perfect for planning multi-region deployments."**
 
-**"The data refreshes monthly, and we track what changed."**
+### Disk SKUs (2 min)
 
-- Show the **What's New** section — SKUs added and removed since the last refresh
-- Point out the **trend badge** on the dashboard card
+**"We also have managed disk information."**
 
-**"This is great for staying on top of new SKU launches or quiet deprecations."**
+- Scroll to the **💿 Managed Disks** section
+- Show tier summary cards: Premium SSD, Standard SSD, Standard HDD, Ultra
+- Expand a disk group — show IOPS, throughput, burst capabilities
+- Demo filters: disk type, redundancy (LRS/ZRS), IOPS range
+- Export disk data to CSV
 
-### Workload Recommendations (1 min)
+**"Same region-specific data, but for disks — IOPS, throughput, burst, zone support."**
 
-**"We also have workload-based recommendations."**
+### What's New & Workloads (2 min)
 
-- Show the workload cards (e.g., general purpose, memory-optimized, compute-optimized)
-- Point out the **series availability badges** showing which families are available in the selected region
+- Show **What's New** — SKUs added/removed since last refresh
+- Show **Workload Recommendations** — cards showing which VM series suit each workload type
+- Point out series availability badges for the selected region
 
 ### Quick Hits (2 min)
 
-**"A few more things worth showing quickly."**
-
-- **Dark mode** — press **T** to toggle (great for demos in dim rooms!)
-- **Keyboard shortcuts** — press **?** to see the full list
-- **Region proximity suggestions** — filter to something with 0 results and show the suggested nearby regions
-- **Welcome modal and guided tips** — mention these appear for first-time users to help them get oriented
+- **Dark mode** — press **T** to toggle
+- **Keyboard shortcuts** — press **?** for the full list
+- **Region proximity** — suggests nearby regions when no results found
+- **Data Refresh Summary** — click ℹ️ to see all data sets and their sources
 
 ## How It Was Built (3 min)
 
 **"This entire app was built using GitHub Copilot CLI in my terminal."**
 
 ### Key Points
-- **Single-file architecture** — One HTML file, no frameworks, no build tools
-- **Pre-fetched data** — Monthly refresh via GitHub Actions, no user authentication
-- **Zero dependencies** — Nothing to install or update
+- **Single-file architecture** — one HTML file, no frameworks, no build tools, zero dependencies
+- **Pre-fetched data** — monthly refresh via GitHub Actions, no user authentication required
+- **Four data sources** — VM SKUs, disk SKUs, pricing, and retirement dates
 - **AI-assisted development** — Copilot CLI wrote the code, created the repo, set up CI/CD
-
-### Configuration & Scripts
-- **`config.json`** — controls which regions are included and app settings
-- **`scripts/normalize-skus.py`** — transforms raw `az vm list-skus` output into clean, flat JSON
-- **`scripts/update-retirements.py`** — pulls retirement dates from Azure announcements
-- **History archiving** — previous data snapshots are archived so the What's New feature can diff them
+- **Hosted on Azure Static Web Apps** — free tier with custom domain and managed SSL
 
 ### Data Pipeline
-- Monthly cron trigger on a **self-hosted runner** at `C:\actions-runner-vmsku`
-- Archive previous data snapshot
-- Run `az vm list-skus` for all configured regions
-- Normalize raw data to clean JSON via `normalize-skus.py`
-- Update retirement info via `update-retirements.py`
-- Commit updated data and deploy to GitHub Pages
+- Manual or monthly trigger on a self-hosted runner
+- Fetches VM SKUs, disk SKUs, pricing, and retirement data
+- Normalizes and deploys to Azure Static Web Apps
+- Commits updated data to the repo
 
 ## Wrap Up (2 min)
 
-**"VM SKU Per Region has grown from a simple browser into a full VM planning toolkit. You can browse and filter SKUs, check retirement status, match against your requirements, pin and compare across regions, and export everything — all without logging in. Data refreshes monthly, and the CLI guidance is right there for when you need real-time subscription-specific data."**
+**"Azure VM SKU by Region is a full VM and disk planning toolkit. Browse and filter SKUs, check retirement status, match against requirements, compare across regions, review disk options — all without logging in. Data refreshes monthly from Azure APIs, and deployment snippets are ready to copy."**
 
 ### Links
+- 🔗 [vmsku.djtools.co.nz](https://vmsku.djtools.co.nz)
 - [GitHub Copilot CLI](https://github.com/features/copilot/cli/)
 - [Azure VM Sizes](https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/overview)
-- [Azure CLI — az vm list-skus](https://learn.microsoft.com/en-us/cli/azure/vm#az-vm-list-skus)
