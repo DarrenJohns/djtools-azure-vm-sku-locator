@@ -4,7 +4,7 @@
   <img src="djtools.png" alt="DJ Tools — Built with GitHub Copilot CLI, deployed to Azure" width="700">
 </div>
 
-> **Browse Azure virtual machine and managed disk SKU availability across regions — no login required.**
+> **A visual tool for Azure infrastructure teams to browse virtual machine and managed disk SKU availability across every Azure region — filter by processor, family, and features, compare across regions, and export deployment-ready code — all in a single HTML file with zero dependencies.**
 
 ![Azure](https://img.shields.io/badge/Azure-VM_SKUs-0078D4)
 ![License](https://img.shields.io/badge/license-MIT-blue)
