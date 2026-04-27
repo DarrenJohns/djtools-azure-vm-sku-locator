@@ -1,13 +1,9 @@
-name: Deploy to Azure Storage
+name: Deploy to Azure Static Web Apps
 
 on:
   push:
     branches: [main]
     paths: ['index.html', 'data/**', 'config.json']
-
-permissions:
-  id-token: write
-  contents: read
 
 jobs:
   deploy:
@@ -15,63 +11,35 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Azure Login (OIDC)
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-      - name: Upload index.html to Azure Blob Storage
+      - name: Prepare deployment staging folder
         run: |
-          az storage blob upload `
-            --account-name ${{ vars.STORAGE_ACCOUNT }} `
-            --container-name '$web' `
-            --name index.html `
-            --file index.html `
-            --overwrite `
-            --content-type "text/html; charset=utf-8" `
-            --auth-mode login
-        shell: pwsh
+          # Only deploy web-servable files (exclude scripts/, docs, etc.)
+          $staging = "deploy-staging"
+          if (Test-Path $staging) { Remove-Item $staging -Recurse -Force }
+          New-Item -ItemType Directory -Path $staging -Force | Out-Null
 
-      - name: Upload data files to Azure Blob Storage
-        run: |
-          if (Test-Path data) {
-            az storage blob upload-batch `
-              --account-name ${{ vars.STORAGE_ACCOUNT }} `
-              --destination '$web' `
-              --source data `
-              --destination-path data `
-              --overwrite `
-              --auth-mode login
-            Write-Host "✅ Data files uploaded"
-          } else {
-            Write-Host "ℹ No data directory found (skipping)"
+          Copy-Item "index.html" "$staging/"
+          Copy-Item "config.json" "$staging/"
+          if (Test-Path "data") {
+            Copy-Item -Recurse "data" "$staging/data"
           }
+
+          $fileCount = (Get-ChildItem $staging -Recurse -File).Count
+          Write-Host "✅ Staging folder ready ($fileCount files)"
         shell: pwsh
 
-      - name: Upload config.json to Azure Blob Storage
+      - name: Deploy to Azure Static Web Apps
         run: |
-          if (Test-Path config.json) {
-            az storage blob upload `
-              --account-name ${{ vars.STORAGE_ACCOUNT }} `
-              --container-name '$web' `
-              --name config.json `
-              --file config.json `
-              --overwrite `
-              --content-type "application/json" `
-              --auth-mode login
-          }
+          npx --yes @azure/static-web-apps-cli deploy ./deploy-staging `
+            --deployment-token ${{ secrets.SWA_DEPLOYMENT_TOKEN }} `
+            --env production
+          Write-Host "✅ Deployed to Azure Static Web Apps"
         shell: pwsh
 
-      - name: Verify deployment
+      - name: Clean up staging folder
+        if: always()
         run: |
-          $url = "https://${{ vars.STORAGE_ACCOUNT }}.z44.web.core.windows.net/"
-          $response = Invoke-WebRequest -Uri $url -UseBasicParsing -TimeoutSec 30
-          if ($response.StatusCode -eq 200) {
-            Write-Host "✅ Deployment verified: $url (HTTP $($response.StatusCode))"
-          } else {
-            Write-Error "❌ Deployment check failed: HTTP $($response.StatusCode)"
-            exit 1
+          if (Test-Path "deploy-staging") {
+            Remove-Item "deploy-staging" -Recurse -Force
           }
         shell: pwsh

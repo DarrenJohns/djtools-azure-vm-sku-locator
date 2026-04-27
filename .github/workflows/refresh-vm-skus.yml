@@ -173,16 +173,22 @@ jobs:
           Write-Host "[OK] Disk SKU data refresh complete"
         shell: pwsh
 
-      - name: Upload data to Azure Blob Storage
+      - name: Deploy to Azure Static Web Apps
         run: |
-          az storage blob upload-batch `
-            --account-name ${{ vars.STORAGE_ACCOUNT }} `
-            --destination '$web' `
-            --source data `
-            --destination-path data `
-            --overwrite `
-            --auth-mode login
-          Write-Host "[OK] Data uploaded to Azure Blob Storage"
+          # Build staging folder with only web-servable files
+          $staging = "deploy-staging"
+          if (Test-Path $staging) { Remove-Item $staging -Recurse -Force }
+          New-Item -ItemType Directory -Path $staging -Force | Out-Null
+          Copy-Item "index.html" "$staging/"
+          Copy-Item "config.json" "$staging/"
+          Copy-Item -Recurse "data" "$staging/data"
+
+          npx --yes @azure/static-web-apps-cli deploy ./deploy-staging `
+            --deployment-token ${{ secrets.SWA_DEPLOYMENT_TOKEN }} `
+            --env production
+
+          Remove-Item $staging -Recurse -Force
+          Write-Host "[OK] Deployed to Azure Static Web Apps"
         shell: pwsh
 
       - name: Commit updated data to repo
