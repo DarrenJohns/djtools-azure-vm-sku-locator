@@ -554,7 +554,7 @@ select:focus, input:focus { outline: 2px solid var(--brand-primary); outline-off
 .wl-tag.unavailable { background: #f8d7da; color: #721c24; text-decoration: line-through; }
 [data-theme="dark"] .wl-tag.available { background: #1a3a1a; color: #54b054; }
 [data-theme="dark"] .wl-tag.unavailable { background: #3a1a1a; color: #e87575; }
-.sku-table-wrap { overflow-x: auto; }
+.sku-table-wrap { overflow-x: auto; padding-top: 4px; }
 table.sku-table {
   width: 100%;
   border-collapse: collapse;
@@ -579,7 +579,7 @@ table.sku-table th.vertical-header {
   transform: rotate(180deg);
   vertical-align: bottom;
   padding: 10px 4px;
-  height: 120px;
+  height: 130px;
   text-align: left;
   white-space: nowrap;
   min-width: 36px;
@@ -608,7 +608,7 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
 .group-toggle { display: inline-block; width: 16px; transition: transform 0.2s; }
 .group-toggle.collapsed { transform: rotate(-90deg); }
 .group-badge { font-size: 11px; font-weight: 500; color: var(--text-secondary); margin-left: 8px; }
-.table-group-actions { display: flex; gap: 8px; margin-bottom: 8px; }
+.table-group-actions { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
 .table-group-actions .btn { font-size: 12px; padding: 3px 10px; }
 /* ── Pinned Shortlist ── */
 .shortlist-panel { background: var(--bg-layer1); border: 1px solid var(--brand-primary); border-radius: var(--radius-md); margin-bottom: 12px; overflow: hidden; box-shadow: var(--shadow-sm); }
@@ -1050,9 +1050,7 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
               <button class="btn btn-danger" onclick="clearFilters()">✖ Clear Filters</button>
             </div>
           </div>
-        </div>
-        <div style="margin-top:16px;">
-          <div class="table-group-actions">
+          <div class="table-group-actions" style="margin-top:8px;">
             <button class="btn btn-outline" onclick="expandAllGroups()">▼ Expand All</button>
             <button class="btn btn-outline" onclick="collapseAllGroups()">▶ Collapse All</button>
             <button class="btn btn-outline" onclick="clearShortlist()" id="clear-pins-btn" disabled>📌 Clear All Pins</button>
@@ -1061,6 +1059,8 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
               <div class="col-chooser-dropdown" id="col-chooser-dropdown"></div>
             </div>
           </div>
+        </div>
+        <div style="margin-top:8px;">
           <div class="sku-table-wrap">
             <table class="sku-table" id="sku-table">
               <thead><tr id="table-head"></tr></thead>
@@ -1826,14 +1826,16 @@ function renderFreshness() {
   // Region bar badge
   if (lastUpdated && badge) {
     let label, cls;
+    const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const updatedMonth = monthNames[lastUpdated.getMonth()] + ' ' + lastUpdated.getFullYear();
     if (daysSince <= 30) {
-      label = daysSince === 0 ? '🟢 Updated today' : `🟢 ${daysSince}d ago`;
+      label = `🟢 Updated ${updatedMonth}`;
       cls = 'fresh';
     } else if (daysSince <= 60) {
-      label = `🟡 ${daysSince}d ago`;
+      label = `🟡 Updated ${updatedMonth}`;
       cls = 'aging';
     } else {
-      label = `🔴 ${daysSince}d ago`;
+      label = `🔴 Updated ${updatedMonth}`;
       cls = 'stale';
     }
     badge.querySelector('#freshness-label').textContent = label + ' ▾';
