@@ -143,6 +143,32 @@ body {
 .section-toggle.collapsed { transform: rotate(-90deg); }
 .section-body { padding: 8px 16px 16px; }
 .section-body.collapsed { display: none; }
+.section-group-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 24px 0 8px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-primary);
+  background: rgba(0,0,0,0.08);
+  border-radius: 6px;
+}
+[data-theme="dark"] .section-group-divider {
+  background: rgba(255,255,255,0.10);
+}
+.section-group-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+.section-group-divider .group-icon {
+  font-size: 14px;
+}
 .region-bar {
   position: fixed;
   top: 56px;
@@ -946,6 +972,9 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
     <!-- Summary Dashboard -->
     <div id="sku-summary" class="summary-grid"></div>
 
+
+    <div class="section-group-divider"><span class="group-icon">🖥️</span> Virtual Machines</div>
+
     <!-- What's New -->
     <div class="section" id="sec-whatsnew">
       <div class="section-header" onclick="toggleSection('whatsnew')">
@@ -1057,6 +1086,38 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
       </div>
     </div>
 
+
+    <!-- Pinned Shortlist -->
+    <div class="section" id="sec-shortlist">
+      <div class="section-header" onclick="toggleSection('shortlist')">
+        <span class="section-title">📌 Pinned Shortlist <span class="badge" id="shortlist-count" style="background:var(--brand-primary);color:white;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:600;margin-left:6px;">0</span></span>
+        <span class="section-toggle collapsed" id="toggle-shortlist">▼</span>
+      </div>
+      <div class="section-body collapsed" id="body-shortlist">
+        <div class="shortlist-chips" id="shortlist-chips"><span style="font-size:12px;color:var(--text-tertiary);">Pin VM SKUs from the table using the ○ button to build your shortlist</span></div>
+        <div class="shortlist-actions" id="shortlist-actions" style="display:none;margin-top:8px;">
+          <button class="btn btn-primary btn-sm" onclick="exportShortlistCsv()">📥 Export Shortlist</button>
+          <button class="btn btn-outline btn-sm" onclick="fetchPinnedPricing()">💰 Load Pricing</button>
+          <button class="btn btn-outline btn-sm" onclick="clearShortlist()">📌 Clear All Pins</button>
+        </div>
+        <div class="pricing-container" id="pricing-container" style="display:none;">
+          <p style="margin-bottom:4px;font-size:13px;font-weight:600;">💰 Pricing Comparison <span style="font-size:11px;font-weight:400;color:var(--text-tertiary);">(USD/hr, Pay-As-You-Go)</span></p>
+          <div id="pricing-content"></div>
+        </div>
+        <div id="multiregion-container" style="display:none;margin-top:14px;padding-top:12px;border-top:1px solid var(--border-default);">
+          <p style="margin-bottom:8px;font-size:13px;font-weight:600;">🌏 Multi-Region Compare</p>
+          <p style="margin-bottom:10px;font-size:12px;color:var(--text-secondary);">Check if your pinned SKUs are available in other regions. Select up to 5.</p>
+          <div id="multiregion-checkboxes" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;"></div>
+          <button class="btn btn-primary btn-sm" onclick="runMultiRegionCompare()" id="multiregion-btn">🔍 Compare Across Regions</button>
+          <div id="multiregion-results" style="margin-top:12px;"></div>
+        </div>
+      </div>
+    </div>
+
+
+
+    <div class="section-group-divider"><span class="group-icon">💿</span> Managed Disks</div>
+
     <!-- Disk SKUs -->
     <div class="section" id="sec-disks">
       <div class="section-header" onclick="toggleSection('disks')">
@@ -1102,32 +1163,7 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
       </div>
     </div>
 
-    <!-- Pinned Shortlist -->
-    <div class="section" id="sec-shortlist">
-      <div class="section-header" onclick="toggleSection('shortlist')">
-        <span class="section-title">📌 Pinned Shortlist <span class="badge" id="shortlist-count" style="background:var(--brand-primary);color:white;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:600;margin-left:6px;">0</span></span>
-        <span class="section-toggle collapsed" id="toggle-shortlist">▼</span>
-      </div>
-      <div class="section-body collapsed" id="body-shortlist">
-        <div class="shortlist-chips" id="shortlist-chips"><span style="font-size:12px;color:var(--text-tertiary);">Pin VM SKUs from the table using the ○ button to build your shortlist</span></div>
-        <div class="shortlist-actions" id="shortlist-actions" style="display:none;margin-top:8px;">
-          <button class="btn btn-primary btn-sm" onclick="exportShortlistCsv()">📥 Export Shortlist</button>
-          <button class="btn btn-outline btn-sm" onclick="fetchPinnedPricing()">💰 Load Pricing</button>
-          <button class="btn btn-outline btn-sm" onclick="clearShortlist()">📌 Clear All Pins</button>
-        </div>
-        <div class="pricing-container" id="pricing-container" style="display:none;">
-          <p style="margin-bottom:4px;font-size:13px;font-weight:600;">💰 Pricing Comparison <span style="font-size:11px;font-weight:400;color:var(--text-tertiary);">(USD/hr, Pay-As-You-Go)</span></p>
-          <div id="pricing-content"></div>
-        </div>
-        <div id="multiregion-container" style="display:none;margin-top:14px;padding-top:12px;border-top:1px solid var(--border-default);">
-          <p style="margin-bottom:8px;font-size:13px;font-weight:600;">🌏 Multi-Region Compare</p>
-          <p style="margin-bottom:10px;font-size:12px;color:var(--text-secondary);">Check if your pinned SKUs are available in other regions. Select up to 5.</p>
-          <div id="multiregion-checkboxes" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;"></div>
-          <button class="btn btn-primary btn-sm" onclick="runMultiRegionCompare()" id="multiregion-btn">🔍 Compare Across Regions</button>
-          <div id="multiregion-results" style="margin-top:12px;"></div>
-        </div>
-      </div>
-    </div>
+    <div class="section-group-divider"><span class="group-icon">📚</span> Reference</div>
 
     <!-- Workload Recommendations -->
     <div class="section" id="sec-workloads">
@@ -1790,14 +1826,19 @@ function renderFreshnessFlyout() {
   const hasPricing = _pricingCache && _pricingCache._region === selectedRegion;
   const pricingDate = hasPricing && _pricingCache._lastUpdated ? formatFlyoutDate(_pricingCache._lastUpdated) : null;
 
-  let html = `<table>
-      <tr><td>🖥️ VM SKU Data</td><td>${skuCount} SKUs · ${skuDate}</td></tr>
+  const diskData = diskDataCache[selectedRegion];
+  const diskCount = diskData ? (diskData.disks || []).length : 0;
+
+  let html = `<div style="font-size:13px;color:var(--text-secondary);margin-bottom:10px;">Last refreshed: <strong>${skuDate}</strong></div>
+    <table>
+      <tr><td>🖥️ VM SKU Data</td><td>${skuCount} SKUs</td></tr>
+      <tr><td>💿 Disk SKU Data</td><td>${diskCount ? diskCount + ' disks' : 'No data'}</td></tr>
       <tr><td>💰 Pricing Data</td><td>${pricingDate || 'Load via pinned shortlist'}</td></tr>
-      <tr><td>⚠️ Retirement Alerts</td><td>${skuDate}</td></tr>
+      <tr><td>⚠️ Retirement Alerts</td><td>Included</td></tr>
       <tr><td>📊 History Snapshots</td><td>Archived monthly</td></tr>
       <tr><td>🌏 Region List</td><td>${allRegions ? allRegions.length + ' regions' : '—'}</td></tr>
     </table>
-    <div class="note">All data is refreshed monthly via GitHub Actions workflow or manual trigger. Pricing sourced from the Azure Retail Prices API (no auth required).</div>`;
+    <div class="note">All data is refreshed monthly via GitHub Actions workflow or manual trigger. Pricing sourced from the Azure Retail Prices API (no auth required). Disk data sourced from Azure Resource SKU API.</div>`;
 
   detail.innerHTML = html;
 }
@@ -1806,7 +1847,7 @@ function formatFlyoutDate(dateStr) {
   try {
     const d = new Date(dateStr);
     if (isNaN(d.getTime())) return '—';
-    return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+    return d.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
   } catch { return '—'; }
 }
 
