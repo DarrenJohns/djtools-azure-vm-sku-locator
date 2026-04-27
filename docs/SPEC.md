@@ -1,23 +1,26 @@
 # VM SKU Per Region — Specification
 
-> Version: v0.0.1-beta
+> Version: v1.0.0-beta
 
 ## 1. Overview
 
-This application helps Azure VM administrators browse virtual machine SKU availability across Azure regions. It displays pre-fetched SKU data with filtering, sorting, and CSV export — no authentication required.
+This application helps Azure VM administrators browse virtual machine SKU availability across Azure regions. It displays pre-fetched SKU data with filtering, sorting, pricing, and CSV export — no authentication required.
 
-**Target users:** Azure infrastructure administrators who need to understand what VM sizes are available in specific regions before deploying.
+**Target users:** Azure infrastructure administrators who need to understand what VM sizes and disk SKUs are available in specific regions before deploying.
+
+**Live app:** [vmsku.djtools.co.nz](https://vmsku.djtools.co.nz)
 
 ## 2. Architecture
 
 - **Type**: Single-file HTML web application (`index.html`) with static JSON data files
-- **Frameworks**: None — pure HTML/CSS/JavaScript
-- **Dependencies**: Zero external dependencies
-- **Data source**: Pre-fetched from Azure Resource SKUs API (`az vm list-skus`)
+- **Frameworks**: None — pure HTML/CSS/JavaScript (inline)
+- **Dependencies**: Zero external dependencies (no CDN, no npm packages)
+- **Data source**: Pre-fetched from Azure Resource SKUs API (`az vm list-skus`) and Azure Retail Prices API
 - **Data refresh**: Monthly via GitHub Actions scheduled workflow
 - **Authentication**: None required — all data is pre-fetched
-- **Hosting**: Azure Blob Storage static website
-- **CI/CD**: GitHub Actions → Azure Storage deploy on push to main
+- **Hosting**: Azure Static Web Apps (SWA)
+- **CI/CD**: GitHub Actions → SWA CLI deploy on push to main
+- **Custom domain**: `vmsku.djtools.co.nz`
 
 ## 3. Data Model
 
@@ -43,6 +46,18 @@ This application helps Azure VM administrators browse virtual machine SKU availa
 | `zones` | string[] | Available availability zones |
 | `restrictions` | string[] | Restriction reason codes |
 
+### Disk SKU Data (per-region, embedded in region JSON)
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `name` | string | Disk SKU name (e.g., `Premium_LRS`) |
+| `tier` | string | Disk tier (Premium, Standard, Ultra) |
+| `size` | string | Disk size identifier |
+| `maxSizeGB` | number | Maximum disk size in GB |
+| `maxIOPS` | number | Maximum IOPS |
+| `maxThroughputMBps` | number | Maximum throughput in MB/s |
+| `zones` | string[] | Available availability zones |
+
 ### Retirement Data (`data/retirements.json`)
 
 | Field | Type | Description |
@@ -59,7 +74,7 @@ Monthly archives of previous SKU data, used for tracking changes over time (What
 
 Target regions for data refresh. Defines which Azure regions are included in the scheduled pipeline run.
 
-### Metadata
+### Metadata (`data/metadata.json`)
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -86,81 +101,93 @@ SKU family names (e.g., `standardDSv5Family`) are mapped to user-friendly names 
 
 ## 5. User Interface
 
-### Region Selector
+All UI sections use a consistent collapsible header pattern with toggle arrow (left), title (center, flex), and badge (right, outlined pill).
+
+### Region Selector & Freshness Status
 - Single region dropdown (default: New Zealand North)
 - Regions grouped by geography in the dropdown
+- Sticky header with data freshness badge (color-coded green/yellow/red)
+- Freshness shows "Updated {Month} {Year}" (e.g., "Updated April 2026")
+- No-data fallback shows CLI command for regions without pre-fetched data
 
-### Filters
-- Text search (SKU name)
-- Dropdowns for Size, Version, Family Type, and vCPU Range
-- Reset button
+### Summary Dashboard (KPI Cards)
+- Cards showing Total SKUs, vCPU Range, Memory Range, Families, Architecture split
+- Data freshness badge with staleness thresholds (≤30d green, ≤60d yellow, >60d red)
 
-### SKU Table
-- Displays all results grouped by first letter (A–Z sections)
-- Sortable by clicking column headers
-- Column Chooser (⚙️ Columns button) lets users show/hide columns; Pin and Size columns are always visible
-- Feature indicators: AccelNet, PremIO, EphOS, EncHost, Spot
-- ⚠️ Retiring badge shown on SKUs from families being retired (data loaded from `data/retirements.json`)
+### 📊 What's New (History/Trends)
+- Section showing SKUs added/removed since last monthly refresh
+- Trend badge displayed on the section header
+- Compares current data against archived history snapshots
 
-### Summary Dashboard
-- Cards showing Total SKUs, vCPU Range, Memory Range
-- Data Freshness badge (color-coded green/yellow/red based on age of data)
+### 🔍 See What's Available
+- **Filters**: Text search, Family, Size, Version, Architecture, vCPU Range dropdowns, Reset button
+- **SKU Table**: Results grouped by family with collapsible letter sections
+  - Sortable by clicking column headers
+  - Column Chooser (⚙️ Columns) lets users show/hide columns; Pin and Size columns always visible
+  - Feature indicators: AccelNet, PremIO, EphOS, EncHost, Spot
+  - ⚠️ Retiring badge on SKUs from families being retired
+  - Expand All / Collapse All / Clear All Pins action buttons
+- **CSV export** of currently filtered results (filename includes region and date)
+- **Region proximity suggestions**: When filters return 0 results, suggests nearby regions with matching SKUs
 
-### Find a Match (Deployment Checker)
+### 🎯 Find a Match (Deployment Checker)
 - Users specify requirements: min vCPUs, min memory, min data disks, min NICs
 - Checkboxes for features (accelerated networking, premium IO, etc.)
-- App finds and ranks matching SKUs with percentage match scores
+- Finds and ranks matching SKUs with percentage match scores
+- Expand All / Collapse All / Clear All Pins action buttons
+- Export matching results to CSV
 
-### Pinned Shortlist
-- Users can pin individual SKUs from the table or deployment checker
-- Pinned SKUs show as chips with key specs
+### 📌 Pinned Shortlist
+- Pin individual SKUs from the table or deployment checker
+- Pinned SKUs show as chips with key specs and pricing (Pay-As-You-Go)
 - Section auto-expands on first pin
 - Export shortlist to CSV
 - Clear all pins button
+- **Pricing comparison**: Fetches live pricing from Azure Retail Prices API, cached per region
+- **Multi-Region Compare**: Select up to 5 other regions, shows ✅/❌ availability matrix for pinned SKUs
 
-### Multi-Region Compare
-- Located inside the Pinned Shortlist section
-- Select up to 5 other regions
-- Shows ✅/❌ availability matrix for pinned SKUs across selected regions
+### 💿 Disk SKUs
+- Displays managed disk SKUs available in the selected region
+- Filters: Tier (Premium/Standard/Ultra), Redundancy, Zone support, IOPS range
+- Table with sortable columns: Name, Tier, Max Size, Max IOPS, Max Throughput, Zones
+- CSV export
+
+### Workload Recommendations
+- Cards for each workload type (general purpose, compute-optimized, memory-optimized, GPU, HPC, etc.)
+- Shows which VM series are available in the selected region with badges
+
+### 🔤 Azure VM Naming Convention
+- Interactive decoder showing the naming structure of Azure VM sizes
+- Breaks down family, sub-family, vCPUs, features, version segments
+- Helps users understand what a SKU name means
 
 ### Snippet Modal
 - Click any SKU size name to open a modal
 - Provides Azure CLI, PowerShell, and Bicep deployment code snippets for that SKU
+- Copy-to-clipboard buttons
 
-### Workload Recommendations
-- Cards for each workload type (general purpose, compute-optimized, memory-optimized, etc.)
-- Shows which series are available with badges
-
-### What's New (History/Trends)
-- Section showing SKUs added/removed since last monthly refresh
-- Trend badge displayed on the summary dashboard
-
-### Region Proximity Suggestions
-- When filters or deployment checker return 0 results, suggests nearby Azure regions that might have matching SKUs
-
-### Export
-- CSV download of currently filtered results
-- Includes all fields (not just visible columns)
-- Filename includes region name and date
-
-### CLI Guidance
+### 🛠️ CLI Guidance
 - Collapsible section with `az vm list-skus` command
 - Updates dynamically based on selected region
 - Links to Azure CLI installation docs
 
 ### Welcome Modal
 - Feature overview shown on first visit
+- Dismissable, won't show again
 
 ### Guided Tips
 - 3-step walkthrough shown after welcome modal dismissal
+- Highlights key features: region selector, filters, pinning
 
 ### First-Pin Flyout
 - One-time notification when user pins their first SKU
+- Points to the Pinned Shortlist section
 
 ## 6. Theme
 - Light and dark mode with system detection
-- Toggle via header button
+- Toggle via header button (☀️/🌙)
 - Preference saved to localStorage
+- Consistent Fluent-inspired design language
 
 ## 7. Keyboard Shortcuts
 
@@ -175,7 +202,10 @@ SKU family names (e.g., `standardDSv5Family`) are mapped to user-friendly names 
 
 ## 8. Deployment
 
-- **Hosting**: Azure Blob Storage `$web` container
-- **CI/CD**: GitHub Actions workflow on push to `main`
-- **Runner**: Self-hosted runner at `C:\actions-runner-vmsku`
-- **Data files**: Deployed alongside `index.html` in `data/` directory
+- **Hosting**: Azure Static Web Apps (SWA)
+- **Custom domain**: `vmsku.djtools.co.nz`
+- **CI/CD**: GitHub Actions workflow on push to `main` (triggers on `index.html`, `data/**`, `config.json`)
+- **Deploy tool**: `@azure/static-web-apps-cli` with `SWA_DEPLOYMENT_TOKEN`
+- **Runner**: Self-hosted runner
+- **Environment**: `production` (enables GitHub deployment tracking)
+- **Staged deploy**: Only `index.html`, `config.json`, and `data/` are deployed (not scripts, docs, etc.)

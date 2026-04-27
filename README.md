@@ -8,6 +8,7 @@
 >
 > **Browse Azure VM and managed disk SKU availability across every region — filter by processor, family, and features, compare across regions, and export deployment-ready code.**
 
+![Version](https://img.shields.io/badge/version-1.0.0--beta-orange)
 ![Azure](https://img.shields.io/badge/Azure-VM_SKUs-0078D4)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Built with](https://img.shields.io/badge/built_with-Copilot_CLI-8957e5)
