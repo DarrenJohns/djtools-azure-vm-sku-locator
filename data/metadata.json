@@ -1,11 +1,11 @@
 {
-  "physicalRegionCount": 62,
+  "regionsWithData": 2,
+  "lastUpdated": "2026-04-27T02:06:21Z",
+  "failedRegions": [],
+  "lastUpdatedDisplay": "April 2026",
   "availableRegions": [
     "australiaeast",
     "newzealandnorth"
   ],
-  "lastUpdatedDisplay": "April 2026",
-  "lastUpdated": "2026-04-26T04:13:27Z",
-  "regionsWithData": 2,
-  "failedRegions": []
+  "physicalRegionCount": 62
 }
