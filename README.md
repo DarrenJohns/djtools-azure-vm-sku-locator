@@ -4,7 +4,7 @@
   <img src="djtools.png" alt="DJ Tools — Built with GitHub Copilot CLI, deployed to Azure" width="700">
 </div>
 
-> **Built by an infrastructure solution architect who doesn't write code for a living — this app was vibe-crafted using [GitHub Copilot CLI](https://github.com/features/copilot/cli/) and deployed to [Azure Static Web Apps](https://azure.microsoft.com/products/app-service/static). From idea 💡 to production web app, without writing a single line of code manually.**
+> **Built by a tech veteran with 30+ years of solution design expertise who has never been a professional coder — this app was vibe-crafted using [GitHub Copilot CLI](https://github.com/features/copilot/cli/) and deployed to [Azure Static Web Apps](https://azure.microsoft.com/products/app-service/static). From idea 💡 to production web app, without writing a single line of code manually.**
 >
 > **Browse Azure VM and managed disk SKU availability across every region — filter by processor, family, and features, compare across regions, and export deployment-ready code.**
 
