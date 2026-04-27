@@ -79,15 +79,6 @@ All data is refreshed **monthly** from Azure APIs. Check the Data Refresh Summar
 
 ---
 
-## 📚 Documentation
-
-| Document | Description |
-|----------|-------------|
-| 📖 [How It Works](docs/howitworks.md) | Technical deep-dive into every feature — data pipeline, processor detection, pricing integration, and more |
-| 🎤 [Talk Track](docs/talktrack.md) | End-to-end demo walkthrough — great for presentations |
-
----
-
 ## 🗂️ Project Structure
 
 ```
