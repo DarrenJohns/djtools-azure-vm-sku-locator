@@ -131,6 +131,8 @@ vm-sku-per-region/
 
 ## 🤝 Contributing
 
+Contributions, ideas, and feedback are welcome!
+
 1. Create a branch from `main` (`feature/`, `fix/`, or `docs/` prefix)
 2. Make your changes and test locally in the browser
 3. Open a Pull Request — the PR template will guide you
