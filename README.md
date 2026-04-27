@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="djtools.png" alt="DJ Tools — Built with GitHub Copilot CLI, deployed to Azure" width="700">
+</div>
+
 # 🖥️ Azure VM SKU by Region
 
 ![Azure](https://img.shields.io/badge/Azure-Tool-0078D4)
