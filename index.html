@@ -114,18 +114,19 @@ body {
   transition: background 0.15s;
 }
 .kbd-shortcut-btn:hover { background: rgba(255,255,255,0.25); }
-.container { max-width: 1400px; margin: 0 auto; padding: 120px 24px 16px; }
+.container { max-width: 1400px; margin: 0 auto; padding: 140px 24px 16px; }
 .section {
   background: var(--bg-layer1);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
   margin-bottom: 16px;
   box-shadow: var(--shadow-sm);
+  overflow: hidden;
 }
 .section-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 8px;
   padding: 10px 16px;
   cursor: pointer;
   user-select: none;
@@ -135,13 +136,16 @@ body {
 }
 [data-theme="dark"] .section-header { background: linear-gradient(90deg, #1a2e4a 0%, #252a32 40%, var(--bg-layer1) 100%); }
 .section-header:hover { filter: brightness(0.97); }
-.section-title { font-size: 15px; font-weight: 600; }
+.section-title { font-size: 15px; font-weight: 600; flex: 1; }
 .section-toggle {
   transition: transform 0.2s;
-  font-size: 12px;
-  color: var(--text-secondary);
+  font-size: 11px;
+  color: var(--brand-primary);
+  font-weight: 700;
 }
-.section-toggle.collapsed { transform: rotate(-90deg); }
+.section-toggle.open { transform: rotate(90deg); }
+.section-badge { font-size: 11px; font-weight: 600; padding: 2px 12px; border-radius: 12px; background: #f0f7ff; color: var(--brand-primary); border: 1.5px solid #b3d4f0; }
+[data-theme="dark"] .section-badge { background: #1a2e4a; color: #6db3f2; border-color: #2a5a8a; }
 .section-body { padding: 8px 16px 16px; }
 .section-body.collapsed { display: none; }
 .section-group-divider {
@@ -291,6 +295,17 @@ select:focus, input:focus { outline: 2px solid var(--brand-primary); outline-off
   border-color: var(--status-danger);
 }
 .btn-danger:hover { background: #a8293f; }
+.summary-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.summary-heading-icon { font-size: 18px; }
+.summary-heading-title { flex: 0; white-space: nowrap; }
 .summary-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -973,6 +988,10 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
   <!-- SKU Results -->
   <div id="sku-results" class="hidden">
     <!-- Summary Dashboard -->
+    <div class="summary-heading">
+      <span class="summary-heading-icon">📊</span>
+      <span class="summary-heading-title">VM SKU Summary</span>
+    </div>
     <div id="sku-summary" class="summary-grid"></div>
 
 
@@ -981,8 +1000,9 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
     <!-- What's New -->
     <div class="section" id="sec-whatsnew">
       <div class="section-header" onclick="toggleSection('whatsnew')">
-        <span class="section-title">📊 What's New <span class="badge" id="whatsnew-count" style="background:var(--brand-primary);color:white;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:600;margin-left:6px;">0</span></span>
-        <span class="section-toggle collapsed" id="toggle-whatsnew">▼</span>
+        <span class="section-toggle" id="toggle-whatsnew">▶</span>
+        <span class="section-title">📊 What's New</span>
+        <span class="section-badge" id="whatsnew-count">0 changes</span>
       </div>
       <div class="section-body collapsed" id="body-whatsnew">
         <div id="whatsnew-content">
@@ -994,8 +1014,9 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
     <!-- See What's Available -->
     <div class="section" id="sec-filters">
       <div class="section-header" onclick="toggleSection('filters')">
-        <span class="section-title">🔍 See What's Available <span class="badge" id="available-count" style="background:var(--brand-primary);color:white;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:600;margin-left:6px;"></span></span>
-        <span class="section-toggle collapsed" id="toggle-filters">▼</span>
+        <span class="section-toggle" id="toggle-filters">▶</span>
+        <span class="section-title">🔍 See What's Available</span>
+        <span class="section-badge" id="available-count"></span>
       </div>
       <div class="section-body collapsed" id="body-filters">
         <div class="filters-row">
@@ -1054,8 +1075,9 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
     <!-- Find a Match -->
     <div class="section" id="sec-checker">
       <div class="section-header" onclick="toggleSection('checker')">
-        <span class="section-title">🎯 Find a Match <span class="badge" id="checker-match-count" style="background:var(--brand-primary);color:white;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:600;margin-left:6px;">0</span></span>
-        <span class="section-toggle collapsed" id="toggle-checker">▼</span>
+        <span class="section-toggle" id="toggle-checker">▶</span>
+        <span class="section-title">🎯 Find a Match</span>
+        <span class="section-badge" id="checker-match-count">0 matches</span>
       </div>
       <div class="section-body collapsed" id="body-checker">
         <div class="checker-form">
@@ -1093,8 +1115,9 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
     <!-- Pinned Shortlist -->
     <div class="section" id="sec-shortlist">
       <div class="section-header" onclick="toggleSection('shortlist')">
-        <span class="section-title">📌 Pinned Shortlist <span class="badge" id="shortlist-count" style="background:var(--brand-primary);color:white;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:600;margin-left:6px;">0</span></span>
-        <span class="section-toggle collapsed" id="toggle-shortlist">▼</span>
+        <span class="section-toggle" id="toggle-shortlist">▶</span>
+        <span class="section-title">📌 Pinned Shortlist</span>
+        <span class="section-badge" id="shortlist-count">0 pinned</span>
       </div>
       <div class="section-body collapsed" id="body-shortlist">
         <div class="shortlist-chips" id="shortlist-chips"><span style="font-size:12px;color:var(--text-tertiary);">Pin VM SKUs from the table using the ○ button to build your shortlist</span></div>
@@ -1124,8 +1147,9 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
     <!-- Disk SKUs -->
     <div class="section" id="sec-disks">
       <div class="section-header" onclick="toggleSection('disks')">
-        <span class="section-title">💿 Disk SKUs <span class="badge" id="disk-count" style="background:var(--brand-primary);color:white;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:600;margin-left:6px;">0</span></span>
-        <span class="section-toggle collapsed" id="toggle-disks">▼</span>
+        <span class="section-toggle" id="toggle-disks">▶</span>
+        <span class="section-title">💿 Disk SKUs</span>
+        <span class="section-badge" id="disk-count">0 disks</span>
       </div>
       <div class="section-body collapsed" id="body-disks">
         <div class="disk-summary-cards" id="disk-summary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px;"></div>
@@ -1171,8 +1195,8 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
     <!-- Workload Recommendations -->
     <div class="section" id="sec-workloads">
       <div class="section-header" onclick="toggleSection('workloads')">
+        <span class="section-toggle" id="toggle-workloads">▶</span>
         <span class="section-title">💼 Workload Recommendations</span>
-        <span class="section-toggle collapsed" id="toggle-workloads">▼</span>
       </div>
       <div class="section-body collapsed" id="body-workloads">
         <div class="workload-grid" id="workload-grid"></div>
@@ -1182,8 +1206,8 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
     <!-- VM Naming Convention -->
     <div class="section" id="sec-naming">
       <div class="section-header" onclick="toggleSection('naming')">
+        <span class="section-toggle" id="toggle-naming">▶</span>
         <span class="section-title">🔤 Azure VM Naming Convention</span>
-        <span class="section-toggle collapsed" id="toggle-naming">▼</span>
       </div>
       <div class="section-body collapsed" id="body-naming">
         <p style="margin-bottom:14px;font-size:13px;color:var(--text-secondary);line-height:1.6;">
@@ -1247,8 +1271,8 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
     <!-- How to Query SKU Data -->
     <div class="section" id="sec-cli">
       <div class="section-header" onclick="toggleSection('cli')">
+        <span class="section-toggle" id="toggle-cli">▶</span>
         <span class="section-title">🛠️ How to Manually View SKU Data</span>
-        <span class="section-toggle collapsed" id="toggle-cli">▼</span>
       </div>
       <div class="section-body collapsed" id="body-cli">
         <p style="margin-bottom:10px;font-size:13px;color:var(--text-secondary);line-height:1.6;">
@@ -1758,7 +1782,7 @@ function toggleSection(id) {
   const body = document.getElementById('body-' + id);
   const toggle = document.getElementById('toggle-' + id);
   body.classList.toggle('collapsed');
-  toggle.classList.toggle('collapsed');
+  toggle.classList.toggle('open');
 }
 
 // === INIT ===
@@ -2106,7 +2130,7 @@ async function loadDiskData(regionName) {
 
 function renderDiskSection() {
   const badge = document.getElementById('disk-count');
-  if (badge) badge.textContent = allDisks.length;
+  if (badge) badge.textContent = allDisks.length + ' disks';
 
   if (!allDisks.length) {
     document.getElementById('disk-summary').innerHTML = '';
@@ -2296,7 +2320,7 @@ function applyFilters() {
 
   document.getElementById('result-count').textContent = `${filteredSkus.length} of ${allSkus.length} SKUs`;
   const availBadge = document.getElementById('available-count');
-  if (availBadge) availBadge.textContent = allSkus.length;
+  if (availBadge) availBadge.textContent = allSkus.length + ' SKUs';
   renderTable();
 }
 
@@ -2469,7 +2493,7 @@ function renderShortlist() {
   if (clearBtn) clearBtn.disabled = !pinnedSkus.size;
   const clearChkBtn = document.getElementById('clear-pins-chk-btn');
   if (clearChkBtn) clearChkBtn.disabled = !pinnedSkus.size;
-  count.textContent = pinnedSkus.size;
+  count.textContent = pinnedSkus.size + ' pinned';
 
   const multiRegionContainer = document.getElementById('multiregion-container');
 
@@ -2484,7 +2508,7 @@ function renderShortlist() {
   // Auto-expand section when pins are added
   if (body && body.classList.contains('collapsed')) {
     body.classList.remove('collapsed');
-    if (toggle) toggle.classList.remove('collapsed');
+    if (toggle) toggle.classList.add('open');
   }
   if (actions) actions.style.display = '';
   if (multiRegionContainer) multiRegionContainer.style.display = '';
@@ -2741,7 +2765,7 @@ function runDeployChecker() {
     lastCheckerResults = exact;
     container.innerHTML = `<div class="checker-summary has-matches">${exact.length} of ${allSkus.length} SKUs match your requirements</div>` + buildCheckerTable(exact);
     collapseCheckerGroups();
-    if (checkerBadge) checkerBadge.textContent = exact.length;
+    if (checkerBadge) checkerBadge.textContent = exact.length + ' matches';
   } else {
     const top5 = scored.sort((a, b) => b.score - a.score || a.sku.vCPUs - b.sku.vCPUs).filter(r => r.score > 0).slice(0, 5);
     lastCheckerResults = top5;
@@ -2820,7 +2844,7 @@ function resetChecker() {
   document.getElementById('chk-processor').value = '';
   document.getElementById('checker-results').innerHTML = '';
   const checkerBadge = document.getElementById('checker-match-count');
-  if (checkerBadge) checkerBadge.textContent = '0';
+  if (checkerBadge) checkerBadge.textContent = '0 matches';
 }
 
 // === MULTI-REGION COMPARE ===
@@ -3164,7 +3188,7 @@ async function loadHistory(regionName) {
         After the next scheduled refresh, you'll see which SKUs were added or removed from this region.
       </div>`;
       const whatsNewBadge1 = document.getElementById('whatsnew-count');
-      if (whatsNewBadge1) whatsNewBadge1.textContent = '0';
+      if (whatsNewBadge1) whatsNewBadge1.textContent = '0 changes';
       renderSummary();
       return;
     }
@@ -3225,7 +3249,7 @@ async function loadHistory(regionName) {
     content.innerHTML = html;
     
     const whatsNewBadge = document.getElementById('whatsnew-count');
-    if (whatsNewBadge) whatsNewBadge.textContent = added.length + removed.length;
+    if (whatsNewBadge) whatsNewBadge.textContent = (added.length + removed.length) + ' changes';
     
     renderSummary();
     
@@ -3235,7 +3259,7 @@ async function loadHistory(regionName) {
       After the next scheduled refresh, you'll see which SKUs were added or removed from this region.
     </div>`;
     const whatsNewBadge2 = document.getElementById('whatsnew-count');
-    if (whatsNewBadge2) whatsNewBadge2.textContent = '0';
+    if (whatsNewBadge2) whatsNewBadge2.textContent = '0 changes';
     renderSummary();
   }
 }
