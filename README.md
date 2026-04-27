@@ -60,13 +60,14 @@
 
 ## 📊 Data Freshness
 
-SKU data is refreshed **monthly** from the Azure Resource SKU API. The app shows the refresh date at the top of the Data Refresh Summary (click ℹ️ in the header).
+All data is refreshed **monthly** from Azure APIs. Check the Data Refresh Summary (ℹ️ in the header) for the last update date.
 
-This data reflects general Azure availability. For subscription-specific restrictions (quotas, policies), use:
-
-```bash
-az vm list-skus --location <region> --resource-type virtualMachines -o table
-```
+| Data Set | Source |
+|----------|--------|
+| VM SKUs | Azure Resource SKU API |
+| Managed Disk SKUs | Azure Resource SKU API |
+| VM Pricing | Azure Retail Prices API |
+| VM Retirement Dates | Azure Updates page |
 
 ## 📄 License
 
