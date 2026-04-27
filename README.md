@@ -10,7 +10,8 @@
 
 ![Azure](https://img.shields.io/badge/Azure-VM_SKUs-0078D4)
 ![License](https://img.shields.io/badge/license-MIT-blue)
-![Dependencies](https://img.shields.io/badge/dependencies-zero-brightgreen)
+![Built with](https://img.shields.io/badge/built_with-Copilot_CLI-8957e5)
+![Hosted on](https://img.shields.io/badge/hosted_on-Azure_SWA-0078D4)
 
 👉 **Try the live app here → [vmsku.djtools.co.nz](https://vmsku.djtools.co.nz)**
 
