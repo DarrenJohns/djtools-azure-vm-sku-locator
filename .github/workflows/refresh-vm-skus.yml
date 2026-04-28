@@ -16,13 +16,17 @@ jobs:
 
       - name: Get all Azure regions and target regions from config
         run: |
+          # Read config for subscription ID
+          $config = Get-Content "config.json" | ConvertFrom-Json
+          $subId = $config.skuSubscriptionId
+          $subArgs = if ($subId) { @("--subscription", $subId) } else { @() }
+
           # Fetch all physical regions for the map/dropdown
-          $allRegions = az account list-locations --query "[?metadata.regionType=='Physical'].{name:name, displayName:displayName, geographyGroup:metadata.geographyGroup, latitude:metadata.latitude, longitude:metadata.longitude}" -o json | ConvertFrom-Json -AsHashtable
+          $allRegions = az account list-locations @subArgs --query "[?metadata.regionType=='Physical'].{name:name, displayName:displayName, geographyGroup:metadata.geographyGroup, latitude:metadata.latitude, longitude:metadata.longitude}" -o json | ConvertFrom-Json -AsHashtable
           $allRegions | ConvertTo-Json -Depth 3 | Set-Content "data/regions.json" -Encoding UTF8
           Write-Host "[OK] Found $($allRegions.Count) physical regions"
 
           # Read target regions from config.json
-          $config = Get-Content "config.json" | ConvertFrom-Json
           $targetRegions = $config.targetRegions
           Write-Host "[OK] Target regions: $($targetRegions.Count) ($($targetRegions.name -join ', '))"
         shell: pwsh
@@ -48,9 +52,17 @@ jobs:
             $success = $false
             for ($attempt = 1; $attempt -le $maxRetries; $attempt++) {
               try {
-                $raw = az vm list-skus --location $name --resource-type virtualMachines -o json 2>$null
+                $subId = $config.skuSubscriptionId
+                $subArgs = if ($subId) { @("--subscription", $subId) } else { @() }
+                $raw = az vm list-skus --location $name --resource-type virtualMachines --all @subArgs -o json 2>$null
                 if (-not $raw -or $raw -eq "[]") {
-                  Write-Host "  [WARN] No VM SKUs for $name (skipping)"
+                  Write-Host "  [WARN] No VM SKUs for $name — removing stale data if present"
+                  $staleFile = "$dataDir/$name.json"
+                  if (Test-Path $staleFile) { Remove-Item $staleFile; Write-Host "  [CLEAN] Removed $staleFile" }
+                  $staleDisk = "$dataDir/$name-disks.json"
+                  if (Test-Path $staleDisk) { Remove-Item $staleDisk; Write-Host "  [CLEAN] Removed $staleDisk" }
+                  $stalePricing = "$dataDir/$name-pricing.json"
+                  if (Test-Path $stalePricing) { Remove-Item $stalePricing; Write-Host "  [CLEAN] Removed $stalePricing" }
                   break
                 }
 
@@ -158,11 +170,13 @@ jobs:
         run: |
           $config = Get-Content "config.json" | ConvertFrom-Json
           $regions = $config.targetRegions
+          $subId = $config.skuSubscriptionId
+          $subArgs = if ($subId) { @("--subscription", $subId) } else { @() }
           foreach ($region in $regions) {
             $name = $region.name
             $display = $region.displayName
             Write-Host "Fetching disk SKUs for $display ($name)..."
-            $raw = az vm list-skus --location $name --resource-type disks -o json 2>$null
+            $raw = az vm list-skus --location $name --resource-type disks --all @subArgs -o json 2>$null
             if ($raw -and $raw -ne "[]") {
               $rawFile = "data/$name-disks-raw.json"
               $raw | Set-Content $rawFile -Encoding UTF8
