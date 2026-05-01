@@ -121,7 +121,6 @@ body {
   border-radius: var(--radius-md);
   margin-bottom: 16px;
   box-shadow: var(--shadow-sm);
-  overflow: hidden;
 }
 .section-header {
   display: flex;
@@ -133,6 +132,7 @@ body {
   border-left: 4px solid var(--brand-primary);
   background: linear-gradient(90deg, #dceafb 0%, #eef4fc 40%, var(--bg-layer1) 100%);
   transition: background 0.15s;
+  border-radius: calc(var(--radius-md) - 1px) calc(var(--radius-md) - 1px) 0 0;
 }
 [data-theme="dark"] .section-header { background: linear-gradient(90deg, #1a2e4a 0%, #252a32 40%, var(--bg-layer1) 100%); }
 .section-header:hover { filter: brightness(0.97); }
