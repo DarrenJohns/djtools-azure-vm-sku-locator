@@ -1,7 +1,7 @@
 {
-  "region": "newzealandnorth",
-  "regionDisplayName": "New Zealand North",
-  "lastUpdated": "2026-05-02T10:26:16Z",
+  "region": "northcentralus",
+  "regionDisplayName": "North Central US",
+  "lastUpdated": "2026-05-02T09:51:01Z",
   "diskCount": 67,
   "disks": [
     {
@@ -16,11 +16,7 @@
       "maxShares": 3,
       "burstIOPS": 3500,
       "burstThroughputMBps": 170.0,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
+      "zones": [],
       "restrictions": []
     },
     {
@@ -35,11 +31,7 @@
       "maxShares": 3,
       "burstIOPS": 3500,
       "burstThroughputMBps": 170.0,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
+      "zones": [],
       "restrictions": []
     },
     {
@@ -54,11 +46,7 @@
       "maxShares": 3,
       "burstIOPS": 3500,
       "burstThroughputMBps": 170.0,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
+      "zones": [],
       "restrictions": []
     },
     {
@@ -73,11 +61,7 @@
       "maxShares": 3,
       "burstIOPS": 3500,
       "burstThroughputMBps": 170.0,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
+      "zones": [],
       "restrictions": []
     },
     {
@@ -92,11 +76,7 @@
       "maxShares": 3,
       "burstIOPS": 3500,
       "burstThroughputMBps": 170.0,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
+      "zones": [],
       "restrictions": []
     },
     {
@@ -111,11 +91,7 @@
       "maxShares": 3,
       "burstIOPS": 3500,
       "burstThroughputMBps": 170.0,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
+      "zones": [],
       "restrictions": []
     },
     {
@@ -130,11 +106,7 @@
       "maxShares": 3,
       "burstIOPS": 3500,
       "burstThroughputMBps": 170.0,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
+      "zones": [],
       "restrictions": []
     },
     {
@@ -149,11 +121,7 @@
       "maxShares": 3,
       "burstIOPS": 3500,
       "burstThroughputMBps": 170.0,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
+      "zones": [],
       "restrictions": []
     },
     {
@@ -168,11 +136,7 @@
       "maxShares": 5,
       "burstIOPS": 0,
       "burstThroughputMBps": 0.0,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
+      "zones": [],
       "restrictions": []
     },
     {
@@ -187,11 +151,7 @@
       "maxShares": 5,
       "burstIOPS": 0,
       "burstThroughputMBps": 0.0,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
+      "zones": [],
       "restrictions": []
     },
     {
@@ -206,11 +166,7 @@
       "maxShares": 5,
       "burstIOPS": 0,
       "burstThroughputMBps": 0.0,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
+      "zones": [],
       "restrictions": []
     },
     {
@@ -225,11 +181,7 @@
       "maxShares": 10,
       "burstIOPS": 0,
       "burstThroughputMBps": 0.0,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
+      "zones": [],
       "restrictions": []
     },
     {
@@ -244,11 +196,7 @@
       "maxShares": 10,
       "burstIOPS": 0,
       "burstThroughputMBps": 0.0,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
+      "zones": [],
       "restrictions": []
     },
     {
@@ -263,11 +211,7 @@
       "maxShares": 10,
       "burstIOPS": 0,
       "burstThroughputMBps": 0.0,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
+      "zones": [],
       "restrictions": []
     },
     {
@@ -492,11 +436,7 @@
       "maxShares": 3,
       "burstIOPS": 600,
       "burstThroughputMBps": 150.0,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
+      "zones": [],
       "restrictions": []
     },
     {
@@ -511,11 +451,7 @@
       "maxShares": 3,
       "burstIOPS": 600,
       "burstThroughputMBps": 150.0,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
+      "zones": [],
       "restrictions": []
     },
     {
@@ -530,11 +466,7 @@
       "maxShares": 3,
       "burstIOPS": 600,
       "burstThroughputMBps": 150.0,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
+      "zones": [],
       "restrictions": []
     },
     {
@@ -549,11 +481,7 @@
       "maxShares": 3,
       "burstIOPS": 600,
       "burstThroughputMBps": 150.0,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
+      "zones": [],
       "restrictions": []
     },
     {
@@ -568,11 +496,7 @@
       "maxShares": 3,
       "burstIOPS": 600,
       "burstThroughputMBps": 150.0,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
+      "zones": [],
       "restrictions": []
     },
     {
@@ -587,11 +511,7 @@
       "maxShares": 3,
       "burstIOPS": 600,
       "burstThroughputMBps": 150.0,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
+      "zones": [],
       "restrictions": []
     },
     {
@@ -606,11 +526,7 @@
       "maxShares": 3,
       "burstIOPS": 600,
       "burstThroughputMBps": 150.0,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
+      "zones": [],
       "restrictions": []
     },
     {
@@ -625,11 +541,7 @@
       "maxShares": 3,
       "burstIOPS": 600,
       "burstThroughputMBps": 150.0,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
+      "zones": [],
       "restrictions": []
     },
     {
@@ -644,11 +556,7 @@
       "maxShares": 5,
       "burstIOPS": 1000,
       "burstThroughputMBps": 250.0,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
+      "zones": [],
       "restrictions": []
     },
     {
@@ -663,11 +571,7 @@
       "maxShares": 5,
       "burstIOPS": 0,
       "burstThroughputMBps": 0.0,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
+      "zones": [],
       "restrictions": []
     },
     {
@@ -682,11 +586,7 @@
       "maxShares": 5,
       "burstIOPS": 0,
       "burstThroughputMBps": 0.0,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
+      "zones": [],
       "restrictions": []
     },
     {
@@ -701,11 +601,7 @@
       "maxShares": 10,
       "burstIOPS": 0,
       "burstThroughputMBps": 0.0,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
+      "zones": [],
       "restrictions": []
     },
     {
@@ -720,11 +616,7 @@
       "maxShares": 10,
       "burstIOPS": 0,
       "burstThroughputMBps": 0.0,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
+      "zones": [],
       "restrictions": []
     },
     {
@@ -739,11 +631,7 @@
       "maxShares": 10,
       "burstIOPS": 0,
       "burstThroughputMBps": 0.0,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
+      "zones": [],
       "restrictions": []
     },
     {
@@ -968,11 +856,7 @@
       "maxShares": 1,
       "burstIOPS": 0,
       "burstThroughputMBps": 0.0,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
+      "zones": [],
       "restrictions": []
     },
     {
@@ -987,11 +871,7 @@
       "maxShares": 1,
       "burstIOPS": 0,
       "burstThroughputMBps": 0.0,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
+      "zones": [],
       "restrictions": []
     },
     {
@@ -1006,11 +886,7 @@
       "maxShares": 1,
       "burstIOPS": 0,
       "burstThroughputMBps": 0.0,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
+      "zones": [],
       "restrictions": []
     },
     {
@@ -1025,11 +901,7 @@
       "maxShares": 1,
       "burstIOPS": 0,
       "burstThroughputMBps": 0.0,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
+      "zones": [],
       "restrictions": []
     },
     {
@@ -1044,11 +916,7 @@
       "maxShares": 2,
       "burstIOPS": 0,
       "burstThroughputMBps": 0.0,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
+      "zones": [],
       "restrictions": []
     },
     {
@@ -1063,11 +931,7 @@
       "maxShares": 5,
       "burstIOPS": 0,
       "burstThroughputMBps": 0.0,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
+      "zones": [],
       "restrictions": []
     },
     {
@@ -1082,11 +946,7 @@
       "maxShares": 5,
       "burstIOPS": 0,
       "burstThroughputMBps": 0.0,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
+      "zones": [],
       "restrictions": []
     },
     {
@@ -1101,11 +961,7 @@
       "maxShares": 5,
       "burstIOPS": 0,
       "burstThroughputMBps": 0.0,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
+      "zones": [],
       "restrictions": []
     },
     {
@@ -1120,11 +976,7 @@
       "maxShares": 5,
       "burstIOPS": 0,
       "burstThroughputMBps": 0.0,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
+      "zones": [],
       "restrictions": []
     },
     {
@@ -1139,11 +991,7 @@
       "maxShares": 5,
       "burstIOPS": 0,
       "burstThroughputMBps": 0.0,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
+      "zones": [],
       "restrictions": []
     },
     {
@@ -1158,11 +1006,7 @@
       "maxShares": 5,
       "burstIOPS": 0,
       "burstThroughputMBps": 0.0,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
+      "zones": [],
       "restrictions": []
     }
   ]

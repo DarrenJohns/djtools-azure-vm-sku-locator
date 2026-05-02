@@ -1,8 +1,8 @@
 {
-  "region": "australiaeast",
-  "regionDisplayName": "Australia East",
-  "lastUpdated": "2026-05-02T08:20:38Z",
-  "skuCount": 1185,
+  "region": "westus2",
+  "regionDisplayName": "West US 2",
+  "lastUpdated": "2026-05-02T07:44:58Z",
+  "skuCount": 1168,
   "skus": [
     {
       "name": "Standard_NC4as_T4_v3",
@@ -95,6 +95,30 @@
         "3"
       ],
       "restrictions": []
+    },
+    {
+      "name": "Standard_ND96asr_v4",
+      "family": "Standard NDASv4_A100 Family",
+      "tier": "Standard",
+      "size": "ND96asr_v4",
+      "vCPUs": 96,
+      "memoryGB": 900.0,
+      "maxDataDisks": 16,
+      "maxNICs": 8,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": false,
+      "zones": [
+        "1"
+      ],
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_D2ads_v7",
@@ -287,7 +311,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1",
         "3"
@@ -309,7 +333,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1",
         "3"
@@ -507,7 +531,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1",
         "3"
@@ -529,7 +553,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1",
         "3"
@@ -727,7 +751,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": false,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1",
         "3"
@@ -749,7 +773,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": false,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1",
         "3"
@@ -947,7 +971,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": false,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1",
         "3"
@@ -969,7 +993,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": false,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1",
         "3"
@@ -3071,6 +3095,27 @@
       "restrictions": []
     },
     {
+      "name": "Standard_E160ads_v7",
+      "family": "StandardEadsv7Family",
+      "tier": "Standard",
+      "size": "E160ads_v7",
+      "vCPUs": 160,
+      "memoryGB": 1280.0,
+      "maxDataDisks": 64,
+      "maxNICs": 15,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "3"
+      ],
+      "restrictions": []
+    },
+    {
       "name": "Standard_E2as_v7",
       "family": "StandardEasv7Family",
       "tier": "Standard",
@@ -3550,6 +3595,27 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "3"
+      ],
+      "restrictions": []
+    },
+    {
+      "name": "Standard_E160as_v7",
+      "family": "StandardEasv7Family",
+      "tier": "Standard",
+      "size": "E160as_v7",
+      "vCPUs": 160,
+      "memoryGB": 1280.0,
+      "maxDataDisks": 64,
+      "maxNICs": 15,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": false,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
         "3"
       ],
       "restrictions": []
@@ -6391,7 +6457,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1",
         "3"
@@ -6413,7 +6479,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1",
         "3"
@@ -6589,7 +6655,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1",
         "3"
@@ -6611,7 +6677,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1",
         "3"
@@ -6636,7 +6702,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -6659,7 +6724,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -6682,7 +6746,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -6705,7 +6768,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -6728,7 +6790,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -6751,7 +6812,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -6774,7 +6834,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -6948,7 +7007,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": false,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1",
         "3"
@@ -6970,7 +7029,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": false,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1",
         "3"
@@ -7344,7 +7403,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1",
         "3"
@@ -7366,7 +7425,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1",
         "3"
@@ -7388,7 +7447,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1",
         "3"
@@ -7410,7 +7469,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1",
         "3"
@@ -7435,7 +7494,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -7458,7 +7516,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -7481,7 +7538,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -7504,7 +7560,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -7527,7 +7582,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -7550,7 +7604,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -7573,7 +7626,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -7945,7 +7997,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": false,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1",
         "3"
@@ -7967,7 +8019,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": false,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1",
         "3"
@@ -7989,7 +8041,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": false,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1",
         "3"
@@ -8011,7 +8063,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": false,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1",
         "3"
@@ -8036,7 +8088,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -8059,7 +8110,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -8082,7 +8132,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -8105,7 +8154,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -8128,7 +8176,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -8151,7 +8198,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -8174,7 +8220,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -8348,7 +8393,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": false,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1",
         "3"
@@ -8370,7 +8415,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": false,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1",
         "3"
@@ -8394,6 +8439,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
+        "2",
         "3"
       ],
       "restrictions": []
@@ -8415,6 +8462,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
+        "2",
         "3"
       ],
       "restrictions": []
@@ -8436,6 +8485,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
+        "2",
         "3"
       ],
       "restrictions": []
@@ -8457,6 +8508,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
+        "2",
         "3"
       ],
       "restrictions": []
@@ -8478,6 +8531,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
+        "2",
         "3"
       ],
       "restrictions": []
@@ -8499,6 +8554,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
+        "2",
         "3"
       ],
       "restrictions": []
@@ -8520,6 +8577,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
+        "2",
         "3"
       ],
       "restrictions": []
@@ -8541,6 +8600,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
+        "2",
         "3"
       ],
       "restrictions": []
@@ -8562,6 +8623,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
+        "2",
         "3"
       ],
       "restrictions": []
@@ -8583,6 +8646,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
+        "2",
         "3"
       ],
       "restrictions": []
@@ -8604,6 +8669,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
+        "2",
         "3"
       ],
       "restrictions": []
@@ -8625,6 +8692,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
+        "2",
         "3"
       ],
       "restrictions": []
@@ -8646,6 +8715,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
+        "2",
         "3"
       ],
       "restrictions": []
@@ -8667,6 +8738,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
+        "2",
         "3"
       ],
       "restrictions": []
@@ -8688,6 +8761,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
+        "2",
         "3"
       ],
       "restrictions": []
@@ -8709,6 +8784,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
+        "2",
         "3"
       ],
       "restrictions": []
@@ -8730,6 +8807,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
+        "2",
         "3"
       ],
       "restrictions": []
@@ -8751,6 +8830,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
+        "2",
         "3"
       ],
       "restrictions": []
@@ -8772,6 +8853,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
+        "2",
         "3"
       ],
       "restrictions": []
@@ -8793,6 +8876,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
+        "2",
         "3"
       ],
       "restrictions": []
@@ -8814,6 +8899,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
+        "2",
         "3"
       ],
       "restrictions": []
@@ -8835,6 +8922,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
+        "2",
         "3"
       ],
       "restrictions": []
@@ -8856,6 +8945,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
+        "2",
         "3"
       ],
       "restrictions": []
@@ -8877,6 +8968,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
+        "2",
         "3"
       ],
       "restrictions": []
@@ -8898,6 +8991,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
+        "2",
         "3"
       ],
       "restrictions": []
@@ -8919,6 +9014,30 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
+        "2",
+        "3"
+      ],
+      "restrictions": []
+    },
+    {
+      "name": "Standard_M416bs_v3",
+      "family": "StandardMBSMediumMemoryv3Family",
+      "tier": "Standard",
+      "size": "M416bs_v3",
+      "vCPUs": 416,
+      "memoryGB": 3800.0,
+      "maxDataDisks": 64,
+      "maxNICs": 8,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": false,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "2",
         "3"
       ],
       "restrictions": []
@@ -8940,6 +9059,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
+        "2",
         "3"
       ],
       "restrictions": []
@@ -8961,6 +9082,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
+        "2",
         "3"
       ],
       "restrictions": []
@@ -8982,6 +9105,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
+        "2",
         "3"
       ],
       "restrictions": []
@@ -9047,12 +9172,11 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "1"
+        "1",
+        "2",
+        "3"
       ],
-      "restrictions": [
-        "NotAvailableForSubscription",
-        "NotAvailableForSubscription"
-      ]
+      "restrictions": []
     },
     {
       "name": "Standard_NV12ads_A10_v5",
@@ -9071,12 +9195,11 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "1"
+        "1",
+        "2",
+        "3"
       ],
-      "restrictions": [
-        "NotAvailableForSubscription",
-        "NotAvailableForSubscription"
-      ]
+      "restrictions": []
     },
     {
       "name": "Standard_NV18ads_A10_v5",
@@ -9095,12 +9218,11 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "1"
+        "1",
+        "2",
+        "3"
       ],
-      "restrictions": [
-        "NotAvailableForSubscription",
-        "NotAvailableForSubscription"
-      ]
+      "restrictions": []
     },
     {
       "name": "Standard_NV36ads_A10_v5",
@@ -9119,12 +9241,11 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "1"
+        "1",
+        "2",
+        "3"
       ],
-      "restrictions": [
-        "NotAvailableForSubscription",
-        "NotAvailableForSubscription"
-      ]
+      "restrictions": []
     },
     {
       "name": "Standard_NV36adms_A10_v5",
@@ -9143,12 +9264,11 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "1"
+        "1",
+        "2",
+        "3"
       ],
-      "restrictions": [
-        "NotAvailableForSubscription",
-        "NotAvailableForSubscription"
-      ]
+      "restrictions": []
     },
     {
       "name": "Standard_NV72ads_A10_v5",
@@ -9167,12 +9287,32 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "1"
+        "1",
+        "2",
+        "3"
       ],
-      "restrictions": [
-        "NotAvailableForSubscription",
-        "NotAvailableForSubscription"
-      ]
+      "restrictions": []
+    },
+    {
+      "name": "Standard_ND96amsr_A100_v4",
+      "family": "standard NDAMSv4_A100Family",
+      "tier": "Standard",
+      "size": "ND96amsr_A100_v4",
+      "vCPUs": 96,
+      "memoryGB": 1800.0,
+      "maxDataDisks": 16,
+      "maxNICs": 8,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "3"
+      ],
+      "restrictions": []
     },
     {
       "name": "Standard_A1_v2",
@@ -11031,6 +11171,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "3"
       ],
       "restrictions": []
@@ -11052,6 +11193,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "3"
       ],
       "restrictions": []
@@ -11073,6 +11215,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "3"
       ],
       "restrictions": []
@@ -11094,6 +11237,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "3"
       ],
       "restrictions": []
@@ -11262,374 +11406,6 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_DC2ads_v6",
-      "family": "standardDCadsv6Family",
-      "tier": "Standard",
-      "size": "DC2ads_v6",
-      "vCPUs": 2,
-      "memoryGB": 8.0,
-      "maxDataDisks": 4,
-      "maxNICs": 2,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V2",
-      "acceleratedNetworking": false,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_DC4ads_v6",
-      "family": "standardDCadsv6Family",
-      "tier": "Standard",
-      "size": "DC4ads_v6",
-      "vCPUs": 4,
-      "memoryGB": 16.0,
-      "maxDataDisks": 8,
-      "maxNICs": 2,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V2",
-      "acceleratedNetworking": false,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_DC8ads_v6",
-      "family": "standardDCadsv6Family",
-      "tier": "Standard",
-      "size": "DC8ads_v6",
-      "vCPUs": 8,
-      "memoryGB": 32.0,
-      "maxDataDisks": 16,
-      "maxNICs": 4,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V2",
-      "acceleratedNetworking": false,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_DC16ads_v6",
-      "family": "standardDCadsv6Family",
-      "tier": "Standard",
-      "size": "DC16ads_v6",
-      "vCPUs": 16,
-      "memoryGB": 64.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V2",
-      "acceleratedNetworking": false,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_DC32ads_v6",
-      "family": "standardDCadsv6Family",
-      "tier": "Standard",
-      "size": "DC32ads_v6",
-      "vCPUs": 32,
-      "memoryGB": 128.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V2",
-      "acceleratedNetworking": false,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_DC48ads_v6",
-      "family": "standardDCadsv6Family",
-      "tier": "Standard",
-      "size": "DC48ads_v6",
-      "vCPUs": 48,
-      "memoryGB": 192.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V2",
-      "acceleratedNetworking": false,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_DC64ads_v6",
-      "family": "standardDCadsv6Family",
-      "tier": "Standard",
-      "size": "DC64ads_v6",
-      "vCPUs": 64,
-      "memoryGB": 256.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V2",
-      "acceleratedNetworking": false,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_DC96ads_v6",
-      "family": "standardDCadsv6Family",
-      "tier": "Standard",
-      "size": "DC96ads_v6",
-      "vCPUs": 96,
-      "memoryGB": 384.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V2",
-      "acceleratedNetworking": false,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_DC2as_v6",
-      "family": "standardDCasv6Family",
-      "tier": "Standard",
-      "size": "DC2as_v6",
-      "vCPUs": 2,
-      "memoryGB": 8.0,
-      "maxDataDisks": 4,
-      "maxNICs": 2,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V2",
-      "acceleratedNetworking": false,
-      "premiumIO": true,
-      "ephemeralOSDisk": false,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_DC4as_v6",
-      "family": "standardDCasv6Family",
-      "tier": "Standard",
-      "size": "DC4as_v6",
-      "vCPUs": 4,
-      "memoryGB": 16.0,
-      "maxDataDisks": 8,
-      "maxNICs": 2,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V2",
-      "acceleratedNetworking": false,
-      "premiumIO": true,
-      "ephemeralOSDisk": false,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_DC8as_v6",
-      "family": "standardDCasv6Family",
-      "tier": "Standard",
-      "size": "DC8as_v6",
-      "vCPUs": 8,
-      "memoryGB": 32.0,
-      "maxDataDisks": 16,
-      "maxNICs": 4,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V2",
-      "acceleratedNetworking": false,
-      "premiumIO": true,
-      "ephemeralOSDisk": false,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_DC16as_v6",
-      "family": "standardDCasv6Family",
-      "tier": "Standard",
-      "size": "DC16as_v6",
-      "vCPUs": 16,
-      "memoryGB": 64.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V2",
-      "acceleratedNetworking": false,
-      "premiumIO": true,
-      "ephemeralOSDisk": false,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_DC32as_v6",
-      "family": "standardDCasv6Family",
-      "tier": "Standard",
-      "size": "DC32as_v6",
-      "vCPUs": 32,
-      "memoryGB": 128.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V2",
-      "acceleratedNetworking": false,
-      "premiumIO": true,
-      "ephemeralOSDisk": false,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_DC48as_v6",
-      "family": "standardDCasv6Family",
-      "tier": "Standard",
-      "size": "DC48as_v6",
-      "vCPUs": 48,
-      "memoryGB": 192.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V2",
-      "acceleratedNetworking": false,
-      "premiumIO": true,
-      "ephemeralOSDisk": false,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_DC64as_v6",
-      "family": "standardDCasv6Family",
-      "tier": "Standard",
-      "size": "DC64as_v6",
-      "vCPUs": 64,
-      "memoryGB": 256.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V2",
-      "acceleratedNetworking": false,
-      "premiumIO": true,
-      "ephemeralOSDisk": false,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_DC96as_v6",
-      "family": "standardDCasv6Family",
-      "tier": "Standard",
-      "size": "DC96as_v6",
-      "vCPUs": 96,
-      "memoryGB": 384.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V2",
-      "acceleratedNetworking": false,
-      "premiumIO": true,
-      "ephemeralOSDisk": false,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -12512,6 +12288,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -12535,6 +12312,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -12558,6 +12336,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -12581,6 +12360,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -12604,6 +12384,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -12627,6 +12408,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -12650,6 +12432,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -12673,6 +12456,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -13708,6 +13492,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -13731,6 +13516,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -13754,6 +13540,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -13777,6 +13564,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -13800,6 +13588,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -13823,6 +13612,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -13846,6 +13636,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -13869,6 +13660,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -14262,6 +14054,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -14287,6 +14080,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -14312,6 +14106,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -14337,6 +14132,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -14362,6 +14158,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -14387,6 +14184,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -14412,6 +14210,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -14437,6 +14236,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -14462,6 +14262,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -15173,7 +14974,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -15196,7 +14996,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -15219,7 +15018,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -15242,7 +15040,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -15265,7 +15062,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -15288,7 +15084,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -15311,7 +15106,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -15334,7 +15128,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -15357,7 +15150,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -15380,7 +15172,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -15403,7 +15194,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -15426,7 +15216,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -15449,7 +15238,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -15472,7 +15260,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -15495,7 +15282,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -15518,7 +15304,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -15541,7 +15326,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -15564,7 +15348,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -15587,7 +15370,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -15610,7 +15392,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -15633,7 +15414,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -15656,7 +15436,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -15679,7 +15458,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -15702,7 +15480,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -15936,6 +15713,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -15961,6 +15739,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -15986,6 +15765,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -16011,6 +15791,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -16036,6 +15817,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -16061,6 +15843,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -16086,6 +15869,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -16111,6 +15895,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -16136,6 +15921,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -18589,374 +18375,6 @@
       "cpuArchitecture": "x64",
       "hyperVGenerations": "V1,V2",
       "acceleratedNetworking": true,
-      "premiumIO": true,
-      "ephemeralOSDisk": false,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_EC2ads_v6",
-      "family": "standardECadsv6Family",
-      "tier": "Standard",
-      "size": "EC2ads_v6",
-      "vCPUs": 2,
-      "memoryGB": 16.0,
-      "maxDataDisks": 4,
-      "maxNICs": 2,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V2",
-      "acceleratedNetworking": false,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_EC4ads_v6",
-      "family": "standardECadsv6Family",
-      "tier": "Standard",
-      "size": "EC4ads_v6",
-      "vCPUs": 4,
-      "memoryGB": 32.0,
-      "maxDataDisks": 8,
-      "maxNICs": 2,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V2",
-      "acceleratedNetworking": false,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_EC8ads_v6",
-      "family": "standardECadsv6Family",
-      "tier": "Standard",
-      "size": "EC8ads_v6",
-      "vCPUs": 8,
-      "memoryGB": 64.0,
-      "maxDataDisks": 16,
-      "maxNICs": 4,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V2",
-      "acceleratedNetworking": false,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_EC16ads_v6",
-      "family": "standardECadsv6Family",
-      "tier": "Standard",
-      "size": "EC16ads_v6",
-      "vCPUs": 16,
-      "memoryGB": 128.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V2",
-      "acceleratedNetworking": false,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_EC32ads_v6",
-      "family": "standardECadsv6Family",
-      "tier": "Standard",
-      "size": "EC32ads_v6",
-      "vCPUs": 32,
-      "memoryGB": 256.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V2",
-      "acceleratedNetworking": false,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_EC48ads_v6",
-      "family": "standardECadsv6Family",
-      "tier": "Standard",
-      "size": "EC48ads_v6",
-      "vCPUs": 48,
-      "memoryGB": 384.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V2",
-      "acceleratedNetworking": false,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_EC64ads_v6",
-      "family": "standardECadsv6Family",
-      "tier": "Standard",
-      "size": "EC64ads_v6",
-      "vCPUs": 64,
-      "memoryGB": 512.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V2",
-      "acceleratedNetworking": false,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_EC96ads_v6",
-      "family": "standardECadsv6Family",
-      "tier": "Standard",
-      "size": "EC96ads_v6",
-      "vCPUs": 96,
-      "memoryGB": 672.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V2",
-      "acceleratedNetworking": false,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_EC2as_v6",
-      "family": "standardECasv6Family",
-      "tier": "Standard",
-      "size": "EC2as_v6",
-      "vCPUs": 2,
-      "memoryGB": 16.0,
-      "maxDataDisks": 4,
-      "maxNICs": 2,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V2",
-      "acceleratedNetworking": false,
-      "premiumIO": true,
-      "ephemeralOSDisk": false,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_EC4as_v6",
-      "family": "standardECasv6Family",
-      "tier": "Standard",
-      "size": "EC4as_v6",
-      "vCPUs": 4,
-      "memoryGB": 32.0,
-      "maxDataDisks": 8,
-      "maxNICs": 2,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V2",
-      "acceleratedNetworking": false,
-      "premiumIO": true,
-      "ephemeralOSDisk": false,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_EC8as_v6",
-      "family": "standardECasv6Family",
-      "tier": "Standard",
-      "size": "EC8as_v6",
-      "vCPUs": 8,
-      "memoryGB": 64.0,
-      "maxDataDisks": 16,
-      "maxNICs": 4,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V2",
-      "acceleratedNetworking": false,
-      "premiumIO": true,
-      "ephemeralOSDisk": false,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_EC16as_v6",
-      "family": "standardECasv6Family",
-      "tier": "Standard",
-      "size": "EC16as_v6",
-      "vCPUs": 16,
-      "memoryGB": 128.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V2",
-      "acceleratedNetworking": false,
-      "premiumIO": true,
-      "ephemeralOSDisk": false,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_EC32as_v6",
-      "family": "standardECasv6Family",
-      "tier": "Standard",
-      "size": "EC32as_v6",
-      "vCPUs": 32,
-      "memoryGB": 256.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V2",
-      "acceleratedNetworking": false,
-      "premiumIO": true,
-      "ephemeralOSDisk": false,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_EC48as_v6",
-      "family": "standardECasv6Family",
-      "tier": "Standard",
-      "size": "EC48as_v6",
-      "vCPUs": 48,
-      "memoryGB": 384.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V2",
-      "acceleratedNetworking": false,
-      "premiumIO": true,
-      "ephemeralOSDisk": false,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_EC64as_v6",
-      "family": "standardECasv6Family",
-      "tier": "Standard",
-      "size": "EC64as_v6",
-      "vCPUs": 64,
-      "memoryGB": 512.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V2",
-      "acceleratedNetworking": false,
-      "premiumIO": true,
-      "ephemeralOSDisk": false,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "1",
-        "2",
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_EC96as_v6",
-      "family": "standardECasv6Family",
-      "tier": "Standard",
-      "size": "EC96as_v6",
-      "vCPUs": 96,
-      "memoryGB": 672.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V2",
-      "acceleratedNetworking": false,
       "premiumIO": true,
       "ephemeralOSDisk": false,
       "encryptionAtHost": true,
@@ -22206,7 +21624,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -22229,7 +21646,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -22252,7 +21668,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -22275,7 +21690,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -22298,7 +21712,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -22321,7 +21734,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -22344,7 +21756,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -22367,7 +21778,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -22390,7 +21800,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -23385,6 +22794,111 @@
       "restrictions": []
     },
     {
+      "name": "Standard_FX4mds",
+      "family": "standardFXMDVSFamily",
+      "tier": "Standard",
+      "size": "FX4mds",
+      "vCPUs": 4,
+      "memoryGB": 84.0,
+      "maxDataDisks": 8,
+      "maxNICs": 2,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "1"
+      ],
+      "restrictions": []
+    },
+    {
+      "name": "Standard_FX12mds",
+      "family": "standardFXMDVSFamily",
+      "tier": "Standard",
+      "size": "FX12mds",
+      "vCPUs": 12,
+      "memoryGB": 252.0,
+      "maxDataDisks": 24,
+      "maxNICs": 4,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "1"
+      ],
+      "restrictions": []
+    },
+    {
+      "name": "Standard_FX24mds",
+      "family": "standardFXMDVSFamily",
+      "tier": "Standard",
+      "size": "FX24mds",
+      "vCPUs": 24,
+      "memoryGB": 504.0,
+      "maxDataDisks": 32,
+      "maxNICs": 4,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "1"
+      ],
+      "restrictions": []
+    },
+    {
+      "name": "Standard_FX36mds",
+      "family": "standardFXMDVSFamily",
+      "tier": "Standard",
+      "size": "FX36mds",
+      "vCPUs": 36,
+      "memoryGB": 756.0,
+      "maxDataDisks": 32,
+      "maxNICs": 8,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "1"
+      ],
+      "restrictions": []
+    },
+    {
+      "name": "Standard_FX48mds",
+      "family": "standardFXMDVSFamily",
+      "tier": "Standard",
+      "size": "FX48mds",
+      "vCPUs": 48,
+      "memoryGB": 1008.0,
+      "maxDataDisks": 32,
+      "maxNICs": 8,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "1"
+      ],
+      "restrictions": []
+    },
+    {
       "name": "Standard_G1",
       "family": "standardGFamily",
       "tier": "Standard",
@@ -23403,7 +22917,10 @@
       "zones": [
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_G2",
@@ -23424,7 +22941,10 @@
       "zones": [
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_G3",
@@ -23445,7 +22965,10 @@
       "zones": [
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_G4",
@@ -23466,7 +22989,10 @@
       "zones": [
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_G5",
@@ -23487,7 +23013,10 @@
       "zones": [
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_GS1",
@@ -23508,7 +23037,10 @@
       "zones": [
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_GS2",
@@ -23529,7 +23061,10 @@
       "zones": [
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_GS3",
@@ -23550,7 +23085,10 @@
       "zones": [
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_GS4",
@@ -23571,7 +23109,10 @@
       "zones": [
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_GS4-4",
@@ -23592,7 +23133,10 @@
       "zones": [
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_GS4-8",
@@ -23613,7 +23157,10 @@
       "zones": [
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_GS5",
@@ -23634,7 +23181,10 @@
       "zones": [
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_GS5-16",
@@ -23655,7 +23205,10 @@
       "zones": [
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_GS5-8",
@@ -23676,7 +23229,10 @@
       "zones": [
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_HB120-16rs_v2",
@@ -23784,111 +23340,6 @@
       "restrictions": []
     },
     {
-      "name": "Standard_HB176-144rs_v4",
-      "family": "standardHBv4Family",
-      "tier": "Standard",
-      "size": "HB176-144rs_v4",
-      "vCPUs": 176,
-      "memoryGB": 768.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V1,V2",
-      "acceleratedNetworking": true,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_HB176-24rs_v4",
-      "family": "standardHBv4Family",
-      "tier": "Standard",
-      "size": "HB176-24rs_v4",
-      "vCPUs": 176,
-      "memoryGB": 768.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V1,V2",
-      "acceleratedNetworking": true,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_HB176-48rs_v4",
-      "family": "standardHBv4Family",
-      "tier": "Standard",
-      "size": "HB176-48rs_v4",
-      "vCPUs": 176,
-      "memoryGB": 768.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V2",
-      "acceleratedNetworking": true,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_HB176-96rs_v4",
-      "family": "standardHBv4Family",
-      "tier": "Standard",
-      "size": "HB176-96rs_v4",
-      "vCPUs": 176,
-      "memoryGB": 768.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V1,V2",
-      "acceleratedNetworking": true,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_HB176rs_v4",
-      "family": "standardHBv4Family",
-      "tier": "Standard",
-      "size": "HB176rs_v4",
-      "vCPUs": 176,
-      "memoryGB": 768.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V1,V2",
-      "acceleratedNetworking": true,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
       "name": "Standard_HC44-16rs",
       "family": "standardHCSFamily",
       "tier": "Standard",
@@ -23905,7 +23356,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -23926,7 +23378,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -23947,111 +23400,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_HX176-144rs",
-      "family": "standardHXFamily",
-      "tier": "Standard",
-      "size": "HX176-144rs",
-      "vCPUs": 176,
-      "memoryGB": 1408.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V1,V2",
-      "acceleratedNetworking": true,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_HX176-24rs",
-      "family": "standardHXFamily",
-      "tier": "Standard",
-      "size": "HX176-24rs",
-      "vCPUs": 176,
-      "memoryGB": 1408.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V1,V2",
-      "acceleratedNetworking": true,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_HX176-48rs",
-      "family": "standardHXFamily",
-      "tier": "Standard",
-      "size": "HX176-48rs",
-      "vCPUs": 176,
-      "memoryGB": 1408.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V1,V2",
-      "acceleratedNetworking": true,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_HX176-96rs",
-      "family": "standardHXFamily",
-      "tier": "Standard",
-      "size": "HX176-96rs",
-      "vCPUs": 176,
-      "memoryGB": 1408.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V1,V2",
-      "acceleratedNetworking": true,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_HX176rs",
-      "family": "standardHXFamily",
-      "tier": "Standard",
-      "size": "HX176rs",
-      "vCPUs": 176,
-      "memoryGB": 1408.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V1,V2",
-      "acceleratedNetworking": true,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
+        "2",
         "3"
       ],
       "restrictions": []
@@ -24213,7 +23562,10 @@
       "zones": [
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_L8s",
@@ -24234,7 +23586,10 @@
       "zones": [
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_L16s",
@@ -24255,7 +23610,10 @@
       "zones": [
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_L32s",
@@ -24276,7 +23634,10 @@
       "zones": [
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_L8s_v2",
@@ -25148,6 +24509,94 @@
       "restrictions": []
     },
     {
+      "name": "Standard_M416ds_6_v3",
+      "family": "standardMDSHighMemoryv3Family",
+      "tier": "Standard",
+      "size": "M416ds_6_v3",
+      "vCPUs": 416,
+      "memoryGB": 5696.0,
+      "maxDataDisks": 64,
+      "maxNICs": 8,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "2",
+        "3"
+      ],
+      "restrictions": []
+    },
+    {
+      "name": "Standard_M416ds_8_v3",
+      "family": "standardMDSHighMemoryv3Family",
+      "tier": "Standard",
+      "size": "M416ds_8_v3",
+      "vCPUs": 416,
+      "memoryGB": 7600.0,
+      "maxDataDisks": 64,
+      "maxNICs": 8,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "2",
+        "3"
+      ],
+      "restrictions": []
+    },
+    {
+      "name": "Standard_M624ds_12_v3",
+      "family": "standardMDSHighMemoryv3Family",
+      "tier": "Standard",
+      "size": "M624ds_12_v3",
+      "vCPUs": 624,
+      "memoryGB": 11400.0,
+      "maxDataDisks": 64,
+      "maxNICs": 8,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "2",
+        "3"
+      ],
+      "restrictions": []
+    },
+    {
+      "name": "Standard_M832ds_12_v3",
+      "family": "standardMDSHighMemoryv3Family",
+      "tier": "Standard",
+      "size": "M832ds_12_v3",
+      "vCPUs": 832,
+      "memoryGB": 11400.0,
+      "maxDataDisks": 64,
+      "maxNICs": 8,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "2",
+        "3"
+      ],
+      "restrictions": []
+    },
+    {
       "name": "Standard_M32dms_v2",
       "family": "standardMDSMediumMemoryv2Family",
       "tier": "Standard",
@@ -25168,7 +24617,10 @@
         "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M64ds_v2",
@@ -25191,7 +24643,10 @@
         "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M64dms_v2",
@@ -25214,7 +24669,10 @@
         "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M128ds_v2",
@@ -25237,7 +24695,10 @@
         "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M128dms_v2",
@@ -25260,7 +24721,10 @@
         "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M12ds_v3",
@@ -25424,6 +24888,28 @@
       "restrictions": []
     },
     {
+      "name": "Standard_M832ids_16_v3",
+      "family": "standardMIDSHighMemoryv3Family",
+      "tier": "Standard",
+      "size": "M832ids_16_v3",
+      "vCPUs": 832,
+      "memoryGB": 15200.0,
+      "maxDataDisks": 64,
+      "maxNICs": 8,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "2",
+        "3"
+      ],
+      "restrictions": []
+    },
+    {
       "name": "Standard_M192ids_v2",
       "family": "standardMIDSMediumMemoryv2Family",
       "tier": "Standard",
@@ -25444,7 +24930,10 @@
         "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M192idms_v2",
@@ -25464,6 +24953,31 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
+        "3"
+      ],
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
+    },
+    {
+      "name": "Standard_M832is_16_v3",
+      "family": "standardMISHighMemoryv3Family",
+      "tier": "Standard",
+      "size": "M832is_16_v3",
+      "vCPUs": 832,
+      "memoryGB": 15200.0,
+      "maxDataDisks": 64,
+      "maxNICs": 8,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": false,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
         "2",
         "3"
       ],
@@ -25490,7 +25004,10 @@
         "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M192ims_v2",
@@ -25513,7 +25030,10 @@
         "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M8-2ms",
@@ -25536,7 +25056,10 @@
         "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M8-4ms",
@@ -25559,7 +25082,10 @@
         "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M8ms",
@@ -25582,7 +25108,10 @@
         "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M16-4ms",
@@ -25605,7 +25134,10 @@
         "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M16-8ms",
@@ -25628,7 +25160,10 @@
         "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M16ms",
@@ -25651,7 +25186,10 @@
         "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M32ts",
@@ -25674,7 +25212,10 @@
         "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M32ls",
@@ -25697,7 +25238,10 @@
         "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M32-16ms",
@@ -25720,7 +25264,10 @@
         "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M32-8ms",
@@ -25743,7 +25290,10 @@
         "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M32ms",
@@ -25766,7 +25316,10 @@
         "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M64ls",
@@ -25789,7 +25342,10 @@
         "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M64",
@@ -25812,7 +25368,10 @@
         "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M64s",
@@ -25835,7 +25394,10 @@
         "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M64-16ms",
@@ -25858,7 +25420,10 @@
         "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M64-32ms",
@@ -25881,7 +25446,10 @@
         "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M64m",
@@ -25904,7 +25472,10 @@
         "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M64ms",
@@ -25927,7 +25498,10 @@
         "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M128",
@@ -25950,7 +25524,10 @@
         "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M128s",
@@ -25973,7 +25550,10 @@
         "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M128-32ms",
@@ -25996,7 +25576,10 @@
         "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M128-64ms",
@@ -26019,7 +25602,10 @@
         "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M128m",
@@ -26042,7 +25628,10 @@
         "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M128ms",
@@ -26062,6 +25651,97 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
+        "3"
+      ],
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
+    },
+    {
+      "name": "Standard_M416s_6_v3",
+      "family": "standardMSHighMemoryv3Family",
+      "tier": "Standard",
+      "size": "M416s_6_v3",
+      "vCPUs": 416,
+      "memoryGB": 5696.0,
+      "maxDataDisks": 64,
+      "maxNICs": 8,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": false,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "2",
+        "3"
+      ],
+      "restrictions": []
+    },
+    {
+      "name": "Standard_M416s_8_v3",
+      "family": "standardMSHighMemoryv3Family",
+      "tier": "Standard",
+      "size": "M416s_8_v3",
+      "vCPUs": 416,
+      "memoryGB": 7600.0,
+      "maxDataDisks": 64,
+      "maxNICs": 8,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": false,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "2",
+        "3"
+      ],
+      "restrictions": []
+    },
+    {
+      "name": "Standard_M624s_12_v3",
+      "family": "standardMSHighMemoryv3Family",
+      "tier": "Standard",
+      "size": "M624s_12_v3",
+      "vCPUs": 624,
+      "memoryGB": 11400.0,
+      "maxDataDisks": 64,
+      "maxNICs": 8,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": false,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "2",
+        "3"
+      ],
+      "restrictions": []
+    },
+    {
+      "name": "Standard_M832s_12_v3",
+      "family": "standardMSHighMemoryv3Family",
+      "tier": "Standard",
+      "size": "M832s_12_v3",
+      "vCPUs": 832,
+      "memoryGB": 11400.0,
+      "maxDataDisks": 64,
+      "maxNICs": 8,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": false,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
         "2",
         "3"
       ],
@@ -26088,7 +25768,10 @@
         "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M64s_v2",
@@ -26111,7 +25794,10 @@
         "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M64ms_v2",
@@ -26134,7 +25820,10 @@
         "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M128s_v2",
@@ -26157,7 +25846,10 @@
         "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M128ms_v2",
@@ -26180,7 +25872,10 @@
         "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M12s_v3",
@@ -26361,9 +26056,11 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -26385,9 +26082,11 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -26409,9 +26108,11 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -26433,9 +26134,11 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -26457,6 +26160,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": []
@@ -26479,6 +26183,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": []
@@ -26501,6 +26206,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": []
@@ -26523,9 +26229,11 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -26547,9 +26255,11 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -26570,7 +26280,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "1"
+        "2",
+        "3"
       ],
       "restrictions": [
         "NotAvailableForSubscription",
@@ -26594,7 +26305,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "1"
+        "2",
+        "3"
       ],
       "restrictions": [
         "NotAvailableForSubscription",
@@ -26618,7 +26330,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "1"
+        "2",
+        "3"
       ],
       "restrictions": [
         "NotAvailableForSubscription",
@@ -26642,7 +26355,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "1"
+        "2",
+        "3"
       ],
       "restrictions": [
         "NotAvailableForSubscription",
@@ -26666,35 +26380,30 @@
       "encryptionAtHost": true,
       "spotEligible": false,
       "zones": [
-        "3"
+        "1"
       ],
       "restrictions": []
     },
     {
-      "name": "Standard_ND96isr_H200_v5",
-      "family": "standardNDISRH200V5Family",
+      "name": "Standard_ND128isr_GB300_v6",
+      "family": "standardNDISRGB300V6Family",
       "tier": "Standard",
-      "size": "ND96isr_H200_v5",
-      "vCPUs": 96,
-      "memoryGB": 1850.0,
+      "size": "ND128isr_GB300_v6",
+      "vCPUs": 128,
+      "memoryGB": 864.0,
       "maxDataDisks": 16,
       "maxNICs": 8,
-      "cpuArchitecture": "x64",
+      "cpuArchitecture": "Arm64",
       "hyperVGenerations": "V2",
       "acceleratedNetworking": true,
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
-        "1",
-        "2",
         "3"
       ],
-      "restrictions": [
-        "NotAvailableForSubscription",
-        "NotAvailableForSubscription"
-      ]
+      "restrictions": []
     },
     {
       "name": "Standard_ND96isr_H100_v5",
@@ -26713,8 +26422,103 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "3"
+      ],
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
+    },
+    {
+      "name": "Standard_ND40rs_v2",
+      "family": "standardNDSv2Family",
+      "tier": "Standard",
+      "size": "ND40rs_v2",
+      "vCPUs": 40,
+      "memoryGB": 672.0,
+      "maxDataDisks": 8,
+      "maxNICs": 8,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
         "1",
-        "2",
+        "2"
+      ],
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
+    },
+    {
+      "name": "Standard_NP10s",
+      "family": "standardNPSFamily",
+      "tier": "Standard",
+      "size": "NP10s",
+      "vCPUs": 10,
+      "memoryGB": 168.0,
+      "maxDataDisks": 8,
+      "maxNICs": 4,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V1",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "3"
+      ],
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
+    },
+    {
+      "name": "Standard_NP20s",
+      "family": "standardNPSFamily",
+      "tier": "Standard",
+      "size": "NP20s",
+      "vCPUs": 20,
+      "memoryGB": 336.0,
+      "maxDataDisks": 16,
+      "maxNICs": 8,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V1,V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "3"
+      ],
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
+    },
+    {
+      "name": "Standard_NP40s",
+      "family": "standardNPSFamily",
+      "tier": "Standard",
+      "size": "NP40s",
+      "vCPUs": 40,
+      "memoryGB": 672.0,
+      "maxDataDisks": 32,
+      "maxNICs": 8,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V1,V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
         "3"
       ],
       "restrictions": [
@@ -26739,7 +26543,7 @@
       "encryptionAtHost": true,
       "spotEligible": false,
       "zones": [
-        "1"
+        "3"
       ],
       "restrictions": [
         "NotAvailableForSubscription",
@@ -26763,7 +26567,7 @@
       "encryptionAtHost": true,
       "spotEligible": false,
       "zones": [
-        "1"
+        "3"
       ],
       "restrictions": [
         "NotAvailableForSubscription",
@@ -26787,7 +26591,7 @@
       "encryptionAtHost": true,
       "spotEligible": false,
       "zones": [
-        "1"
+        "3"
       ],
       "restrictions": [
         "NotAvailableForSubscription",
@@ -26811,7 +26615,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "1"
+        "3"
       ],
       "restrictions": [
         "NotAvailableForSubscription",
@@ -26835,7 +26639,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "1"
+        "3"
       ],
       "restrictions": [
         "NotAvailableForSubscription",
@@ -26859,7 +26663,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "1"
+        "3"
       ],
       "restrictions": [
         "NotAvailableForSubscription",
@@ -26884,7 +26688,8 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": [
         "NotAvailableForSubscription",
@@ -26909,7 +26714,8 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": [
         "NotAvailableForSubscription",
@@ -26934,7 +26740,8 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": [
         "NotAvailableForSubscription",
@@ -26959,7 +26766,32 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2"
+        "2",
+        "3"
+      ],
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
+    },
+    {
+      "name": "Standard_PB6s",
+      "family": "standardPBSFamily",
+      "tier": "Standard",
+      "size": "PB6s",
+      "vCPUs": 6,
+      "memoryGB": 112.0,
+      "maxDataDisks": 12,
+      "maxNICs": 1,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V1,V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": false,
+      "encryptionAtHost": false,
+      "spotEligible": false,
+      "zones": [
+        "1"
       ],
       "restrictions": [
         "NotAvailableForSubscription",

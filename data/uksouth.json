@@ -1,8 +1,8 @@
 {
-  "region": "australiaeast",
-  "regionDisplayName": "Australia East",
-  "lastUpdated": "2026-05-02T08:20:38Z",
-  "skuCount": 1185,
+  "region": "uksouth",
+  "regionDisplayName": "UK South",
+  "lastUpdated": "2026-05-02T07:57:32Z",
+  "skuCount": 1175,
   "skus": [
     {
       "name": "Standard_NC4as_T4_v3",
@@ -114,7 +114,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -136,7 +136,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -158,7 +158,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -180,7 +180,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -202,7 +202,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -224,7 +224,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -246,7 +246,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -268,7 +268,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -290,7 +290,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -312,7 +312,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -334,7 +334,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -356,7 +356,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -378,7 +378,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -400,7 +400,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -422,7 +422,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -444,7 +444,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -466,7 +466,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -488,7 +488,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -510,7 +510,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -532,7 +532,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -554,7 +554,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -576,7 +576,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -598,7 +598,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -620,7 +620,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -642,7 +642,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -664,7 +664,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -686,7 +686,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -708,7 +708,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -730,7 +730,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -752,7 +752,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -774,7 +774,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -796,7 +796,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -818,7 +818,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -840,7 +840,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -862,7 +862,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -884,7 +884,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -906,7 +906,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -928,7 +928,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -950,7 +950,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -972,7 +972,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -2604,7 +2604,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -2626,7 +2626,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -2648,7 +2648,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -2670,7 +2670,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -2692,7 +2692,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -2714,7 +2714,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -2736,7 +2736,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -2758,7 +2758,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -2780,7 +2780,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -2802,7 +2802,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -2824,7 +2824,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -2846,7 +2846,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -2868,7 +2868,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -2890,7 +2890,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -2912,7 +2912,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -2934,7 +2934,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -2956,7 +2956,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -2978,7 +2978,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -3000,7 +3000,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -3022,7 +3022,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -3044,7 +3044,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -3066,7 +3066,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -3088,7 +3088,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -3110,7 +3110,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -3132,7 +3132,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -3154,7 +3154,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -3176,7 +3176,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -3198,7 +3198,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -3220,7 +3220,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -3242,7 +3242,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -3264,7 +3264,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -3286,7 +3286,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -3308,7 +3308,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -3330,7 +3330,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -3352,7 +3352,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -3374,7 +3374,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -3396,7 +3396,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -3418,7 +3418,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -3440,7 +3440,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -3462,7 +3462,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -3484,7 +3484,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -3506,7 +3506,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -3528,7 +3528,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -3550,7 +3550,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -6240,7 +6240,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -6262,7 +6262,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -6284,7 +6284,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -6306,7 +6306,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -6328,7 +6328,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -6350,7 +6350,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -6372,7 +6372,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -6394,7 +6394,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -6416,7 +6416,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -6438,7 +6438,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -6460,7 +6460,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -6482,7 +6482,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -6504,7 +6504,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -6526,7 +6526,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -6548,7 +6548,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -6570,7 +6570,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -6592,7 +6592,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -6614,7 +6614,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -6797,7 +6797,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -6819,7 +6819,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -6841,7 +6841,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -6863,7 +6863,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -6885,7 +6885,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -6907,7 +6907,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -6929,7 +6929,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -6951,7 +6951,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -6973,7 +6973,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -6995,7 +6995,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -7017,7 +7017,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -7039,7 +7039,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -7061,7 +7061,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -7083,7 +7083,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -7105,7 +7105,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -7127,7 +7127,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -7149,7 +7149,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -7171,7 +7171,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -7193,7 +7193,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -7215,7 +7215,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -7237,7 +7237,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -7259,7 +7259,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -7281,7 +7281,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -7303,7 +7303,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -7325,7 +7325,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -7347,7 +7347,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -7369,7 +7369,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -7391,7 +7391,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -7413,7 +7413,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -7596,7 +7596,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -7618,7 +7618,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -7640,7 +7640,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -7662,7 +7662,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -7684,7 +7684,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -7706,7 +7706,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -7728,7 +7728,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -7750,7 +7750,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -7772,7 +7772,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -7794,7 +7794,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -7816,7 +7816,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -7838,7 +7838,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -7860,7 +7860,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -7882,7 +7882,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -7904,7 +7904,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -7926,7 +7926,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -7948,7 +7948,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -7970,7 +7970,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -7992,7 +7992,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -8014,7 +8014,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -8197,7 +8197,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -8219,7 +8219,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -8241,7 +8241,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -8263,7 +8263,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -8285,7 +8285,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -8307,7 +8307,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -8329,7 +8329,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -8351,7 +8351,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -8373,7 +8373,7 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "3"
+        "2"
       ],
       "restrictions": []
     },
@@ -8394,6 +8394,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "3"
       ],
       "restrictions": []
@@ -8415,6 +8416,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "3"
       ],
       "restrictions": []
@@ -8436,6 +8438,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "3"
       ],
       "restrictions": []
@@ -8457,6 +8460,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "3"
       ],
       "restrictions": []
@@ -8478,6 +8482,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "3"
       ],
       "restrictions": []
@@ -8499,6 +8504,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "3"
       ],
       "restrictions": []
@@ -8520,6 +8526,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "3"
       ],
       "restrictions": []
@@ -8541,6 +8548,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "3"
       ],
       "restrictions": []
@@ -8562,6 +8570,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "3"
       ],
       "restrictions": []
@@ -8583,6 +8592,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "3"
       ],
       "restrictions": []
@@ -8604,6 +8614,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "3"
       ],
       "restrictions": []
@@ -8625,6 +8636,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "3"
       ],
       "restrictions": []
@@ -8646,6 +8658,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "3"
       ],
       "restrictions": []
@@ -8667,6 +8680,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "3"
       ],
       "restrictions": []
@@ -8688,6 +8702,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "3"
       ],
       "restrictions": []
@@ -8709,6 +8724,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "3"
       ],
       "restrictions": []
@@ -8730,6 +8746,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "3"
       ],
       "restrictions": []
@@ -8751,6 +8768,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "3"
       ],
       "restrictions": []
@@ -8772,6 +8790,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "3"
       ],
       "restrictions": []
@@ -8793,6 +8812,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "3"
       ],
       "restrictions": []
@@ -8814,6 +8834,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "3"
       ],
       "restrictions": []
@@ -8835,6 +8856,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "3"
       ],
       "restrictions": []
@@ -8856,6 +8878,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "3"
       ],
       "restrictions": []
@@ -8877,6 +8900,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "3"
       ],
       "restrictions": []
@@ -8898,6 +8922,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "3"
       ],
       "restrictions": []
@@ -8919,6 +8944,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "3"
       ],
       "restrictions": []
@@ -8940,6 +8966,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "2",
         "3"
       ],
       "restrictions": []
@@ -8961,6 +8988,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "2",
         "3"
       ],
       "restrictions": []
@@ -8982,6 +9010,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "2",
         "3"
       ],
       "restrictions": []
@@ -9004,6 +9033,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": []
@@ -9026,6 +9056,49 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
+        "3"
+      ],
+      "restrictions": []
+    },
+    {
+      "name": "Standard_NG8ads_V620_v1",
+      "family": "StandardNGADSV620v1Family",
+      "tier": "Standard",
+      "size": "NG8ads_V620_v1",
+      "vCPUs": 8,
+      "memoryGB": 16.0,
+      "maxDataDisks": 8,
+      "maxNICs": 2,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V1,V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "3"
+      ],
+      "restrictions": []
+    },
+    {
+      "name": "Standard_NG16ads_V620_v1",
+      "family": "StandardNGADSV620v1Family",
+      "tier": "Standard",
+      "size": "NG16ads_V620_v1",
+      "vCPUs": 16,
+      "memoryGB": 32.0,
+      "maxDataDisks": 16,
+      "maxNICs": 4,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V1,V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
         "3"
       ],
       "restrictions": []
@@ -9047,7 +9120,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "1"
+        "2",
+        "3"
       ],
       "restrictions": [
         "NotAvailableForSubscription",
@@ -9071,7 +9145,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "1"
+        "2",
+        "3"
       ],
       "restrictions": [
         "NotAvailableForSubscription",
@@ -9095,7 +9170,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "1"
+        "2",
+        "3"
       ],
       "restrictions": [
         "NotAvailableForSubscription",
@@ -9119,7 +9195,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "1"
+        "2",
+        "3"
       ],
       "restrictions": [
         "NotAvailableForSubscription",
@@ -9143,7 +9220,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "1"
+        "2",
+        "3"
       ],
       "restrictions": [
         "NotAvailableForSubscription",
@@ -9167,12 +9245,34 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "1"
+        "2",
+        "3"
       ],
       "restrictions": [
         "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
+    },
+    {
+      "name": "Standard_ND96amsr_A100_v4",
+      "family": "standard NDAMSv4_A100Family",
+      "tier": "Standard",
+      "size": "ND96amsr_A100_v4",
+      "vCPUs": 96,
+      "memoryGB": 1800.0,
+      "maxDataDisks": 16,
+      "maxNICs": 8,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "3"
+      ],
+      "restrictions": []
     },
     {
       "name": "Standard_A1_v2",
@@ -11031,9 +11131,12 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "3"
+        "1",
+        "2"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_DC2s_v2",
@@ -11052,9 +11155,12 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "3"
+        "1",
+        "2"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_DC4s_v2",
@@ -11073,9 +11179,12 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "3"
+        "1",
+        "2"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_DC8_v2",
@@ -11094,9 +11203,12 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "3"
+        "1",
+        "2"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_DC1s_v3",
@@ -14287,6 +14399,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -14312,6 +14425,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -14337,6 +14451,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -14362,6 +14477,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -14387,6 +14503,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -14412,6 +14529,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -14437,6 +14555,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -14462,6 +14581,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -15961,6 +16081,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -15986,6 +16107,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -16011,6 +16133,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -16036,6 +16159,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -16061,6 +16185,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -16086,6 +16211,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -16111,6 +16237,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -16136,6 +16263,7 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -23403,7 +23531,10 @@
       "zones": [
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_G2",
@@ -23424,7 +23555,10 @@
       "zones": [
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_G3",
@@ -23445,7 +23579,10 @@
       "zones": [
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_G4",
@@ -23466,7 +23603,10 @@
       "zones": [
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_G5",
@@ -23487,7 +23627,10 @@
       "zones": [
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_GS1",
@@ -23508,7 +23651,10 @@
       "zones": [
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_GS2",
@@ -23529,7 +23675,10 @@
       "zones": [
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_GS3",
@@ -23550,7 +23699,10 @@
       "zones": [
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_GS4",
@@ -23571,7 +23723,10 @@
       "zones": [
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_GS4-4",
@@ -23592,7 +23747,10 @@
       "zones": [
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_GS4-8",
@@ -23613,7 +23771,10 @@
       "zones": [
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_GS5",
@@ -23634,7 +23795,10 @@
       "zones": [
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_GS5-16",
@@ -23655,7 +23819,10 @@
       "zones": [
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_GS5-8",
@@ -23676,13 +23843,16 @@
       "zones": [
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
-      "name": "Standard_HB120-16rs_v2",
-      "family": "standardHBrsv2Family",
+      "name": "Standard_HB120-16rs_v3",
+      "family": "standardHBv3Family",
       "tier": "Standard",
-      "size": "HB120-16rs_v2",
+      "size": "HB120-16rs_v3",
       "vCPUs": 120,
       "memoryGB": 456.0,
       "maxDataDisks": 32,
@@ -23700,10 +23870,10 @@
       "restrictions": []
     },
     {
-      "name": "Standard_HB120-32rs_v2",
-      "family": "standardHBrsv2Family",
+      "name": "Standard_HB120-32rs_v3",
+      "family": "standardHBv3Family",
       "tier": "Standard",
-      "size": "HB120-32rs_v2",
+      "size": "HB120-32rs_v3",
       "vCPUs": 120,
       "memoryGB": 456.0,
       "maxDataDisks": 32,
@@ -23721,10 +23891,10 @@
       "restrictions": []
     },
     {
-      "name": "Standard_HB120-64rs_v2",
-      "family": "standardHBrsv2Family",
+      "name": "Standard_HB120-64rs_v3",
+      "family": "standardHBv3Family",
       "tier": "Standard",
-      "size": "HB120-64rs_v2",
+      "size": "HB120-64rs_v3",
       "vCPUs": 120,
       "memoryGB": 456.0,
       "maxDataDisks": 32,
@@ -23742,10 +23912,10 @@
       "restrictions": []
     },
     {
-      "name": "Standard_HB120-96rs_v2",
-      "family": "standardHBrsv2Family",
+      "name": "Standard_HB120-96rs_v3",
+      "family": "standardHBv3Family",
       "tier": "Standard",
-      "size": "HB120-96rs_v2",
+      "size": "HB120-96rs_v3",
       "vCPUs": 120,
       "memoryGB": 456.0,
       "maxDataDisks": 32,
@@ -23763,285 +23933,12 @@
       "restrictions": []
     },
     {
-      "name": "Standard_HB120rs_v2",
-      "family": "standardHBrsv2Family",
+      "name": "Standard_HB120rs_v3",
+      "family": "standardHBv3Family",
       "tier": "Standard",
-      "size": "HB120rs_v2",
+      "size": "HB120rs_v3",
       "vCPUs": 120,
       "memoryGB": 456.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V1,V2",
-      "acceleratedNetworking": true,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_HB176-144rs_v4",
-      "family": "standardHBv4Family",
-      "tier": "Standard",
-      "size": "HB176-144rs_v4",
-      "vCPUs": 176,
-      "memoryGB": 768.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V1,V2",
-      "acceleratedNetworking": true,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_HB176-24rs_v4",
-      "family": "standardHBv4Family",
-      "tier": "Standard",
-      "size": "HB176-24rs_v4",
-      "vCPUs": 176,
-      "memoryGB": 768.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V1,V2",
-      "acceleratedNetworking": true,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_HB176-48rs_v4",
-      "family": "standardHBv4Family",
-      "tier": "Standard",
-      "size": "HB176-48rs_v4",
-      "vCPUs": 176,
-      "memoryGB": 768.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V2",
-      "acceleratedNetworking": true,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_HB176-96rs_v4",
-      "family": "standardHBv4Family",
-      "tier": "Standard",
-      "size": "HB176-96rs_v4",
-      "vCPUs": 176,
-      "memoryGB": 768.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V1,V2",
-      "acceleratedNetworking": true,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_HB176rs_v4",
-      "family": "standardHBv4Family",
-      "tier": "Standard",
-      "size": "HB176rs_v4",
-      "vCPUs": 176,
-      "memoryGB": 768.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V1,V2",
-      "acceleratedNetworking": true,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_HC44-16rs",
-      "family": "standardHCSFamily",
-      "tier": "Standard",
-      "size": "HC44-16rs",
-      "vCPUs": 44,
-      "memoryGB": 352.0,
-      "maxDataDisks": 4,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V1,V2",
-      "acceleratedNetworking": true,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "2"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_HC44-32rs",
-      "family": "standardHCSFamily",
-      "tier": "Standard",
-      "size": "HC44-32rs",
-      "vCPUs": 44,
-      "memoryGB": 352.0,
-      "maxDataDisks": 4,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V1,V2",
-      "acceleratedNetworking": true,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "2"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_HC44rs",
-      "family": "standardHCSFamily",
-      "tier": "Standard",
-      "size": "HC44rs",
-      "vCPUs": 44,
-      "memoryGB": 352.0,
-      "maxDataDisks": 4,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V1,V2",
-      "acceleratedNetworking": true,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "2"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_HX176-144rs",
-      "family": "standardHXFamily",
-      "tier": "Standard",
-      "size": "HX176-144rs",
-      "vCPUs": 176,
-      "memoryGB": 1408.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V1,V2",
-      "acceleratedNetworking": true,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_HX176-24rs",
-      "family": "standardHXFamily",
-      "tier": "Standard",
-      "size": "HX176-24rs",
-      "vCPUs": 176,
-      "memoryGB": 1408.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V1,V2",
-      "acceleratedNetworking": true,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_HX176-48rs",
-      "family": "standardHXFamily",
-      "tier": "Standard",
-      "size": "HX176-48rs",
-      "vCPUs": 176,
-      "memoryGB": 1408.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V1,V2",
-      "acceleratedNetworking": true,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_HX176-96rs",
-      "family": "standardHXFamily",
-      "tier": "Standard",
-      "size": "HX176-96rs",
-      "vCPUs": 176,
-      "memoryGB": 1408.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V1,V2",
-      "acceleratedNetworking": true,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_HX176rs",
-      "family": "standardHXFamily",
-      "tier": "Standard",
-      "size": "HX176rs",
-      "vCPUs": 176,
-      "memoryGB": 1408.0,
       "maxDataDisks": 32,
       "maxNICs": 8,
       "cpuArchitecture": "x64",
@@ -24213,7 +24110,10 @@
       "zones": [
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_L8s",
@@ -24234,7 +24134,10 @@
       "zones": [
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_L16s",
@@ -24255,7 +24158,10 @@
       "zones": [
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_L32s",
@@ -24276,7 +24182,10 @@
       "zones": [
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_L8s_v2",
@@ -24300,7 +24209,6 @@
         "3"
       ],
       "restrictions": [
-        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -24326,7 +24234,6 @@
         "3"
       ],
       "restrictions": [
-        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -24352,7 +24259,6 @@
         "3"
       ],
       "restrictions": [
-        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -24378,7 +24284,6 @@
         "3"
       ],
       "restrictions": [
-        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -24404,7 +24309,6 @@
         "3"
       ],
       "restrictions": [
-        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -24430,7 +24334,6 @@
         "3"
       ],
       "restrictions": [
-        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
@@ -25165,10 +25068,11 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M64ds_v2",
@@ -25188,10 +25092,11 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M64dms_v2",
@@ -25211,10 +25116,11 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M128ds_v2",
@@ -25234,10 +25140,11 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M128dms_v2",
@@ -25257,10 +25164,11 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M12ds_v3",
@@ -25280,7 +25188,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -25303,7 +25210,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -25326,7 +25232,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -25349,7 +25254,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -25372,7 +25276,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -25395,7 +25298,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -25418,7 +25320,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -25441,10 +25342,11 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M192idms_v2",
@@ -25464,10 +25366,11 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M192is_v2",
@@ -25487,10 +25390,11 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M192ims_v2",
@@ -25510,10 +25414,11 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M8-2ms",
@@ -25533,10 +25438,11 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M8-4ms",
@@ -25556,10 +25462,11 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M8ms",
@@ -25579,10 +25486,11 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M16-4ms",
@@ -25602,10 +25510,11 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M16-8ms",
@@ -25625,10 +25534,11 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M16ms",
@@ -25648,10 +25558,11 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M32ts",
@@ -25671,10 +25582,11 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M32ls",
@@ -25694,10 +25606,11 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M32-16ms",
@@ -25717,10 +25630,11 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M32-8ms",
@@ -25740,10 +25654,11 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M32ms",
@@ -25763,10 +25678,11 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M64ls",
@@ -25786,10 +25702,11 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M64",
@@ -25809,10 +25726,11 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M64s",
@@ -25832,10 +25750,11 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M64-16ms",
@@ -25855,10 +25774,11 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M64-32ms",
@@ -25878,10 +25798,11 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M64m",
@@ -25901,10 +25822,11 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M64ms",
@@ -25924,10 +25846,11 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M128",
@@ -25947,10 +25870,11 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M128s",
@@ -25970,10 +25894,11 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M128-32ms",
@@ -25993,10 +25918,11 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M128-64ms",
@@ -26016,10 +25942,11 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M128m",
@@ -26039,10 +25966,11 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M128ms",
@@ -26062,10 +25990,11 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M32ms_v2",
@@ -26085,10 +26014,11 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M64s_v2",
@@ -26108,10 +26038,11 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M64ms_v2",
@@ -26131,10 +26062,11 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M128s_v2",
@@ -26154,10 +26086,11 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M128ms_v2",
@@ -26177,10 +26110,11 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_M12s_v3",
@@ -26200,7 +26134,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -26223,7 +26156,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -26246,7 +26178,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -26269,7 +26200,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -26292,7 +26222,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -26315,7 +26244,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -26338,7 +26266,6 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2",
         "3"
       ],
       "restrictions": []
@@ -26363,9 +26290,7 @@
         "1",
         "3"
       ],
-      "restrictions": [
-        "NotAvailableForSubscription"
-      ]
+      "restrictions": []
     },
     {
       "name": "Standard_M208ms_v2",
@@ -26387,9 +26312,7 @@
         "1",
         "3"
       ],
-      "restrictions": [
-        "NotAvailableForSubscription"
-      ]
+      "restrictions": []
     },
     {
       "name": "Standard_M416-208s_v2",
@@ -26411,9 +26334,7 @@
         "1",
         "3"
       ],
-      "restrictions": [
-        "NotAvailableForSubscription"
-      ]
+      "restrictions": []
     },
     {
       "name": "Standard_M416s_v2",
@@ -26435,9 +26356,7 @@
         "1",
         "3"
       ],
-      "restrictions": [
-        "NotAvailableForSubscription"
-      ]
+      "restrictions": []
     },
     {
       "name": "Standard_M416s_8_v2",
@@ -26525,9 +26444,7 @@
         "1",
         "3"
       ],
-      "restrictions": [
-        "NotAvailableForSubscription"
-      ]
+      "restrictions": []
     },
     {
       "name": "Standard_M416ms_v2",
@@ -26549,9 +26466,7 @@
         "1",
         "3"
       ],
-      "restrictions": [
-        "NotAvailableForSubscription"
-      ]
+      "restrictions": []
     },
     {
       "name": "Standard_NC6s_v3",
@@ -26570,7 +26485,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "1"
+        "3"
       ],
       "restrictions": [
         "NotAvailableForSubscription",
@@ -26592,9 +26507,9 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
-        "1"
+        "3"
       ],
       "restrictions": [
         "NotAvailableForSubscription",
@@ -26616,9 +26531,9 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
-        "1"
+        "3"
       ],
       "restrictions": [
         "NotAvailableForSubscription",
@@ -26640,9 +26555,9 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
-        "1"
+        "3"
       ],
       "restrictions": [
         "NotAvailableForSubscription",
@@ -26650,10 +26565,10 @@
       ]
     },
     {
-      "name": "Standard_ND128isr_NDR_GB200_v6",
-      "family": "standardNDISRGB200V6NDRFamily",
+      "name": "Standard_ND128isr_GB300_v6",
+      "family": "standardNDISRGB300V6Family",
       "tier": "Standard",
-      "size": "ND128isr_NDR_GB200_v6",
+      "size": "ND128isr_GB300_v6",
       "vCPUs": 128,
       "memoryGB": 864.0,
       "maxDataDisks": 16,
@@ -26666,7 +26581,7 @@
       "encryptionAtHost": true,
       "spotEligible": false,
       "zones": [
-        "3"
+        "1"
       ],
       "restrictions": []
     },
@@ -26687,9 +26602,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "1",
-        "2",
-        "3"
+        "1"
       ],
       "restrictions": [
         "NotAvailableForSubscription",
@@ -26713,14 +26626,9 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "1",
-        "2",
-        "3"
+        "1"
       ],
-      "restrictions": [
-        "NotAvailableForSubscription",
-        "NotAvailableForSubscription"
-      ]
+      "restrictions": []
     },
     {
       "name": "Standard_NV6s_v2",
@@ -26739,7 +26647,8 @@
       "encryptionAtHost": true,
       "spotEligible": false,
       "zones": [
-        "1"
+        "1",
+        "2"
       ],
       "restrictions": [
         "NotAvailableForSubscription",
@@ -26763,7 +26672,8 @@
       "encryptionAtHost": true,
       "spotEligible": false,
       "zones": [
-        "1"
+        "1",
+        "2"
       ],
       "restrictions": [
         "NotAvailableForSubscription",
@@ -26787,7 +26697,8 @@
       "encryptionAtHost": true,
       "spotEligible": false,
       "zones": [
-        "1"
+        "1",
+        "2"
       ],
       "restrictions": [
         "NotAvailableForSubscription",
@@ -26811,7 +26722,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "1"
+        "1",
+        "2"
       ],
       "restrictions": [
         "NotAvailableForSubscription",
@@ -26835,7 +26747,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "1"
+        "1",
+        "2"
       ],
       "restrictions": [
         "NotAvailableForSubscription",
@@ -26859,7 +26772,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "1"
+        "1",
+        "2"
       ],
       "restrictions": [
         "NotAvailableForSubscription",
@@ -26884,7 +26798,8 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": [
         "NotAvailableForSubscription",
@@ -26909,7 +26824,8 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": [
         "NotAvailableForSubscription",
@@ -26934,7 +26850,8 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": [
         "NotAvailableForSubscription",
@@ -26959,7 +26876,8 @@
       "spotEligible": true,
       "zones": [
         "1",
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": [
         "NotAvailableForSubscription",
