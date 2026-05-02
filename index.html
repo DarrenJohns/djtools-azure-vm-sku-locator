@@ -116,27 +116,18 @@ body {
 .kbd-shortcut-btn:hover { background: rgba(255,255,255,0.25); }
 .container { max-width: 1400px; margin: 0 auto; padding: 128px 24px 16px; }
 .section {
-  background: var(--bg-layer1);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
-  margin-bottom: 16px;
-  box-shadow: var(--shadow-sm);
+  margin-bottom: 24px;
 }
 .section-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
+  gap: 10px;
+  padding: 0 0 12px 0;
   cursor: default;
   user-select: none;
-  border-left: 4px solid var(--brand-primary);
-  background: linear-gradient(90deg, #dceafb 0%, #eef4fc 40%, var(--bg-layer1) 100%);
-  transition: background 0.15s;
-  border-radius: calc(var(--radius-md) - 1px) calc(var(--radius-md) - 1px) 0 0;
 }
-[data-theme="dark"] .section-header { background: linear-gradient(90deg, #1a2e4a 0%, #252a32 40%, var(--bg-layer1) 100%); }
 .section-header:hover { }
-.section-title { font-size: 15px; font-weight: 600; flex: 1; }
+.section-title { font-size: 1.35rem; font-weight: 700; flex: 1; color: var(--text-primary); }
 .section-toggle {
   transition: transform 0.2s;
   font-size: 11px;
@@ -146,7 +137,13 @@ body {
 .section-toggle.open { transform: rotate(90deg); }
 .section-badge { font-size: 11px; font-weight: 600; padding: 2px 12px; border-radius: 12px; background: #f0f7ff; color: var(--brand-primary); border: 1.5px solid #b3d4f0; }
 [data-theme="dark"] .section-badge { background: #1a2e4a; color: #6db3f2; border-color: #2a5a8a; }
-.section-body { padding: 8px 16px 16px; }
+.section-body {
+  background: var(--bg-layer1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: 16px;
+}
 .section-body.collapsed { display: none; }
 .section-group-divider {
   display: flex;
@@ -345,13 +342,13 @@ select:focus, input:focus { outline: 2px solid var(--brand-primary); outline-off
 .summary-heading {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   margin-bottom: 12px;
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 1.35rem;
+  font-weight: 700;
   color: var(--text-primary);
 }
-.summary-heading-icon { font-size: 18px; }
+.summary-heading-icon { font-size: 1.35rem; }
 .summary-heading-title { flex: 0; white-space: nowrap; }
 .summary-grid {
   display: grid;
