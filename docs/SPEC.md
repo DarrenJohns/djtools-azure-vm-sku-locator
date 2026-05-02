@@ -101,7 +101,15 @@ SKU family names (e.g., `standardDSv5Family`) are mapped to user-friendly names 
 
 ## 5. User Interface
 
-All UI sections use a consistent collapsible header pattern with toggle arrow (left), title (center, flex), and badge (right, outlined pill).
+All UI sections are organized into **6 tabs** using a sticky tab strip below the region selector bar. Tab navigation supports keyboard shortcuts (1–6), URL hash routing (#browse, #pinned, etc.), and dynamic badge counts.
+
+**Tabs:**
+1. 📊 **Overview** — Summary dashboard, What's New, Workload Recommendations
+2. 🔍 **Browse SKUs** — Filters and full SKU table
+3. 🎯 **Find a Match** — Deployment requirements checker
+4. 📌 **Pinned** — Shortlist, pricing comparison, multi-region compare
+5. 💿 **Disk SKUs** — Managed disk browser
+6. 📖 **Reference** — VM naming convention, CLI guidance
 
 ### Region Selector & Freshness Status
 - Single region dropdown (default: New Zealand North)
@@ -140,7 +148,7 @@ All UI sections use a consistent collapsible header pattern with toggle arrow (l
 ### 📌 Pinned Shortlist
 - Pin individual SKUs from the table or deployment checker
 - Pinned SKUs show as chips with key specs and pricing (Pay-As-You-Go)
-- Section auto-expands on first pin
+- Section prominently displayed when pins are added
 - Export shortlist to CSV
 - Clear all pins button
 - **Pricing comparison**: Fetches live pricing from Azure Retail Prices API, cached per region
@@ -167,7 +175,7 @@ All UI sections use a consistent collapsible header pattern with toggle arrow (l
 - Copy-to-clipboard buttons
 
 ### 🛠️ CLI Guidance
-- Collapsible section with `az vm list-skus` command
+- Section with `az vm list-skus` command
 - Updates dynamically based on selected region
 - Links to Azure CLI installation docs
 

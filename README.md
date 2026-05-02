@@ -62,7 +62,7 @@
 3. **Filter** — Narrow results by name, family, processor, vCPU range, or features
 4. **Find a Match** — Set your requirements and get ranked results with match scores
 5. **Pin & Compare** — Pin SKUs to your shortlist, then compare across regions
-6. **View Disks** — Scroll to the Managed Disks section to browse available disk sizes
+6. **View Disks** — Switch to the Disk SKUs tab to browse available disk sizes
 7. **Export** — Download filtered results or your pinned shortlist as CSV
 
 ---

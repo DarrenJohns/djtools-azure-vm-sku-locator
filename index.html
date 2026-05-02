@@ -114,7 +114,7 @@ body {
   transition: background 0.15s;
 }
 .kbd-shortcut-btn:hover { background: rgba(255,255,255,0.25); }
-.container { max-width: 1400px; margin: 0 auto; padding: 140px 24px 16px; }
+.container { max-width: 1400px; margin: 0 auto; padding: 128px 24px 16px; }
 .section {
   background: var(--bg-layer1);
   border: 1px solid var(--border-default);
@@ -127,7 +127,7 @@ body {
   align-items: center;
   gap: 8px;
   padding: 10px 16px;
-  cursor: pointer;
+  cursor: default;
   user-select: none;
   border-left: 4px solid var(--brand-primary);
   background: linear-gradient(90deg, #dceafb 0%, #eef4fc 40%, var(--bg-layer1) 100%);
@@ -135,7 +135,7 @@ body {
   border-radius: calc(var(--radius-md) - 1px) calc(var(--radius-md) - 1px) 0 0;
 }
 [data-theme="dark"] .section-header { background: linear-gradient(90deg, #1a2e4a 0%, #252a32 40%, var(--bg-layer1) 100%); }
-.section-header:hover { filter: brightness(0.97); }
+.section-header:hover { }
 .section-title { font-size: 15px; font-weight: 600; flex: 1; }
 .section-toggle {
   transition: transform 0.2s;
@@ -250,6 +250,53 @@ body {
 [data-theme="dark"] .freshness-badge.fresh { background: #1a3d1a; color: #81c995; border-color: #2d5a2d; }
 [data-theme="dark"] .freshness-badge.aging { background: #3d3200; color: #fdd663; border-color: #665200; }
 [data-theme="dark"] .freshness-badge.stale { background: #3d1a1a; color: #f28b82; border-color: #5a2d2d; }
+/* Tab strip */
+.tab-strip {
+  position: sticky;
+  top: 0;
+  z-index: 998;
+  background: var(--bg-layer1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  display: flex;
+  gap: 2px;
+  max-width: 1400px;
+  margin: 8px auto 0;
+  padding: 0 24px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  box-shadow: var(--shadow-sm);
+}
+.tab-strip .tab {
+  flex: 0 0 auto;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: var(--text-tertiary);
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: color 0.15s, border-color 0.15s;
+  font-family: var(--font-sans);
+  user-select: none;
+}
+.tab-strip .tab:hover { color: var(--text-primary); }
+.tab-strip .tab.active { color: var(--brand-primary); border-bottom-color: var(--brand-primary); }
+.tab-strip .tab .tab-badge {
+  font-size: 9px;
+  background: #f0f7ff;
+  color: var(--brand-primary);
+  padding: 1px 6px;
+  border-radius: 8px;
+  margin-left: 5px;
+  font-weight: 700;
+  border: 1px solid #b3d4f0;
+}
+[data-theme="dark"] .tab-strip .tab .tab-badge { background: #1a2e4a; color: #6db3f2; border-color: #2a5a8a; }
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
 select, input[type="text"], input[type="search"] {
   font-family: var(--font-sans);
   font-size: 14px;
@@ -975,6 +1022,16 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
 
 <div class="container">
 
+  <!-- Tab Strip -->
+  <div class="tab-strip" id="tabStrip" role="tablist">
+    <button class="tab active" data-tab="overview" onclick="activateTab('overview')">📊 Overview</button>
+    <button class="tab" data-tab="browse" onclick="activateTab('browse')">🔍 Browse SKUs<span class="tab-badge" id="tab-badge-browse"></span></button>
+    <button class="tab" data-tab="match" onclick="activateTab('match')">🎯 Find a Match</button>
+    <button class="tab" data-tab="pinned" onclick="activateTab('pinned')">📌 Pinned<span class="tab-badge" id="tab-badge-pinned"></span></button>
+    <button class="tab" data-tab="disks" onclick="activateTab('disks')">💿 Disk SKUs<span class="tab-badge" id="tab-badge-disks"></span></button>
+    <button class="tab" data-tab="reference" onclick="activateTab('reference')">📖 Reference</button>
+  </div>
+
   <!-- No-Data Message -->
   <div class="no-data-box hidden" id="no-data-msg">
     <div class="icon">📭</div>
@@ -987,6 +1044,9 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
 
   <!-- SKU Results -->
   <div id="sku-results" class="hidden">
+
+    <!-- TAB: Overview -->
+    <div class="tab-pane active" data-tab="overview">
     <!-- Summary Dashboard -->
     <div class="summary-heading">
       <span class="summary-heading-icon">📊</span>
@@ -995,30 +1055,39 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
     <div id="sku-summary" class="summary-grid"></div>
 
 
-    <div class="section-group-divider"><span class="group-icon">🖥️</span> Virtual Machines</div>
-
     <!-- What's New -->
     <div class="section" id="sec-whatsnew">
-      <div class="section-header" onclick="toggleSection('whatsnew')">
-        <span class="section-toggle" id="toggle-whatsnew">▶</span>
+      <div class="section-header">
         <span class="section-title">📊 What's New</span>
         <span class="section-badge" id="whatsnew-count">0 changes</span>
       </div>
-      <div class="section-body collapsed" id="body-whatsnew">
+      <div class="section-body" id="body-whatsnew">
         <div id="whatsnew-content">
           <span style="font-size:12px;color:var(--text-tertiary);">Loading history...</span>
         </div>
       </div>
     </div>
 
+    <!-- Workload Recommendations (in Overview tab) -->
+    <div class="section" id="sec-workloads">
+      <div class="section-header">
+        <span class="section-title">💼 Workload Recommendations</span>
+      </div>
+      <div class="section-body" id="body-workloads">
+        <div class="workload-grid" id="workload-grid"></div>
+      </div>
+    </div>
+    </div><!-- /tab-pane overview -->
+
+    <!-- TAB: Browse SKUs -->
+    <div class="tab-pane" data-tab="browse">
     <!-- See What's Available -->
     <div class="section" id="sec-filters">
-      <div class="section-header" onclick="toggleSection('filters')">
-        <span class="section-toggle" id="toggle-filters">▶</span>
+      <div class="section-header">
         <span class="section-title">🔍 See What's Available</span>
         <span class="section-badge" id="available-count"></span>
       </div>
-      <div class="section-body collapsed" id="body-filters">
+      <div class="section-body" id="body-filters">
         <div class="filters-row">
           <div class="filters-search">
             <input type="search" id="search-input" placeholder="Search by size, version, family type, vCPUs..." oninput="applyFilters()">
@@ -1071,15 +1140,17 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
         </div>
       </div>
     </div>
+    </div><!-- /tab-pane browse -->
 
+    <!-- TAB: Find a Match -->
+    <div class="tab-pane" data-tab="match">
     <!-- Find a Match -->
     <div class="section" id="sec-checker">
-      <div class="section-header" onclick="toggleSection('checker')">
-        <span class="section-toggle" id="toggle-checker">▶</span>
+      <div class="section-header">
         <span class="section-title">🎯 Find a Match</span>
         <span class="section-badge" id="checker-match-count">0 matches</span>
       </div>
-      <div class="section-body collapsed" id="body-checker">
+      <div class="section-body" id="body-checker">
         <div class="checker-form">
           <div class="form-field"><label>Min vCPUs</label><input type="number" id="chk-vcpus" min="0" placeholder="e.g. 8"></div>
           <div class="form-field"><label>Min Memory GB</label><input type="number" id="chk-memory" min="0" placeholder="e.g. 32"></div>
@@ -1110,16 +1181,17 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
         <div class="checker-results" id="checker-results"></div>
       </div>
     </div>
+    </div><!-- /tab-pane match -->
 
-
+    <!-- TAB: Pinned -->
+    <div class="tab-pane" data-tab="pinned">
     <!-- Pinned Shortlist -->
     <div class="section" id="sec-shortlist">
-      <div class="section-header" onclick="toggleSection('shortlist')">
-        <span class="section-toggle" id="toggle-shortlist">▶</span>
+      <div class="section-header">
         <span class="section-title">📌 Pinned Shortlist</span>
         <span class="section-badge" id="shortlist-count">0 pinned</span>
       </div>
-      <div class="section-body collapsed" id="body-shortlist">
+      <div class="section-body" id="body-shortlist">
         <div class="shortlist-chips" id="shortlist-chips"><span style="font-size:12px;color:var(--text-tertiary);">Pin VM SKUs from the table using the ○ button to build your shortlist</span></div>
         <div class="shortlist-actions" id="shortlist-actions" style="display:none;margin-top:8px;">
           <button class="btn btn-primary btn-sm" onclick="exportShortlistCsv()">📥 Export Shortlist</button>
@@ -1139,19 +1211,17 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
         </div>
       </div>
     </div>
+    </div><!-- /tab-pane pinned -->
 
-
-
-    <div class="section-group-divider"><span class="group-icon">💿</span> Managed Disks</div>
-
+    <!-- TAB: Disk SKUs -->
+    <div class="tab-pane" data-tab="disks">
     <!-- Disk SKUs -->
     <div class="section" id="sec-disks">
-      <div class="section-header" onclick="toggleSection('disks')">
-        <span class="section-toggle" id="toggle-disks">▶</span>
+      <div class="section-header">
         <span class="section-title">💿 Disk SKUs</span>
         <span class="section-badge" id="disk-count">0 disks</span>
       </div>
-      <div class="section-body collapsed" id="body-disks">
+      <div class="section-body" id="body-disks">
         <div class="disk-summary-cards" id="disk-summary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px;"></div>
         <div class="filters-row">
           <div class="filters-search">
@@ -1189,27 +1259,16 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
         <div id="disk-table-container" style="margin-top:16px;"></div>
       </div>
     </div>
+    </div><!-- /tab-pane disks -->
 
-    <div class="section-group-divider"><span class="group-icon">📚</span> Reference</div>
-
-    <!-- Workload Recommendations -->
-    <div class="section" id="sec-workloads">
-      <div class="section-header" onclick="toggleSection('workloads')">
-        <span class="section-toggle" id="toggle-workloads">▶</span>
-        <span class="section-title">💼 Workload Recommendations</span>
-      </div>
-      <div class="section-body collapsed" id="body-workloads">
-        <div class="workload-grid" id="workload-grid"></div>
-      </div>
-    </div>
-
+    <!-- TAB: Reference -->
+    <div class="tab-pane" data-tab="reference">
     <!-- VM Naming Convention -->
     <div class="section" id="sec-naming">
-      <div class="section-header" onclick="toggleSection('naming')">
-        <span class="section-toggle" id="toggle-naming">▶</span>
+      <div class="section-header">
         <span class="section-title">🔤 Azure VM Naming Convention</span>
       </div>
-      <div class="section-body collapsed" id="body-naming">
+      <div class="section-body" id="body-naming">
         <p style="margin-bottom:14px;font-size:13px;color:var(--text-secondary);line-height:1.6;">
           Azure VM SKU names encode key specifications into a structured format. Hover over each segment to learn what it means.
         </p>
@@ -1270,11 +1329,10 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
 
     <!-- How to Query SKU Data -->
     <div class="section" id="sec-cli">
-      <div class="section-header" onclick="toggleSection('cli')">
-        <span class="section-toggle" id="toggle-cli">▶</span>
+      <div class="section-header">
         <span class="section-title">🛠️ How to Manually View SKU Data</span>
       </div>
-      <div class="section-body collapsed" id="body-cli">
+      <div class="section-body" id="body-cli">
         <p style="margin-bottom:10px;font-size:13px;color:var(--text-secondary);line-height:1.6;">
           The data shown in this app is collected using the <strong>Azure CLI</strong>. You can run the same command yourself anytime to get live, up-to-date SKU availability for any Azure region. All you need is the <a href="https://learn.microsoft.com/en-us/cli/azure/install-azure-cli" target="_blank" rel="noopener" style="color:var(--brand-primary);">Azure CLI</a> installed and an active Azure subscription.
         </p>
@@ -1290,6 +1348,7 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
         </p>
       </div>
     </div>
+    </div><!-- /tab-pane reference -->
   </div>
 </div>
 
@@ -1322,6 +1381,7 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
     </div>
     <div class="modal-body-content">
       <div class="shortcuts-grid">
+        <div class="shortcut-item"><span class="shortcut-key">1–6</span><span class="shortcut-desc">Switch between tabs</span></div>
         <div class="shortcut-item"><span class="shortcut-key">T</span><span class="shortcut-desc">Toggle light/dark theme</span></div>
         <div class="shortcut-item"><span class="shortcut-key">F</span><span class="shortcut-desc">Focus search filter</span></div>
         <div class="shortcut-item"><span class="shortcut-key">C</span><span class="shortcut-desc">Clear all filters</span></div>
@@ -1674,11 +1734,13 @@ const GUIDED_TIPS = [
   },
   {
     target: '#sec-filters',
+    tab: 'browse',
     title: '🔍 See What\'s Available',
     text: 'Browse and filter all VM SKUs in the region. Search by size, version, or family type — then expand letter groups to explore the full data table.'
   },
   {
     target: '#sec-checker',
+    tab: 'match',
     title: '🎯 Find a Match',
     text: 'Enter your workload requirements like vCPUs, memory, and capabilities — the app will find and rank the best matching VM SKUs for you.'
   }
@@ -1712,6 +1774,7 @@ function _renderTip() {
   document.getElementById('tipsNextBtn').textContent = _tipIdx === GUIDED_TIPS.length - 1 ? 'Got it!' : 'Next →';
 
   var el = document.querySelector(tip.target);
+  if (tip.tab) activateTab(tip.tab);
   card.classList.remove('positioned');
   spotlight.style.display = 'none';
   overlay.classList.add('active');
@@ -1772,17 +1835,56 @@ document.addEventListener('keydown', function(e) {
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
   if (e.key === '?') { e.preventDefault(); openShortcutsModal(); }
   if (e.key === 't' || e.key === 'T') { e.preventDefault(); toggleTheme(); }
-  if (e.key === 'f' || e.key === 'F') { e.preventDefault(); document.getElementById('search-input').focus(); }
+  if (e.key === 'f' || e.key === 'F') { e.preventDefault(); activateTab('browse'); document.getElementById('search-input').focus(); }
   if (e.key === 'c' || e.key === 'C') { e.preventDefault(); clearFilters(); }
-  if (e.key === 'x' || e.key === 'X') { e.preventDefault(); exportCsv(); }
+  if (e.key === 'x' || e.key === 'X') { e.preventDefault(); activateTab('browse'); exportCsv(); }
   if (e.key === 'Escape') { closeShortcutsModal(); closeSnippetModal(); }
+  if (e.key === '1') { e.preventDefault(); activateTab('overview'); }
+  if (e.key === '2') { e.preventDefault(); activateTab('browse'); }
+  if (e.key === '3') { e.preventDefault(); activateTab('match'); }
+  if (e.key === '4') { e.preventDefault(); activateTab('pinned'); }
+  if (e.key === '5') { e.preventDefault(); activateTab('disks'); }
+  if (e.key === '6') { e.preventDefault(); activateTab('reference'); }
 });
+
+// === TAB NAVIGATION ===
+const TAB_KEYS = ['overview','browse','match','pinned','disks','reference'];
+
+function activateTab(key) {
+  if (!TAB_KEYS.includes(key)) return;
+  document.querySelectorAll('.tab-strip .tab').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === key);
+  });
+  document.querySelectorAll('.tab-pane').forEach(p => {
+    p.classList.toggle('active', p.dataset.tab === key);
+  });
+  if (history && history.replaceState) {
+    history.replaceState(null, '', '#' + key);
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function activateTabFromHash() {
+  const h = (location.hash || '').replace('#','').toLowerCase();
+  if (TAB_KEYS.includes(h)) activateTab(h);
+}
+
+window.addEventListener('hashchange', activateTabFromHash);
+
+function updateTabBadges() {
+  const browseBadge = document.getElementById('tab-badge-browse');
+  const pinnedBadge = document.getElementById('tab-badge-pinned');
+  const disksBadge = document.getElementById('tab-badge-disks');
+  if (browseBadge) browseBadge.textContent = allSkus.length || '';
+  if (pinnedBadge) pinnedBadge.textContent = pinnedSkus.size || '';
+  if (disksBadge) disksBadge.textContent = allDisks.length || '';
+}
 
 function toggleSection(id) {
   const body = document.getElementById('body-' + id);
   const toggle = document.getElementById('toggle-' + id);
-  body.classList.toggle('collapsed');
-  toggle.classList.toggle('open');
+  if (body) body.classList.toggle('collapsed');
+  if (toggle) toggle.classList.toggle('open');
 }
 
 // === INIT ===
@@ -1813,6 +1915,7 @@ async function init() {
     renderFreshness();
     buildDropdown();
     selectRegion('newzealandnorth');
+    activateTabFromHash();
   } catch (e) {
     showToast('Failed to load data: ' + e.message, 'error');
   }
@@ -2133,6 +2236,7 @@ async function loadDiskData(regionName) {
 function renderDiskSection() {
   const badge = document.getElementById('disk-count');
   if (badge) badge.textContent = allDisks.length + ' disks';
+  updateTabBadges();
 
   if (!allDisks.length) {
     document.getElementById('disk-summary').innerHTML = '';
@@ -2324,6 +2428,7 @@ function applyFilters() {
   const availBadge = document.getElementById('available-count');
   if (availBadge) availBadge.textContent = allSkus.length + ' SKUs';
   renderTable();
+  updateTabBadges();
 }
 
 function clearFilters() {
@@ -2485,10 +2590,8 @@ function togglePin(size) {
 }
 
 function renderShortlist() {
-  const body = document.getElementById('body-shortlist');
   const chips = document.getElementById('shortlist-chips');
   const count = document.getElementById('shortlist-count');
-  const toggle = document.getElementById('toggle-shortlist');
   const clearBtn = document.getElementById('clear-pins-btn');
 
   const actions = document.getElementById('shortlist-actions');
@@ -2496,7 +2599,7 @@ function renderShortlist() {
   const clearChkBtn = document.getElementById('clear-pins-chk-btn');
   if (clearChkBtn) clearChkBtn.disabled = !pinnedSkus.size;
   count.textContent = pinnedSkus.size + ' pinned';
-
+  updateTabBadges();
   const multiRegionContainer = document.getElementById('multiregion-container');
 
   if (pinnedSkus.size === 0) {
@@ -2506,11 +2609,6 @@ function renderShortlist() {
     const pricingCtr = document.getElementById('pricing-container');
     if (pricingCtr) pricingCtr.style.display = 'none';
     return;
-  }
-  // Auto-expand section when pins are added
-  if (body && body.classList.contains('collapsed')) {
-    body.classList.remove('collapsed');
-    if (toggle) toggle.classList.add('open');
   }
   if (actions) actions.style.display = '';
   if (multiRegionContainer) multiRegionContainer.style.display = '';
@@ -3033,14 +3131,8 @@ function renderFamilyOverview() {
 function filterBySize(size) {
   document.getElementById('size-filter').value = size;
   applyFilters();
-  // Open table section and scroll to it
-  const body = document.getElementById('body-table');
-  const toggle = document.getElementById('toggle-table');
-  if (body.classList.contains('collapsed')) {
-    body.classList.remove('collapsed');
-    toggle.classList.remove('collapsed');
-  }
-  document.getElementById('sec-filters').scrollIntoView({ behavior: 'smooth' });
+  // Switch to Browse tab and scroll to top
+  activateTab('browse');
 }
 
 // === WORKLOAD RECOMMENDATIONS ===

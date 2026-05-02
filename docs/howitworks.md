@@ -72,11 +72,16 @@ On initialization, the app loads:
 
 ## Sections & Features
 
-### Section Groups
-The app is organized into three visual groups with dividers:
-- **🖥️ Virtual Machines** — Browse, Find a Match, Pinned Shortlist, Multi-Region Compare, What's New, Workload Recommendations
-- **💿 Managed Disks** — Disk SKU browser with tier cards, filters, and collapsible groups
-- **📚 Reference** — Naming guide, deployment snippets
+### Tab Layout
+The app uses a **tabbed interface** with 6 tabs in a sticky tab strip:
+1. **📊 Overview** — Summary KPI cards, What's New (month-over-month SKU changes), Workload Recommendations
+2. **🔍 Browse SKUs** — Filterable SKU table with search, filters, column chooser
+3. **🎯 Find a Match** — Deployment requirements checker with ranked results
+4. **📌 Pinned** — Shortlist, pricing comparison, multi-region availability compare
+5. **💿 Disk SKUs** — Managed disk browser with tier filters and collapsible groups
+6. **📖 Reference** — VM naming convention guide, CLI guidance, deployment snippets
+
+Tabs support keyboard shortcuts (1–6), URL hash routing, and dynamic badge counts.
 
 ### Browse SKUs (See What's Available)
 - Filterable, sortable table grouped alphabetically by first letter

@@ -32,7 +32,7 @@
 
 **"Now let's see what's actually available."**
 
-- Expand the **Browse SKUs** section
+- Open the **Browse SKUs** tab (or press **2**)
 - Show the full table — results are letter-grouped
 - Demo the filters: **text search**, **family type**, **vCPU range**, **processor type** (Intel/AMD/ARM)
 - Click **⚙️ Columns** to customize visible columns
@@ -68,7 +68,7 @@
 
 **"We also have managed disk information."**
 
-- Scroll to the **💿 Managed Disks** section
+- Switch to the **💿 Disk SKUs** tab (or press **5**)
 - Show tier summary cards: Premium SSD, Standard SSD, Standard HDD, Ultra
 - Expand a disk group — show IOPS, throughput, burst capabilities
 - Demo filters: disk type, redundancy (LRS/ZRS), IOPS range
@@ -85,7 +85,7 @@
 ### Quick Hits (2 min)
 
 - **Dark mode** — press **T** to toggle
-- **Keyboard shortcuts** — press **?** for the full list
+- **Keyboard shortcuts** — press **?** for the full list, **1–6** to switch tabs
 - **Region proximity** — suggests nearby regions when no results found
 - **Data Refresh Summary** — click ℹ️ to see all data sets and their sources
 

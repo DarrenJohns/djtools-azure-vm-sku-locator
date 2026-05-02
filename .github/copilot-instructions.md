@@ -45,7 +45,7 @@ This is a **single-file HTML web application** (`index.html`) with pre-fetched s
 - JavaScript uses modern ES6+ (const/let, arrow functions, template literals, async/await)
 - No external CDN dependencies
 - Family-to-docs URL mapping is best-effort — always provide a fallback link
-- **Collapsible sections**: Use the `collapsed` CSS class on section bodies to collapse sections. NEVER use inline `display:none` on section bodies.
+- **Tab layout**: App uses tabbed interface with `.tab-strip` and `.tab-pane` (display:none/block). Use `activateTab(key)` to switch tabs.
 - **overflow:hidden restriction**: Do NOT add `overflow:hidden` to `.section` elements — it clips rotated column headers in tables.
 - Scripts (`scripts/`) are Python — keep them simple and self-contained
 - `config.json` is the single source of truth for which regions to refresh
