@@ -2406,8 +2406,7 @@ function renderTable() {
       </td>
     </tr>`;
     rows.forEach(s => {
-      const rowCls = shaded ? 'row-shaded' : '';
-      html += `<tr class="${rowCls} group-row-${letter}">` + visCols.map(c => {
+      html += `<tr class="group-row-${letter}">` + visCols.map(c => {
         const val = s[c.key];
         const rendered = c.render ? c.render(val, s) : escapeHtml(val);
         const cls = c.vertical ? ' class="icon-cell"' : '';
