@@ -254,7 +254,9 @@ body {
   left: 50%;
   transform: translateX(-50%);
   z-index: 998;
-  background: var(--bg-layer1);
+  background: rgba(255,255,255, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
   display: flex;
@@ -266,6 +268,9 @@ body {
   overflow-x: auto;
   scrollbar-width: thin;
   box-shadow: var(--shadow-sm);
+}
+[data-theme="dark"] .tab-strip {
+  background: rgba(30,33,40, 0.8);
 }
 .tab-strip .tab {
   flex: 0 0 auto;
