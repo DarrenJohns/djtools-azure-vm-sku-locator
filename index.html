@@ -114,7 +114,7 @@ body {
   transition: background 0.15s;
 }
 .kbd-shortcut-btn:hover { background: rgba(255,255,255,0.25); }
-.container { max-width: 1400px; margin: 0 auto; padding: 128px 24px 16px; }
+.container { max-width: 1400px; margin: 0 auto; padding: 168px 24px 16px; }
 .section {
   margin-bottom: 24px;
 }
@@ -249,8 +249,10 @@ body {
 [data-theme="dark"] .freshness-badge.stale { background: #3d1a1a; color: #f28b82; border-color: #5a2d2d; }
 /* Tab strip */
 .tab-strip {
-  position: sticky;
-  top: 104px;
+  position: fixed;
+  top: 112px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 998;
   background: var(--bg-layer1);
   border: 1px solid var(--border-default);
