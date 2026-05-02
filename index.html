@@ -312,7 +312,8 @@ select, input[type="text"], input[type="search"] {
   width: 100%;
 }
 select:focus, input:focus { outline: 2px solid var(--brand-primary); outline-offset: -1px; }
-*:focus:not(select):not(input):not(button):not(a) { outline: none; }
+*:focus { outline: none; }
+*:focus-visible { outline: 2px solid var(--brand-primary); outline-offset: 2px; border-radius: 4px; }
 .badge {
   display: inline-block;
   background: var(--brand-primary);
