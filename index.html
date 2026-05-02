@@ -905,22 +905,6 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
 .welcome-body li { padding: 8px 0; display: flex; gap: 10px; align-items: flex-start; white-space: nowrap; }
 .welcome-body li span { font-size: 18px; flex-shrink: 0; }
 .welcome-body .btn { width: 100%; justify-content: center; font-size: 14px; padding: 10px; display: flex; }
-/* ── Guided Tips ── */
-.tips-overlay { position: fixed; inset: 0; z-index: 1050; display: none; }
-.tips-overlay.active { display: block; }
-.tips-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.45); backdrop-filter: blur(2px); }
-.tips-spotlight { position: fixed; z-index: 1051; border: 3px solid var(--brand-primary); border-radius: var(--radius-md); box-shadow: 0 0 0 9999px rgba(0,0,0,0.45), 0 0 24px rgba(15,108,189,0.4); pointer-events: none; transition: all 0.4s ease; }
-.tips-card { position: fixed; z-index: 1052; background: var(--bg-layer1); border-radius: var(--radius-md); box-shadow: var(--shadow-md); padding: 20px; width: 320px; opacity: 0; pointer-events: none; }
-.tips-card.positioned { opacity: 1; pointer-events: auto; animation: tipsSlideIn 0.35s ease; }
-@keyframes tipsSlideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-.tips-step { font-size: 11px; color: var(--brand-primary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
-.tips-card h4 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
-.tips-card p { font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.5; }
-.tips-footer { display: flex; justify-content: space-between; align-items: center; }
-.tips-dots { display: flex; gap: 6px; }
-.tips-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border-default); transition: all 0.2s; }
-.tips-dot.active { background: var(--brand-primary); transform: scale(1.3); }
-.tips-dot.done { background: var(--status-success); }
 .btn-outline { background: var(--bg-layer1); border: 1px solid var(--border-default); color: var(--text-primary); }
 .btn-outline:hover { background: var(--bg-layer2); border-color: var(--brand-primary); }
 .btn-sm { font-size: 12px; padding: 4px 10px; }
@@ -972,24 +956,6 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
         <li><span>⌨️</span> <strong>Shortcuts</strong> — Press <strong>?</strong> anytime for keyboard shortcuts</li>
       </ul>
       <button class="btn btn-primary" onclick="closeWelcome()">Get Started</button>
-    </div>
-  </div>
-</div>
-
-<!-- Guided Tips Overlay -->
-<div class="tips-overlay" id="tipsOverlay">
-  <div class="tips-backdrop" id="tipsBackdrop"></div>
-  <div class="tips-spotlight" id="tipsSpotlight"></div>
-  <div class="tips-card" id="tipsCard">
-    <div class="tips-step" id="tipsStepLabel"></div>
-    <h4 id="tipsTitle"></h4>
-    <p id="tipsText"></p>
-    <div class="tips-footer">
-      <div class="tips-dots" id="tipsDots"></div>
-      <div style="display:flex;gap:6px;">
-        <button class="btn btn-outline btn-sm" onclick="dismissTips()">Skip</button>
-        <button class="btn btn-primary btn-sm" id="tipsNextBtn" onclick="advanceTip()">Next</button>
-      </div>
     </div>
   </div>
 </div>
@@ -1724,131 +1690,9 @@ function closeShortcutsModal() { document.getElementById('shortcutsModal').class
 
 function closeWelcome() {
   document.getElementById('welcomeModal').classList.remove('active');
-  setTimeout(startGuidedTips, 400);
 }
 
 // === GUIDED TIPS ===
-const GUIDED_TIPS = [
-  {
-    target: '#region-select',
-    title: '🌏 Select an Azure Region',
-    text: 'Choose any Azure region from the dropdown to see which VM SKUs are available there. Data is pre-fetched so results appear instantly.'
-  },
-  {
-    target: '#tabStrip',
-    title: '📑 Navigate with Tabs',
-    text: 'Use the tab bar to switch between views — Overview, Browse SKUs, Find a Match, Pinned, Disk SKUs, and Reference. You can also press 1–6 on your keyboard.'
-  },
-  {
-    target: '#sec-filters',
-    tab: 'browse',
-    title: '🔍 Browse & Filter SKUs',
-    text: 'Browse all VM SKUs in the region. Filter by size, family, vCPUs, or processor type — then expand letter groups to explore the full data table.'
-  },
-  {
-    target: '#sec-checker',
-    tab: 'match',
-    title: '🎯 Find a Match',
-    text: 'Enter your workload requirements like vCPUs, memory, and capabilities — the app will find and rank the best matching VM SKUs for you.'
-  },
-  {
-    target: '#pane-pinned',
-    tab: 'pinned',
-    title: '📌 Pin & Compare',
-    text: 'Click the pin icon on any SKU to add it to your shortlist. Compare specs and pricing side by side, then export your selection.'
-  },
-  {
-    target: '#pane-disks',
-    tab: 'disks',
-    title: '💿 Disk SKUs',
-    text: 'Browse managed disk types available in your region — see IOPS, throughput, burst capabilities, and pricing for each tier.'
-  }
-];
-let _tipIdx = 0;
-let _tipsActive = false;
-
-function startGuidedTips() {
-  _tipIdx = 0;
-  _tipsActive = true;
-  _renderTip();
-}
-
-function _renderTip() {
-  if (_tipIdx >= GUIDED_TIPS.length) { dismissTips(); return; }
-  const tip = GUIDED_TIPS[_tipIdx];
-  const overlay = document.getElementById('tipsOverlay');
-  const spotlight = document.getElementById('tipsSpotlight');
-  const card = document.getElementById('tipsCard');
-  const backdrop = document.getElementById('tipsBackdrop');
-
-  document.getElementById('tipsStepLabel').textContent = 'TIP ' + (_tipIdx + 1) + ' OF ' + GUIDED_TIPS.length;
-  document.getElementById('tipsTitle').textContent = tip.title;
-  document.getElementById('tipsText').textContent = tip.text;
-
-  document.getElementById('tipsDots').innerHTML = GUIDED_TIPS.map((_, i) => {
-    const cls = i < _tipIdx ? 'tips-dot done' : i === _tipIdx ? 'tips-dot active' : 'tips-dot';
-    return '<div class="' + cls + '"></div>';
-  }).join('');
-
-  document.getElementById('tipsNextBtn').textContent = _tipIdx === GUIDED_TIPS.length - 1 ? 'Got it!' : 'Next →';
-
-  var el = document.querySelector(tip.target);
-  if (tip.tab) activateTab(tip.tab);
-  card.classList.remove('positioned');
-  spotlight.style.display = 'none';
-  overlay.classList.add('active');
-
-  if (el) {
-    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    setTimeout(function() {
-      var rect = el.getBoundingClientRect();
-      spotlight.style.top = (rect.top - 6) + 'px';
-      spotlight.style.left = (rect.left - 6) + 'px';
-      spotlight.style.width = (rect.width + 12) + 'px';
-      spotlight.style.height = (rect.height + 12) + 'px';
-      spotlight.style.display = 'block';
-
-      var cardW = 320;
-      var cardH = card.offsetHeight || 200;
-      var top = rect.bottom + 16;
-      var left = rect.left + (rect.width / 2) - (cardW / 2);
-      if (top + cardH > window.innerHeight - 20) top = rect.top - cardH - 16;
-      if (left < 12) left = 12;
-      if (left + cardW > window.innerWidth - 12) left = window.innerWidth - cardW - 12;
-
-      card.style.top = top + 'px';
-      card.style.left = left + 'px';
-      card.style.transform = 'none';
-      card.classList.add('positioned');
-    }, 350);
-  } else {
-    spotlight.style.display = 'none';
-    card.style.top = '50%';
-    card.style.left = '50%';
-    card.style.transform = 'translate(-50%, -50%)';
-    card.classList.add('positioned');
-  }
-  backdrop.onclick = dismissTips;
-}
-
-function advanceTip() {
-  _tipIdx++;
-  if (_tipIdx >= GUIDED_TIPS.length) {
-    dismissTips();
-  } else {
-    var card = document.getElementById('tipsCard');
-    card.classList.remove('positioned');
-    card.style.transform = 'none';
-    _renderTip();
-  }
-}
-
-function dismissTips() {
-  _tipsActive = false;
-  document.getElementById('tipsOverlay').classList.remove('active');
-  document.getElementById('tipsSpotlight').style.display = 'none';
-  document.getElementById('tipsCard').classList.remove('positioned');
-}
 
 document.addEventListener('keydown', function(e) {
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
