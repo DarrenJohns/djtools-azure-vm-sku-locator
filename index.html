@@ -1875,6 +1875,7 @@ function activateTab(key) {
 function activateTabFromHash() {
   const h = (location.hash || '').replace('#','').toLowerCase();
   if (TAB_KEYS.includes(h)) activateTab(h);
+  else activateTab('overview');
 }
 
 window.addEventListener('hashchange', activateTabFromHash);
@@ -1923,7 +1924,8 @@ async function init() {
     renderFreshness();
     buildDropdown();
     selectRegion('newzealandnorth');
-    activateTabFromHash();
+    history.replaceState(null, '', location.pathname);
+    activateTab('overview');
   } catch (e) {
     showToast('Failed to load data: ' + e.message, 'error');
   }
