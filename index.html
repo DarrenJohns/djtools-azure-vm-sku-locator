@@ -2457,6 +2457,18 @@ function togglePin(size) {
   }
   renderShortlist();
   renderTable();
+  // Update pin buttons in checker table without full re-render
+  document.querySelectorAll('.checker-table .pin-btn').forEach(btn => {
+    const onclick = btn.getAttribute('onclick') || '';
+    const match = onclick.match(/togglePin\('([^']+)'\)/);
+    if (match) {
+      const s = match[1];
+      const isPinned = pinnedSkus.has(s);
+      btn.classList.toggle('pinned', isPinned);
+      btn.textContent = isPinned ? '📌' : '○';
+      btn.title = isPinned ? 'Unpin' : 'Pin to shortlist';
+    }
+  });
 }
 
 function renderShortlist() {
