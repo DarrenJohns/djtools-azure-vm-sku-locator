@@ -2175,7 +2175,7 @@ function renderDiskSection() {
   let summaryHtml = '';
   Object.entries(tierCounts).forEach(([label, count]) => {
     const color = tierColors[label] || '#0078d4';
-    summaryHtml += `<div class="summary-card" style="border-top:3px solid ${color};cursor:pointer;" onclick="document.getElementById('disk-tier-filter').value='${escapeHtml(label)}';applyDiskFilters();">
+    summaryHtml += `<div class="summary-card" style="border-top:3px solid ${color};">
       <div class="summary-value" style="font-size:22px;color:${color};">${count}</div>
       <div class="summary-label" style="font-size:11px;">${escapeHtml(label)}</div>
     </div>`;
