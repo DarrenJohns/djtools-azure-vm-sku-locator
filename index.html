@@ -1059,6 +1059,7 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
         <span class="section-badge" id="available-count"></span>
       </div>
       <div class="section-body" id="body-filters">
+        <div id="browse-summary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-bottom:16px;"></div>
         <div class="filters-row">
           <div class="filters-search">
             <input type="search" id="search-input" placeholder="Search by size, version, family type, vCPUs..." oninput="applyFilters()">
@@ -1999,11 +2000,44 @@ function rebuildSkuList(regionName) {
   if (prevType && typeSet.has(prevType)) familyTypeFilter.value = prevType;
 
   applyFilters();
+  renderBrowseSummary();
   renderSummary();
   renderWorkloads();
   populateMultiRegionCheckboxes();
   loadHistory(regionName);
   loadDiskData(regionName);
+}
+
+// === BROWSE SUMMARY BADGES ===
+function renderBrowseSummary() {
+  const el = document.getElementById('browse-summary');
+  if (!el || !allSkus.length) { if (el) el.innerHTML = ''; return; }
+
+  const sizes = new Set(allSkus.map(s => s.size)).size;
+  const versions = new Set(allSkus.map(s => {
+    const m = (s.size || '').match(/_v(\d+)$/i);
+    return m ? 'v' + m[1] : 'v1';
+  })).size;
+  const families = new Set(allSkus.map(s => s.family)).size;
+  const intelCount = allSkus.filter(s => getProcessorType(s.size) === 'Intel').length;
+  const amdCount = allSkus.filter(s => getProcessorType(s.size) === 'AMD').length;
+  const armCount = allSkus.filter(s => getProcessorType(s.size) === 'ARM').length;
+
+  const cards = [
+    { label: 'Total Sizes', value: sizes, color: '#0078d4' },
+    { label: 'Versions', value: versions, color: '#8764b8' },
+    { label: 'Families', value: families, color: '#107c10' },
+    { label: 'Intel', value: intelCount, color: '#0071c5' },
+    { label: 'AMD', value: amdCount, color: '#ed1c24' },
+  ];
+  if (armCount > 0) cards.push({ label: 'ARM', value: armCount, color: '#00a86b' });
+
+  el.innerHTML = cards.map(c =>
+    `<div class="summary-card" style="border-top:3px solid ${c.color};">
+      <div class="summary-value" style="font-size:22px;color:${c.color};">${c.value}</div>
+      <div class="summary-label" style="font-size:11px;">${c.label}</div>
+    </div>`
+  ).join('');
 }
 
 // === SUMMARY DASHBOARD ===
