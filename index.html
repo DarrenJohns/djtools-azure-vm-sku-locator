@@ -143,7 +143,9 @@ body {
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
   padding: 16px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
+.section-body:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
 .section-body.collapsed { display: none; }
 .section-group-divider {
   display: flex;
@@ -372,7 +374,9 @@ select:focus, input:focus { outline: 2px solid var(--brand-primary); outline-off
   box-shadow: var(--shadow-sm);
   border-top: 3px solid var(--brand-primary);
   position: relative;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
+.summary-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
 .summary-card .summary-icon {
   font-size: 22px;
   margin-bottom: 4px;
