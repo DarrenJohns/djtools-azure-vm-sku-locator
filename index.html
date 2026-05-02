@@ -982,9 +982,9 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
   <div class="tab-strip" id="tabStrip" role="tablist">
     <button class="tab active" data-tab="overview" onclick="activateTab('overview')">📊 Overview</button>
     <button class="tab" data-tab="browse" onclick="activateTab('browse')">🔍 Browse SKUs<span class="tab-badge" id="tab-badge-browse"></span></button>
+    <button class="tab" data-tab="disks" onclick="activateTab('disks')">💿 Disk SKUs<span class="tab-badge" id="tab-badge-disks"></span></button>
     <button class="tab" data-tab="match" onclick="activateTab('match')">🎯 Find a Match</button>
     <button class="tab" data-tab="pinned" onclick="activateTab('pinned')">📌 Pinned<span class="tab-badge" id="tab-badge-pinned"></span></button>
-    <button class="tab" data-tab="disks" onclick="activateTab('disks')">💿 Disk SKUs<span class="tab-badge" id="tab-badge-disks"></span></button>
     <button class="tab" data-tab="reference" onclick="activateTab('reference')">📖 Reference</button>
   </div>
 
@@ -1707,14 +1707,14 @@ document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') { closeShortcutsModal(); closeSnippetModal(); }
   if (e.key === '1') { e.preventDefault(); activateTab('overview'); }
   if (e.key === '2') { e.preventDefault(); activateTab('browse'); }
-  if (e.key === '3') { e.preventDefault(); activateTab('match'); }
-  if (e.key === '4') { e.preventDefault(); activateTab('pinned'); }
-  if (e.key === '5') { e.preventDefault(); activateTab('disks'); }
+  if (e.key === '3') { e.preventDefault(); activateTab('disks'); }
+  if (e.key === '4') { e.preventDefault(); activateTab('match'); }
+  if (e.key === '5') { e.preventDefault(); activateTab('pinned'); }
   if (e.key === '6') { e.preventDefault(); activateTab('reference'); }
 });
 
 // === TAB NAVIGATION ===
-const TAB_KEYS = ['overview','browse','match','pinned','disks','reference'];
+const TAB_KEYS = ['overview','browse','disks','match','pinned','reference'];
 
 function activateTab(key) {
   if (!TAB_KEYS.includes(key)) return;
