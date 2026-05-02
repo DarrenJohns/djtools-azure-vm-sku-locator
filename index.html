@@ -114,7 +114,7 @@ body {
   transition: background 0.15s;
 }
 .kbd-shortcut-btn:hover { background: rgba(255,255,255,0.25); }
-.container { max-width: 1400px; margin: 0 auto; padding: 176px 24px 16px; }
+.container { max-width: 1400px; margin: 0 auto; padding: 120px 24px 16px; }
 .section {
   margin-bottom: 24px;
 }
@@ -173,37 +173,35 @@ body {
 .section-group-divider .group-icon {
   font-size: 14px;
 }
-.region-bar {
-  position: fixed;
-  top: 56px;
-  left: 0;
-  right: 0;
-  z-index: 999;
-  background: var(--bg-layer1);
-  border-bottom: 1px solid var(--border-default);
-  padding: 12px 24px;
+.region-selector-bar {
   display: flex;
   align-items: center;
   gap: 16px;
+  padding: 14px 18px;
+  background: var(--bg-layer1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
+  margin-bottom: 18px;
+  flex-wrap: wrap;
 }
-.region-bar label {
+.region-selector-bar label {
   font-size: 14px;
   font-weight: 600;
   color: var(--text-secondary);
   white-space: nowrap;
 }
-.region-bar select {
+.region-selector-bar select {
   font-family: var(--font-sans);
   font-size: 14px;
-  padding: 6px 12px;
+  padding: 8px 14px;
   border: 1px solid var(--border-default);
   border-radius: var(--radius-sm);
   background: var(--bg-layer2);
   color: var(--text-primary);
-  max-width: 280px;
+  min-width: 260px;
 }
-.region-bar .current-region {
+.region-selector-bar .current-region {
   font-size: 15px;
   font-weight: 600;
   color: var(--brand-primary);
@@ -250,7 +248,7 @@ body {
 /* Tab strip */
 .tab-strip {
   position: fixed;
-  top: 120px;
+  top: 64px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 998;
@@ -968,17 +966,7 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
   <button class="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark theme">🌙</button>
 </header>
 
-<!-- Sticky Region Selector Bar -->
-<div class="region-bar">
-  <label for="region-select">🌏 Azure Region:</label>
-  <select id="region-select" onchange="selectRegion(this.value)">
-    <option value="">Loading regions...</option>
-  </select>
-  <span class="current-region" id="current-region-label"></span>
-  <span class="freshness-badge" id="freshness-badge" style="display:none;" onclick="toggleFreshnessFlyout(event)">
-    <span id="freshness-label"></span>
-  </span>
-</div>
+
 
 <!-- Freshness Detail Overlay -->
 <div class="freshness-overlay" id="freshness-overlay" onclick="closeFreshnessFlyout()">
@@ -1000,52 +988,67 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
     <button class="tab" data-tab="reference" onclick="activateTab('reference')">📖 Reference</button>
   </div>
 
-  <!-- No-Data Message -->
-  <div class="no-data-box hidden" id="no-data-msg">
-    <div class="icon">📭</div>
-    <h3 id="no-data-title">No SKU data available</h3>
-    <p id="no-data-desc" style="margin-top:8px;color:var(--text-secondary);font-size:14px;"></p>
-    <div class="cli-box" style="margin-top:12px;display:inline-block;text-align:left;">
-      <code id="no-data-cli"></code>
+  <!-- TAB: Overview (always visible — contains region selector) -->
+  <div class="tab-pane active" data-tab="overview">
+
+    <!-- Region Selector -->
+    <div class="region-selector-bar">
+      <label for="region-select">🌏 Azure Region:</label>
+      <select id="region-select" onchange="selectRegion(this.value)">
+        <option value="">Loading regions...</option>
+      </select>
+      <span class="current-region" id="current-region-label"></span>
+      <span class="freshness-badge" id="freshness-badge" style="display:none;" onclick="toggleFreshnessFlyout(event)">
+        <span id="freshness-label"></span>
+      </span>
     </div>
-  </div>
 
-  <!-- SKU Results -->
-  <div id="sku-results" class="hidden">
-
-    <!-- TAB: Overview -->
-    <div class="tab-pane active" data-tab="overview">
-    <!-- Summary Dashboard -->
-    <div class="summary-heading">
-      <span class="summary-heading-icon">📊</span>
-      <span class="summary-heading-title">VM SKU Summary</span>
-    </div>
-    <div id="sku-summary" class="summary-grid"></div>
-
-
-    <!-- What's New -->
-    <div class="section" id="sec-whatsnew">
-      <div class="section-header">
-        <span class="section-title">📊 What's New</span>
-        <span class="section-badge" id="whatsnew-count">0 changes</span>
+    <!-- No-Data Message -->
+    <div class="no-data-box hidden" id="no-data-msg">
+      <div class="icon">📭</div>
+      <h3 id="no-data-title">No SKU data available</h3>
+      <p id="no-data-desc" style="margin-top:8px;color:var(--text-secondary);font-size:14px;"></p>
+      <div class="cli-box" style="margin-top:12px;display:inline-block;text-align:left;">
+        <code id="no-data-cli"></code>
       </div>
-      <div class="section-body" id="body-whatsnew">
-        <div id="whatsnew-content">
-          <span style="font-size:12px;color:var(--text-tertiary);">Loading history...</span>
+    </div>
+
+    <!-- Overview Data (shown when region has data) -->
+    <div id="overview-data" class="hidden">
+      <!-- Summary Dashboard -->
+      <div class="summary-heading">
+        <span class="summary-heading-icon">📊</span>
+        <span class="summary-heading-title">VM SKU Summary</span>
+      </div>
+      <div id="sku-summary" class="summary-grid"></div>
+
+      <!-- What's New -->
+      <div class="section" id="sec-whatsnew">
+        <div class="section-header">
+          <span class="section-title">📊 What's New</span>
+          <span class="section-badge" id="whatsnew-count">0 changes</span>
+        </div>
+        <div class="section-body" id="body-whatsnew">
+          <div id="whatsnew-content">
+            <span style="font-size:12px;color:var(--text-tertiary);">Loading history...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Workload Recommendations (in Overview tab) -->
+      <div class="section" id="sec-workloads">
+        <div class="section-header">
+          <span class="section-title">💼 Workload Recommendations</span>
+        </div>
+        <div class="section-body" id="body-workloads">
+          <div class="workload-grid" id="workload-grid"></div>
         </div>
       </div>
     </div>
+  </div><!-- /tab-pane overview -->
 
-    <!-- Workload Recommendations (in Overview tab) -->
-    <div class="section" id="sec-workloads">
-      <div class="section-header">
-        <span class="section-title">💼 Workload Recommendations</span>
-      </div>
-      <div class="section-body" id="body-workloads">
-        <div class="workload-grid" id="workload-grid"></div>
-      </div>
-    </div>
-    </div><!-- /tab-pane overview -->
+  <!-- SKU Results (other tabs — shown when region has data) -->
+  <div id="sku-results" class="hidden">
 
     <!-- TAB: Browse SKUs -->
     <div class="tab-pane" data-tab="browse">
@@ -1916,9 +1919,11 @@ function selectRegion(regionName) {
 
   if (availableDataRegions.has(regionName)) {
     document.getElementById('no-data-msg').classList.add('hidden');
+    document.getElementById('overview-data').classList.remove('hidden');
     document.getElementById('sku-results').classList.remove('hidden');
     loadRegionData(regionName);
   } else {
+    document.getElementById('overview-data').classList.add('hidden');
     document.getElementById('sku-results').classList.add('hidden');
     document.getElementById('no-data-msg').classList.remove('hidden');
     document.getElementById('no-data-title').textContent = `No SKU data available for ${displayName}`;
