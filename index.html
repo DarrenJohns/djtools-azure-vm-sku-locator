@@ -965,16 +965,10 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
     </div>
     <div class="welcome-body">
       <ul>
-        <li><span>🌏</span> <strong>Browse</strong> — Select any Azure region to view available VM SKUs</li>
-        <li><span>🔍</span> <strong>Filter</strong> — Search by size, family, vCPUs, processor type, or capability</li>
+        <li><span>🌏</span> <strong>Browse</strong> — Select any Azure region to view available VM and disk SKUs</li>
         <li><span>🎯</span> <strong>Find a Match</strong> — Specify requirements and find SKUs that fit</li>
-        <li><span>💿</span> <strong>Disk SKUs</strong> — Browse available disk types, IOPS, throughput, and burst capabilities</li>
         <li><span>📌</span> <strong>Pin &amp; Compare</strong> — Pin SKUs to a shortlist with pricing data</li>
-        <li><span>🔄</span> <strong>Retirement Alerts</strong> — See which SKUs are scheduled for retirement</li>
         <li><span>📊</span> <strong>What's New</strong> — Track SKU additions and removals over time</li>
-        <li><span>🔤</span> <strong>Naming Guide</strong> — Interactive decoder for Azure VM naming conventions</li>
-        <li><span>💡</span> <strong>Nearby Regions</strong> — Get suggestions for alternative regions</li>
-        <li><span>📥</span> <strong>Export</strong> — Download filtered results as CSV</li>
         <li><span>⌨️</span> <strong>Shortcuts</strong> — Press <strong>?</strong> anytime for keyboard shortcuts</li>
       </ul>
       <button class="btn btn-primary" onclick="closeWelcome()">Get Started</button>
@@ -1741,16 +1735,33 @@ const GUIDED_TIPS = [
     text: 'Choose any Azure region from the dropdown to see which VM SKUs are available there. Data is pre-fetched so results appear instantly.'
   },
   {
+    target: '#tabStrip',
+    title: '📑 Navigate with Tabs',
+    text: 'Use the tab bar to switch between views — Overview, Browse SKUs, Find a Match, Pinned, Disk SKUs, and Reference. You can also press 1–6 on your keyboard.'
+  },
+  {
     target: '#sec-filters',
     tab: 'browse',
-    title: '🔍 See What\'s Available',
-    text: 'Browse and filter all VM SKUs in the region. Search by size, version, or family type — then expand letter groups to explore the full data table.'
+    title: '🔍 Browse & Filter SKUs',
+    text: 'Browse all VM SKUs in the region. Filter by size, family, vCPUs, or processor type — then expand letter groups to explore the full data table.'
   },
   {
     target: '#sec-checker',
     tab: 'match',
     title: '🎯 Find a Match',
     text: 'Enter your workload requirements like vCPUs, memory, and capabilities — the app will find and rank the best matching VM SKUs for you.'
+  },
+  {
+    target: '#pane-pinned',
+    tab: 'pinned',
+    title: '📌 Pin & Compare',
+    text: 'Click the pin icon on any SKU to add it to your shortlist. Compare specs and pricing side by side, then export your selection.'
+  },
+  {
+    target: '#pane-disks',
+    tab: 'disks',
+    title: '💿 Disk SKUs',
+    text: 'Browse managed disk types available in your region — see IOPS, throughput, burst capabilities, and pricing for each tier.'
   }
 ];
 let _tipIdx = 0;
