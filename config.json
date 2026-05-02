@@ -47,6 +47,5 @@
     { "name": "israelcentral", "displayName": "Israel Central" }
   ],
   "defaultRegion": "newzealandnorth",
-  "skuSubscriptionId": "***REDACTED***",
   "refreshNote": "Add or remove regions here. The monthly GitHub Actions workflow reads this file to determine which regions to fetch SKU data for. Uses --all flag to show all SKUs regardless of quota. Regions returning 0 SKUs are excluded from availableRegions."
 }
