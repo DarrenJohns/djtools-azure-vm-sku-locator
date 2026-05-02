@@ -114,7 +114,7 @@ body {
   transition: background 0.15s;
 }
 .kbd-shortcut-btn:hover { background: rgba(255,255,255,0.25); }
-.container { max-width: 1400px; margin: 0 auto; padding: 128px 24px 16px; }
+.container { max-width: 1400px; margin: 0 auto; padding: 160px 24px 16px; }
 .section {
   margin-bottom: 24px;
 }
@@ -249,23 +249,32 @@ body {
 [data-theme="dark"] .freshness-badge.stale { background: #3d1a1a; color: #f28b82; border-color: #5a2d2d; }
 /* Tab strip */
 .tab-strip {
-  position: sticky;
-  top: 0;
+  position: fixed;
+  top: 104px;
+  left: 0;
+  right: 0;
   z-index: 998;
-  background: var(--bg-layer1);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
+  display: flex;
+  justify-content: center;
+  padding: 8px 24px;
+  pointer-events: none;
+}
+.tab-strip-inner {
   display: flex;
   justify-content: center;
   gap: 2px;
   max-width: 1400px;
-  margin: 8px auto 20px;
+  width: 100%;
+  background: var(--bg-layer1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
   padding: 0 24px;
   overflow-x: auto;
   scrollbar-width: thin;
   box-shadow: var(--shadow-sm);
+  pointer-events: auto;
 }
-.tab-strip .tab {
+.tab-strip-inner .tab {
   flex: 0 0 auto;
   background: transparent;
   border: none;
@@ -1022,12 +1031,14 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
 
   <!-- Tab Strip -->
   <div class="tab-strip" id="tabStrip" role="tablist">
-    <button class="tab active" data-tab="overview" onclick="activateTab('overview')">📊 Overview</button>
-    <button class="tab" data-tab="browse" onclick="activateTab('browse')">🔍 Browse SKUs<span class="tab-badge" id="tab-badge-browse"></span></button>
-    <button class="tab" data-tab="match" onclick="activateTab('match')">🎯 Find a Match</button>
-    <button class="tab" data-tab="pinned" onclick="activateTab('pinned')">📌 Pinned<span class="tab-badge" id="tab-badge-pinned"></span></button>
-    <button class="tab" data-tab="disks" onclick="activateTab('disks')">💿 Disk SKUs<span class="tab-badge" id="tab-badge-disks"></span></button>
-    <button class="tab" data-tab="reference" onclick="activateTab('reference')">📖 Reference</button>
+    <div class="tab-strip-inner">
+      <button class="tab active" data-tab="overview" onclick="activateTab('overview')">📊 Overview</button>
+      <button class="tab" data-tab="browse" onclick="activateTab('browse')">🔍 Browse SKUs<span class="tab-badge" id="tab-badge-browse"></span></button>
+      <button class="tab" data-tab="match" onclick="activateTab('match')">🎯 Find a Match</button>
+      <button class="tab" data-tab="pinned" onclick="activateTab('pinned')">📌 Pinned<span class="tab-badge" id="tab-badge-pinned"></span></button>
+      <button class="tab" data-tab="disks" onclick="activateTab('disks')">💿 Disk SKUs<span class="tab-badge" id="tab-badge-disks"></span></button>
+      <button class="tab" data-tab="reference" onclick="activateTab('reference')">📖 Reference</button>
+    </div>
   </div>
 
   <!-- No-Data Message -->
