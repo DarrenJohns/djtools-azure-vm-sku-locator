@@ -1,0 +1,66 @@
+name: Validate HTML
+
+on:
+  pull_request:
+    paths:
+      - 'index.html'
+      - '.github/workflows/validate.yml'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check file exists and is not empty
+        run: |
+          if (-not (Test-Path "index.html")) { Write-Error "index.html not found"; exit 1 }
+          $size = (Get-Item "index.html").Length
+          if ($size -eq 0) { Write-Error "index.html is empty"; exit 1 }
+          Write-Host "✅ index.html exists ($size bytes)"
+        shell: pwsh
+
+      - name: Validate HTML structure
+        run: |
+          python -c "
+          import re, sys
+          with open('index.html', encoding='utf-8') as f:
+              content = f.read()
+          # Check DOCTYPE (allow leading comments / whitespace)
+          if '<!DOCTYPE html>' not in content[:500]:
+              print('❌ Missing DOCTYPE'); sys.exit(1)
+          # Check essential tags
+          for tag in ['<html', '<head', '<body', '</html>', '</head>', '</body>']:
+              if tag not in content:
+                  print(f'❌ Missing {tag}'); sys.exit(1)
+          # Strip <script> and <style> blocks before counting tags — their string
+          # contents (template literals, CSS selectors) create false-positive matches.
+          stripped = re.sub(r'<script\b[^>]*>.*?</script>', '', content, flags=re.DOTALL|re.IGNORECASE)
+          stripped = re.sub(r'<style\b[^>]*>.*?</style>',  '', stripped, flags=re.DOTALL|re.IGNORECASE)
+          opens = len(re.findall(r'<[a-zA-Z][^/>]*>', stripped))
+          closes = len(re.findall(r'</[a-zA-Z]+>', stripped))
+          diff = abs(opens - closes)
+          if diff > 20:
+              print(f'⚠ Tag mismatch: {opens} opens vs {closes} closes (diff {diff})')
+              sys.exit(1)
+          print(f'✅ HTML structure valid ({opens} opens, {closes} closes, diff {diff})')
+          "
+        shell: pwsh
+
+      - name: Check for common issues
+        run: |
+          python -c "
+          import sys
+          with open('index.html', encoding='utf-8') as f:
+              content = f.read()
+          issues = []
+          if 'TODO' in content or 'FIXME' in content:
+              issues.append('⚠ Contains TODO/FIXME comments')
+          if 'console.log' in content:
+              issues.append('⚠ Contains console.log statements')
+          if issues:
+              for i in issues: print(i)
+          else:
+              print('✅ No common issues found')
+          "
+        shell: pwsh

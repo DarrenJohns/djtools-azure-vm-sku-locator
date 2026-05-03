@@ -1,0 +1,47 @@
+name: Deploy to Azure Static Web Apps
+
+on:
+  push:
+    branches: [main]
+    paths: ['index.html', 'data/**', 'config.json']
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare deployment staging folder
+        run: |
+          # Only deploy web-servable files (exclude scripts/, docs, etc.)
+          $staging = "deploy-staging"
+          if (Test-Path $staging) { Remove-Item $staging -Recurse -Force }
+          New-Item -ItemType Directory -Path $staging -Force | Out-Null
+
+          Copy-Item "index.html" "$staging/"
+          Copy-Item "config.json" "$staging/"
+          if (Test-Path "data") {
+            Copy-Item -Recurse "data" "$staging/data"
+          }
+
+          $fileCount = (Get-ChildItem $staging -Recurse -File).Count
+          Write-Host "✅ Staging folder ready ($fileCount files)"
+        shell: pwsh
+
+      - name: Deploy to Azure Static Web Apps
+        run: |
+          npx --yes @azure/static-web-apps-cli deploy ./deploy-staging `
+            --deployment-token ${{ secrets.SWA_DEPLOYMENT_TOKEN }} `
+            --env production
+          Write-Host "✅ Deployed to Azure Static Web Apps"
+        shell: pwsh
+
+      - name: Clean up staging folder
+        if: always()
+        run: |
+          if (Test-Path "deploy-staging") {
+            Remove-Item "deploy-staging" -Recurse -Force
+          }
+        shell: pwsh
