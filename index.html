@@ -880,24 +880,24 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
 }
 .modal-close:hover { background: var(--bg-layer2); }
 .modal-body-content { padding: 20px; }
-.shortcuts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 20px; }
-.shortcut-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: var(--bg-layer2); border: 1px solid var(--border-default); border-radius: 8px; }
+.shortcuts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 8px; }
+.shortcut-item { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: var(--radius-sm); background: var(--bg-layer2); }
 .shortcut-key {
-  font-family: 'Cascadia Code', monospace;
-  font-size: 12px;
-  background: var(--bg-layer1);
-  border: 1px solid var(--border-default);
-  border-radius: 4px;
-  padding: 4px 10px;
   min-width: 36px;
   text-align: center;
-  font-weight: 700;
-  white-space: nowrap;
+  padding: 4px 8px;
+  background: var(--bg-layer1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  font-family: 'Cascadia Code', 'Consolas', monospace;
+  font-size: 13px;
+  font-weight: 600;
 }
 .shortcut-desc { font-size: 13px; color: var(--text-secondary); }
-.shortcuts-close-bar { padding: 12px 20px 20px; }
-.shortcuts-close-btn { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border-default); background: var(--bg-layer2); color: var(--text-primary); font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
-.shortcuts-close-btn:hover { background: var(--bg-layer1); }
+.modal-close-row { display: flex; justify-content: flex-end; margin-top: 8px; }
+.modal-banner { background: linear-gradient(135deg, #0f6cbd 0%, #0e4a8a 100%); color: #fff; padding: 24px 28px 18px; text-align: center; }
+.modal-banner h2 { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
+.modal-body { padding: 20px 28px 24px; overflow-y: auto; }
 /* ── Welcome Modal ── */
 .welcome-overlay { position: fixed; inset: 0; z-index: 10001; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
 .welcome-overlay.active { opacity: 1; pointer-events: auto; }
@@ -1352,22 +1352,19 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
 
 <div class="toast-container" id="toast-container"></div>
 
-<div class="modal-overlay" id="shortcutsModal">
-  <div class="modal" style="width:480px;overflow:hidden;">
-    <div class="modal-header-bar">
-      <h3>⌨️ Keyboard Shortcuts</h3>
+<div class="modal-overlay" id="shortcutsModal" onclick="if(event.target===this)closeShortcutsModal()">
+  <div class="modal" style="max-width:480px;width:90%;" role="dialog" aria-modal="true">
+    <div class="modal-banner">
+      <h2>⌨️ Keyboard Shortcuts</h2>
     </div>
-    <div class="shortcuts-grid">
-      <div class="shortcut-item"><span class="shortcut-key">?</span><span class="shortcut-desc">Show shortcuts</span></div>
-      <div class="shortcut-item"><span class="shortcut-key">T</span><span class="shortcut-desc">Toggle dark mode</span></div>
-      <div class="shortcut-item"><span class="shortcut-key">Esc</span><span class="shortcut-desc">Close modal</span></div>
-      <div class="shortcut-item"><span class="shortcut-key">1–6</span><span class="shortcut-desc">Switch tabs</span></div>
-      <div class="shortcut-item"><span class="shortcut-key">F</span><span class="shortcut-desc">Focus search filter</span></div>
-      <div class="shortcut-item"><span class="shortcut-key">C</span><span class="shortcut-desc">Clear all filters</span></div>
-      <div class="shortcut-item"><span class="shortcut-key">X</span><span class="shortcut-desc">Export CSV</span></div>
-    </div>
-    <div class="shortcuts-close-bar">
-      <button class="shortcuts-close-btn" onclick="closeShortcutsModal()">Close</button>
+    <div class="modal-body">
+      <div class="shortcuts-grid">
+        <div class="shortcut-item"><span class="shortcut-key">?</span><span class="shortcut-desc">Show shortcuts</span></div>
+        <div class="shortcut-item"><span class="shortcut-key">T</span><span class="shortcut-desc">Toggle dark mode</span></div>
+        <div class="shortcut-item"><span class="shortcut-key">Esc</span><span class="shortcut-desc">Close modal</span></div>
+        <div class="shortcut-item"><span class="shortcut-key">1–6</span><span class="shortcut-desc">Switch tabs</span></div>
+      </div>
+      <div class="modal-close-row"><button class="btn btn-outline" onclick="closeShortcutsModal()">Close</button></div>
     </div>
   </div>
 </div>
