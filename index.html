@@ -225,15 +225,15 @@ body {
 .freshness-overlay.show { display: flex; }
 .freshness-card {
   background: var(--bg-layer1);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-lg);
-  box-shadow: 0 8px 30px rgba(0,0,0,0.25);
-  padding: 24px 28px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
   max-width: 420px;
   width: 90%;
+  overflow: hidden;
   animation: fadeInUp 0.2s ease;
 }
-.freshness-card h4 { font-size: 15px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.freshness-card .modal-banner h2 { font-size: 18px; }
+.freshness-card .modal-body { padding: 16px 24px 20px; }
 .freshness-card table { width: 100%; font-size: 13px; border-collapse: collapse; }
 .freshness-card td { padding: 8px 10px; border-bottom: 1px solid var(--border-subtle); vertical-align: middle; }
 .freshness-card td:first-child { font-weight: 600; white-space: nowrap; }
@@ -979,8 +979,13 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
 <!-- Freshness Detail Overlay -->
 <div class="freshness-overlay" id="freshness-overlay" onclick="closeFreshnessFlyout()">
   <div class="freshness-card" onclick="event.stopPropagation()">
-    <h4>📋 Data Refresh Summary <button class="btn btn-outline btn-sm" style="margin-left:auto;" onclick="closeFreshnessFlyout()">✕</button></h4>
-    <div id="freshness-detail"></div>
+    <div class="modal-banner">
+      <h2>📋 Data Refresh Summary</h2>
+    </div>
+    <div class="modal-body">
+      <div id="freshness-detail"></div>
+      <div class="modal-close-row"><button class="btn btn-outline" onclick="closeFreshnessFlyout()">Close</button></div>
+    </div>
   </div>
 </div>
 
