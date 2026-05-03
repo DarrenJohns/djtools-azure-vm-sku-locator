@@ -880,20 +880,24 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
 }
 .modal-close:hover { background: var(--bg-layer2); }
 .modal-body-content { padding: 20px; }
-.shortcuts-grid { display: grid; gap: 8px; }
-.shortcut-item { display: flex; align-items: center; gap: 12px; padding: 6px 0; }
+.shortcuts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 20px; }
+.shortcut-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: var(--bg-layer2); border: 1px solid var(--border-default); border-radius: 8px; }
 .shortcut-key {
   font-family: 'Cascadia Code', monospace;
   font-size: 12px;
-  background: var(--bg-layer2);
+  background: var(--bg-layer1);
   border: 1px solid var(--border-default);
   border-radius: 4px;
-  padding: 2px 8px;
-  min-width: 60px;
+  padding: 4px 10px;
+  min-width: 36px;
   text-align: center;
-  font-weight: 600;
+  font-weight: 700;
+  white-space: nowrap;
 }
 .shortcut-desc { font-size: 13px; color: var(--text-secondary); }
+.shortcuts-close-bar { padding: 12px 20px 20px; }
+.shortcuts-close-btn { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border-default); background: var(--bg-layer2); color: var(--text-primary); font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+.shortcuts-close-btn:hover { background: var(--bg-layer1); }
 /* ── Welcome Modal ── */
 .welcome-overlay { position: fixed; inset: 0; z-index: 10001; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
 .welcome-overlay.active { opacity: 1; pointer-events: auto; }
@@ -965,7 +969,7 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
   <svg viewBox="0 0 100 100" style="width:32px;height:32px;flex-shrink:0;"><defs><linearGradient id="hg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#5bb8f5"/><stop offset="100%" stop-color="#ffffff"/></linearGradient></defs><rect x="8" y="8" width="84" height="60" rx="8" fill="url(#hg)"/><rect x="14" y="14" width="72" height="48" rx="4" fill="#0a3d6b"/><rect x="20" y="22" width="26" height="4" rx="2" fill="#00b7c3"/><rect x="20" y="30" width="18" height="4" rx="2" fill="#00b7c3" opacity="0.7"/><rect x="20" y="38" width="32" height="4" rx="2" fill="#00b7c3" opacity="0.5"/><rect x="20" y="46" width="14" height="4" rx="2" fill="#00b7c3" opacity="0.3"/><circle cx="70" cy="30" r="8" fill="none" stroke="#00b7c3" stroke-width="2"/><path d="M70 24v6h5" fill="none" stroke="#00b7c3" stroke-width="2" stroke-linecap="round"/><rect x="60" y="44" width="18" height="8" rx="2" fill="#00b7c3" opacity="0.4"/><rect x="62" y="46" width="4" height="4" rx="1" fill="#00b7c3"/><rect x="68" y="46" width="4" height="4" rx="1" fill="#00b7c3" opacity="0.7"/><rect x="40" y="68" width="20" height="6" rx="2" fill="rgba(255,255,255,0.4)"/><rect x="30" y="74" width="40" height="8" rx="4" fill="rgba(255,255,255,0.3)"/><rect x="32" y="76" width="8" height="4" rx="1" fill="rgba(255,255,255,0.5)"/><rect x="42" y="76" width="8" height="4" rx="1" fill="rgba(255,255,255,0.5)"/><rect x="52" y="76" width="8" height="4" rx="1" fill="rgba(255,255,255,0.5)"/></svg>
   <h1>Azure Virtual Machine SKU by Region</h1>
   <span style="flex:1;"></span>
-  <button class="kbd-shortcut-btn" onclick="openShortcutsModal()" title="Keyboard shortcuts (?)">⌨</button>
+  <button class="kbd-shortcut-btn" onclick="openShortcutsModal()" title="Keyboard shortcuts (?)">⌨️</button>
   <button class="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark theme">🌙</button>
 </header>
 
@@ -1349,21 +1353,21 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
 <div class="toast-container" id="toast-container"></div>
 
 <div class="modal-overlay" id="shortcutsModal">
-  <div class="modal" style="width:440px;">
+  <div class="modal" style="width:480px;overflow:hidden;">
     <div class="modal-header-bar">
-      <h3>⌨ Keyboard Shortcuts</h3>
-      <button class="modal-close" onclick="closeShortcutsModal()">&times;</button>
+      <h3>⌨️ Keyboard Shortcuts</h3>
     </div>
-    <div class="modal-body-content">
-      <div class="shortcuts-grid">
-        <div class="shortcut-item"><span class="shortcut-key">1–6</span><span class="shortcut-desc">Switch between tabs</span></div>
-        <div class="shortcut-item"><span class="shortcut-key">T</span><span class="shortcut-desc">Toggle light/dark theme</span></div>
-        <div class="shortcut-item"><span class="shortcut-key">F</span><span class="shortcut-desc">Focus search filter</span></div>
-        <div class="shortcut-item"><span class="shortcut-key">C</span><span class="shortcut-desc">Clear all filters</span></div>
-        <div class="shortcut-item"><span class="shortcut-key">X</span><span class="shortcut-desc">Export CSV</span></div>
-        <div class="shortcut-item"><span class="shortcut-key">?</span><span class="shortcut-desc">Show this shortcuts panel</span></div>
-        <div class="shortcut-item"><span class="shortcut-key">Esc</span><span class="shortcut-desc">Close any open modal</span></div>
-      </div>
+    <div class="shortcuts-grid">
+      <div class="shortcut-item"><span class="shortcut-key">?</span><span class="shortcut-desc">Show shortcuts</span></div>
+      <div class="shortcut-item"><span class="shortcut-key">T</span><span class="shortcut-desc">Toggle dark mode</span></div>
+      <div class="shortcut-item"><span class="shortcut-key">Esc</span><span class="shortcut-desc">Close modal</span></div>
+      <div class="shortcut-item"><span class="shortcut-key">1–6</span><span class="shortcut-desc">Switch tabs</span></div>
+      <div class="shortcut-item"><span class="shortcut-key">F</span><span class="shortcut-desc">Focus search filter</span></div>
+      <div class="shortcut-item"><span class="shortcut-key">C</span><span class="shortcut-desc">Clear all filters</span></div>
+      <div class="shortcut-item"><span class="shortcut-key">X</span><span class="shortcut-desc">Export CSV</span></div>
+    </div>
+    <div class="shortcuts-close-bar">
+      <button class="shortcuts-close-btn" onclick="closeShortcutsModal()">Close</button>
     </div>
   </div>
 </div>
