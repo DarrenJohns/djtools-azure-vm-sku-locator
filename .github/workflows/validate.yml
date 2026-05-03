@@ -2,7 +2,9 @@ name: Validate HTML
 
 on:
   pull_request:
-    paths: ['index.html']
+    paths:
+      - 'index.html'
+      - '.github/workflows/validate.yml'
 
 jobs:
   validate:
@@ -24,16 +26,19 @@ jobs:
           import re, sys
           with open('index.html', encoding='utf-8') as f:
               content = f.read()
-          # Check DOCTYPE
-          if not content.strip().startswith('<!DOCTYPE html>'):
+          # Check DOCTYPE (allow leading comments / whitespace)
+          if '<!DOCTYPE html>' not in content[:500]:
               print('❌ Missing DOCTYPE'); sys.exit(1)
           # Check essential tags
           for tag in ['<html', '<head', '<body', '</html>', '</head>', '</body>']:
               if tag not in content:
                   print(f'❌ Missing {tag}'); sys.exit(1)
-          # Count open/close tags (rough check — threshold accounts for JS template strings)
-          opens = len(re.findall(r'<[a-zA-Z][^/>]*>', content))
-          closes = len(re.findall(r'</[a-zA-Z]+>', content))
+          # Strip <script> and <style> blocks before counting tags — their string
+          # contents (template literals, CSS selectors) create false-positive matches.
+          stripped = re.sub(r'<script\b[^>]*>.*?</script>', '', content, flags=re.DOTALL|re.IGNORECASE)
+          stripped = re.sub(r'<style\b[^>]*>.*?</style>',  '', stripped, flags=re.DOTALL|re.IGNORECASE)
+          opens = len(re.findall(r'<[a-zA-Z][^/>]*>', stripped))
+          closes = len(re.findall(r'</[a-zA-Z]+>', stripped))
           diff = abs(opens - closes)
           if diff > 20:
               print(f'⚠ Tag mismatch: {opens} opens vs {closes} closes (diff {diff})')
