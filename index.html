@@ -371,10 +371,17 @@ select:focus, input:focus { outline: 2px solid var(--brand-primary); outline-off
   border-radius: var(--radius-md);
   padding: 14px 16px;
   box-shadow: var(--shadow-sm);
-  border-top: 3px solid var(--brand-primary);
   position: relative;
+  overflow: hidden;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
   outline: none;
+}
+.summary-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: var(--accent-strip, linear-gradient(90deg, #0078D4, #50E6FF));
 }
 .summary-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
 .summary-card .summary-icon {
@@ -401,18 +408,18 @@ select:focus, input:focus { outline: 2px solid var(--brand-primary); outline-off
   margin-top: 4px;
   line-height: 1.4;
 }
-.summary-card[data-accent="blue"] { border-top-color: #0d6efd; }
-.summary-card[data-accent="blue"] .summary-value { color: #0d6efd; }
-.summary-card[data-accent="green"] { border-top-color: #198754; }
-.summary-card[data-accent="green"] .summary-value { color: #198754; }
-.summary-card[data-accent="purple"] { border-top-color: #6f42c1; }
+.summary-card[data-accent="blue"]   { --accent-strip: linear-gradient(90deg, #0d6efd, #6ea8fe); }
+.summary-card[data-accent="blue"]   .summary-value { color: #0d6efd; }
+.summary-card[data-accent="green"]  { --accent-strip: linear-gradient(90deg, #198754, #75b798); }
+.summary-card[data-accent="green"]  .summary-value { color: #198754; }
+.summary-card[data-accent="purple"] { --accent-strip: linear-gradient(90deg, #6f42c1, #a98eda); }
 .summary-card[data-accent="purple"] .summary-value { color: #6f42c1; }
-.summary-card[data-accent="orange"] { border-top-color: #fd7e14; }
+.summary-card[data-accent="orange"] { --accent-strip: linear-gradient(90deg, #fd7e14, #feb272); }
 .summary-card[data-accent="orange"] .summary-value { color: #fd7e14; }
-.summary-card[data-accent="teal"] { border-top-color: #20c997; }
-.summary-card[data-accent="teal"] .summary-value { color: #20c997; }
-.summary-card[data-accent="red"] { border-top-color: #dc3545; }
-.summary-card[data-accent="red"] .summary-value { color: #dc3545; }
+.summary-card[data-accent="teal"]   { --accent-strip: linear-gradient(90deg, #20c997, #79dfc1); }
+.summary-card[data-accent="teal"]   .summary-value { color: #20c997; }
+.summary-card[data-accent="red"]    { --accent-strip: linear-gradient(90deg, #dc3545, #ea868f); }
+.summary-card[data-accent="red"]    .summary-value { color: #dc3545; }
 [data-theme="dark"] .summary-card[data-accent="blue"] .summary-value { color: #6ea8fe; }
 [data-theme="dark"] .summary-card[data-accent="green"] .summary-value { color: #75b798; }
 [data-theme="dark"] .summary-card[data-accent="purple"] .summary-value { color: #a98eda; }
@@ -2045,7 +2052,7 @@ function renderBrowseSummary() {
   if (armCount > 0) cards.push({ label: 'ARM', value: armCount, color: '#00a86b' });
 
   el.innerHTML = cards.map(c =>
-    `<div class="summary-card" style="border-top:3px solid ${c.color};">
+    `<div class="summary-card" style="--accent-strip: linear-gradient(90deg, ${c.color}, ${c.color}cc);">
       <div class="summary-value" style="font-size:22px;color:${c.color};">${c.value}</div>
       <div class="summary-label" style="font-size:11px;">${c.label}</div>
     </div>`
@@ -2185,7 +2192,7 @@ function renderDiskSection() {
   let summaryHtml = '';
   Object.entries(tierCounts).forEach(([label, count]) => {
     const color = tierColors[label] || '#0078d4';
-    summaryHtml += `<div class="summary-card" style="border-top:3px solid ${color};">
+    summaryHtml += `<div class="summary-card" style="--accent-strip: linear-gradient(90deg, ${color}, ${color}cc);">
       <div class="summary-value" style="font-size:22px;color:${color};">${count}</div>
       <div class="summary-label" style="font-size:11px;">${escapeHtml(label)}</div>
     </div>`;
