@@ -1,6 +1,6 @@
 # VM SKU Per Region — Specification
 
-> Version: v1.0.0-beta
+> Version: v1.1.0
 
 ## 1. Overview
 
@@ -152,6 +152,7 @@ All UI sections are organized into **6 tabs** using a sticky tab strip below the
 - Export shortlist to CSV
 - Clear all pins button
 - **Pricing comparison**: Fetches live pricing from Azure Retail Prices API, cached per region
+- **Multi-Currency Support**: 17 currencies (USD, EUR, GBP, NZD, AUD, JPY, etc.) — currency selector dropdown, persisted to localStorage
 - **Multi-Region Compare**: Select up to 5 other regions, shows ✅/❌ availability matrix for pinned SKUs
 
 ### 💿 Disk SKUs
