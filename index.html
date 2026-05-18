@@ -666,7 +666,7 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
 [data-theme="dark"] .shortlist-chip { background: #1a3050; border-color: #2a4a6a; }
 .shortlist-chip .remove-pin { cursor: pointer; font-size: 14px; margin-left: 2px; opacity: 0.6; }
 .shortlist-chip .remove-pin:hover { opacity: 1; color: var(--status-danger); }
-.shortlist-actions { display: flex; gap: 8px; margin-top: 10px; }
+.shortlist-actions { display: flex; gap: 8px; margin-top: 10px; justify-content: space-between; align-items: center; }
 /* Pricing table */
 .pricing-container { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border-default); }
 .pricing-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
@@ -1176,13 +1176,15 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
       </div>
       <div class="section-body" id="body-shortlist">
         <div class="shortlist-chips" id="shortlist-chips"><span style="font-size:12px;color:var(--text-tertiary);">Pin VM SKUs from the table using the ○ button to build your shortlist</span></div>
-        <div class="shortlist-actions" id="shortlist-actions" style="display:none;margin-top:8px;">
+        <div class="shortlist-actions" id="shortlist-actions" style="display:none;margin-top:8px;justify-content:space-between;align-items:center;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="currency-select-wrapper">
+              <label for="currency-select">💱</label>
+              <select id="currency-select" onchange="onCurrencyChange()"></select>
+            </span>
+            <button class="btn btn-outline btn-sm" onclick="clearShortlist()">📌 Clear All Pins</button>
+          </div>
           <button class="btn btn-primary btn-sm" onclick="exportShortlistCsv()">📥 Export Shortlist</button>
-          <span class="currency-select-wrapper">
-            <label for="currency-select">💱</label>
-            <select id="currency-select" onchange="onCurrencyChange()"></select>
-          </span>
-          <button class="btn btn-outline btn-sm" onclick="clearShortlist()">📌 Clear All Pins</button>
         </div>
         <div class="pricing-container" id="pricing-container" style="display:none;">
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;flex-wrap:wrap;">
