@@ -22,7 +22,7 @@ This is a **single-file HTML web application** with **static JSON data files** â
 |----------|--------|--------|
 | VM SKUs | Azure Resource SKU API | `scripts/normalize-skus.py` |
 | Managed Disk SKUs | Azure Resource SKU API | `scripts/normalize-disks.py` |
-| VM Pricing | Azure Retail Prices API (17 currencies) | `scripts/fetch-pricing.py --currency <CODE>` |
+| VM Pricing | Azure Retail Prices API (17 currencies, PAYG + RI) | `scripts/fetch-pricing.py --currency <CODE>` |
 | Retirement Dates | Azure Updates page | `scripts/update-retirements.py` |
 
 The list of regions to fetch is configured in `config.json`.

@@ -29,6 +29,7 @@
 | **Find a Match** | Specify your requirements (vCPUs, memory, disks, NICs, features) and get ranked matches with percentage scores |
 | **Pin & Compare** | Pin SKUs to a shortlist, then compare availability across up to 5 other regions |
 | **Multi-Currency Pricing** | View pricing in 17 currencies (USD, EUR, GBP, NZD, AUD, JPY, and more) — selection persists across sessions |
+| **RI & Savings Plan Pricing** | Compare Pay-As-You-Go, 1/3-year Reserved Instance (actual Azure prices), and 1/3-year Savings Plan (estimated) rates |
 | **Deployment Snippets** | Click any SKU for ready-to-use Azure CLI, PowerShell, and Bicep code |
 | **Retirement Warnings** | SKUs from families being retired are flagged with a warning badge |
 | **What's New** | See which SKUs were added or removed since the last monthly refresh |
