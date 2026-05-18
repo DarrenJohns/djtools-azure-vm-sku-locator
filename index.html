@@ -2715,7 +2715,7 @@ async function fetchPinnedPricing() {
   if (!_pricingCache || _pricingCache._region !== selectedRegion || _pricingCache._currency !== selectedCurrency) {
     try {
       let resp = await fetch(`data/${selectedRegion}-pricing-${selectedCurrency}.json`);
-      if (!resp.ok && selectedCurrency !== 'USD') {
+      if (!resp.ok) {
         resp = await fetch(`data/${selectedRegion}-pricing.json`);
       }
       if (!resp.ok) {
