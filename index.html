@@ -676,6 +676,10 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
 .pricing-table .price-cell { font-family: 'Cascadia Code', 'Consolas', monospace; font-size: 12px; }
 .pricing-table .price-cell.cheapest { color: var(--status-success); font-weight: 700; }
 .pricing-note { font-size: 11px; color: var(--text-tertiary); margin-top: 6px; }
+.term-pills { display: inline-flex; gap: 2px; background: var(--bg-layer2); border-radius: var(--radius-sm); padding: 2px; border: 1px solid var(--border-default); }
+.term-pill { font-size: 11px; padding: 3px 10px; border: none; border-radius: var(--radius-sm); background: transparent; color: var(--text-secondary); cursor: pointer; font-weight: 500; transition: all 0.15s; white-space: nowrap; }
+.term-pill:hover { color: var(--text-primary); background: var(--bg-hover); }
+.term-pill.active { background: var(--brand-primary); color: #fff; font-weight: 600; }
 .currency-select-wrapper { display: inline-flex; align-items: center; gap: 6px; }
 .currency-select-wrapper label { font-size: 12px; color: var(--text-secondary); font-weight: 600; white-space: nowrap; }
 .currency-select-wrapper select { font-size: 12px; padding: 4px 8px; border: 1px solid var(--border-default); border-radius: var(--radius-sm); background: var(--bg-layer2); color: var(--text-primary); cursor: pointer; }
@@ -1181,7 +1185,16 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
           <button class="btn btn-outline btn-sm" onclick="clearShortlist()">📌 Clear All Pins</button>
         </div>
         <div class="pricing-container" id="pricing-container" style="display:none;">
-          <p style="margin-bottom:4px;font-size:13px;font-weight:600;">💰 Pricing Comparison <span id="pricing-currency-label" style="font-size:11px;font-weight:400;color:var(--text-tertiary);">(USD/hr, Pay-As-You-Go)</span></p>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;flex-wrap:wrap;">
+            <p style="margin:0;font-size:13px;font-weight:600;">💰 Pricing Comparison <span id="pricing-currency-label" style="font-size:11px;font-weight:400;color:var(--text-tertiary);">(USD/hr, Pay-As-You-Go)</span></p>
+            <div class="term-pills" id="term-pills">
+              <button class="term-pill active" data-term="payg" onclick="selectPricingTerm('payg')">PAYG</button>
+              <button class="term-pill" data-term="ri1" onclick="selectPricingTerm('ri1')">1yr RI</button>
+              <button class="term-pill" data-term="ri3" onclick="selectPricingTerm('ri3')">3yr RI</button>
+              <button class="term-pill" data-term="sp1" onclick="selectPricingTerm('sp1')">1yr SP</button>
+              <button class="term-pill" data-term="sp3" onclick="selectPricingTerm('sp3')">3yr SP</button>
+            </div>
+          </div>
           <div id="pricing-content"></div>
         </div>
         <div id="multiregion-container" style="display:none;margin-top:14px;padding-top:12px;border-top:1px solid var(--border-default);">
@@ -2565,7 +2578,9 @@ function exportShortlistCsv() {
   const hasPricing = _pricingCache && _pricingCache._region === selectedRegion;
   const ci = getCurrencyInfo();
   const currCode = selectedCurrency || 'USD';
-  const pricingHeaders = hasPricing ? [`Linux/hr (${currCode})`, `Windows/hr (${currCode})`, `Spot/hr (${currCode})`, `~Monthly (${currCode})`] : [];
+  const term = selectedTerm || 'payg';
+  const termLabel = TERM_LABELS[term] || 'PAYG';
+  const pricingHeaders = hasPricing ? [`Linux/hr ${termLabel} (${currCode})`, `Windows/hr ${termLabel} (${currCode})`, `~Monthly ${termLabel} (${currCode})`] : [];
   const headers = [...specHeaders, ...pricingHeaders, 'Retirement Status', 'Retirement Date'];
   const rows = pinned.map(s => {
     const specCols = columns.filter(c => c.key !== '_pin').map(c => {
@@ -2576,8 +2591,15 @@ function exportShortlistCsv() {
     if (hasPricing) {
       const prices = _pricingCache[s.size] || {};
       const fmt = (p) => p != null ? `${ci.symbol}${p.toFixed(ci.decimalPlaces)}` : '';
-      const monthly = prices.linux != null ? `${ci.symbol}${(prices.linux * 730).toFixed(0)}` : '';
-      specCols.push(fmt(prices.linux), fmt(prices.windows), fmt(prices.spot), monthly);
+      // Compute term-adjusted prices for export
+      let linuxPrice = prices.linux;
+      let winPrice = prices.windows;
+      if (term === 'ri1') { linuxPrice = prices.ri1yr; winPrice = null; }
+      else if (term === 'ri3') { linuxPrice = prices.ri3yr; winPrice = null; }
+      else if (term === 'sp1') { linuxPrice = prices.linux != null ? prices.linux * SP_DISCOUNTS.sp1 : null; winPrice = prices.windows != null ? prices.windows * SP_DISCOUNTS.sp1 : null; }
+      else if (term === 'sp3') { linuxPrice = prices.linux != null ? prices.linux * SP_DISCOUNTS.sp3 : null; winPrice = prices.windows != null ? prices.windows * SP_DISCOUNTS.sp3 : null; }
+      const monthly = linuxPrice != null ? `${ci.symbol}${(linuxPrice * 730).toFixed(0)}` : '';
+      specCols.push(fmt(linuxPrice), fmt(winPrice), monthly);
     }
     const ret = s.family && retirementFamilies[s.family.toLowerCase()] ? retirementFamilies[s.family.toLowerCase()] : null;
     specCols.push(ret ? 'Retiring' : '', ret ? ret.date : '');
@@ -2590,14 +2612,31 @@ function exportShortlistCsv() {
   a.download = `shortlist-${selectedRegion || 'export'}.csv`;
   a.click();
   URL.revokeObjectURL(a.href);
-  showToast(`Exported ${pinned.length} pinned SKUs to CSV${hasPricing ? ` with ${currCode} pricing` : ''}`);
+  showToast(`Exported ${pinned.length} pinned SKUs to CSV${hasPricing ? ` with ${currCode} ${termLabel} pricing` : ''}`);
 }
 
 // === PRICING COMPARISON ===
 let currencyMeta = []; // loaded from data/currencies.json
 let selectedCurrency = localStorage.getItem('vmsku_currency') || 'USD';
+let selectedTerm = 'payg'; // payg | ri1 | ri3 | sp1 | sp3
 
-let _pricingCache = null; // { skuName: { linux, windows, spot } }
+const SP_DISCOUNTS = Object.freeze({ sp1: 0.78, sp3: 0.58 });
+const TERM_LABELS = Object.freeze({ payg: 'Pay-As-You-Go', ri1: '1-Year Reserved', ri3: '3-Year Reserved', sp1: '1-Year Savings Plan', sp3: '3-Year Savings Plan' });
+
+let _pricingCache = null; // { skuName: { linux, windows, spot, ri1yr, ri3yr } }
+
+function selectPricingTerm(term) {
+  selectedTerm = term;
+  document.querySelectorAll('.term-pill').forEach(btn => btn.classList.toggle('active', btn.dataset.term === term));
+  // Update header label
+  const currLabel = document.getElementById('pricing-currency-label');
+  if (currLabel) currLabel.textContent = `(${selectedCurrency || 'USD'}/hr, ${TERM_LABELS[term] || 'Pay-As-You-Go'})`;
+  // Re-render pricing table if data loaded
+  const content = document.getElementById('pricing-content');
+  if (_pricingCache && pinnedSkus.size && content) {
+    renderPricingTable([...pinnedSkus].sort(), content);
+  }
+}
 
 function populateCurrencySelector() {
   const sel = document.getElementById('currency-select');
@@ -2658,10 +2697,29 @@ async function fetchPinnedPricing() {
 }
 
 function renderPricingTable(skuNames, content) {
+  const ci = getCurrencyInfo();
+  const currCode = selectedCurrency || 'USD';
+  const term = selectedTerm || 'payg';
+
+  // Compute effective hourly price based on selected term
+  function getTermPrice(prices, os) {
+    const payg = prices[os];
+    if (payg == null) return null;
+    if (term === 'payg') return payg;
+    if (term === 'ri1') return prices.ri1yr != null ? prices.ri1yr : null;
+    if (term === 'ri3') return prices.ri3yr != null ? prices.ri3yr : null;
+    if (term === 'sp1') return payg * SP_DISCOUNTS.sp1;
+    if (term === 'sp3') return payg * SP_DISCOUNTS.sp3;
+    return payg;
+  }
+
   const rows = skuNames.map(name => {
     const prices = _pricingCache[name] || {};
     const sku = allSkus.find(s => s.size === name);
-    return { name, linux: prices.linux, windows: prices.windows, spot: prices.spot, sku };
+    const linux = getTermPrice(prices, 'linux');
+    const windows = (term === 'payg') ? prices.windows : (term.startsWith('sp') && prices.windows != null ? prices.windows * SP_DISCOUNTS[term] : null);
+    const spot = (term === 'payg') ? prices.spot : null; // Spot only shown for PAYG
+    return { name, linux, windows, spot, sku, rawPrices: prices };
   });
 
   // Find cheapest in each column for highlighting
@@ -2672,21 +2730,20 @@ function renderPricingTable(skuNames, content) {
   const minWindows = windowsPrices.length ? Math.min(...windowsPrices) : null;
   const minSpot = spotPrices.length ? Math.min(...spotPrices) : null;
 
-  const ci = getCurrencyInfo();
   const fmt = (price) => price != null ? `${ci.symbol}${price.toFixed(ci.decimalPlaces)}` : '—';
   const monthly = (price) => price != null ? `${ci.symbol}${(price * 730).toFixed(0)}/mo` : '';
 
-  const currCode = selectedCurrency || 'USD';
+  const showSpot = (term === 'payg');
   let html = `<table class="pricing-table">
     <thead><tr>
       <th>SKU</th><th>vCPUs</th><th>Memory</th>
-      <th>🐧 Linux/hr (${currCode})</th><th>🪟 Windows/hr (${currCode})</th><th>⚡ Spot/hr (${currCode})</th><th>🐧 ~Monthly (${currCode})</th>
+      <th>🐧 Linux/hr (${currCode})</th><th>🪟 Windows/hr (${currCode})</th>${showSpot ? `<th>⚡ Spot/hr (${currCode})</th>` : ''}<th>🐧 ~Monthly (${currCode})</th>
     </tr></thead><tbody>`;
 
   for (const r of rows) {
-    const lp = r.linux != null ? r.linux : null;
-    const wp = r.windows != null ? r.windows : null;
-    const sp = r.spot != null ? r.spot : null;
+    const lp = r.linux;
+    const wp = r.windows;
+    const sp = r.spot;
     const lClass = (lp !== null && lp === minLinux && rows.length > 1) ? ' cheapest' : '';
     const wClass = (wp !== null && wp === minWindows && rows.length > 1) ? ' cheapest' : '';
     const sClass = (sp !== null && sp === minSpot && rows.length > 1) ? ' cheapest' : '';
@@ -2696,19 +2753,25 @@ function renderPricingTable(skuNames, content) {
       <td>${r.sku ? r.sku.vCPUs : '—'}</td>
       <td>${r.sku ? r.sku.memoryGB + ' GB' : '—'}</td>
       <td class="price-cell${lClass}">${fmt(lp)}</td>
-      <td class="price-cell${wClass}">${fmt(wp)}</td>
-      <td class="price-cell${sClass}">${fmt(sp)}</td>
+      <td class="price-cell${wClass}">${fmt(wp)}</td>${showSpot ? `
+      <td class="price-cell${sClass}">${fmt(sp)}</td>` : ''}
       <td class="price-cell" style="color:var(--text-tertiary);">${monthly(lp)}</td>
     </tr>`;
   }
 
   html += '</tbody></table>';
   const updated = _pricingCache._lastUpdated ? ` · Updated ${new Date(_pricingCache._lastUpdated).toLocaleDateString()}` : '';
-  html += `<p class="pricing-note">💡 Pricing sourced from the <a href="https://prices.azure.com" target="_blank" style="color:var(--brand-primary);">Azure Retail Prices API</a> · ${selectedCurrency || 'USD'} pay-as-you-go rates · Est. ~730 hrs/mo${updated}<br>— indicates the SKU has no published price in this region (may be in preview or not yet commercially available)</p>`;
+  const termNote = TERM_LABELS[term] || 'Pay-As-You-Go';
+  const sourceNote = (term === 'ri1' || term === 'ri3')
+    ? 'RI pricing from Azure Retail Prices API (actual per-SKU rates)'
+    : (term === 'sp1' || term === 'sp3')
+    ? 'SP pricing estimated using industry-average discount multipliers against PAYG'
+    : `${currCode} pay-as-you-go rates`;
+  html += `<p class="pricing-note">💡 ${sourceNote} · <a href="https://prices.azure.com" target="_blank" style="color:var(--brand-primary);">Azure Retail Prices API</a> · Est. ~730 hrs/mo${updated}<br>— indicates the SKU has no published price in this region (may be in preview or not yet commercially available)</p>`;
 
-  // Update header label with current currency
+  // Update header label
   const currLabel = document.getElementById('pricing-currency-label');
-  if (currLabel) currLabel.textContent = `(${selectedCurrency || 'USD'}/hr, Pay-As-You-Go)`;
+  if (currLabel) currLabel.textContent = `(${currCode}/hr, ${termNote})`;
 
   content.innerHTML = html;
 }
