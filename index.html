@@ -676,6 +676,9 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
 .pricing-table .price-cell { font-family: 'Cascadia Code', 'Consolas', monospace; font-size: 12px; }
 .pricing-table .price-cell.cheapest { color: var(--status-success); font-weight: 700; }
 .pricing-note { font-size: 11px; color: var(--text-tertiary); margin-top: 6px; }
+.currency-select-wrapper { display: inline-flex; align-items: center; gap: 6px; }
+.currency-select-wrapper label { font-size: 12px; color: var(--text-secondary); font-weight: 600; white-space: nowrap; }
+.currency-select-wrapper select { font-size: 12px; padding: 4px 8px; border: 1px solid var(--border-default); border-radius: var(--radius-sm); background: var(--bg-layer2); color: var(--text-primary); cursor: pointer; }
 .pricing-loading { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); padding: 8px 0; }
 .pin-btn { cursor: pointer; font-size: 16px; opacity: 0.3; transition: all 0.15s; background: none; border: none; padding: 0 2px; }
 .pin-btn:hover { opacity: 0.7; transform: scale(1.2); }
@@ -1172,10 +1175,14 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
         <div class="shortlist-actions" id="shortlist-actions" style="display:none;margin-top:8px;">
           <button class="btn btn-primary btn-sm" onclick="exportShortlistCsv()">📥 Export Shortlist</button>
           <button class="btn btn-outline btn-sm" onclick="fetchPinnedPricing()">💰 Load Pricing</button>
+          <span class="currency-select-wrapper">
+            <label for="currency-select">💱</label>
+            <select id="currency-select" onchange="onCurrencyChange()"></select>
+          </span>
           <button class="btn btn-outline btn-sm" onclick="clearShortlist()">📌 Clear All Pins</button>
         </div>
         <div class="pricing-container" id="pricing-container" style="display:none;">
-          <p style="margin-bottom:4px;font-size:13px;font-weight:600;">💰 Pricing Comparison <span style="font-size:11px;font-weight:400;color:var(--text-tertiary);">(USD/hr, Pay-As-You-Go)</span></p>
+          <p style="margin-bottom:4px;font-size:13px;font-weight:600;">💰 Pricing Comparison <span id="pricing-currency-label" style="font-size:11px;font-weight:400;color:var(--text-tertiary);">(USD/hr, Pay-As-You-Go)</span></p>
           <div id="pricing-content"></div>
         </div>
         <div id="multiregion-container" style="display:none;margin-top:14px;padding-top:12px;border-top:1px solid var(--border-default);">
@@ -1345,7 +1352,7 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
   <a href="https://github.com/features/copilot/cli/" target="_blank" rel="noopener noreferrer" style="color:var(--brand-primary);text-decoration:none;font-weight:600;">Learn more ↗</a>
   &nbsp;·&nbsp;
   <a href="https://github.com/DarrenJohns/djtools-azure-vm-sku-locator" target="_blank" rel="noopener noreferrer" style="color:var(--brand-primary);text-decoration:none;font-weight:600;">GitHub ↗</a>
-  <div style="margin-top:8px;font-size:11px;color:var(--text-tertiary);opacity:0.7;">v1.0.0-beta</div>
+  <div style="margin-top:8px;font-size:11px;color:var(--text-tertiary);opacity:0.7;">v1.1.0</div>
 </footer>
 
 <div class="toast-container" id="toast-container"></div>
@@ -1782,6 +1789,10 @@ async function init() {
       retirementFamilies = {};
     }
     availableDataRegions = new Set(metadata.availableRegions || []);
+    try {
+      const currResp = await fetch('data/currencies.json');
+      if (currResp.ok) { currencyMeta = await currResp.json(); populateCurrencySelector(); }
+    } catch(e) {}
     renderFreshness();
     buildDropdown();
     selectRegion('newzealandnorth');
@@ -2565,7 +2576,32 @@ function exportShortlistCsv() {
 }
 
 // === PRICING COMPARISON ===
+let currencyMeta = []; // loaded from data/currencies.json
+let selectedCurrency = localStorage.getItem('vmsku_currency') || 'USD';
+
 let _pricingCache = null; // { skuName: { linux, windows, spot } }
+
+function populateCurrencySelector() {
+  const sel = document.getElementById('currency-select');
+  if (!sel || !currencyMeta.length) return;
+  sel.innerHTML = currencyMeta.map(c => 
+    `<option value="${c.code}" ${c.code === selectedCurrency ? 'selected' : ''}>${c.code} ${c.symbol}</option>`
+  ).join('');
+}
+
+function onCurrencyChange() {
+  const sel = document.getElementById('currency-select');
+  selectedCurrency = sel.value;
+  localStorage.setItem('vmsku_currency', selectedCurrency);
+  if (_pricingCache && _pricingCache._region) {
+    _pricingCache = null;
+    fetchPinnedPricing();
+  }
+}
+
+function getCurrencyInfo() {
+  return currencyMeta.find(c => c.code === selectedCurrency) || { code: 'USD', symbol: '$', decimalPlaces: 4 };
+}
 
 async function fetchPinnedPricing() {
   if (!pinnedSkus.size) { showToast('Pin some SKUs first', 'warning'); return; }
@@ -2579,9 +2615,12 @@ async function fetchPinnedPricing() {
   content.innerHTML = '<div class="pricing-loading">⏳ Loading pricing data...</div>';
 
   // Load pricing file if not cached for this region
-  if (!_pricingCache || _pricingCache._region !== selectedRegion) {
+  if (!_pricingCache || _pricingCache._region !== selectedRegion || _pricingCache._currency !== selectedCurrency) {
     try {
-      const resp = await fetch(`data/${selectedRegion}-pricing.json`);
+      let resp = await fetch(`data/${selectedRegion}-pricing-${selectedCurrency}.json`);
+      if (!resp.ok && selectedCurrency !== 'USD') {
+        resp = await fetch(`data/${selectedRegion}-pricing.json`);
+      }
       if (!resp.ok) {
         content.innerHTML = '<div style="font-size:12px;color:var(--text-tertiary);padding:8px 0;">💰 Pricing data not yet available for this region. It will be generated on the next scheduled data refresh.</div>';
         return;
@@ -2589,6 +2628,7 @@ async function fetchPinnedPricing() {
       const data = await resp.json();
       _pricingCache = data.prices || {};
       _pricingCache._region = selectedRegion;
+      _pricingCache._currency = selectedCurrency;
       _pricingCache._lastUpdated = data.lastUpdated;
     } catch (e) {
       content.innerHTML = '<div style="font-size:12px;color:var(--status-danger);padding:8px 0;">⚠️ Failed to load pricing data.</div>';
@@ -2615,13 +2655,15 @@ function renderPricingTable(skuNames, content) {
   const minWindows = windowsPrices.length ? Math.min(...windowsPrices) : null;
   const minSpot = spotPrices.length ? Math.min(...spotPrices) : null;
 
-  const fmt = (price) => price != null ? `$${price.toFixed(4)}` : '—';
-  const monthly = (price) => price != null ? `$${(price * 730).toFixed(0)}/mo` : '';
+  const ci = getCurrencyInfo();
+  const fmt = (price) => price != null ? `${ci.symbol}${price.toFixed(ci.decimalPlaces)}` : '—';
+  const monthly = (price) => price != null ? `${ci.symbol}${(price * 730).toFixed(0)}/mo` : '';
 
+  const currCode = selectedCurrency || 'USD';
   let html = `<table class="pricing-table">
     <thead><tr>
       <th>SKU</th><th>vCPUs</th><th>Memory</th>
-      <th>🐧 Linux/hr</th><th>🪟 Windows/hr</th><th>⚡ Spot/hr</th><th>🐧 ~Monthly</th>
+      <th>🐧 Linux/hr (${currCode})</th><th>🪟 Windows/hr (${currCode})</th><th>⚡ Spot/hr (${currCode})</th><th>🐧 ~Monthly</th>
     </tr></thead><tbody>`;
 
   for (const r of rows) {
@@ -2645,7 +2687,11 @@ function renderPricingTable(skuNames, content) {
 
   html += '</tbody></table>';
   const updated = _pricingCache._lastUpdated ? ` · Updated ${new Date(_pricingCache._lastUpdated).toLocaleDateString()}` : '';
-  html += `<p class="pricing-note">💡 Data from <a href="https://prices.azure.com" target="_blank" style="color:var(--brand-primary);">Azure Retail Prices API</a> · USD pay-as-you-go · ~730 hrs/mo${updated}<br>— indicates the SKU is not yet priced in this region (may be in preview or not commercially available)</p>`;
+  html += `<p class="pricing-note">💡 Pricing sourced from the <a href="https://prices.azure.com" target="_blank" style="color:var(--brand-primary);">Azure Retail Prices API</a> · ${selectedCurrency || 'USD'} pay-as-you-go rates · Est. ~730 hrs/mo${updated}<br>— indicates the SKU has no published price in this region (may be in preview or not yet commercially available)</p>`;
+
+  // Update header label with current currency
+  const currLabel = document.getElementById('pricing-currency-label');
+  if (currLabel) currLabel.textContent = `(${selectedCurrency || 'USD'}/hr, Pay-As-You-Go)`;
 
   content.innerHTML = html;
 }

@@ -1,19 +1,24 @@
 """Fetch VM pricing from Azure Retail Prices API (no auth required).
 
 Produces a JSON file per region with pay-as-you-go pricing for each SKU.
+Supports fetching in any currency the API supports via --currency flag.
 """
 import json
 import sys
 import urllib.request
 import urllib.parse
 import time
+import argparse
 
-if len(sys.argv) != 3:
-    print("Usage: fetch-pricing.py <region-data-file> <output-file>")
-    sys.exit(1)
+parser = argparse.ArgumentParser(description='Fetch VM pricing from Azure Retail Prices API')
+parser.add_argument('region_file', help='Path to region SKU data JSON file')
+parser.add_argument('output_file', help='Path to output pricing JSON file')
+parser.add_argument('--currency', default='USD', help='Currency code (default: USD)')
+args = parser.parse_args()
 
-region_file = sys.argv[1]
-output_file = sys.argv[2]
+region_file = args.region_file
+output_file = args.output_file
+currency = args.currency.upper()
 
 with open(region_file, encoding='utf-8') as f:
     region_data = json.load(f)
@@ -28,7 +33,7 @@ for name in sku_names:
     api_sku_map[api_name] = name
 
 api_sku_names = sorted(api_sku_map.keys())
-print(f"  Fetching pricing for {len(api_sku_names)} SKUs in {region_name}...")
+print(f"  Fetching pricing for {len(api_sku_names)} SKUs in {region_name} ({currency})...")
 
 all_items = []
 
@@ -43,7 +48,7 @@ for i in range(0, len(api_sku_names), BATCH_SIZE):
         f"and ({sku_filter}) "
         f"and priceType eq 'Consumption'"
     )
-    url = f"https://prices.azure.com/api/retail/prices?$filter={urllib.parse.quote(odata_filter)}"
+    url = f"https://prices.azure.com/api/retail/prices?currencyCode='{currency}'&$filter={urllib.parse.quote(odata_filter)}"
 
     pages = 0
     while url and pages < 10:
@@ -95,7 +100,7 @@ for item in all_items:
 
 output = {
     'region': region_name,
-    'currency': 'USD',
+    'currency': currency,
     'lastUpdated': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
     'prices': pricing
 }
@@ -104,4 +109,4 @@ with open(output_file, 'w', encoding='utf-8') as f:
     json.dump(output, f, separators=(',', ':'))
 
 matched = sum(1 for v in pricing.values() if v)
-print(f"  [OK] Pricing fetched: {matched}/{len(sku_names)} SKUs with prices")
+print(f"  [OK] Pricing fetched ({currency}): {matched}/{len(sku_names)} SKUs with prices")
