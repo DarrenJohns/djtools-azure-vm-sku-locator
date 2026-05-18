@@ -1,5 +1,5 @@
 [
-  { "code": "USD", "symbol": "$", "name": "US Dollar", "decimalPlaces": 4 },
+  { "code": "USD", "symbol": "US$", "name": "US Dollar", "decimalPlaces": 4 },
   { "code": "AUD", "symbol": "A$", "name": "Australian Dollar", "decimalPlaces": 4 },
   { "code": "BRL", "symbol": "R$", "name": "Brazilian Real", "decimalPlaces": 4 },
   { "code": "CAD", "symbol": "C$", "name": "Canadian Dollar", "decimalPlaces": 4 },
