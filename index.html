@@ -909,6 +909,7 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
 .welcome-body .btn { width: 100%; justify-content: center; font-size: 14px; font-weight: 400; padding: 10px; display: flex; }
 .btn-outline { background: var(--bg-layer1); border: 1px solid var(--border-default); color: var(--text-primary); }
 .btn-outline:hover { background: var(--bg-layer2); border-color: var(--brand-primary); }
+.btn-danger-hover:hover { background: var(--status-danger); border-color: var(--status-danger); color: #fff; }
 .btn-sm { font-size: 12px; padding: 4px 10px; }
 /* ── Deployment Checker ── */
 .checker-form { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 12px; }
@@ -1182,7 +1183,7 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
               <label for="currency-select">💱</label>
               <select id="currency-select" onchange="onCurrencyChange()"></select>
             </span>
-            <button class="btn btn-outline btn-sm" onclick="clearShortlist()">📌 Clear All Pins</button>
+            <button class="btn btn-outline btn-sm btn-danger-hover" onclick="clearShortlist()">📌 Clear All Pins</button>
           </div>
           <button class="btn btn-primary btn-sm" onclick="exportShortlistCsv()">📥 Export Shortlist</button>
         </div>
@@ -2567,6 +2568,7 @@ function renderShortlist() {
 }
 
 function clearShortlist() {
+  if (!confirm(`Remove all ${pinnedSkus.size} pinned SKUs from your shortlist?`)) return;
   pinnedSkus.clear();
   renderShortlist();
   renderTable();
