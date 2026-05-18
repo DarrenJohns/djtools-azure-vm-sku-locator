@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Layout C: Dual-List Region Selector — Mockup</title>
+<style>
+  /* ── Reset & Base ────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #1e1e2e;
+    color: #e0e0e0;
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px;
+    min-height: 100vh;
+  }
+
+  /* ── Card Container ──────────────────────────────────── */
+  .card {
+    background: #2a2a3a;
+    border: 1px solid #3a3a4a;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 960px;
+    padding: 32px;
+    box-shadow: 0 8px 32px rgba(0,0,0,.35);
+  }
+  .card-title {
+    font-size: 1.45rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .card-desc {
+    color: #9e9eb8;
+    font-size: .88rem;
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+
+  /* ── Dual-List Layout ────────────────────────────────── */
+  .dual-list {
+    display: flex;
+    gap: 0;
+    align-items: stretch;
+    min-height: 420px;
+    border: 1px solid #3a3a4a;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #232336;
+  }
+
+  /* ── Panels (left & right) ───────────────────────────── */
+  .panel {
+    display: flex;
+    flex-direction: column;
+  }
+  .panel-available { flex: 1 1 55%; min-width: 0; }
+  .panel-selected  { flex: 1 1 30%; min-width: 0; border-left: 1px solid #3a3a4a; }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px 10px;
+    font-size: .82rem;
+    font-weight: 600;
+    color: #b0b0cc;
+    text-transform: uppercase;
+    letter-spacing: .6px;
+    border-bottom: 1px solid #3a3a4a;
+    background: #272740;
+    flex-shrink: 0;
+  }
+  .panel-header .count {
+    background: #4fc3f7;
+    color: #1e1e2e;
+    font-size: .72rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 700;
+  }
+
+  /* ── Search Box ──────────────────────────────────────── */
+  .search-wrap {
+    padding: 10px 12px;
+    border-bottom: 1px solid #3a3a4a;
+    flex-shrink: 0;
+    background: #272740;
+  }
+  .search-wrap input {
+    width: 100%;
+    padding: 8px 12px 8px 34px;
+    border: 1px solid #3a3a4a;
+    border-radius: 6px;
+    background: #1e1e2e;
+    color: #e0e0e0;
+    font-size: .85rem;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .search-wrap input:focus { border-color: #4fc3f7; }
+  .search-wrap { position: relative; }
+  .search-icon {
+    position: absolute;
+    left: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6a6a88;
+    font-size: .85rem;
+    pointer-events: none;
+  }
+
+  /* ── Scrollable List ─────────────────────────────────── */
+  .panel-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 6px 0;
+  }
+  .panel-body::-webkit-scrollbar { width: 6px; }
+  .panel-body::-webkit-scrollbar-track { background: transparent; }
+  .panel-body::-webkit-scrollbar-thumb { background: #3a3a4a; border-radius: 3px; }
+
+  /* ── Geography Groups ────────────────────────────────── */
+  .geo-group { border-bottom: 1px solid #2e2e44; }
+  .geo-group:last-child { border-bottom: none; }
+  .geo-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    font-size: .78rem;
+    font-weight: 700;
+    color: #8888aa;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    cursor: pointer;
+    user-select: none;
+    transition: background .15s;
+  }
+  .geo-header:hover { background: #2e2e48; }
+  .geo-header .chevron {
+    font-size: .65rem;
+    transition: transform .2s;
+    display: inline-block;
+  }
+  .geo-header .chevron.collapsed { transform: rotate(-90deg); }
+  .geo-header .geo-count {
+    margin-left: auto;
+    font-size: .7rem;
+    color: #5e5e78;
+    font-weight: 400;
+  }
+  .geo-items { overflow: hidden; transition: max-height .25s ease; }
+
+  /* ── Region Item (left panel) ────────────────────────── */
+  .region-item {
+    display: flex;
+    align-items: center;
+    padding: 7px 16px 7px 28px;
+    font-size: .84rem;
+    cursor: pointer;
+    transition: background .12s, opacity .2s;
+    user-select: none;
+    position: relative;
+  }
+  .region-item:hover:not(.disabled) { background: #33335a; }
+  .region-item.disabled {
+    opacity: .35;
+    cursor: default;
+    pointer-events: none;
+  }
+  .region-item .ri-name { flex: 1; }
+  .region-item .ri-check {
+    color: #4fc3f7;
+    font-size: .75rem;
+    opacity: 0;
+    transition: opacity .15s;
+  }
+  .region-item.disabled .ri-check { opacity: 1; }
+
+  /* ── Center Transfer Buttons ─────────────────────────── */
+  .transfer-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 0 6px;
+    flex-shrink: 0;
+    width: 52px;
+    background: #272740;
+    border-left: 1px solid #3a3a4a;
+    border-right: 1px solid #3a3a4a;
+  }
+  .transfer-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid #3a3a4a;
+    background: #2a2a3a;
+    color: #8888aa;
+    font-size: .95rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .15s, color .15s, border-color .15s;
+  }
+  .transfer-btn:hover:not(:disabled) {
+    background: #4fc3f7;
+    color: #1e1e2e;
+    border-color: #4fc3f7;
+  }
+  .transfer-btn:disabled { opacity: .3; cursor: default; }
+  .transfer-btn.clear-btn { font-size: .7rem; }
+
+  /* ── Selected Region Chip (right panel) ──────────────── */
+  .selected-list { padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; }
+  .selected-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 12px;
+    background: #30304e;
+    border: 1px solid #3a3a5a;
+    border-radius: 8px;
+    font-size: .84rem;
+    animation: chipIn .25s ease;
+    transition: opacity .2s, transform .2s;
+  }
+  .selected-chip .sc-name { flex: 1; }
+  .selected-chip .sc-geo {
+    font-size: .65rem;
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: #3a3a5a;
+    color: #9e9eb8;
+    white-space: nowrap;
+  }
+  .selected-chip .sc-remove {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: #8888aa;
+    font-size: .85rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .15s, color .15s;
+    flex-shrink: 0;
+  }
+  .selected-chip .sc-remove:hover { background: #e05050; color: #fff; }
+
+  @keyframes chipIn {
+    from { opacity: 0; transform: translateX(-12px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  .empty-state {
+    text-align: center;
+    color: #5e5e78;
+    font-size: .82rem;
+    padding: 40px 16px;
+    line-height: 1.6;
+  }
+  .empty-state .empty-icon { font-size: 1.6rem; margin-bottom: 8px; }
+
+  /* ── Compare Button ──────────────────────────────────── */
+  .compare-btn {
+    margin-top: 24px;
+    width: 100%;
+    padding: 13px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #4fc3f7, #2196f3);
+    color: #fff;
+    font-size: .95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity .2s, transform .1s;
+    letter-spacing: .3px;
+  }
+  .compare-btn:hover { opacity: .92; }
+  .compare-btn:active { transform: scale(.995); }
+  .compare-btn:disabled { opacity: .4; cursor: default; transform: none; }
+
+  /* ── Toast ───────────────────────────────────────────── */
+  .toast {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #e05050;
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: .85rem;
+    font-weight: 500;
+    box-shadow: 0 4px 20px rgba(0,0,0,.4);
+    opacity: 0;
+    transition: transform .3s ease, opacity .3s ease;
+    pointer-events: none;
+    z-index: 100;
+    white-space: nowrap;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ── No-results ──────────────────────────────────────── */
+  .no-results {
+    text-align: center;
+    color: #5e5e78;
+    font-size: .82rem;
+    padding: 24px 16px;
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="card-title">🌏 Multi-Region Compare</div>
+  <div class="card-desc">
+    Select up to <strong>5 regions</strong> to compare VM SKU availability, pricing, and quota side-by-side.
+    Use the search box to quickly find a region, then click or use the arrow buttons to transfer.
+  </div>
+
+  <!-- Dual-List Selector -->
+  <div class="dual-list">
+    <!-- LEFT: Available Regions -->
+    <div class="panel panel-available">
+      <div class="panel-header">
+        Available Regions
+        <span class="count" id="availCount">44</span>
+      </div>
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="Filter regions…" autocomplete="off" spellcheck="false">
+      </div>
+      <div class="panel-body" id="availableList"></div>
+      <div class="no-results" id="noResults">No regions match your filter.</div>
+    </div>
+
+    <!-- CENTER: Transfer Buttons -->
+    <div class="transfer-col">
+      <button class="transfer-btn" id="btnAdd" title="Add highlighted region" disabled>→</button>
+      <button class="transfer-btn" id="btnRemove" title="Remove last selected" disabled>←</button>
+      <button class="transfer-btn clear-btn" id="btnClear" title="Clear all selected" disabled>⟵✕</button>
+    </div>
+
+    <!-- RIGHT: Selected Regions -->
+    <div class="panel panel-selected">
+      <div class="panel-header">
+        Selected Regions
+        <span class="count" id="selCount">0 / 5</span>
+      </div>
+      <div class="panel-body">
+        <div class="selected-list" id="selectedList">
+          <div class="empty-state" id="emptyState">
+            <div class="empty-icon">📋</div>
+            Click a region on the left<br>to add it here.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button class="compare-btn" id="compareBtn" disabled>Compare Across Regions</button>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Region Data ──────────────────────────────────────────
+const REGIONS = [
+  { geo: 'Americas', regions: ['East US','East US 2','West US','West US 2','West US 3','Central US','North Central US','South Central US','Canada Central','Canada East','Brazil South','Mexico Central'] },
+  { geo: 'Europe', regions: ['North Europe','West Europe','UK South','UK West','France Central','France South','Germany West Central','Norway East','Sweden Central','Switzerland North','Italy North','Poland Central','Spain Central'] },
+  { geo: 'Asia Pacific', regions: ['East Asia','Southeast Asia','Australia East','Australia Southeast','Japan East','Japan West','Korea Central','Korea South','Central India','South India','West India'] },
+  { geo: 'Middle East & Africa', regions: ['UAE North','South Africa North','Qatar Central','Israel Central','New Zealand North'] },
+];
+const MAX = 5;
+
+// ── State ────────────────────────────────────────────────
+let selected = [];          // [{name, geo}]
+let highlighted = null;     // region name string (left panel)
+let collapsedGeos = new Set();
+
+// ── DOM refs ─────────────────────────────────────────────
+const $avail     = document.getElementById('availableList');
+const $selList   = document.getElementById('selectedList');
+const $search    = document.getElementById('searchInput');
+const $availCnt  = document.getElementById('availCount');
+const $selCnt    = document.getElementById('selCount');
+const $empty     = document.getElementById('emptyState');
+const $noRes     = document.getElementById('noResults');
+const $btnAdd    = document.getElementById('btnAdd');
+const $btnRemove = document.getElementById('btnRemove');
+const $btnClear  = document.getElementById('btnClear');
+const $compare   = document.getElementById('compareBtn');
+const $toast     = document.getElementById('toast');
+
+// ── Helpers ──────────────────────────────────────────────
+const isSelected = (name) => selected.some(s => s.name === name);
+const geoFor     = (name) => REGIONS.find(g => g.regions.includes(name))?.geo ?? '';
+
+function showToast(msg, duration = 2200) {
+  $toast.textContent = msg;
+  $toast.classList.add('show');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => $toast.classList.remove('show'), duration);
+}
+
+// ── Render Available List ────────────────────────────────
+function renderAvailable() {
+  const q = $search.value.trim().toLowerCase();
+  $avail.innerHTML = '';
+  let totalVisible = 0;
+
+  REGIONS.forEach(group => {
+    const filtered = group.regions.filter(r => r.toLowerCase().includes(q));
+    if (filtered.length === 0) return;
+
+    const gDiv = document.createElement('div');
+    gDiv.className = 'geo-group';
+
+    const collapsed = collapsedGeos.has(group.geo);
+
+    // Header
+    const hdr = document.createElement('div');
+    hdr.className = 'geo-header';
+    hdr.innerHTML = `<span class="chevron ${collapsed ? 'collapsed' : ''}">▾</span> ${group.geo}
+      <span class="geo-count">${filtered.length}</span>`;
+    hdr.addEventListener('click', () => {
+      if (collapsedGeos.has(group.geo)) collapsedGeos.delete(group.geo);
+      else collapsedGeos.add(group.geo);
+      renderAvailable();
+    });
+    gDiv.appendChild(hdr);
+
+    // Items
+    const items = document.createElement('div');
+    items.className = 'geo-items';
+    if (collapsed) items.style.maxHeight = '0';
+    else items.style.maxHeight = (filtered.length * 38) + 'px';
+
+    filtered.forEach(name => {
+      const sel = isSelected(name);
+      const div = document.createElement('div');
+      div.className = 'region-item' + (sel ? ' disabled' : '') + (highlighted === name ? ' highlighted' : '');
+      if (highlighted === name && !sel) div.style.background = '#33335a';
+      div.innerHTML = `<span class="ri-name">${name}</span><span class="ri-check">✓</span>`;
+      if (!sel) {
+        div.addEventListener('click', () => {
+          highlighted = name;
+          addRegion(name);
+        });
+      }
+      items.appendChild(div);
+      totalVisible++;
+    });
+
+    gDiv.appendChild(items);
+    $avail.appendChild(gDiv);
+  });
+
+  $noRes.style.display = totalVisible === 0 ? 'block' : 'none';
+  const totalAll = REGIONS.reduce((s, g) => s + g.regions.filter(r => r.toLowerCase().includes(q)).length, 0);
+  $availCnt.textContent = totalAll;
+}
+
+// ── Render Selected List ─────────────────────────────────
+function renderSelected() {
+  $selList.innerHTML = '';
+  if (selected.length === 0) {
+    $selList.innerHTML = `<div class="empty-state" id="emptyState">
+      <div class="empty-icon">📋</div>Click a region on the left<br>to add it here.</div>`;
+  } else {
+    selected.forEach(s => {
+      const chip = document.createElement('div');
+      chip.className = 'selected-chip';
+      chip.innerHTML = `<span class="sc-name">${s.name}</span>
+        <span class="sc-geo">${s.geo}</span>
+        <button class="sc-remove" title="Remove ${s.name}">✕</button>`;
+      chip.querySelector('.sc-remove').addEventListener('click', () => removeRegion(s.name));
+      $selList.appendChild(chip);
+    });
+  }
+  $selCnt.textContent = `${selected.length} / ${MAX}`;
+  $btnRemove.disabled = selected.length === 0;
+  $btnClear.disabled  = selected.length === 0;
+  $compare.disabled   = selected.length < 2;
+}
+
+// ── Add / Remove ─────────────────────────────────────────
+function addRegion(name) {
+  if (isSelected(name)) return;
+  if (selected.length >= MAX) { showToast(`Maximum ${MAX} regions allowed`); return; }
+  selected.push({ name, geo: geoFor(name) });
+  renderSelected();
+  renderAvailable();
+  updateTransferBtns();
+}
+
+function removeRegion(name) {
+  selected = selected.filter(s => s.name !== name);
+  renderSelected();
+  renderAvailable();
+  updateTransferBtns();
+}
+
+function clearAll() {
+  selected = [];
+  renderSelected();
+  renderAvailable();
+  updateTransferBtns();
+}
+
+function updateTransferBtns() {
+  $btnAdd.disabled = !highlighted || isSelected(highlighted) || selected.length >= MAX;
+}
+
+// ── Events ───────────────────────────────────────────────
+$search.addEventListener('input', () => { renderAvailable(); });
+$btnAdd.addEventListener('click', () => { if (highlighted) addRegion(highlighted); });
+$btnRemove.addEventListener('click', () => { if (selected.length) removeRegion(selected[selected.length - 1].name); });
+$btnClear.addEventListener('click', clearAll);
+$compare.addEventListener('click', () => {
+  const names = selected.map(s => s.name).join(', ');
+  showToast('Comparing: ' + names, 3000);
+});
+
+// ── Init ─────────────────────────────────────────────────
+renderAvailable();
+renderSelected();
+</script>
+</body>
+</html>

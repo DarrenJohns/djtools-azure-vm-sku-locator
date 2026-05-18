@@ -22,7 +22,7 @@ This is a **single-file HTML web application** with **static JSON data files** �
 |----------|--------|--------|
 | VM SKUs | Azure Resource SKU API | `scripts/normalize-skus.py` |
 | Managed Disk SKUs | Azure Resource SKU API | `scripts/normalize-disks.py` |
-| VM Pricing | Azure Retail Prices API | `scripts/fetch-pricing.py` |
+| VM Pricing | Azure Retail Prices API (17 currencies, PAYG + RI) | `scripts/fetch-pricing.py --currency <CODE>` |
 | Retirement Dates | Azure Updates page | `scripts/update-retirements.py` |
 
 The list of regions to fetch is configured in `config.json`.
@@ -149,7 +149,7 @@ Only web-servable files are deployed (`index.html`, `config.json`, `data/`). Scr
 
 ### Data Refresh Pipeline
 ```
-Monthly trigger → fetch VM/disk/pricing/retirement data → swa deploy → git commit → push
+Monthly trigger → fetch VM/disk/pricing (×17 currencies)/retirement data → swa deploy → git commit → push
 ```
 
 The refresh pipeline runs on a self-hosted runner with Azure CLI access.

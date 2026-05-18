@@ -8,7 +8,7 @@
 >
 > **Browse Azure VM and managed disk SKU availability across every region — filter by processor, family, and features, compare across regions, pin, and see pricing and retirements.**
 
-![Version](https://img.shields.io/badge/version-1.0.0--beta-orange)
+![Version](https://img.shields.io/badge/version-1.1.0-blue)
 ![Azure](https://img.shields.io/badge/Azure-VM_SKUs-0078D4)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Built with](https://img.shields.io/badge/built_with-Copilot_CLI-8957e5)
@@ -28,6 +28,8 @@
 | **Search & Filter** | Filter by name, family, vCPU range, processor type (Intel/AMD/ARM), and more |
 | **Find a Match** | Specify your requirements (vCPUs, memory, disks, NICs, features) and get ranked matches with percentage scores |
 | **Pin & Compare** | Pin SKUs to a shortlist, then compare availability across up to 5 other regions |
+| **Multi-Currency Pricing** | View pricing in 17 currencies (USD, EUR, GBP, NZD, AUD, JPY, and more) — selection persists across sessions |
+| **RI & Savings Plan Pricing** | Compare Pay-As-You-Go, 1/3-year Reserved Instance (actual Azure prices), and 1/3-year Savings Plan (estimated) rates |
 | **Deployment Snippets** | Click any SKU for ready-to-use Azure CLI, PowerShell, and Bicep code |
 | **Retirement Warnings** | SKUs from families being retired are flagged with a warning badge |
 | **What's New** | See which SKUs were added or removed since the last monthly refresh |
@@ -75,7 +77,7 @@ All data is refreshed **monthly** from Azure APIs. Check the Data Refresh Summar
 |----------|--------|
 | VM SKUs | Azure Resource SKU API |
 | Managed Disk SKUs | Azure Resource SKU API |
-| VM Pricing | Azure Retail Prices API |
+| VM Pricing | Azure Retail Prices API (17 currencies) |
 | VM Retirement Dates | Azure Updates page |
 
 ---
@@ -95,12 +97,14 @@ vm-sku-per-region/
 │   ├── retirements.json          # VM family retirement dates
 │   ├── <region>.json             # VM SKU data per region
 │   ├── <region>-disks.json       # Disk SKU data per region
-│   ├── <region>-pricing.json     # Pricing data per region
+│   ├── <region>-pricing.json     # Pricing data per region (USD, backward compat)
+│   ├── <region>-pricing-<CUR>.json # Pricing data per region per currency
+│   ├── currencies.json           # Currency metadata (code, symbol, decimals)
 │   └── history/                  # Monthly SKU snapshots for What's New
 ├── scripts/
 │   ├── normalize-skus.py         # VM SKU data pipeline
 │   ├── normalize-disks.py        # Disk SKU data pipeline
-│   ├── fetch-pricing.py          # Pricing data fetcher
+│   ├── fetch-pricing.py          # Pricing data fetcher (supports --currency flag)
 │   └── update-retirements.py     # Retirement date scraper
 ├── docs/
 │   ├── SPEC.md                   # App specification

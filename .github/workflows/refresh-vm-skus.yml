@@ -71,6 +71,9 @@ jobs:
                   if (Test-Path $staleDisk) { Remove-Item $staleDisk; Write-Host "  [CLEAN] Removed $staleDisk" }
                   $stalePricing = "$dataDir/$name-pricing.json"
                   if (Test-Path $stalePricing) { Remove-Item $stalePricing; Write-Host "  [CLEAN] Removed $stalePricing" }
+                  Get-ChildItem "$dataDir/$name-pricing-*.json" -ErrorAction SilentlyContinue | ForEach-Object {
+                    Remove-Item $_.FullName; Write-Host "  [CLEAN] Removed $($_.Name)"
+                  }
                   break
                 }
 
@@ -162,16 +165,30 @@ jobs:
         run: |
           $config = Get-Content "config.json" | ConvertFrom-Json
           $regions = $config.targetRegions
-          foreach ($region in $regions) {
-            $name = $region.name
-            $dataFile = "data/$name.json"
-            $pricingFile = "data/$name-pricing.json"
-            if (Test-Path $dataFile) {
-              Write-Host "Fetching pricing for $name..."
-              python scripts/fetch-pricing.py $dataFile $pricingFile
+          $currencies = $config.supportedCurrencies
+          if (-not $currencies) { $currencies = @("USD") }
+          foreach ($currency in $currencies) {
+            Write-Host "=== Fetching pricing in $currency ==="
+            foreach ($region in $regions) {
+              $name = $region.name
+              $dataFile = "data/$name.json"
+              $pricingFile = "data/$name-pricing-$currency.json"
+              if (Test-Path $dataFile) {
+                Write-Host "  Fetching pricing for $name ($currency)..."
+                python scripts/fetch-pricing.py $dataFile $pricingFile --currency $currency
+              }
             }
           }
-          Write-Host "[OK] Pricing data refresh complete"
+          # Write USD copies as backward-compatible {region}-pricing.json
+          foreach ($region in $regions) {
+            $name = $region.name
+            $usdFile = "data/$name-pricing-USD.json"
+            $compatFile = "data/$name-pricing.json"
+            if (Test-Path $usdFile) {
+              Copy-Item $usdFile $compatFile -Force
+            }
+          }
+          Write-Host "[OK] Pricing data refresh complete ($($currencies.Count) currencies)"
         shell: pwsh
 
       - name: Fetch disk SKU data

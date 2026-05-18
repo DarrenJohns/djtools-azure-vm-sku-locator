@@ -666,7 +666,7 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
 [data-theme="dark"] .shortlist-chip { background: #1a3050; border-color: #2a4a6a; }
 .shortlist-chip .remove-pin { cursor: pointer; font-size: 14px; margin-left: 2px; opacity: 0.6; }
 .shortlist-chip .remove-pin:hover { opacity: 1; color: var(--status-danger); }
-.shortlist-actions { display: flex; gap: 8px; margin-top: 10px; }
+.shortlist-actions { display: flex; gap: 8px; margin-top: 10px; justify-content: space-between; align-items: center; }
 /* Pricing table */
 .pricing-container { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border-default); }
 .pricing-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
@@ -676,6 +676,13 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
 .pricing-table .price-cell { font-family: 'Cascadia Code', 'Consolas', monospace; font-size: 12px; }
 .pricing-table .price-cell.cheapest { color: var(--status-success); font-weight: 700; }
 .pricing-note { font-size: 11px; color: var(--text-tertiary); margin-top: 6px; }
+.term-pills { display: inline-flex; gap: 2px; background: var(--bg-layer2); border-radius: var(--radius-sm); padding: 2px; border: 1px solid var(--border-default); }
+.term-pill { font-size: 11px; padding: 3px 10px; border: none; border-radius: var(--radius-sm); background: transparent; color: var(--text-secondary); cursor: pointer; font-weight: 500; transition: all 0.15s; white-space: nowrap; }
+.term-pill:hover { color: var(--text-primary); background: var(--bg-hover); }
+.term-pill.active { background: var(--brand-primary); color: #fff; font-weight: 600; }
+.currency-select-wrapper { display: inline-flex; align-items: center; gap: 6px; }
+.currency-select-wrapper label { font-size: 12px; color: var(--text-secondary); font-weight: 600; white-space: nowrap; }
+.currency-select-wrapper select { font-size: 12px; padding: 4px 8px; border: 1px solid var(--border-default); border-radius: var(--radius-sm); background: var(--bg-layer2); color: var(--text-primary); cursor: pointer; }
 .pricing-loading { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); padding: 8px 0; }
 .pin-btn { cursor: pointer; font-size: 16px; opacity: 0.3; transition: all 0.15s; background: none; border: none; padding: 0 2px; }
 .pin-btn:hover { opacity: 0.7; transform: scale(1.2); }
@@ -902,6 +909,7 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
 .welcome-body .btn { width: 100%; justify-content: center; font-size: 14px; font-weight: 400; padding: 10px; display: flex; }
 .btn-outline { background: var(--bg-layer1); border: 1px solid var(--border-default); color: var(--text-primary); }
 .btn-outline:hover { background: var(--bg-layer2); border-color: var(--brand-primary); }
+.btn-danger-hover:hover { background: var(--status-danger); border-color: var(--status-danger); color: #fff; }
 .btn-sm { font-size: 12px; padding: 4px 10px; }
 /* ── Deployment Checker ── */
 .checker-form { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 12px; }
@@ -1169,13 +1177,27 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
       </div>
       <div class="section-body" id="body-shortlist">
         <div class="shortlist-chips" id="shortlist-chips"><span style="font-size:12px;color:var(--text-tertiary);">Pin VM SKUs from the table using the ○ button to build your shortlist</span></div>
-        <div class="shortlist-actions" id="shortlist-actions" style="display:none;margin-top:8px;">
+        <div class="shortlist-actions" id="shortlist-actions" style="display:none;margin-top:8px;justify-content:space-between;align-items:center;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="currency-select-wrapper">
+              <label for="currency-select">💲</label>
+              <select id="currency-select" onchange="onCurrencyChange()"></select>
+            </span>
+            <button class="btn btn-outline btn-sm btn-danger-hover" onclick="clearShortlist()">📌 Clear All Pins</button>
+          </div>
           <button class="btn btn-primary btn-sm" onclick="exportShortlistCsv()">📥 Export Shortlist</button>
-          <button class="btn btn-outline btn-sm" onclick="fetchPinnedPricing()">💰 Load Pricing</button>
-          <button class="btn btn-outline btn-sm" onclick="clearShortlist()">📌 Clear All Pins</button>
         </div>
         <div class="pricing-container" id="pricing-container" style="display:none;">
-          <p style="margin-bottom:4px;font-size:13px;font-weight:600;">💰 Pricing Comparison <span style="font-size:11px;font-weight:400;color:var(--text-tertiary);">(USD/hr, Pay-As-You-Go)</span></p>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;flex-wrap:wrap;">
+            <p style="margin:0;font-size:13px;font-weight:600;">💰 Pricing Comparison <span id="pricing-currency-label" style="font-size:11px;font-weight:400;color:var(--text-tertiary);">(USD/hr, Pay-As-You-Go)</span></p>
+            <div class="term-pills" id="term-pills">
+              <button class="term-pill active" data-term="payg" onclick="selectPricingTerm('payg')">PAYG</button>
+              <button class="term-pill" data-term="ri1" onclick="selectPricingTerm('ri1')">1yr RI</button>
+              <button class="term-pill" data-term="ri3" onclick="selectPricingTerm('ri3')">3yr RI</button>
+              <button class="term-pill" data-term="sp1" onclick="selectPricingTerm('sp1')">1yr SP</button>
+              <button class="term-pill" data-term="sp3" onclick="selectPricingTerm('sp3')">3yr SP</button>
+            </div>
+          </div>
           <div id="pricing-content"></div>
         </div>
         <div id="multiregion-container" style="display:none;margin-top:14px;padding-top:12px;border-top:1px solid var(--border-default);">
@@ -1345,10 +1367,26 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
   <a href="https://github.com/features/copilot/cli/" target="_blank" rel="noopener noreferrer" style="color:var(--brand-primary);text-decoration:none;font-weight:600;">Learn more ↗</a>
   &nbsp;·&nbsp;
   <a href="https://github.com/DarrenJohns/djtools-azure-vm-sku-locator" target="_blank" rel="noopener noreferrer" style="color:var(--brand-primary);text-decoration:none;font-weight:600;">GitHub ↗</a>
-  <div style="margin-top:8px;font-size:11px;color:var(--text-tertiary);opacity:0.7;">v1.0.0-beta</div>
+  <div style="margin-top:8px;font-size:11px;color:var(--text-tertiary);opacity:0.7;">v1.1.0</div>
 </footer>
 
 <div class="toast-container" id="toast-container"></div>
+
+<div class="modal-overlay" id="confirmModal" onclick="if(event.target===this)closeConfirmModal(false)">
+  <div class="modal" style="max-width:420px;width:90%;" role="dialog" aria-modal="true">
+    <div style="background:linear-gradient(135deg,#c42b1c 0%,#961b1b 100%);color:#fff;padding:20px 24px 16px;text-align:center;border-radius:var(--radius-md) var(--radius-md) 0 0;">
+      <div style="font-size:28px;margin-bottom:6px;">⚠️</div>
+      <h3 id="confirmModal-title" style="font-size:18px;font-weight:600;margin:0;">Confirm</h3>
+    </div>
+    <div style="padding:24px;">
+      <p id="confirmModal-message" style="font-size:14px;color:var(--text-secondary);margin:0 0 24px;line-height:1.5;"></p>
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button class="btn btn-outline" onclick="closeConfirmModal(false)" style="padding:8px 20px;">Cancel</button>
+        <button class="btn" id="confirmModal-ok" style="background:var(--status-danger);color:#fff;border:none;padding:8px 20px;font-weight:600;" onclick="closeConfirmModal(true)">Confirm</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div class="modal-overlay" id="shortcutsModal" onclick="if(event.target===this)closeShortcutsModal()">
   <div class="modal" style="max-width:480px;width:90%;" role="dialog" aria-modal="true">
@@ -1782,6 +1820,10 @@ async function init() {
       retirementFamilies = {};
     }
     availableDataRegions = new Set(metadata.availableRegions || []);
+    try {
+      const currResp = await fetch('data/currencies.json');
+      if (currResp.ok) { currencyMeta = await currResp.json(); populateCurrencySelector(); }
+    } catch(e) {}
     renderFreshness();
     buildDropdown();
     selectRegion('newzealandnorth');
@@ -2536,24 +2578,74 @@ function renderShortlist() {
     const badge = sku ? getLifecycleBadge(sku) : '';
     return `<span class="shortlist-chip">${escapeHtml(size)}<span style="color:var(--text-secondary);font-weight:400;">${info}</span>${badge}<span class="remove-pin" onclick="togglePin('${escapeHtml(size)}')" title="Remove">×</span></span>`;
   }).join('');
+
+  // Auto-load pricing when pins exist
+  fetchPinnedPricing();
 }
 
 function clearShortlist() {
-  pinnedSkus.clear();
-  renderShortlist();
-  renderTable();
-  showToast('Shortlist cleared');
+  showConfirmModal(
+    'Clear All Pins',
+    `Remove all ${pinnedSkus.size} pinned SKUs from your shortlist? This cannot be undone.`,
+    'Clear All',
+    () => {
+      pinnedSkus.clear();
+      renderShortlist();
+      renderTable();
+      showToast('Shortlist cleared');
+    }
+  );
+}
+
+let _confirmResolve = null;
+function showConfirmModal(title, message, okLabel, onConfirm) {
+  const overlay = document.getElementById('confirmModal');
+  document.getElementById('confirmModal-title').textContent = title;
+  document.getElementById('confirmModal-message').textContent = message;
+  document.getElementById('confirmModal-ok').textContent = okLabel || 'Confirm';
+  _confirmResolve = onConfirm;
+  overlay.classList.add('active');
+}
+function closeConfirmModal(confirmed) {
+  document.getElementById('confirmModal').classList.remove('active');
+  if (confirmed && _confirmResolve) _confirmResolve();
+  _confirmResolve = null;
 }
 
 function exportShortlistCsv() {
   const pinned = allSkus.filter(s => pinnedSkus.has(s.size));
   if (!pinned.length) { showToast('No pinned SKUs to export', 'error'); return; }
-  const headers = columns.filter(c => c.key !== '_pin').map(c => c.label);
-  const rows = pinned.map(s => columns.filter(c => c.key !== '_pin').map(c => {
-    const v = s[c.key];
-    if (Array.isArray(v)) return v.join(';');
-    return v != null ? String(v) : '';
-  }));
+  const specHeaders = columns.filter(c => c.key !== '_pin').map(c => c.label);
+  const hasPricing = _pricingCache && _pricingCache._region === selectedRegion;
+  const ci = getCurrencyInfo();
+  const currCode = selectedCurrency || 'USD';
+  const term = selectedTerm || 'payg';
+  const termLabel = TERM_LABELS[term] || 'PAYG';
+  const pricingHeaders = hasPricing ? [`Linux/hr ${termLabel} (${currCode})`, `Windows/hr ${termLabel} (${currCode})`, `~Monthly ${termLabel} (${currCode})`] : [];
+  const headers = [...specHeaders, ...pricingHeaders, 'Retirement Status', 'Retirement Date'];
+  const rows = pinned.map(s => {
+    const specCols = columns.filter(c => c.key !== '_pin').map(c => {
+      const v = s[c.key];
+      if (Array.isArray(v)) return v.join(';');
+      return v != null ? String(v) : '';
+    });
+    if (hasPricing) {
+      const prices = _pricingCache[s.size] || {};
+      const fmt = (p) => p != null ? `${ci.symbol}${p.toFixed(ci.decimalPlaces)}` : '';
+      // Compute term-adjusted prices for export
+      let linuxPrice = prices.linux;
+      let winPrice = prices.windows;
+      if (term === 'ri1') { linuxPrice = prices.ri1yr; winPrice = null; }
+      else if (term === 'ri3') { linuxPrice = prices.ri3yr; winPrice = null; }
+      else if (term === 'sp1') { linuxPrice = prices.linux != null ? prices.linux * SP_DISCOUNTS.sp1 : null; winPrice = prices.windows != null ? prices.windows * SP_DISCOUNTS.sp1 : null; }
+      else if (term === 'sp3') { linuxPrice = prices.linux != null ? prices.linux * SP_DISCOUNTS.sp3 : null; winPrice = prices.windows != null ? prices.windows * SP_DISCOUNTS.sp3 : null; }
+      const monthly = linuxPrice != null ? `${ci.symbol}${(linuxPrice * 730).toFixed(0)}` : '';
+      specCols.push(fmt(linuxPrice), fmt(winPrice), monthly);
+    }
+    const ret = s.family && retirementFamilies[s.family.toLowerCase()] ? retirementFamilies[s.family.toLowerCase()] : null;
+    specCols.push(ret ? 'Retiring' : '', ret ? ret.date : '');
+    return specCols;
+  });
   const csv = [headers.join(','), ...rows.map(r => r.map(v => `"${v}"`).join(','))].join('\n');
   const blob = new Blob([csv], { type: 'text/csv' });
   const a = document.createElement('a');
@@ -2561,15 +2653,56 @@ function exportShortlistCsv() {
   a.download = `shortlist-${selectedRegion || 'export'}.csv`;
   a.click();
   URL.revokeObjectURL(a.href);
-  showToast(`Exported ${pinned.length} pinned SKUs to CSV`);
+  showToast(`Exported ${pinned.length} pinned SKUs to CSV${hasPricing ? ` with ${currCode} ${termLabel} pricing` : ''}`);
 }
 
 // === PRICING COMPARISON ===
-let _pricingCache = null; // { skuName: { linux, windows, spot } }
+let currencyMeta = []; // loaded from data/currencies.json
+let selectedCurrency = localStorage.getItem('vmsku_currency') || 'USD';
+let selectedTerm = 'payg'; // payg | ri1 | ri3 | sp1 | sp3
+
+const SP_DISCOUNTS = Object.freeze({ sp1: 0.78, sp3: 0.58 });
+const TERM_LABELS = Object.freeze({ payg: 'Pay-As-You-Go', ri1: '1-Year Reserved', ri3: '3-Year Reserved', sp1: '1-Year Savings Plan', sp3: '3-Year Savings Plan' });
+
+let _pricingCache = null; // { skuName: { linux, windows, spot, ri1yr, ri3yr } }
+
+function selectPricingTerm(term) {
+  selectedTerm = term;
+  document.querySelectorAll('.term-pill').forEach(btn => btn.classList.toggle('active', btn.dataset.term === term));
+  // Update header label
+  const currLabel = document.getElementById('pricing-currency-label');
+  if (currLabel) currLabel.textContent = `(${selectedCurrency || 'USD'}/hr, ${TERM_LABELS[term] || 'Pay-As-You-Go'})`;
+  // Re-render pricing table if data loaded
+  const content = document.getElementById('pricing-content');
+  if (_pricingCache && pinnedSkus.size && content) {
+    renderPricingTable([...pinnedSkus].sort(), content);
+  }
+}
+
+function populateCurrencySelector() {
+  const sel = document.getElementById('currency-select');
+  if (!sel || !currencyMeta.length) return;
+  sel.innerHTML = currencyMeta.map(c => 
+    `<option value="${c.code}" ${c.code === selectedCurrency ? 'selected' : ''}>${c.code} ${c.symbol}</option>`
+  ).join('');
+}
+
+function onCurrencyChange() {
+  const sel = document.getElementById('currency-select');
+  selectedCurrency = sel.value;
+  localStorage.setItem('vmsku_currency', selectedCurrency);
+  if (_pricingCache && _pricingCache._region) {
+    _pricingCache = null;
+    fetchPinnedPricing();
+  }
+}
+
+function getCurrencyInfo() {
+  return currencyMeta.find(c => c.code === selectedCurrency) || { code: 'USD', symbol: '$', decimalPlaces: 4 };
+}
 
 async function fetchPinnedPricing() {
-  if (!pinnedSkus.size) { showToast('Pin some SKUs first', 'warning'); return; }
-  if (!selectedRegion) { showToast('Select a region first', 'warning'); return; }
+  if (!pinnedSkus.size || !selectedRegion) return;
 
   const container = document.getElementById('pricing-container');
   const content = document.getElementById('pricing-content');
@@ -2579,9 +2712,12 @@ async function fetchPinnedPricing() {
   content.innerHTML = '<div class="pricing-loading">⏳ Loading pricing data...</div>';
 
   // Load pricing file if not cached for this region
-  if (!_pricingCache || _pricingCache._region !== selectedRegion) {
+  if (!_pricingCache || _pricingCache._region !== selectedRegion || _pricingCache._currency !== selectedCurrency) {
     try {
-      const resp = await fetch(`data/${selectedRegion}-pricing.json`);
+      let resp = await fetch(`data/${selectedRegion}-pricing-${selectedCurrency}.json`);
+      if (!resp.ok && selectedCurrency !== 'USD') {
+        resp = await fetch(`data/${selectedRegion}-pricing.json`);
+      }
       if (!resp.ok) {
         content.innerHTML = '<div style="font-size:12px;color:var(--text-tertiary);padding:8px 0;">💰 Pricing data not yet available for this region. It will be generated on the next scheduled data refresh.</div>';
         return;
@@ -2589,6 +2725,7 @@ async function fetchPinnedPricing() {
       const data = await resp.json();
       _pricingCache = data.prices || {};
       _pricingCache._region = selectedRegion;
+      _pricingCache._currency = selectedCurrency;
       _pricingCache._lastUpdated = data.lastUpdated;
     } catch (e) {
       content.innerHTML = '<div style="font-size:12px;color:var(--status-danger);padding:8px 0;">⚠️ Failed to load pricing data.</div>';
@@ -2601,10 +2738,29 @@ async function fetchPinnedPricing() {
 }
 
 function renderPricingTable(skuNames, content) {
+  const ci = getCurrencyInfo();
+  const currCode = selectedCurrency || 'USD';
+  const term = selectedTerm || 'payg';
+
+  // Compute effective hourly price based on selected term
+  function getTermPrice(prices, os) {
+    const payg = prices[os];
+    if (payg == null) return null;
+    if (term === 'payg') return payg;
+    if (term === 'ri1') return prices.ri1yr != null ? prices.ri1yr : null;
+    if (term === 'ri3') return prices.ri3yr != null ? prices.ri3yr : null;
+    if (term === 'sp1') return payg * SP_DISCOUNTS.sp1;
+    if (term === 'sp3') return payg * SP_DISCOUNTS.sp3;
+    return payg;
+  }
+
   const rows = skuNames.map(name => {
     const prices = _pricingCache[name] || {};
     const sku = allSkus.find(s => s.size === name);
-    return { name, linux: prices.linux, windows: prices.windows, spot: prices.spot, sku };
+    const linux = getTermPrice(prices, 'linux');
+    const windows = (term === 'payg') ? prices.windows : (term.startsWith('sp') && prices.windows != null ? prices.windows * SP_DISCOUNTS[term] : null);
+    const spot = (term === 'payg') ? prices.spot : null; // Spot only shown for PAYG
+    return { name, linux, windows, spot, sku, rawPrices: prices };
   });
 
   // Find cheapest in each column for highlighting
@@ -2615,19 +2771,20 @@ function renderPricingTable(skuNames, content) {
   const minWindows = windowsPrices.length ? Math.min(...windowsPrices) : null;
   const minSpot = spotPrices.length ? Math.min(...spotPrices) : null;
 
-  const fmt = (price) => price != null ? `$${price.toFixed(4)}` : '—';
-  const monthly = (price) => price != null ? `$${(price * 730).toFixed(0)}/mo` : '';
+  const fmt = (price) => price != null ? `${ci.symbol}${price.toFixed(ci.decimalPlaces)}` : '—';
+  const monthly = (price) => price != null ? `${ci.symbol}${(price * 730).toFixed(0)}/mo` : '';
 
+  const showSpot = (term === 'payg');
   let html = `<table class="pricing-table">
     <thead><tr>
       <th>SKU</th><th>vCPUs</th><th>Memory</th>
-      <th>🐧 Linux/hr</th><th>🪟 Windows/hr</th><th>⚡ Spot/hr</th><th>🐧 ~Monthly</th>
+      <th>🐧 Linux/hr (${currCode})</th><th>🪟 Windows/hr (${currCode})</th>${showSpot ? `<th>⚡ Spot/hr (${currCode})</th>` : ''}<th>🐧 ~Monthly (${currCode})</th>
     </tr></thead><tbody>`;
 
   for (const r of rows) {
-    const lp = r.linux != null ? r.linux : null;
-    const wp = r.windows != null ? r.windows : null;
-    const sp = r.spot != null ? r.spot : null;
+    const lp = r.linux;
+    const wp = r.windows;
+    const sp = r.spot;
     const lClass = (lp !== null && lp === minLinux && rows.length > 1) ? ' cheapest' : '';
     const wClass = (wp !== null && wp === minWindows && rows.length > 1) ? ' cheapest' : '';
     const sClass = (sp !== null && sp === minSpot && rows.length > 1) ? ' cheapest' : '';
@@ -2637,15 +2794,25 @@ function renderPricingTable(skuNames, content) {
       <td>${r.sku ? r.sku.vCPUs : '—'}</td>
       <td>${r.sku ? r.sku.memoryGB + ' GB' : '—'}</td>
       <td class="price-cell${lClass}">${fmt(lp)}</td>
-      <td class="price-cell${wClass}">${fmt(wp)}</td>
-      <td class="price-cell${sClass}">${fmt(sp)}</td>
+      <td class="price-cell${wClass}">${fmt(wp)}</td>${showSpot ? `
+      <td class="price-cell${sClass}">${fmt(sp)}</td>` : ''}
       <td class="price-cell" style="color:var(--text-tertiary);">${monthly(lp)}</td>
     </tr>`;
   }
 
   html += '</tbody></table>';
   const updated = _pricingCache._lastUpdated ? ` · Updated ${new Date(_pricingCache._lastUpdated).toLocaleDateString()}` : '';
-  html += `<p class="pricing-note">💡 Data from <a href="https://prices.azure.com" target="_blank" style="color:var(--brand-primary);">Azure Retail Prices API</a> · USD pay-as-you-go · ~730 hrs/mo${updated}<br>— indicates the SKU is not yet priced in this region (may be in preview or not commercially available)</p>`;
+  const termNote = TERM_LABELS[term] || 'Pay-As-You-Go';
+  const sourceNote = (term === 'ri1' || term === 'ri3')
+    ? 'RI pricing from Azure Retail Prices API (actual per-SKU rates)'
+    : (term === 'sp1' || term === 'sp3')
+    ? 'SP pricing estimated using industry-average discount multipliers against PAYG'
+    : `${currCode} pay-as-you-go rates`;
+  html += `<p class="pricing-note">💡 ${sourceNote} · <a href="https://prices.azure.com" target="_blank" style="color:var(--brand-primary);">Azure Retail Prices API</a> · Est. ~730 hrs/mo${updated}<br>— indicates the SKU has no published price in this region (may be in preview or not yet commercially available)</p>`;
+
+  // Update header label
+  const currLabel = document.getElementById('pricing-currency-label');
+  if (currLabel) currLabel.textContent = `(${currCode}/hr, ${termNote})`;
 
   content.innerHTML = html;
 }

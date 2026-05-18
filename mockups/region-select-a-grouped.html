@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Layout A: Region Selector — Grouped by Geography</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    background:#1e1e2e;color:#e0e0e0;
+    display:flex;justify-content:center;align-items:flex-start;
+    min-height:100vh;padding:48px 16px;
+  }
+
+  /* ── Card ─────────────────────────────────────── */
+  .card{
+    background:#2a2a3a;border:1px solid #3a3a4a;border-radius:14px;
+    width:100%;max-width:720px;padding:32px 28px 28px;
+    box-shadow:0 8px 32px rgba(0,0,0,.35);
+  }
+  .card-title{font-size:1.35rem;font-weight:600;margin-bottom:4px}
+  .card-desc{font-size:.85rem;color:#9e9eb8;margin-bottom:20px;line-height:1.5}
+
+  /* ── Top bar (pill + clear) ───────────────────── */
+  .top-bar{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:16px;
+  }
+  .pill{
+    display:inline-flex;align-items:center;gap:6px;
+    background:#333348;border:1px solid #3a3a4a;border-radius:20px;
+    padding:5px 14px;font-size:.8rem;font-weight:500;
+    color:#c0c0d8;user-select:none;
+  }
+  .pill .count{color:#4fc3f7;font-weight:700}
+  .clear-btn{
+    background:none;border:none;color:#4fc3f7;font-size:.8rem;
+    cursor:pointer;padding:4px 8px;border-radius:6px;
+    transition:background .15s;
+  }
+  .clear-btn:hover{background:rgba(79,195,247,.12)}
+  .clear-btn:disabled{opacity:.35;cursor:default;pointer-events:none}
+
+  /* ── Geography group ──────────────────────────── */
+  .geo-group{
+    border:1px solid #3a3a4a;border-radius:10px;
+    margin-bottom:10px;overflow:hidden;
+    transition:border-color .2s;
+  }
+  .geo-group:last-child{margin-bottom:0}
+  .geo-header{
+    display:flex;align-items:center;gap:10px;
+    padding:10px 14px;cursor:pointer;user-select:none;
+    background:#303044;transition:background .15s;
+  }
+  .geo-header:hover{background:#363650}
+  .geo-chevron{
+    font-size:.7rem;transition:transform .2s;color:#8888a8;
+    width:16px;text-align:center;flex-shrink:0;
+  }
+  .geo-group.collapsed .geo-chevron{transform:rotate(-90deg)}
+  .geo-name{font-weight:600;font-size:.88rem;flex:1}
+  .geo-count{
+    font-size:.72rem;color:#8888a8;background:#2a2a3a;
+    padding:2px 8px;border-radius:10px;margin-right:4px;
+  }
+  .select-all-label{
+    display:flex;align-items:center;gap:5px;
+    font-size:.75rem;color:#9e9eb8;cursor:pointer;
+    padding:3px 6px;border-radius:6px;transition:background .15s;
+  }
+  .select-all-label:hover{background:rgba(79,195,247,.08)}
+
+  /* ── Region grid ──────────────────────────────── */
+  .region-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:2px 8px;
+    padding:10px 14px 14px;
+    transition:max-height .25s ease,padding .25s ease,opacity .2s ease;
+    max-height:600px;opacity:1;
+  }
+  .geo-group.collapsed .region-grid{
+    max-height:0;padding-top:0;padding-bottom:0;opacity:0;
+    overflow:hidden;
+  }
+
+  /* ── Checkbox labels ──────────────────────────── */
+  .region-label{
+    display:flex;align-items:center;gap:7px;
+    font-size:.8rem;padding:5px 8px;border-radius:6px;
+    cursor:pointer;transition:background .12s;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .region-label:hover{background:rgba(79,195,247,.07)}
+  .region-label.disabled{opacity:.38;cursor:not-allowed}
+  .region-label.disabled:hover{background:transparent}
+
+  /* custom checkbox */
+  .region-label input[type="checkbox"],
+  .select-all-label input[type="checkbox"]{
+    appearance:none;-webkit-appearance:none;
+    width:15px;height:15px;border:1.5px solid #5a5a7a;border-radius:3px;
+    background:transparent;cursor:pointer;flex-shrink:0;
+    position:relative;transition:border-color .15s,background .15s;
+  }
+  .region-label input[type="checkbox"]:checked,
+  .select-all-label input[type="checkbox"]:checked{
+    background:#4fc3f7;border-color:#4fc3f7;
+  }
+  .region-label input[type="checkbox"]:checked::after,
+  .select-all-label input[type="checkbox"]:checked::after{
+    content:'✓';position:absolute;top:-1px;left:1.5px;
+    font-size:11px;color:#1e1e2e;font-weight:700;
+  }
+  .select-all-label input[type="checkbox"]:indeterminate{
+    background:transparent;border-color:#4fc3f7;
+  }
+  .select-all-label input[type="checkbox"]:indeterminate::after{
+    content:'–';position:absolute;top:-2px;left:2px;
+    font-size:13px;color:#4fc3f7;font-weight:700;
+  }
+  .region-label input[type="checkbox"]:disabled,
+  .select-all-label input[type="checkbox"]:disabled{cursor:not-allowed}
+
+  /* ── Compare button ───────────────────────────── */
+  .compare-btn{
+    margin-top:20px;width:100%;padding:12px;
+    background:linear-gradient(135deg,#4fc3f7,#2196f3);
+    color:#fff;border:none;border-radius:8px;
+    font-size:.92rem;font-weight:600;cursor:pointer;
+    transition:opacity .15s,transform .1s;
+  }
+  .compare-btn:hover{opacity:.9}
+  .compare-btn:active{transform:scale(.995)}
+  .compare-btn:disabled{opacity:.4;cursor:not-allowed}
+
+  /* ── Toast ────────────────────────────────────── */
+  .toast{
+    position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(80px);
+    background:#f44336;color:#fff;padding:10px 22px;border-radius:8px;
+    font-size:.84rem;font-weight:500;opacity:0;
+    transition:transform .3s ease,opacity .3s ease;
+    pointer-events:none;z-index:100;
+    box-shadow:0 4px 20px rgba(244,67,54,.4);
+  }
+  .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+  /* ── Responsive ───────────────────────────────── */
+  @media(max-width:560px){
+    .region-grid{grid-template-columns:repeat(2,1fr)}
+    .card{padding:20px 16px 18px}
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="card-title">🌏 Multi-Region Compare</div>
+  <div class="card-desc">Select up to <strong>5 regions</strong> across geographies to compare VM SKU availability, pricing, and quota side-by-side.</div>
+
+  <!-- top bar -->
+  <div class="top-bar">
+    <span class="pill"><span class="count" id="selCount">0</span> of 5 selected</span>
+    <button class="clear-btn" id="clearBtn" disabled>Clear All</button>
+  </div>
+
+  <!-- groups container -->
+  <div id="groups"></div>
+
+  <button class="compare-btn" id="compareBtn" disabled>Compare Across Regions</button>
+</div>
+
+<div class="toast" id="toast">⚠ Maximum 5 regions — deselect one first.</div>
+
+<script>
+const MAX = 5;
+const DATA = [
+  { geo: 'Americas', icon: '🌎', regions: ['East US','East US 2','West US','West US 2','West US 3','Central US','North Central US','South Central US','Canada Central','Canada East','Brazil South','Mexico Central'] },
+  { geo: 'Europe',   icon: '🌍', regions: ['North Europe','West Europe','UK South','UK West','France Central','France South','Germany West Central','Norway East','Sweden Central','Switzerland North','Italy North','Poland Central','Spain Central'] },
+  { geo: 'Asia Pacific', icon: '🌏', regions: ['East Asia','Southeast Asia','Australia East','Australia Southeast','Japan East','Japan West','Korea Central','Korea South','Central India','South India','West India'] },
+  { geo: 'Middle East & Africa', icon: '🌍', regions: ['UAE North','South Africa North','Qatar Central','Israel Central','New Zealand North'] },
+];
+
+const groupsEl = document.getElementById('groups');
+const selCountEl = document.getElementById('selCount');
+const clearBtn = document.getElementById('clearBtn');
+const compareBtn = document.getElementById('compareBtn');
+const toast = document.getElementById('toast');
+let toastTimer;
+
+function slug(s){ return s.toLowerCase().replace(/[^a-z0-9]+/g,'-') }
+
+// Build DOM
+DATA.forEach(g => {
+  const div = document.createElement('div');
+  div.className = 'geo-group';
+  div.dataset.geo = g.geo;
+
+  // header
+  const header = document.createElement('div');
+  header.className = 'geo-header';
+  header.innerHTML = `
+    <span class="geo-chevron">▼</span>
+    <span class="geo-name">${g.icon} ${g.geo}</span>
+    <span class="geo-count">${g.regions.length} regions</span>
+    <label class="select-all-label" onclick="event.stopPropagation()">
+      <input type="checkbox" data-selall="${g.geo}"> All
+    </label>`;
+  header.addEventListener('click', () => div.classList.toggle('collapsed'));
+  div.appendChild(header);
+
+  // grid
+  const grid = document.createElement('div');
+  grid.className = 'region-grid';
+  g.regions.forEach(r => {
+    const id = slug(r);
+    const lbl = document.createElement('label');
+    lbl.className = 'region-label';
+    lbl.setAttribute('for', id);
+    lbl.innerHTML = `<input type="checkbox" id="${id}" data-geo="${g.geo}" value="${r}"> ${r}`;
+    grid.appendChild(lbl);
+  });
+  div.appendChild(grid);
+  groupsEl.appendChild(div);
+});
+
+function selectedCount(){
+  return document.querySelectorAll('#groups input[type="checkbox"][data-geo]:checked').length;
+}
+
+function refresh(){
+  const n = selectedCount();
+  selCountEl.textContent = n;
+  clearBtn.disabled = n === 0;
+  compareBtn.disabled = n === 0;
+
+  // disable unchecked when at max
+  document.querySelectorAll('#groups input[type="checkbox"][data-geo]').forEach(cb => {
+    const lbl = cb.closest('.region-label');
+    if(!cb.checked && n >= MAX){
+      cb.disabled = true;
+      lbl.classList.add('disabled');
+    } else {
+      cb.disabled = false;
+      lbl.classList.remove('disabled');
+    }
+  });
+
+  // update select-all state per group
+  DATA.forEach(g => {
+    const boxes = [...document.querySelectorAll(`input[data-geo="${g.geo}"]`)];
+    const checked = boxes.filter(b=>b.checked).length;
+    const sa = document.querySelector(`input[data-selall="${g.geo}"]`);
+    sa.checked = checked === boxes.length && checked > 0;
+    sa.indeterminate = checked > 0 && checked < boxes.length;
+  });
+}
+
+// region checkbox change
+groupsEl.addEventListener('change', e => {
+  if(e.target.dataset.geo && !e.target.dataset.selall){
+    if(e.target.checked && selectedCount() > MAX){
+      e.target.checked = false;
+      showToast();
+    }
+    refresh();
+  }
+});
+
+// select-all
+document.querySelectorAll('input[data-selall]').forEach(sa => {
+  sa.addEventListener('change', () => {
+    const geo = sa.dataset.selall;
+    const boxes = [...document.querySelectorAll(`input[data-geo="${geo}"]`)];
+    if(sa.checked){
+      const n = selectedCount();
+      const unchecked = boxes.filter(b=>!b.checked);
+      if(n + unchecked.length > MAX){
+        sa.checked = false;
+        showToast();
+        refresh();
+        return;
+      }
+      boxes.forEach(b => b.checked = true);
+    } else {
+      boxes.forEach(b => b.checked = false);
+    }
+    refresh();
+  });
+});
+
+clearBtn.addEventListener('click', () => {
+  document.querySelectorAll('#groups input[type="checkbox"]').forEach(cb => {
+    cb.checked = false; cb.indeterminate = false;
+  });
+  refresh();
+});
+
+compareBtn.addEventListener('click', () => {
+  const sel = [...document.querySelectorAll('#groups input[data-geo]:checked')].map(c=>c.value);
+  alert('Compare regions:\n• ' + sel.join('\n• '));
+});
+
+function showToast(){
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> toast.classList.remove('show'), 2200);
+}
+
+refresh();
+</script>
+</body>
+</html>
