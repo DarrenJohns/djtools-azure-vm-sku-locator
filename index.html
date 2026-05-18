@@ -2564,7 +2564,7 @@ function exportShortlistCsv() {
   const ci = getCurrencyInfo();
   const currCode = selectedCurrency || 'USD';
   const pricingHeaders = hasPricing ? [`Linux/hr (${currCode})`, `Windows/hr (${currCode})`, `Spot/hr (${currCode})`, `~Monthly (${currCode})`] : [];
-  const headers = [...specHeaders, ...pricingHeaders];
+  const headers = [...specHeaders, ...pricingHeaders, 'Retirement Status', 'Retirement Date'];
   const rows = pinned.map(s => {
     const specCols = columns.filter(c => c.key !== '_pin').map(c => {
       const v = s[c.key];
@@ -2577,6 +2577,8 @@ function exportShortlistCsv() {
       const monthly = prices.linux != null ? `${ci.symbol}${(prices.linux * 730).toFixed(0)}` : '';
       specCols.push(fmt(prices.linux), fmt(prices.windows), fmt(prices.spot), monthly);
     }
+    const ret = s.family && retirementFamilies[s.family.toLowerCase()] ? retirementFamilies[s.family.toLowerCase()] : null;
+    specCols.push(ret ? 'Retiring' : '', ret ? ret.date : '');
     return specCols;
   });
   const csv = [headers.join(','), ...rows.map(r => r.map(v => `"${v}"`).join(','))].join('\n');
