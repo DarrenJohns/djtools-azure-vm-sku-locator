@@ -2559,12 +2559,26 @@ function clearShortlist() {
 function exportShortlistCsv() {
   const pinned = allSkus.filter(s => pinnedSkus.has(s.size));
   if (!pinned.length) { showToast('No pinned SKUs to export', 'error'); return; }
-  const headers = columns.filter(c => c.key !== '_pin').map(c => c.label);
-  const rows = pinned.map(s => columns.filter(c => c.key !== '_pin').map(c => {
-    const v = s[c.key];
-    if (Array.isArray(v)) return v.join(';');
-    return v != null ? String(v) : '';
-  }));
+  const specHeaders = columns.filter(c => c.key !== '_pin').map(c => c.label);
+  const hasPricing = _pricingCache && _pricingCache._region === selectedRegion;
+  const ci = getCurrencyInfo();
+  const currCode = selectedCurrency || 'USD';
+  const pricingHeaders = hasPricing ? [`Linux/hr (${currCode})`, `Windows/hr (${currCode})`, `Spot/hr (${currCode})`, `~Monthly (${currCode})`] : [];
+  const headers = [...specHeaders, ...pricingHeaders];
+  const rows = pinned.map(s => {
+    const specCols = columns.filter(c => c.key !== '_pin').map(c => {
+      const v = s[c.key];
+      if (Array.isArray(v)) return v.join(';');
+      return v != null ? String(v) : '';
+    });
+    if (hasPricing) {
+      const prices = _pricingCache[s.size] || {};
+      const fmt = (p) => p != null ? `${ci.symbol}${p.toFixed(ci.decimalPlaces)}` : '';
+      const monthly = prices.linux != null ? `${ci.symbol}${(prices.linux * 730).toFixed(0)}` : '';
+      specCols.push(fmt(prices.linux), fmt(prices.windows), fmt(prices.spot), monthly);
+    }
+    return specCols;
+  });
   const csv = [headers.join(','), ...rows.map(r => r.map(v => `"${v}"`).join(','))].join('\n');
   const blob = new Blob([csv], { type: 'text/csv' });
   const a = document.createElement('a');
@@ -2572,7 +2586,7 @@ function exportShortlistCsv() {
   a.download = `shortlist-${selectedRegion || 'export'}.csv`;
   a.click();
   URL.revokeObjectURL(a.href);
-  showToast(`Exported ${pinned.length} pinned SKUs to CSV`);
+  showToast(`Exported ${pinned.length} pinned SKUs to CSV${hasPricing ? ` with ${currCode} pricing` : ''}`);
 }
 
 // === PRICING COMPARISON ===
