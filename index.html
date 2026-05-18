@@ -1373,16 +1373,16 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
 <div class="toast-container" id="toast-container"></div>
 
 <div class="modal-overlay" id="confirmModal" onclick="if(event.target===this)closeConfirmModal(false)">
-  <div class="modal" style="max-width:400px;width:90%;" role="dialog" aria-modal="true">
-    <div class="modal-header-bar">
-      <h3 id="confirmModal-title">Confirm</h3>
-      <button class="modal-close" onclick="closeConfirmModal(false)">&times;</button>
+  <div class="modal" style="max-width:420px;width:90%;" role="dialog" aria-modal="true">
+    <div style="background:linear-gradient(135deg,#c42b1c 0%,#961b1b 100%);color:#fff;padding:20px 24px 16px;text-align:center;border-radius:var(--radius-md) var(--radius-md) 0 0;">
+      <div style="font-size:28px;margin-bottom:6px;">⚠️</div>
+      <h3 id="confirmModal-title" style="font-size:18px;font-weight:600;margin:0;">Confirm</h3>
     </div>
-    <div style="padding:20px;">
-      <p id="confirmModal-message" style="font-size:14px;color:var(--text-secondary);margin:0 0 20px;"></p>
-      <div style="display:flex;gap:8px;justify-content:flex-end;">
-        <button class="btn btn-outline btn-sm" onclick="closeConfirmModal(false)">Cancel</button>
-        <button class="btn btn-sm" id="confirmModal-ok" style="background:var(--status-danger);color:#fff;border:none;" onclick="closeConfirmModal(true)">Confirm</button>
+    <div style="padding:24px;">
+      <p id="confirmModal-message" style="font-size:14px;color:var(--text-secondary);margin:0 0 24px;line-height:1.5;"></p>
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button class="btn btn-outline" onclick="closeConfirmModal(false)" style="padding:8px 20px;">Cancel</button>
+        <button class="btn" id="confirmModal-ok" style="background:var(--status-danger);color:#fff;border:none;padding:8px 20px;font-weight:600;" onclick="closeConfirmModal(true)">Confirm</button>
       </div>
     </div>
   </div>
