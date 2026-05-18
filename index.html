@@ -1372,6 +1372,22 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
 
 <div class="toast-container" id="toast-container"></div>
 
+<div class="modal-overlay" id="confirmModal" onclick="if(event.target===this)closeConfirmModal(false)">
+  <div class="modal" style="max-width:400px;width:90%;" role="dialog" aria-modal="true">
+    <div class="modal-header-bar">
+      <h3 id="confirmModal-title">Confirm</h3>
+      <button class="modal-close" onclick="closeConfirmModal(false)">&times;</button>
+    </div>
+    <div style="padding:20px;">
+      <p id="confirmModal-message" style="font-size:14px;color:var(--text-secondary);margin:0 0 20px;"></p>
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <button class="btn btn-outline btn-sm" onclick="closeConfirmModal(false)">Cancel</button>
+        <button class="btn btn-sm" id="confirmModal-ok" style="background:var(--status-danger);color:#fff;border:none;" onclick="closeConfirmModal(true)">Confirm</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="shortcutsModal" onclick="if(event.target===this)closeShortcutsModal()">
   <div class="modal" style="max-width:480px;width:90%;" role="dialog" aria-modal="true">
     <div class="modal-banner">
@@ -2568,11 +2584,32 @@ function renderShortlist() {
 }
 
 function clearShortlist() {
-  if (!confirm(`Remove all ${pinnedSkus.size} pinned SKUs from your shortlist?`)) return;
-  pinnedSkus.clear();
-  renderShortlist();
-  renderTable();
-  showToast('Shortlist cleared');
+  showConfirmModal(
+    'Clear All Pins',
+    `Remove all ${pinnedSkus.size} pinned SKUs from your shortlist? This cannot be undone.`,
+    'Clear All',
+    () => {
+      pinnedSkus.clear();
+      renderShortlist();
+      renderTable();
+      showToast('Shortlist cleared');
+    }
+  );
+}
+
+let _confirmResolve = null;
+function showConfirmModal(title, message, okLabel, onConfirm) {
+  const overlay = document.getElementById('confirmModal');
+  document.getElementById('confirmModal-title').textContent = title;
+  document.getElementById('confirmModal-message').textContent = message;
+  document.getElementById('confirmModal-ok').textContent = okLabel || 'Confirm';
+  _confirmResolve = onConfirm;
+  overlay.classList.add('active');
+}
+function closeConfirmModal(confirmed) {
+  document.getElementById('confirmModal').classList.remove('active');
+  if (confirmed && _confirmResolve) _confirmResolve();
+  _confirmResolve = null;
 }
 
 function exportShortlistCsv() {
