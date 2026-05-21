@@ -94,6 +94,10 @@ body {
 .header h1 { font-size: 20px; font-weight: 600; }
 .nav-btn { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); color: #fff; padding: 6px 14px; border-radius: 20px; cursor: pointer; font-size: 0.82rem; font-weight: 600; transition: background 0.2s; backdrop-filter: blur(4px); }
 .nav-btn-icon { font-size: 16px; padding: 6px 12px; line-height: 1; }
+.nav-btn-bare { background: transparent; border: 1px solid transparent; padding: 2px 6px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; transition: filter 0.2s ease; }
+.nav-btn-bare:hover { background: transparent; border-color: transparent; filter: drop-shadow(0 0 6px rgba(91,184,245,0.85)) drop-shadow(0 0 12px rgba(91,184,245,0.55)); }
+.nav-btn-bare svg { display: block; width: 34px; height: 34px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4)); }
+.nav-btn-bare-emoji { font-size: 26px; line-height: 1; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4)); }
 .nav-btn:hover { background: rgba(255,255,255,0.25); }
 .container { max-width: 1400px; margin: 0 auto; padding: 48px 24px 16px; }
 .page-flex { flex: 1 0 auto; min-width: 0; }
@@ -968,8 +972,20 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
   <svg viewBox="0 0 100 100" style="width:32px;height:32px;flex-shrink:0;"><defs><linearGradient id="hg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#5bb8f5"/><stop offset="100%" stop-color="#ffffff"/></linearGradient></defs><rect x="8" y="8" width="84" height="60" rx="8" fill="url(#hg)"/><rect x="14" y="14" width="72" height="48" rx="4" fill="#0a3d6b"/><rect x="20" y="22" width="26" height="4" rx="2" fill="#00b7c3"/><rect x="20" y="30" width="18" height="4" rx="2" fill="#00b7c3" opacity="0.7"/><rect x="20" y="38" width="32" height="4" rx="2" fill="#00b7c3" opacity="0.5"/><rect x="20" y="46" width="14" height="4" rx="2" fill="#00b7c3" opacity="0.3"/><circle cx="70" cy="30" r="8" fill="none" stroke="#00b7c3" stroke-width="2"/><path d="M70 24v6h5" fill="none" stroke="#00b7c3" stroke-width="2" stroke-linecap="round"/><rect x="60" y="44" width="18" height="8" rx="2" fill="#00b7c3" opacity="0.4"/><rect x="62" y="46" width="4" height="4" rx="1" fill="#00b7c3"/><rect x="68" y="46" width="4" height="4" rx="1" fill="#00b7c3" opacity="0.7"/><rect x="40" y="68" width="20" height="6" rx="2" fill="rgba(255,255,255,0.4)"/><rect x="30" y="74" width="40" height="8" rx="4" fill="rgba(255,255,255,0.3)"/><rect x="32" y="76" width="8" height="4" rx="1" fill="rgba(255,255,255,0.5)"/><rect x="42" y="76" width="8" height="4" rx="1" fill="rgba(255,255,255,0.5)"/><rect x="52" y="76" width="8" height="4" rx="1" fill="rgba(255,255,255,0.5)"/></svg>
   <h1>Azure Virtual Machine SKU by Region</h1>
   <span style="flex:1;"></span>
-  <button class="nav-btn nav-btn-icon" onclick="openShortcutsModal()" title="Keyboard shortcuts (?)">⌨</button>
-  <button class="nav-btn nav-btn-icon" id="themeToggle" onclick="toggleTheme()" title="Toggle light/dark theme">🌙</button>
+  <button class="nav-btn nav-btn-icon nav-btn-bare" onclick="openTopTrumps()" title="Play Top Trumps – Azure VM Edition" aria-label="Play Top Trumps – Azure VM Edition">
+    <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" width="22" height="22" aria-hidden="true">
+      <g transform="translate(28 34) rotate(-14)">
+        <rect x="-18" y="-24" width="36" height="48" rx="4" fill="#0f6cbd" stroke="#094780" stroke-width="1.5"/>
+        <rect x="-14" y="-20" width="28" height="40" rx="2" fill="none" stroke="#2596e7" stroke-width="0.9" opacity="0.7"/>
+      </g>
+      <g transform="translate(36 32) rotate(9)">
+        <rect x="-18" y="-24" width="36" height="48" rx="4" fill="#f7f5ec" stroke="#0a1424" stroke-width="1.5"/>
+        <text x="0" y="11" font-family="Arial Black,Impact,sans-serif" font-size="30" font-weight="900" fill="#0f6cbd" text-anchor="middle">A</text>
+        <text x="-12" y="-14" font-size="9" fill="#d8a14a" text-anchor="middle">★</text>
+      </g>
+    </svg>
+  </button>
+  <button class="nav-btn nav-btn-icon nav-btn-bare nav-btn-bare-emoji" id="themeToggle" onclick="toggleTheme()" title="Toggle light/dark theme">🌙</button>
 </header>
 
 
@@ -1367,7 +1383,7 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
   <a href="https://github.com/features/copilot/cli/" target="_blank" rel="noopener noreferrer" style="color:var(--brand-primary);text-decoration:none;font-weight:600;">Learn more ↗</a>
   &nbsp;·&nbsp;
   <a href="https://github.com/DarrenJohns/djtools-azure-vm-sku-locator" target="_blank" rel="noopener noreferrer" style="color:var(--brand-primary);text-decoration:none;font-weight:600;">GitHub ↗</a>
-  <div style="margin-top:8px;font-size:11px;color:var(--text-tertiary);opacity:0.7;">v1.1.0</div>
+  <div style="margin-top:8px;font-size:11px;color:var(--text-tertiary);opacity:0.7;">v1.2.0</div>
 </footer>
 
 <div class="toast-container" id="toast-container"></div>
@@ -1716,6 +1732,17 @@ function toggleTheme() {
   html.setAttribute('data-theme', next);
   document.getElementById('themeToggle').textContent = next === 'dark' ? '☀️' : '🌙';
   localStorage.setItem('vmsku-theme', next);
+}
+
+function openTopTrumps() {
+  const w = 1200, h = 900;
+  const left = Math.max(0, (window.screen.availWidth  - w) / 2);
+  const top  = Math.max(0, (window.screen.availHeight - h) / 2);
+  const features = `popup=yes,width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes,noopener`;
+  const win = window.open('toptrumps.html', 'azureTopTrumps', features);
+  // Some browsers (or popup blockers) ignore the popup feature flags and
+  // return null. Fall back to a regular new tab so the link still works.
+  if (!win) { window.open('toptrumps.html', '_blank', 'noopener'); }
 }
 
 (function initTheme() {
