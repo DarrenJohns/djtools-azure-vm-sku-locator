@@ -94,10 +94,11 @@ body {
 .header h1 { font-size: 20px; font-weight: 600; }
 .nav-btn { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); color: #fff; padding: 6px 14px; border-radius: 20px; cursor: pointer; font-size: 0.82rem; font-weight: 600; transition: background 0.2s; backdrop-filter: blur(4px); }
 .nav-btn-icon { font-size: 16px; padding: 6px 12px; line-height: 1; }
-.nav-btn-bare { background: transparent; border: 1px solid transparent; padding: 2px 6px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; transition: filter 0.2s ease; }
-.nav-btn-bare:hover { background: transparent; border-color: transparent; filter: drop-shadow(0 0 6px rgba(91,184,245,0.85)) drop-shadow(0 0 12px rgba(91,184,245,0.55)); }
-.nav-btn-bare svg { display: block; width: 34px; height: 34px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4)); }
-.nav-btn-bare-emoji { font-size: 26px; line-height: 1; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4)); }
+.nav-btn-bare { background: transparent; border: 1px solid transparent; padding: 0; margin: 0; width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; transition: box-shadow 0.2s ease, background 0.2s ease; }
+.nav-btn-bare + .nav-btn-bare { margin-left: -10px; }
+.nav-btn-bare:hover { background: rgba(91,184,245,0.10); border-color: transparent; box-shadow: 0 0 0 2px rgba(91,184,245,0.45), 0 0 14px 2px rgba(91,184,245,0.55); }
+.nav-btn-bare svg { display: block; width: 30px; height: 30px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4)); }
+.nav-btn-bare-emoji { font-size: 24px; line-height: 1; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4)); }
 .nav-btn:hover { background: rgba(255,255,255,0.25); }
 .container { max-width: 1400px; margin: 0 auto; padding: 48px 24px 16px; }
 .page-flex { flex: 1 0 auto; min-width: 0; }
