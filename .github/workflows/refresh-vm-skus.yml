@@ -215,6 +215,12 @@ jobs:
           Write-Host "[OK] Disk SKU data refresh complete"
         shell: pwsh
 
+      - name: Build Top Trumps card deck (data/cards.json)
+        run: |
+          python scripts/build-cards.py
+          Write-Host "[OK] Top Trumps cards.json regenerated"
+        shell: pwsh
+
       - name: Deploy to Azure Static Web Apps
         run: |
           # Build staging folder with only web-servable files
@@ -222,6 +228,8 @@ jobs:
           if (Test-Path $staging) { Remove-Item $staging -Recurse -Force }
           New-Item -ItemType Directory -Path $staging -Force | Out-Null
           Copy-Item "index.html" "$staging/"
+          if (Test-Path "toptrumps.html") { Copy-Item "toptrumps.html" "$staging/" }
+          if (Test-Path "azure-logo.png") { Copy-Item "azure-logo.png" "$staging/" }
           Copy-Item "config.json" "$staging/"
           Copy-Item -Recurse "data" "$staging/data"
 
