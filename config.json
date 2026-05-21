@@ -1,4 +1,8 @@
 {
+  "topTrumpsRegions": [
+    { "name": "australiaeast", "displayName": "Australia East" },
+    { "name": "newzealandnorth", "displayName": "New Zealand North" }
+  ],
   "targetRegions": [
     { "name": "eastus", "displayName": "East US" },
     { "name": "eastus2", "displayName": "East US 2" },

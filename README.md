@@ -16,6 +16,8 @@
 
 👉 **Try the live app here → [vmsku.djtools.co.nz](https://vmsku.djtools.co.nz)**
 
+🎴 **Bonus:** a companion **Top Trumps – Azure VM Edition** card game ships from the same site at [`/toptrumps.html`](toptrumps.html) — a standalone single-page game built on the same SKU data via `scripts/build-cards.py`.
+
 ---
 
 ## ✨ What You Can Do

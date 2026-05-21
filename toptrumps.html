@@ -1,0 +1,4371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Top Trumps - Azure VM Edition</title>
+<meta name="description" content="A real-data card game where every card is an Azure VM SKU. Pick a stat — highest wins (lowest for price). Educational. Single-file. Experimental.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg transform='translate(28 34) rotate(-14)'%3E%3Crect x='-18' y='-24' width='36' height='48' rx='4' fill='%230f6cbd' stroke='%23094780' stroke-width='1.5'/%3E%3Crect x='-14' y='-20' width='28' height='40' rx='2' fill='none' stroke='%232596e7' stroke-width='0.9' opacity='0.7'/%3E%3C/g%3E%3Cg transform='translate(36 32) rotate(9)'%3E%3Crect x='-18' y='-24' width='36' height='48' rx='4' fill='%23f7f5ec' stroke='%230a1424' stroke-width='1.5'/%3E%3Ctext x='0' y='11' font-family='Arial Black,Impact,sans-serif' font-size='30' font-weight='900' fill='%230f6cbd' text-anchor='middle'%3EA%3C/text%3E%3Ctext x='-12' y='-14' font-size='9' fill='%23d8a14a' text-anchor='middle'%3E%E2%98%85%3C/text%3E%3C/g%3E%3C/svg%3E">
+
+<style>
+/* =================================================================
+   Azure Top Trumps  —  single-file vanilla
+   ──────────────────────────────────────────────────────────────────
+   Tokens
+   ================================================================= */
+:root {
+  --bg:           #15171c;
+  --bg-elev:      #1d2027;
+  --bg-elev-2:    #262932;
+  --table:        #1a1d24;
+  --table-edge:   #11131a;
+  --ink:          #e6e8ed;
+  --ink-mute:     #8d93a3;
+  --ink-dim:      #5a6072;
+  --line:         #2a2e3a;
+  --line-strong:  #3a3f4f;
+  --azure:        #0f6cbd;
+  --azure-bright: #2596e7;
+  --azure-deep:   #094780;
+  --warm:         #fdfdfb;
+  --warm-2:       #f3f1ec;
+  --warm-3:       #d9d6cd;
+  --gold:         #d8a14a;
+  --silver:       #b9bcc6;
+  --bronze:       #a16a3b;
+  --ruby:         #c4314b;
+  --ok:           #18a957;
+
+  --gp:    #0f6cbd;
+  --co:    #e97548;
+  --mo:    #8764b8;
+  --so:    #038387;
+  --gpu:   #c4314b;
+  --hpc:   #4f52b2;
+  --conf:  #7a7574;
+
+  --r-common:     #b9bcc6;
+  --r-uncommon:   #4ea36b;
+  --r-rare:       #2596e7;
+  --r-epic:       #b074e8;
+  --r-legendary:  #f0a93b;
+
+  --radius:    14px;
+  --radius-sm: 6px;
+  --shadow:    0 18px 40px rgba(0,0,0,.45), 0 2px 6px rgba(0,0,0,.4);
+  --shadow-card: 0 10px 24px rgba(0,0,0,.55), 0 1px 0 rgba(255,255,255,.04) inset;
+
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", "Cascadia Mono", "SF Mono", Menlo, Consolas, monospace;
+  --font-display: "Inter", system-ui, sans-serif;
+
+  /* Table felt — overridable per theme via body[data-felt="..."] */
+  --felt: radial-gradient(ellipse at top, #1f222a 0%, #15171c 60%, #0c0e13 100%);
+}
+
+/* ---- Table felt themes ---- */
+body[data-felt="azure"] {
+  --felt: radial-gradient(ellipse at top, #173766 0%, #0a1a30 55%, #050a16 100%);
+}
+
+@media (prefers-color-scheme: light) {
+  /* (We ship dark only — Top Trumps tabletop reads better dark. Light mode TBD.) */
+}
+
+* { box-sizing: border-box; }
+html, body { margin:0; padding:0; min-height:100%; }
+/* Hide the browser scrollbar but keep scrolling functional */
+html { scrollbar-width: none; -ms-overflow-style: none; }
+html::-webkit-scrollbar { width: 0; height: 0; display: none; }
+body {
+  background: var(--felt);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+/* Subtle table grain */
+body::before {
+  content:"";
+  position: fixed; inset:0;
+  pointer-events:none;
+  background-image: radial-gradient(rgba(255,255,255,.012) 1px, transparent 1px);
+  background-size: 3px 3px;
+  z-index: 1;
+}
+
+/* Animated globe background (Azure regions) */
+#globe-bg {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.55;
+  transition: opacity .8s ease;
+}
+body.bg-bright #globe-bg { opacity: 0.85; }
+body.bg-dim #globe-bg { opacity: 0.28; }
+
+button { font: inherit; color: inherit; }
+:focus-visible {
+  outline: 2px solid var(--azure-bright);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* =================================================================
+   Screen scaffold
+   ================================================================= */
+.app {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  z-index: 2;
+}
+.screen { display: none; flex: 1; }
+.screen.active { display: flex; }
+
+/* =================================================================
+   Top bar
+   ================================================================= */
+.topbar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 22px;
+  border-bottom: 1px solid var(--line);
+  background:
+    radial-gradient(ellipse 80% 100% at 50% 0%, rgba(40,110,200,.18) 0%, transparent 70%),
+    linear-gradient(180deg, rgba(20,28,42,.78) 0%, rgba(13,15,20,.62) 100%);
+  backdrop-filter: blur(10px);
+  position: sticky; top: 0;
+  z-index: 10;
+  overflow: hidden;
+}
+/* Faint diagonal grid pattern + slow horizontal sweep behind everything. */
+.topbar::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(90deg, rgba(120,200,255,.045) 1px, transparent 1px),
+    linear-gradient(0deg,  rgba(120,200,255,.045) 1px, transparent 1px);
+  background-size: 28px 28px, 28px 28px;
+  mask-image: radial-gradient(ellipse 60% 120% at 50% 50%, #000 30%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse 60% 120% at 50% 50%, #000 30%, transparent 80%);
+  pointer-events: none;
+  opacity: .55;
+}
+.topbar::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: -1px;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(80,180,255,.15) 18%,
+    rgba(120,200,255,.6) 50%,
+    rgba(80,180,255,.15) 82%,
+    transparent 100%);
+  pointer-events: none;
+}
+/* Slow horizontal light sweep across the whole bar. */
+.topbar > .topbar-sweep,
+.topbar-sweep {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.topbar > .brand,
+.topbar > .topbar-status,
+.topbar > .topbar-actions { position: relative; z-index: 1; }
+.topbar > .brand          { justify-self: start; }
+.topbar > .topbar-status  { justify-self: center; }
+.topbar > .topbar-actions { justify-self: end; }
+
+.brand {
+  display: flex; align-items: center; gap: 12px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  font-size: 14px;
+  min-width: 0;
+}
+.brand .brand-title {
+  background: linear-gradient(180deg, #ffffff 0%, #9eb2cd 110%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  white-space: nowrap;
+}
+.brand .mark {
+  width: 44px; height: 44px;
+  display: grid; place-items: center;
+  position: relative;
+  flex-shrink: 0;
+  filter: drop-shadow(0 4px 10px rgba(15,108,189,.55));
+}
+.brand .mark > svg {
+  width: 44px;
+  height: 44px;
+  display: block;
+}
+.brand .tag {
+  font-size: 10px;
+  color: var(--ink-dim);
+  font-weight: 700;
+  letter-spacing: .18em;
+  padding: 3px 7px;
+  border: 1px solid rgba(120,200,255,.22);
+  border-radius: 4px;
+  background: rgba(120,200,255,.06);
+}
+
+/* ---- Status pill (center) ---- */
+.topbar-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 14px 7px 11px;
+  background:
+    linear-gradient(180deg, rgba(20,40,70,.55) 0%, rgba(10,16,28,.55) 100%);
+  border: 1px solid rgba(120,200,255,.18);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ink);
+  box-shadow:
+    0 2px 10px rgba(0,0,0,.35),
+    inset 0 1px 0 rgba(255,255,255,.05);
+  position: relative;
+  overflow: hidden;
+}
+.topbar-status::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(120,200,255,.18) 50%, transparent 100%);
+  transform: translateX(-100%);
+  animation: statusSweep 4s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes statusSweep {
+  0%, 60% { transform: translateX(-100%); }
+  80%, 100% { transform: translateX(100%); }
+}
+.topbar-status .status-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #7adc9a;
+  box-shadow: 0 0 0 0 rgba(122,220,154,.6);
+  animation: statusPulse 1.6s ease-out infinite;
+  flex-shrink: 0;
+}
+@keyframes statusPulse {
+  0%   { box-shadow: 0 0 0 0   rgba(122,220,154,.55); }
+  70%  { box-shadow: 0 0 0 8px rgba(122,220,154,0);   }
+  100% { box-shadow: 0 0 0 0   rgba(122,220,154,0);   }
+}
+/* Live state (during match) — switch to azure */
+.topbar-status.is-live .status-dot { background: var(--azure-bright); animation-name: statusPulseLive; }
+.topbar-status.is-live { border-color: rgba(120,200,255,.4); }
+@keyframes statusPulseLive {
+  0%   { box-shadow: 0 0 0 0   rgba(80,170,255,.7); }
+  70%  { box-shadow: 0 0 0 10px rgba(80,170,255,0);  }
+  100% { box-shadow: 0 0 0 0   rgba(80,170,255,0);   }
+}
+/* End-of-match state */
+.topbar-status.is-end .status-dot { background: #ffd66b; animation-name: statusPulseEnd; }
+.topbar-status.is-end { border-color: rgba(255,214,107,.4); }
+@keyframes statusPulseEnd {
+  0%   { box-shadow: 0 0 0 0   rgba(255,214,107,.6); }
+  70%  { box-shadow: 0 0 0 10px rgba(255,214,107,0); }
+  100% { box-shadow: 0 0 0 0   rgba(255,214,107,0);  }
+}
+.topbar-status .status-text { color: var(--ink); }
+.topbar-status .status-sub {
+  color: var(--ink-mute);
+  font-weight: 600;
+  letter-spacing: .12em;
+}
+.topbar-status .status-sub:not(:empty)::before {
+  content: '·';
+  margin: 0 8px 0 2px;
+  color: rgba(120,200,255,.5);
+}
+
+/* ---- Right side meta + actions ---- */
+.topbar-actions { display: flex; align-items: center; gap: 10px; }
+.topbar-meta { display: flex; align-items: center; gap: 6px; }
+.meta-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  background: rgba(255,255,255,.03);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.meta-chip .meta-icon { color: var(--azure-bright); font-size: 11px; }
+.meta-chip .meta-val { color: var(--ink); font-variant-numeric: tabular-nums; }
+.meta-chip .meta-greek { color: var(--azure-bright); margin-left: 1px; }
+.meta-version { color: var(--ink-dim); }
+.sound-btn { font-size: 15px; line-height: 1; }
+.sound-btn[aria-pressed="true"] {
+  color: var(--azure-bright);
+  background: rgba(120,200,255,.10);
+  border-color: rgba(120,200,255,.35);
+  box-shadow: 0 0 0 1px rgba(120,200,255,.18), 0 0 12px rgba(120,200,255,.25);
+}
+
+@media (max-width: 720px) {
+  .topbar { padding: 10px 14px; gap: 10px; }
+  .topbar-status .status-sub { display: none; }
+  .topbar-meta { display: none; }
+  .brand .tag { display: none; }
+}
+@media (max-width: 520px) {
+  .topbar-status .status-text { font-size: 10px; letter-spacing: .08em; }
+  .brand .brand-title { font-size: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .topbar-status::after { animation: none; }
+  .topbar-status .status-dot { animation: none; }
+}
+.icon-btn {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--ink-mute);
+  width: 34px; height: 34px;
+  border-radius: 8px;
+  display: grid; place-items: center;
+  cursor: pointer;
+  transition: all .15s;
+}
+.icon-btn:hover {
+  border-color: var(--line-strong);
+  color: var(--ink);
+  background: var(--bg-elev);
+}
+
+/* ---- Table felt picker ---- */
+.felt-wrap { position: relative; }
+.felt-pop {
+  position: fixed;
+  top: 58px;
+  right: 22px;
+  background: linear-gradient(180deg, rgba(16,24,40,.98), rgba(10,16,28,.98));
+  border: 1px solid rgba(120,200,255,.32);
+  border-radius: 10px;
+  box-shadow: 0 12px 28px rgba(0,0,0,.55), 0 0 24px rgba(80,170,255,.16);
+  padding: 10px;
+  display: none;
+  z-index: 70;
+  width: 196px;
+}
+.felt-pop.is-open { display: block; }
+.felt-wrap.is-open .felt-pop { display: block; }
+.felt-pop .felt-title {
+  display: block;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: #7dc3ff;
+  margin: 0 4px 8px;
+}
+.felt-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+.felt-swatch {
+  display: flex; flex-direction: column; align-items: stretch;
+  gap: 5px;
+  padding: 6px;
+  background: transparent;
+  border: 1px solid rgba(120,200,255,.18);
+  border-radius: 8px;
+  color: #d9e2f0;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color .15s, transform .15s;
+}
+.felt-swatch:hover { border-color: rgba(120,200,255,.55); transform: translateY(-1px); }
+.felt-swatch[aria-pressed="true"] {
+  border-color: #7dc3ff;
+  box-shadow: 0 0 0 1px rgba(125,195,255,.4) inset;
+}
+.felt-swatch .felt-chip {
+  height: 28px;
+  border-radius: 5px;
+  border: 1px solid rgba(255,255,255,.08);
+}
+.felt-swatch[data-felt="midnight"] .felt-chip { background: radial-gradient(ellipse at top, #1f222a, #0c0e13); }
+.felt-swatch[data-felt="azure"]    .felt-chip { background: radial-gradient(ellipse at top, #173766, #050a16); }
+
+/* =================================================================
+   TITLE SCREEN
+   ================================================================= */
+#screen-title {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px 80px;
+  text-align: center;
+}
+.title-wrap { max-width: 720px; }
+.title-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .35em;
+  color: var(--azure-bright);
+  margin-bottom: 18px;
+  text-transform: uppercase;
+}
+.title-main {
+  font-family: var(--font-display);
+  font-size: clamp(48px, 9vw, 92px);
+  font-weight: 900;
+  letter-spacing: -.03em;
+  line-height: .95;
+  margin: 0 0 8px;
+  background: linear-gradient(180deg, #fff 0%, #aab2c5 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-transform: uppercase;
+  filter:
+    drop-shadow(0 2px 0 rgba(0,0,0,.55))
+    drop-shadow(0 8px 22px rgba(0,0,0,.55))
+    drop-shadow(0 0 28px rgba(15,108,189,.25));
+}
+.title-main .sub {
+  display: block;
+  font-size: .55em;
+  background: linear-gradient(135deg, var(--azure-bright) 0%, var(--azure) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: -.01em;
+}
+.title-tagline {
+  color: var(--ink-mute);
+  margin: 16px auto 32px;
+  max-width: 520px;
+  font-size: 15px;
+  line-height: 1.55;
+}
+.title-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  max-width: 320px;
+  margin: 0 auto 40px;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 28px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: var(--bg-elev);
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all .15s ease-out;
+  text-decoration: none;
+  letter-spacing: .02em;
+  width: 100%;
+}
+.btn:hover { background: var(--bg-elev-2); transform: translateY(-1px); }
+.btn:active { transform: translateY(0); }
+.btn-primary {
+  background: linear-gradient(135deg, var(--azure-bright) 0%, var(--azure) 100%);
+  color: white;
+  border-color: var(--azure-bright);
+  box-shadow: 0 8px 22px rgba(15,108,189,.35);
+  font-size: 16px;
+  padding: 18px 32px;
+}
+.btn-primary:hover {
+  box-shadow: 0 12px 28px rgba(15,108,189,.5);
+  background: linear-gradient(135deg, #3aa2ee 0%, #1574c8 100%);
+}
+.btn-ghost {
+  background: transparent;
+  border-color: var(--line);
+  color: var(--ink-mute);
+}
+.btn-ghost:hover { color: var(--ink); border-color: var(--line-strong); }
+.btn[disabled] { opacity: .4; cursor: not-allowed; transform: none !important; }
+.btn-sm {
+  padding: 7px 14px;
+  font-size: 11px;
+  letter-spacing: .08em;
+  min-height: 0;
+  height: 32px;
+  width: auto;
+  white-space: nowrap;
+  gap: 6px;
+}
+.btn-sm .btn-ic {
+  font-size: 13px;
+  line-height: 1;
+  display: inline-block;
+}
+.action-bar-btns { display: inline-flex; gap: 8px; align-items: center; }
+
+/* Continue button — sits ABOVE the action-bar so it never overlaps wrapped hint/legend rows */
+.continue-btn {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 14px);
+  transform: translateX(-50%) translateY(8px);
+  z-index: 55;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px 12px 22px;
+  background: linear-gradient(135deg, var(--azure), var(--azure-2));
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 999px;
+  font: 700 14px/1 var(--font-sans);
+  letter-spacing: .02em;
+  cursor: pointer;
+  box-shadow: 0 18px 40px rgba(0,0,0,.55), 0 0 0 0 rgba(80,180,255,.0);
+  opacity: 0;
+  transition: opacity .22s ease, transform .22s cubic-bezier(.2,.7,.3,1.4), box-shadow .3s ease;
+  white-space: nowrap;
+  overflow: hidden;  /* clip the progress bar to the pill */
+  --progress: 100%;
+}
+/* Thin auto-advance progress bar inside the pill — shrinks left-to-right as the
+   safety timeout counts down. Paused while user is hovering a card. */
+.continue-btn::before {
+  content: '';
+  position: absolute;
+  left: 0; bottom: 0;
+  height: 3px;
+  width: var(--progress, 100%);
+  background: linear-gradient(90deg, rgba(255,255,255,.85), rgba(180,220,255,.55));
+  box-shadow: 0 0 8px rgba(180,220,255,.5);
+  transition: width .15s linear;
+  pointer-events: none;
+}
+.continue-btn[hidden] { display: none; }
+.continue-btn.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  animation: continuePulse 1.8s ease-in-out infinite;
+}
+.continue-btn.is-paused { animation: none; box-shadow: 0 18px 40px rgba(0,0,0,.55), 0 0 24px 4px rgba(80,180,255,.55); }
+.continue-btn.is-paused::before { background: linear-gradient(90deg, rgba(255,220,140,.95), rgba(255,200,90,.65)); box-shadow: 0 0 10px rgba(255,210,110,.55); }
+.continue-btn:hover { background: linear-gradient(135deg, var(--azure-2), var(--azure)); }
+.continue-btn:active { transform: translateX(-50%) translateY(1px) scale(.98); }
+.continue-btn .continue-arrow { font-size: 12px; }
+.continue-btn .continue-key {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  background: rgba(255,255,255,.16);
+  padding: 4px 8px;
+  border-radius: 6px;
+  opacity: .9;
+}
+@keyframes continuePulse {
+  0%, 100% { box-shadow: 0 18px 40px rgba(0,0,0,.55), 0 0 0 0 rgba(80,180,255,.0); }
+  50%      { box-shadow: 0 18px 40px rgba(0,0,0,.55), 0 0 24px 4px rgba(80,180,255,.55); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .continue-btn.show { animation: none; }
+}
+
+.deck-strip {
+  display: flex;
+  justify-content: center;
+  gap: -8px;
+  margin-top: 30px;
+  perspective: 800px;
+}
+.deck-strip .mini {
+  width: 95px; height: 136px;
+  border-radius: 10px;
+  background:
+    url("azure-logo.png") center 48% / 38% no-repeat,
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='24' viewBox='0 0 56 48'><g fill='none' stroke='%23ffffff' stroke-opacity='.10' stroke-width='1'><polygon points='14,0 28,8 28,24 14,32 0,24 0,8'/><polygon points='42,0 56,8 56,24 42,32 28,24 28,8'/><polygon points='14,32 28,40 28,48 14,48'/><polygon points='0,48 14,48 14,32 0,24'/><polygon points='42,32 56,24 56,48 42,48'/></g></svg>") top left / 28px 24px repeat,
+    linear-gradient(135deg, var(--azure) 0%, var(--azure-deep) 60%, #06335e 100%);
+  border: 1px solid rgba(255,255,255,.12);
+  margin: 0 -14px;
+  box-shadow: 0 8px 18px rgba(0,0,0,.45);
+  transition: transform .3s;
+  position: relative;
+  overflow: hidden;
+}
+.deck-strip .mini::after {
+  content: ""; position: absolute; inset: 5px;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 7px;
+  pointer-events: none;
+}
+.deck-strip .mini:nth-child(1) { transform: rotate(-7deg) translateY(4px); z-index: 1; }
+.deck-strip .mini:nth-child(2) { transform: rotate(-3deg) translateY(2px); z-index: 2; }
+.deck-strip .mini:nth-child(3) { transform: rotate(0deg); z-index: 3; }
+.deck-strip .mini:nth-child(4) { transform: rotate(3deg) translateY(2px); z-index: 2; }
+.deck-strip .mini:nth-child(5) { transform: rotate(7deg) translateY(4px); z-index: 1; }
+.title-meta {
+  margin-top: 50px;
+  font-size: 12px;
+  color: var(--ink-dim);
+}
+.title-meta strong { color: var(--ink-mute); font-weight: 600; }
+.data-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 6px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: linear-gradient(180deg, rgba(20,40,70,.55) 0%, rgba(10,16,28,.55) 100%);
+  border: 1px solid rgba(120,200,255,.25);
+  border-radius: 999px;
+  box-shadow:
+    0 2px 12px rgba(0,0,0,.4),
+    inset 0 1px 0 rgba(255,255,255,.06);
+  cursor: help;
+}
+.data-pill-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #7adc9a;
+  box-shadow: 0 0 0 0 rgba(122,220,154,.6);
+  animation: statusPulse 1.6s ease-out infinite;
+}
+.data-pill-sep { color: rgba(120,200,255,.45); }
+.data-pill-stamp { color: var(--ink-mute); font-weight: 600; letter-spacing: .1em; }
+@media (prefers-reduced-motion: reduce) { .data-pill-dot { animation: none; } }
+/* ---- Difficulty picker ---- */
+.difficulty {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0 18px;
+  padding: 12px 18px 14px;
+  width: 360px;
+  background: linear-gradient(180deg, rgba(20,40,70,.45), rgba(10,16,28,.45));
+  border: 1px solid rgba(120,200,255,.18);
+  border-radius: 14px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 4px 14px rgba(0,0,0,.3);
+}
+.difficulty-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+.difficulty-label .diff-name { color: var(--ink); margin-left: 8px; }
+.difficulty-seg {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  background: rgba(0,0,0,.35);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 10px;
+}
+.diff-btn {
+  width: 38px; height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink-mute);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s, transform .1s;
+}
+.diff-btn:hover { color: var(--ink); background: rgba(120,200,255,.08); }
+.diff-btn.is-active {
+  color: #0a1220;
+  background: linear-gradient(180deg, #6cc7ff, #2f8fd6);
+  border-color: rgba(120,200,255,.6);
+  box-shadow: 0 0 0 1px rgba(120,200,255,.25), 0 2px 8px rgba(60,150,220,.4);
+}
+.diff-btn:focus-visible { outline: 2px solid #6cc7ff; outline-offset: 2px; }
+.difficulty-hint {
+  font-size: 11px;
+  color: var(--ink-dim);
+  letter-spacing: .04em;
+  width: 100%;
+  text-align: center;
+  min-height: 1.4em;
+}
+.disclaimer {
+  margin-top: 16px;
+  font-size: 11px;
+  color: var(--ink-dim);
+  max-width: 460px;
+  margin-left: auto; margin-right: auto;
+  line-height: 1.5;
+}
+
+/* =================================================================
+   MATCH SCREEN
+   ================================================================= */
+#screen-match {
+  flex-direction: column;
+}
+.match-bar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 22px 16px;
+  background:
+    radial-gradient(ellipse 80% 140% at 50% 0%, rgba(15,108,189,.10) 0%, transparent 70%),
+    rgba(13,15,20,.65);
+  border-bottom: 1px solid var(--line);
+  position: relative;
+}
+/* Tug-of-war deck balance bar — shows CPU vs YOU share of remaining cards */
+.match-bar::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 3px;
+  background: linear-gradient(90deg,
+    #e26a5a 0%,
+    #e26a5a var(--cpu-share, 50%),
+    rgba(255,255,255,.10) var(--cpu-share, 50%),
+    rgba(255,255,255,.10) calc(var(--cpu-share, 50%) + 1px),
+    var(--azure-bright) calc(var(--cpu-share, 50%) + 1px),
+    var(--azure-bright) 100%);
+  box-shadow: 0 0 12px rgba(80,180,255,.25);
+  transition: background .5s ease;
+}
+.score-side {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .10em;
+  text-transform: uppercase;
+}
+.score-side.right { justify-content: flex-end; }
+.score-side .who {
+  color: var(--ink-mute);
+}
+.score-side .count {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--ink);
+  background: linear-gradient(180deg, rgba(40,48,62,.95) 0%, rgba(22,28,40,.95) 100%);
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  min-width: 52px;
+  text-align: center;
+  position: relative;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 2px 6px rgba(0,0,0,.35);
+}
+#score-cpu .count {
+  border-color: rgba(230,110,90,.45);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.06),
+    inset 0 0 14px rgba(230,110,90,.15),
+    0 2px 6px rgba(0,0,0,.35),
+    0 0 0 0 rgba(230,110,90,.0);
+  color: #ffd9d2;
+}
+#score-player .count {
+  border-color: rgba(80,180,255,.45);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.06),
+    inset 0 0 14px rgba(80,180,255,.15),
+    0 2px 6px rgba(0,0,0,.35),
+    0 0 0 0 rgba(80,180,255,.0);
+  color: #d4ecff;
+}
+.score-side.is-active #cpu-count,
+.score-side.is-active #player-count {
+  animation: scoreActiveGlow 1.8s ease-in-out infinite;
+}
+@keyframes scoreActiveGlow {
+  0%, 100% { box-shadow: inset 0 1px 0 rgba(255,255,255,.06), inset 0 0 14px rgba(80,180,255,.15), 0 2px 6px rgba(0,0,0,.35), 0 0 0 0 rgba(80,180,255,.0); }
+  50%      { box-shadow: inset 0 1px 0 rgba(255,255,255,.06), inset 0 0 18px rgba(80,180,255,.30), 0 2px 6px rgba(0,0,0,.35), 0 0 18px 2px rgba(80,180,255,.45); }
+}
+#score-cpu.is-active #cpu-count {
+  animation-name: scoreActiveGlowCpu;
+}
+@keyframes scoreActiveGlowCpu {
+  0%, 100% { box-shadow: inset 0 1px 0 rgba(255,255,255,.06), inset 0 0 14px rgba(230,110,90,.15), 0 2px 6px rgba(0,0,0,.35), 0 0 0 0 rgba(230,110,90,.0); }
+  50%      { box-shadow: inset 0 1px 0 rgba(255,255,255,.06), inset 0 0 18px rgba(230,110,90,.30), 0 2px 6px rgba(0,0,0,.35), 0 0 18px 2px rgba(230,110,90,.45); }
+}
+.score-side .count-lbl {
+  color: var(--ink-mute);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  opacity: .75;
+  font-weight: 600;
+}
+.score-side .pip {
+  display: inline-block;
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--ink-dim);
+  box-shadow: 0 0 0 0 transparent;
+  transition: background .25s, box-shadow .25s;
+}
+#score-cpu.is-active .pip {
+  background: #ff8a76;
+  box-shadow: 0 0 12px #ff8a76, 0 0 4px #ffb8a8 inset;
+}
+#score-player.is-active .pip {
+  background: var(--azure-bright);
+  box-shadow: 0 0 12px var(--azure-bright), 0 0 4px #c2e6ff inset;
+}
+.match-center {
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 10px;
+  letter-spacing: .28em;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  font-weight: 700;
+}
+.match-center .round-badge {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 5px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(80,180,255,.30);
+  background: linear-gradient(180deg, rgba(15,108,189,.18) 0%, rgba(15,108,189,.06) 100%);
+  box-shadow: inset 0 0 12px rgba(80,180,255,.10), 0 0 0 1px rgba(80,180,255,.05);
+  color: var(--ink-mute);
+}
+.match-center .round-badge .round-num {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: 0;
+}
+.match-center .pot {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.match-center .pot.empty { color: var(--ink-dim); opacity: .75; font-weight: 500; }
+
+.table {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  justify-items: center;
+  gap: 30px;
+  padding: 30px clamp(16px, 4vw, 60px);
+  position: relative;
+}
+.table-side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  position: relative;
+}
+.side-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .25em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  transition: opacity .35s ease;
+}
+/* Hide the "CPU's top card" / "Your top card" labels while a round verdict
+   is showing, so the lift/dim treatment can read cleanly. Falls back gracefully
+   in browsers without :has() (label simply stays visible). */
+.table-side:has(.side-stack.verdict-win) .side-label,
+.table-side:has(.side-stack.verdict-lose) .side-label,
+.table-side:has(.side-stack.verdict-tie) .side-label {
+  opacity: 0;
+}
+.side-stack {
+  position: relative;
+  width: 320px;
+  height: 500px;
+  transition: transform .45s cubic-bezier(.2,.8,.3,1.2), opacity .45s ease, filter .45s ease;
+}
+.side-stack::after {
+  content: '';
+  position: absolute; inset: -20px;
+  border-radius: 28px;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 0;
+}
+.side-stack.flash-win::after  { animation: flashWin  .9s ease-out; }
+.side-stack.flash-lose::after { animation: flashLose .9s ease-out; }
+.side-stack.flash-tie::after  { animation: flashTie  .9s ease-out; }
+/* Round-winner indicator — Option 1: card lift & dim.
+   Applied to .side-stack after a round resolves; persists while the
+   Continue button is visible, then cleared at the start of the next round. */
+.side-stack.verdict-win {
+  transform: translateY(-12px) scale(1.025);
+  filter: drop-shadow(0 22px 38px rgba(80, 220, 140, .35));
+}
+.side-stack.verdict-win::after {
+  opacity: 1;
+  box-shadow: 0 0 36px 4px rgba(80, 220, 140, .35), 0 0 0 2px rgba(120, 240, 170, .45) inset;
+  transition: opacity .4s ease, box-shadow .4s ease;
+}
+.side-stack.verdict-lose {
+  transform: translateY(8px);
+  opacity: .55;
+  filter: saturate(.65) brightness(.82);
+}
+.side-stack.verdict-tie::after {
+  opacity: .55;
+  box-shadow: 0 0 28px 2px rgba(227, 196, 106, .22), 0 0 0 1px rgba(255, 225, 140, .26) inset;
+  transition: opacity .4s ease, box-shadow .4s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .side-stack { transition: none; }
+  .side-stack.verdict-win  { transform: none; }
+  .side-stack.verdict-lose { transform: none; }
+}
+@keyframes flashWin {
+  0%   { opacity: 0; box-shadow: 0 0 0 0 rgba(80, 220, 140, .0), 0 0 0 0 rgba(80, 220, 140, .0) inset; }
+  25%  { opacity: 1; box-shadow: 0 0 60px 8px rgba(80, 220, 140, .55), 0 0 0 2px rgba(120, 240, 170, .55) inset; }
+  100% { opacity: 0; box-shadow: 0 0 100px 20px rgba(80, 220, 140, 0), 0 0 0 0 rgba(120, 240, 170, 0) inset; }
+}
+@keyframes flashLose {
+  0%   { opacity: 0; box-shadow: 0 0 0 0 rgba(230, 90, 80, .0), 0 0 0 0 rgba(230, 90, 80, .0) inset; }
+  25%  { opacity: 1; box-shadow: 0 0 60px 8px rgba(230, 90, 80, .50), 0 0 0 2px rgba(240, 120, 110, .50) inset; }
+  100% { opacity: 0; box-shadow: 0 0 100px 20px rgba(230, 90, 80, 0), 0 0 0 0 rgba(240, 120, 110, 0) inset; }
+}
+@keyframes flashTie {
+  0%   { opacity: 0; box-shadow: 0 0 0 0 rgba(230, 190, 80, .0), 0 0 0 0 rgba(230, 190, 80, .0) inset; }
+  25%  { opacity: 1; box-shadow: 0 0 50px 6px rgba(230, 190, 80, .45), 0 0 0 2px rgba(240, 200, 100, .45) inset; }
+  100% { opacity: 0; box-shadow: 0 0 80px 16px rgba(230, 190, 80, 0), 0 0 0 0 rgba(240, 200, 100, 0) inset; }
+}
+@media (max-width: 720px) {
+  .table { grid-template-columns: 1fr; padding: 20px 16px; gap: 22px; }
+  .side-stack { width: 280px; height: 446px; }
+}
+
+/* Animated count tween bump */
+.score-side .count.bump { animation: countBump .35s ease-out; }
+@keyframes countBump {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.18); color: var(--azure-bright); }
+  100% { transform: scale(1); }
+}
+
+/* Confetti layer (victory) */
+.confetti-layer {
+  position: fixed; inset: 0;
+  pointer-events: none;
+  z-index: 65;
+  overflow: hidden;
+}
+.confetti-piece {
+  position: absolute;
+  top: -16px;
+  width: 8px; height: 14px;
+  will-change: transform, opacity;
+  animation: confettiFall linear forwards;
+}
+@keyframes confettiFall {
+  0%   { transform: translate3d(0, -20px, 0) rotate(0deg); opacity: 1; }
+  85%  { opacity: 1; }
+  100% { transform: translate3d(var(--cx, 0), 110vh, 0) rotate(var(--cr, 720deg)); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .side-stack.flash-win::after,
+  .side-stack.flash-lose::after,
+  .side-stack.flash-tie::after { animation: none; }
+  .confetti-piece { animation: none; display: none; }
+  .score-side .count.bump { animation: none; }
+}
+
+.action-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 8px 14px;
+  padding: 14px 20px 22px;
+  border-top: 1px solid var(--line);
+  background: rgba(13,15,20,.4);
+  font-size: 13px;
+  color: var(--ink-mute);
+  min-height: 120px;
+  position: relative;
+}
+.action-bar #action-hint {
+  flex: 0 0 100%;
+  justify-content: center;
+  text-align: center;
+  min-height: 56px;
+  line-height: 1.4;
+}
+.action-bar .hint {
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.action-bar kbd {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  background: var(--bg-elev);
+  border: 1px solid var(--line);
+  padding: 1px 6px;
+  border-radius: 4px;
+  color: var(--ink);
+}
+.banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--gold);
+  padding: 6px 12px;
+  background: linear-gradient(180deg, rgba(216,161,74,.12), rgba(216,161,74,0));
+  border-radius: 6px;
+}
+.banner.lose { color: var(--ruby); background: linear-gradient(180deg, rgba(196,49,75,.14), rgba(196,49,75,0)); }
+.banner.tie  { color: var(--silver); background: linear-gradient(180deg, rgba(185,188,198,.10), rgba(185,188,198,0)); }
+.banner .icon { font-size: 18px; }
+
+/* =================================================================
+   THE CARD
+   ================================================================= */
+.card {
+  --fam: var(--gp);
+  --rar: var(--r-common);
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius);
+  background: var(--warm);
+  color: #1a1d24;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform-style: flat;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  user-select: none;
+}
+/* ---------- card back: ornate playing-card style ---------- */
+.card.is-back {
+  background:
+    /* hex tessellation overlay */
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='56' height='48' viewBox='0 0 56 48'><g fill='none' stroke='%23ffffff' stroke-opacity='.06' stroke-width='1'><polygon points='14,0 28,8 28,24 14,32 0,24 0,8'/><polygon points='42,0 56,8 56,24 42,32 28,24 28,8'/><polygon points='14,32 28,40 28,48 14,48'/><polygon points='0,48 14,48 14,32 0,24'/><polygon points='42,32 56,24 56,48 42,48'/></g></svg>"),
+    radial-gradient(circle at 30% 25%, rgba(255,255,255,.08), transparent 55%),
+    linear-gradient(135deg, var(--azure) 0%, var(--azure-deep) 60%, #06335e 100%);
+  background-size: 56px 48px, auto, auto;
+  border: 1px solid rgba(255,255,255,.12);
+  overflow: hidden;
+}
+.card.is-back > .card-body,
+.card.is-back .card-accent,
+.card.is-back .card-head,
+.card.is-back .card-title,
+.card.is-back .card-art,
+.card.is-back .card-foot,
+.card.is-back .corner-pip { display: none; }
+/* outer & inner frame — bolder, with gold filigree */
+.card.is-back .back-frame {
+  position: absolute;
+  inset: 8px;
+  border: 1px solid rgba(255, 214, 130, .55);
+  border-radius: 11px;
+  pointer-events: none;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.10),
+    inset 0 0 18px rgba(0,0,0,.35),
+    0 0 0 1px rgba(0,0,0,.25);
+  background:
+    linear-gradient(180deg, rgba(255,214,130,.10), transparent 18%, transparent 82%, rgba(255,214,130,.10)) border-box;
+}
+.card.is-back .back-frame::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border: 1px solid rgba(255,255,255,.22);
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 1px rgba(255,214,130,.18);
+}
+.card.is-back .back-frame::after {
+  content: "";
+  position: absolute;
+  inset: 11px;
+  border: 1px dashed rgba(255,255,255,.08);
+  border-radius: 5px;
+  pointer-events: none;
+}
+/* central medallion */
+.card.is-back .back-medallion {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+.card.is-back .back-medallion svg {
+  width: 62%;
+  max-width: 180px;
+  height: auto;
+  filter: drop-shadow(0 3px 8px rgba(0,0,0,.55)) drop-shadow(0 1px 2px rgba(0,0,0,.4));
+}
+.card.is-back .back-logo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 32%;
+  max-width: 96px;
+  height: auto;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,.55)) drop-shadow(0 1px 3px rgba(0,0,0,.4));
+  z-index: 4;
+}
+.card.is-back .back-wordmark {
+  position: absolute;
+  left: 0; right: 0;
+  text-align: center;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .42em;
+  color: rgba(255, 224, 168, .72);
+  text-shadow: 0 1px 2px rgba(0,0,0,.5), 0 0 8px rgba(255,214,130,.18);
+  pointer-events: none;
+}
+.card.is-back .back-wordmark.top    { top: 26px; }
+.card.is-back .back-wordmark.bottom { bottom: 26px; }
+.card.is-back .back-wordmark::before,
+.card.is-back .back-wordmark::after {
+  content: "";
+  display: inline-block;
+  width: 28px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,214,130,.55), transparent);
+  vertical-align: middle;
+  margin: 0 10px;
+  transform: translateY(-1px);
+}
+/* corner ornaments — 4-fold rotational symmetry */
+.card.is-back .back-corner {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  color: rgba(255, 214, 130, .72);
+  pointer-events: none;
+  filter: drop-shadow(0 0 4px rgba(255,214,130,.25));
+}
+.card.is-back .back-corner svg { width: 100%; height: 100%; }
+.card.is-back .back-corner.tl { top: 14px;    left: 14px; }
+.card.is-back .back-corner.tr { top: 14px;    right: 14px; transform: rotate(90deg); }
+.card.is-back .back-corner.br { bottom: 14px; right: 14px; transform: rotate(180deg); }
+.card.is-back .back-corner.bl { bottom: 14px; left: 14px;  transform: rotate(-90deg); }
+/* slow foil sheen across the back */
+.card.is-back .back-sheen {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  background: linear-gradient(115deg,
+    transparent 30%,
+    rgba(255,255,255,.10) 47%,
+    rgba(255,255,255,.18) 50%,
+    rgba(255,255,255,.10) 53%,
+    transparent 70%);
+  background-size: 250% 250%;
+  background-position: 0% 0%;
+  mix-blend-mode: screen;
+  animation: backSheen 9s ease-in-out infinite;
+}
+@keyframes backSheen {
+  0%, 100% { background-position: 0% 0%; opacity: .55; }
+  50%      { background-position: 100% 100%; opacity: .9; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .card.is-back .back-sheen { animation: none; opacity: .5; }
+}
+
+/* ----- Cinematic shuffle & deal stage (match start) -----
+   The .deal-card is just a positioned wrapper; it hosts a real .card.is-back
+   inside so the dealt deck visually matches the actual card-back artwork. */
+.deal-stage {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 40;
+  transition: opacity .25s ease;
+}
+.deal-stage.is-fading { opacity: 0; }
+.deal-deck {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  transform-origin: center;
+  animation: deckShuffle 500ms cubic-bezier(.5,.1,.5,.9) 1;
+}
+.deal-card {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 320px;
+  height: 500px;
+  margin: -250px 0 0 -160px;
+  --tx: 0px; --ty: 0px; --trot: 0deg;
+  transform: rotate(var(--initRot, 0deg)) translateY(var(--initY, 0px));
+  will-change: transform;
+  filter: drop-shadow(0 18px 28px rgba(0,0,0,.55));
+}
+.deal-card > .card.is-back {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.deal-card:nth-child(1) { --initRot: -5deg; --initY: 0px;  z-index: 1; }
+.deal-card:nth-child(2) { --initRot: -3deg; --initY: -1px; z-index: 2; }
+.deal-card:nth-child(3) { --initRot: -1deg; --initY: -2px; z-index: 3; }
+.deal-card:nth-child(4) { --initRot:  1deg; --initY: -3px; z-index: 4; }
+.deal-card:nth-child(5) { --initRot:  3deg; --initY: -4px; z-index: 5; }
+.deal-card:nth-child(6) { --initRot:  5deg; --initY: -5px; z-index: 6; }
+.deal-card.is-flying {
+  animation: dealFly 420ms cubic-bezier(.35,.6,.45,1) forwards;
+  z-index: 10 !important;
+}
+@keyframes deckShuffle {
+  0%   { transform: rotate(0deg)  translateY(0); }
+  20%  { transform: rotate(-3deg) translateY(1px); }
+  40%  { transform: rotate(4deg)  translateY(-1px); }
+  60%  { transform: rotate(-2deg) translateY(1px); }
+  80%  { transform: rotate(2deg)  translateY(0); }
+  100% { transform: rotate(0deg)  translateY(0); }
+}
+@keyframes dealFly {
+  0%   { transform: rotate(var(--initRot, 0deg)) translateY(var(--initY, 0px)); }
+  45%  { transform: translate(calc(var(--tx) * .5), calc(var(--ty) * .5 - 60px)) rotate(calc(var(--trot) * .6)); }
+  100% { transform: translate(var(--tx), var(--ty)) rotate(var(--trot)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .deal-deck { animation: none; }
+  .deal-card { animation: none !important; }
+  .deal-card.is-flying { animation: none !important; transform: translate(var(--tx), var(--ty)) rotate(var(--trot)); }
+}
+
+.card-accent {
+  height: 8px;
+  background: var(--fam);
+  flex-shrink: 0;
+}
+.card-head {
+  padding: 12px 16px 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+}
+.card-region {
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .12em;
+  background: var(--fam);
+  padding: 4px 10px;
+  clip-path: polygon(8% 0%, 92% 0%, 100% 50%, 92% 100%, 8% 100%, 0% 50%);
+  display: inline-block;
+  line-height: 1;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.18));
+}
+.card-rarity {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--rar);
+  text-shadow: 0 0 8px var(--rar);
+}
+.card-rarity .star {
+  font-size: 11px;
+}
+
+.card-title {
+  padding: 4px 16px 4px;
+  flex-shrink: 0;
+}
+.card-name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: -.02em;
+  line-height: 1.05;
+  color: #15171c;
+  word-break: break-word;
+}
+.card-nick {
+  font-size: 12px;
+  color: #687085;
+  margin-top: 2px;
+  font-style: italic;
+}
+.card-fam {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--fam);
+  margin-top: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.card-fam .fam-id { text-transform: none; letter-spacing: 0; font-size: 11px; }
+.card-fam .dot {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--fam);
+}
+
+.card-art {
+  flex-shrink: 0;
+  height: 70px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  gap: 4px;
+  position: relative;
+}
+.card-art .art-watermark {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  color: var(--fam);
+  opacity: .07;
+}
+.card-art .art-watermark svg { width: 130%; height: 130%; }
+.card-art .glyph,
+.card-art .gpu-tag { position: relative; z-index: 1; }
+.card-art .glyph {
+  width: 56px; height: 56px;
+  color: var(--fam);
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,.08));
+}
+.card-art .glyph svg { width: 100%; height: 100%; }
+.card-art .gpu-tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--gpu);
+  letter-spacing: .04em;
+}
+
+.card-stats {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin: 4px 12px 6px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  overflow: visible;
+}
+.stat-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  padding: 5px 12px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  text-align: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: default;
+  position: relative;
+  transition: background .15s;
+}
+.stat-row:focus { outline: none; }
+.stat-row:last-child { padding-bottom: 7px; }
+.stat-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: #4a5063;
+  display: flex; align-items: center; gap: 6px;
+}
+.stat-dir {
+  font-size: 9px;
+  color: #9a9588;
+}
+.stat-value {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 15px;
+  color: #15171c;
+  text-align: right;
+}
+.stat-value .unit {
+  font-family: var(--font);
+  font-weight: 600;
+  font-size: .68em;
+  color: #8a8f99;
+  letter-spacing: .04em;
+  margin-left: 4px;
+  vertical-align: 1px;
+  text-transform: uppercase;
+}
+.card.is-pickable .stat-row {
+  cursor: pointer;
+}
+.card.is-pickable .stat-row:hover,
+.card.is-pickable .stat-row:focus-visible {
+  background: rgba(15,108,189,.09);
+  box-shadow: inset 3px 0 0 rgba(15,108,189,.55);
+}
+.card.is-pickable .stat-row:hover .stat-label,
+.card.is-pickable .stat-row:focus-visible .stat-label { color: var(--azure-deep); }
+.stat-row.is-picked {
+  background: rgba(15,108,189,.14);
+  box-shadow: inset 3px 0 0 var(--azure);
+}
+.stat-row.is-winner {
+  background: rgba(78,163,107,.18);
+  box-shadow: inset 3px 0 0 var(--ok);
+}
+.stat-row.is-loser {
+  background: rgba(196,49,75,.10);
+  box-shadow: inset 3px 0 0 var(--ruby);
+}
+.stat-row.is-loser > .stat-label,
+.stat-row.is-loser > .stat-value { opacity: .85; }
+.stat-row.is-tie {
+  background: rgba(185,188,198,.18);
+  box-shadow: inset 3px 0 0 var(--silver);
+}
+.stat-row.is-other > .stat-label,
+.stat-row.is-other > .stat-value {
+  opacity: .38;
+  transition: opacity .25s ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .stat-row.is-other > .stat-label,
+  .stat-row.is-other > .stat-value { transition: none; }
+}
+.stat-hint {
+  display: block;
+  font-size: 9px;
+  font-weight: 500;
+  font-style: italic;
+  letter-spacing: 0;
+  text-transform: none;
+  color: #80869a;
+  margin-top: 2px;
+  line-height: 1.3;
+}
+
+/* Themed popover for stats with rich explanations (Price, Power).
+   Replaces the OS-yellow `title` tooltip. Hover/focus on the stat row reveals it. */
+.stat-tip {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  transform: translate(-50%, 6px);
+  width: 240px;
+  max-width: 88%;
+  padding: 10px 12px;
+  background:
+    linear-gradient(180deg, rgba(16,24,40,.98) 0%, rgba(10,16,28,.98) 100%);
+  color: #e6ecf5;
+  border: 1px solid rgba(120,200,255,.38);
+  border-radius: 10px;
+  box-shadow:
+    0 12px 28px rgba(0,0,0,.55),
+    0 0 0 1px rgba(120,200,255,.06) inset,
+    0 0 24px rgba(80,170,255,.18);
+  font-size: 11px;
+  font-weight: 500;
+  font-style: normal;
+  line-height: 1.45;
+  letter-spacing: .01em;
+  text-align: left;
+  text-transform: none;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .16s ease, transform .16s ease;
+  transition-delay: 0s;
+  z-index: 60;
+  white-space: normal;
+}
+.stat-tip::after {
+  content: '';
+  position: absolute;
+  left: 50%; top: 100%;
+  transform: translateX(-50%);
+  width: 0; height: 0;
+  border: 6px solid transparent;
+  border-top-color: rgba(16,24,40,.98);
+  filter: drop-shadow(0 1px 0 rgba(120,200,255,.38));
+}
+.stat-tip .tip-title {
+  display: block;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: #7dc3ff;
+  margin-bottom: 4px;
+}
+.stat-tip .tip-body { display: block; color: #d9e2f0; }
+.stat-tip .tip-extra {
+  display: block;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px dashed rgba(120,200,255,.22);
+  color: #b9c5d8;
+  font-style: italic;
+}
+.stat-row:hover .stat-tip,
+.stat-row:focus-visible .stat-tip {
+  opacity: 1;
+  transform: translate(-50%, 0);
+  transition-delay: .55s;
+}
+/* Once a stat is picked, suppress its tooltip — the round is resolving and the
+   hint area is already showing the explainer. Prevents the tooltip from sticking
+   open after keyboard pick. */
+/* Suppress the tooltip on a freshly-picked row only when the row still has
+   keyboard focus (e.g. immediately after pressing Enter/Space to pick).
+   Hover on a picked row is still a legitimate "I want to read this" signal
+   so the tooltip should appear normally. */
+.stat-row.is-picked:focus-visible .stat-tip {
+  opacity: 0 !important;
+  pointer-events: none;
+}
+/* Mini cards never need tooltips. */
+.mini .stat-tip { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  .stat-tip { transition: none; }
+}
+.info-pip {
+  margin-left: 4px;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+  background: var(--fam);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  font-family: Georgia, serif;
+  font-style: italic;
+  cursor: pointer;
+  display: inline-grid;
+  place-items: center;
+  padding: 0;
+  line-height: 1;
+  letter-spacing: 0;
+  transition: transform .15s ease, box-shadow .15s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,.18);
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+.info-pip:hover,
+.info-pip:focus-visible {
+  transform: scale(1.12);
+  box-shadow: 0 2px 6px rgba(0,0,0,.28);
+  outline: none;
+}
+.mini .info-pip { display: none; }
+
+.card-foot {
+  padding: 18px 14px 16px;
+  flex-shrink: 0;
+  font-size: 10.5px;
+  line-height: 1.55;
+  color: #4a5063;
+  border-top: 0;
+  background: #f7f5ec;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+  min-height: 56px;
+}
+.card-foot .ability-title { display: block; }
+.card-foot .ability-desc { display: block; }
+.card-foot .ability-title {
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  font-size: 9px;
+  color: var(--fam);
+  white-space: nowrap;
+}
+.card-foot .ability-desc { color: #565b6d; }
+.card-foot .ability-link {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  color: var(--fam);
+  text-decoration: none;
+  border-bottom: 1px dashed currentColor;
+  padding-bottom: 1px;
+  transition: opacity .15s ease;
+}
+.card-foot .ability-link:hover,
+.card-foot .ability-link:focus-visible {
+  opacity: .75;
+  outline: none;
+}
+.mini .ability-link { display: none; }
+.card-foot.empty { opacity: .35; }
+
+/* =================================================================
+   Rarity foils, corner pips, front polish
+   ================================================================= */
+
+/* Foil overlay layer — present only on the front face */
+.card .card-foil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: var(--radius);
+  z-index: 4;
+  opacity: 0;
+  mix-blend-mode: screen;
+}
+.card.rarity-uncommon .card-foil {
+  opacity: 1;
+  background: radial-gradient(circle at 50% 0%, rgba(78,163,107,.18), transparent 60%);
+  mix-blend-mode: normal;
+}
+.card.rarity-rare .card-foil,
+.card.rarity-epic .card-foil,
+.card.rarity-legendary .card-foil {
+  opacity: 1;
+  background: linear-gradient(115deg,
+    rgba(255,80,180,.0)  20%,
+    rgba(120,210,255,.28) 38%,
+    rgba(255,255,255,.32) 50%,
+    rgba(255,200,120,.28) 62%,
+    rgba(180,120,255,.0)  80%);
+  background-size: 220% 220%;
+  background-position: 0% 0%;
+  animation: foilDrift 7s ease-in-out infinite;
+}
+.card.rarity-epic .card-foil {
+  background: linear-gradient(115deg,
+    rgba(255,80,200,.0)  18%,
+    rgba(180,116,232,.38) 36%,
+    rgba(255,255,255,.42) 50%,
+    rgba(120,210,255,.38) 64%,
+    rgba(255,180,120,.0)  82%);
+  background-size: 220% 220%;
+  animation: foilDrift 6s ease-in-out infinite;
+}
+.card.rarity-legendary .card-foil {
+  background: linear-gradient(115deg,
+    rgba(255,120,60,.0)   16%,
+    rgba(255,200,80,.50)  34%,
+    rgba(255,255,255,.55) 50%,
+    rgba(255,160,60,.50)  66%,
+    rgba(180,80,40,.0)    84%);
+  background-size: 220% 220%;
+  animation: foilDrift 5s ease-in-out infinite;
+}
+@keyframes foilDrift {
+  0%, 100% { background-position: 0% 0%; }
+  50%      { background-position: 100% 100%; }
+}
+
+/* Rarity border / outer glow */
+.card.rarity-common      { box-shadow: var(--shadow-card); }
+.card.rarity-uncommon    { box-shadow: var(--shadow-card), 0 0 0 1px var(--r-uncommon), 0 0 14px rgba(78,163,107,.18); }
+.card.rarity-rare        { box-shadow: var(--shadow-card), 0 0 0 1.25px var(--r-rare), 0 0 18px rgba(37,150,231,.22); }
+.card.rarity-epic        { box-shadow: var(--shadow-card), 0 0 0 1.5px var(--r-epic),  0 0 22px rgba(176,116,232,.34); animation: epicGlow 4s ease-in-out infinite; }
+.card.rarity-legendary   { box-shadow: var(--shadow-card), 0 0 0 2px   var(--r-legendary), 0 0 28px rgba(240,169,59,.5); animation: legendaryGlow 3.5s ease-in-out infinite; }
+@keyframes epicGlow {
+  0%, 100% { box-shadow: var(--shadow-card), 0 0 0 1.5px var(--r-epic), 0 0 18px rgba(176,116,232,.28); }
+  50%      { box-shadow: var(--shadow-card), 0 0 0 1.5px var(--r-epic), 0 0 28px rgba(176,116,232,.55); }
+}
+@keyframes legendaryGlow {
+  0%, 100% { box-shadow: var(--shadow-card), 0 0 0 2px var(--r-legendary), 0 0 22px rgba(240,169,59,.4); }
+  50%      { box-shadow: var(--shadow-card), 0 0 0 2px var(--r-legendary), 0 0 38px rgba(240,169,59,.75); }
+}
+
+/* Legendary sparkle accents (CSS-only) */
+.card.rarity-legendary .card-foil::before,
+.card.rarity-legendary .card-foil::after {
+  content: "";
+  position: absolute;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff 0%, rgba(255,220,120,.85) 40%, transparent 70%);
+  filter: blur(.4px);
+  opacity: 0;
+  animation: sparkle 4.2s ease-in-out infinite;
+}
+.card.rarity-legendary .card-foil::before { top: 18%; left: 12%; animation-delay: 0s; }
+.card.rarity-legendary .card-foil::after  { top: 64%; right: 14%; animation-delay: 2.1s; }
+@keyframes sparkle {
+  0%, 100% { opacity: 0; transform: scale(.6); }
+  50%      { opacity: 1; transform: scale(1.4); }
+}
+
+/* Inner border + paper grain on the front */
+.card:not(.is-back)::after {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: 1px solid rgba(0,0,0,.06);
+  border-radius: 10px;
+  pointer-events: none;
+  z-index: 2;
+}
+.card:not(.is-back)::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  border-radius: var(--radius);
+  opacity: .35;
+  background-image:
+    radial-gradient(circle at 18% 22%, rgba(0,0,0,.04) 0 1px, transparent 2px),
+    radial-gradient(circle at 78% 64%, rgba(0,0,0,.035) 0 1px, transparent 2px),
+    radial-gradient(circle at 42% 88%, rgba(0,0,0,.03) 0 1px, transparent 2px);
+  background-size: 7px 7px, 9px 9px, 11px 11px;
+}
+/* keep card content stacked above the front overlays */
+.card-accent, .card-head, .card-title, .card-art,
+.card-body, .card-foot { position: relative; z-index: 3; }
+
+/* Corner pips removed — rarity + family already shown in card head row,
+   and the rotated bottom-right pip overlapped the POWER stat value. */
+
+/* Hover affordance on pickable card (desktop only) — box-shadow only, no lift */
+@media (hover: hover) {
+  .card.is-pickable {
+    transition: box-shadow .2s ease;
+  }
+  .card.is-pickable.rarity-common:hover    { box-shadow: var(--shadow-card), 0 12px 28px rgba(0,0,0,.18); }
+  .card.is-pickable.rarity-uncommon:hover  { box-shadow: var(--shadow-card), 0 0 0 1px var(--r-uncommon), 0 12px 28px rgba(78,163,107,.28); }
+  .card.is-pickable.rarity-rare:hover      { box-shadow: var(--shadow-card), 0 0 0 1.25px var(--r-rare), 0 12px 30px rgba(37,150,231,.34); }
+}
+
+/* One-shot pulse on a winning stat row */
+.stat-row.is-winner { animation: winnerPulse .42s cubic-bezier(.2,.8,.3,1.2) 1; }
+@keyframes winnerPulse {
+  0%   { transform: scale(1); }
+  45%  { transform: scale(1.035); }
+  100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card.rarity-rare .card-foil,
+  .card.rarity-epic .card-foil,
+  .card.rarity-legendary .card-foil { animation: none; }
+  .card.rarity-epic, .card.rarity-legendary { animation: none; }
+  .card.rarity-legendary .card-foil::before,
+  .card.rarity-legendary .card-foil::after { animation: none; opacity: .8; }
+  .stat-row.is-winner { animation: none; }
+}
+
+/* Family-type specific accents (applied via .ft-* class) */
+.ft-gp   { --fam: var(--gp); }
+.ft-co   { --fam: var(--co); }
+.ft-mo   { --fam: var(--mo); }
+.ft-so   { --fam: var(--so); }
+.ft-gpu  { --fam: var(--gpu); }
+.ft-hpc  { --fam: var(--hpc); }
+.ft-conf { --fam: var(--conf); }
+
+/* =================================================================
+   Animations  (respect prefers-reduced-motion)
+   ================================================================= */
+.flip-host {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  perspective: 1200px;
+  transform-style: preserve-3d;
+}
+.flip-host > .face {
+  position: absolute; inset: 0;
+  transition: transform .7s cubic-bezier(.5,0,.5,1);
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.flip-host > .face.front { transform: rotateY(0deg) translateZ(0); }
+.flip-host > .face.back  { transform: rotateY(-180deg) translateZ(0); pointer-events: none; }
+.flip-host.is-flipped > .face.front { transform: rotateY(180deg) translateZ(40px); pointer-events: none; }
+.flip-host.is-flipped > .face.back  { transform: rotateY(0deg) translateZ(0); pointer-events: auto; }
+
+/* Tappable card back — invites the player to reveal their card. */
+.face.back.is-tappable { cursor: pointer; transition: filter .25s ease; }
+.face.back.is-tappable:hover { filter: brightness(1.08) drop-shadow(0 0 18px rgba(80,180,255,.35)); }
+.face.back.is-tappable:focus-visible { outline: 2px solid var(--azure-bright); outline-offset: 4px; border-radius: 14px; filter: brightness(1.08) drop-shadow(0 0 18px rgba(80,180,255,.35)); }
+
+.enter { animation: enter .35s ease-out both; }
+@keyframes enter {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.fly-in {
+  animation: flyIn .45s cubic-bezier(.2,.8,.3,1) both;
+}
+@keyframes flyIn {
+  from { transform: translateY(40px) scale(.92); opacity: 0; }
+  to   { transform: translateY(0)    scale(1);   opacity: 1; }
+}
+.shake {
+  animation: shake .35s;
+}
+@keyframes shake {
+  10%, 90% { transform: translateX(-1px); }
+  20%, 80% { transform: translateX(2px); }
+  30%, 50%, 70% { transform: translateX(-3px); }
+  40%, 60% { transform: translateX(3px); }
+}
+.fly-to-winner-left  { animation: flyLeft  .55s cubic-bezier(.4,0,.2,1) both; }
+.fly-to-winner-right { animation: flyRight .55s cubic-bezier(.4,0,.2,1) both; }
+@keyframes flyLeft  { to { transform: translate(-60vw, 10vh) rotate(-12deg) scale(.4); opacity: 0; } }
+@keyframes flyRight { to { transform: translate( 60vw, 10vh) rotate( 12deg) scale(.4); opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .flip-host, .flip-host.is-flipped { transition: none !important; }
+  .flip-host > .face { transition: none !important; transform: none !important; backface-visibility: visible; -webkit-backface-visibility: visible; opacity: 1; }
+  .flip-host > .face.back  { opacity: 0; }
+  .flip-host.is-flipped > .face.front { opacity: 0; }
+  .flip-host.is-flipped > .face.back  { opacity: 1; }
+  .fly-in { animation: none; }
+  .fly-to-winner-left, .fly-to-winner-right {
+    animation: fadeOut .3s both;
+  }
+  @keyframes fadeOut { to { opacity: 0; } }
+  .shake { animation: none; }
+}
+
+/* =================================================================
+   FAMILY INFO PANEL  (overlay)
+   ================================================================= */
+.info-overlay {
+  position: fixed; inset: 0;
+  background: rgba(10,12,18,.72);
+  backdrop-filter: blur(4px);
+  display: none;
+  align-items: center; justify-content: center;
+  padding: 24px;
+  z-index: 50;
+}
+.info-overlay.is-open { display: flex; }
+.info-card {
+  width: min(440px, 100%);
+  background: var(--bg-elev);
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  padding: 22px 24px;
+  position: relative;
+  box-shadow: 0 30px 60px rgba(0,0,0,.55);
+}
+.info-card .info-accent {
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 4px;
+  background: var(--fam, var(--azure));
+  border-radius: 12px 12px 0 0;
+}
+.info-card h4 {
+  margin: 6px 0 4px;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -.01em;
+  color: var(--ink);
+}
+.info-card .info-type {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--fam, var(--azure-bright));
+  margin-bottom: 14px;
+}
+.info-card p {
+  margin: 0 0 12px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink-mute);
+}
+.info-card .info-rarity {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+  color: var(--ink-dim);
+  line-height: 1.5;
+}
+.info-card .info-rarity strong { color: var(--ink-mute); }
+.info-card .info-link {
+  display: inline-block;
+  margin-top: 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--azure-bright);
+  text-decoration: none;
+  letter-spacing: .04em;
+}
+.info-card .info-link:hover { text-decoration: underline; }
+.info-card .info-close {
+  position: absolute; top: 10px; right: 10px;
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--ink-mute);
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: grid; place-items: center;
+}
+.info-card .info-close:hover { color: var(--ink); border-color: var(--line-strong); }
+
+/* =================================================================
+   STATS LEGEND CHIP & SEED BADGE
+   ================================================================= */
+.legend-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  background: rgba(255,255,255,.025);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 3px 10px;
+}
+.legend-chip .ok { color: var(--ok); }
+.legend-chip .down { color: var(--gold); }
+.seed-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-dim);
+  background: rgba(15,108,189,.08);
+  border: 1px solid rgba(15,108,189,.25);
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
+/* =================================================================
+   FIRST-VISIT TUTORIAL
+   ================================================================= */
+.tutorial-overlay {
+  position: fixed; inset: 0;
+  background: rgba(10,12,18,.85);
+  backdrop-filter: blur(6px);
+  display: none;
+  align-items: center; justify-content: center;
+  padding: 24px;
+  z-index: 60;
+}
+.tutorial-overlay.is-open { display: flex; }
+.tutorial-card {
+  width: min(560px, 100%);
+  background: var(--bg-elev);
+  border: 1px solid var(--line-strong);
+  border-radius: 14px;
+  padding: 26px 28px;
+  text-align: left;
+  box-shadow: 0 30px 60px rgba(0,0,0,.55);
+}
+.tutorial-card h3 {
+  margin: 0 0 16px;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -.01em;
+}
+.tutorial-card ol {
+  margin: 0 0 18px;
+  padding-left: 22px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink-mute);
+}
+.tutorial-card ol li { margin-bottom: 8px; }
+.tutorial-card ol li strong { color: var(--ink); }
+.tutorial-card .tut-note {
+  font-size: 12px;
+  color: var(--ink-dim);
+  margin: 0 0 18px;
+  padding: 10px 12px;
+  background: rgba(15,108,189,.07);
+  border-left: 3px solid var(--azure);
+  border-radius: 4px;
+}
+.tutorial-card .tut-actions {
+  display: flex; gap: 10px; flex-wrap: wrap;
+}
+.tutorial-card .tut-actions .btn { width: auto; }
+
+/* =================================================================
+   CONFIRM MODAL (replacement for native confirm())
+   ================================================================= */
+.confirm-overlay {
+  position: fixed; inset: 0;
+  background: rgba(10,12,18,.78);
+  backdrop-filter: blur(6px);
+  display: none;
+  align-items: center; justify-content: center;
+  padding: 24px;
+  z-index: 70;
+  opacity: 0;
+  transition: opacity .14s ease;
+}
+.confirm-overlay.is-open { display: flex; opacity: 1; }
+.confirm-card {
+  width: min(440px, 100%);
+  background: var(--bg-elev);
+  border: 1px solid var(--line-strong);
+  border-radius: 14px;
+  padding: 0;
+  text-align: left;
+  box-shadow: 0 30px 60px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.02) inset;
+  overflow: hidden;
+  transform: translateY(8px) scale(.98);
+  transition: transform .18s cubic-bezier(.2,.7,.3,1);
+}
+.confirm-overlay.is-open .confirm-card { transform: translateY(0) scale(1); }
+.confirm-accent {
+  height: 4px;
+  background: linear-gradient(90deg, var(--azure), var(--azure-2));
+}
+.confirm-body { padding: 22px 24px 8px; }
+.confirm-card h3 {
+  margin: 0 0 10px;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -.005em;
+  color: var(--ink);
+}
+.confirm-card p {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink-mute);
+}
+.confirm-actions {
+  display: flex; gap: 8px; justify-content: flex-end;
+  padding: 16px 24px 20px;
+}
+.confirm-actions .btn { width: auto; min-width: 96px; }
+.confirm-card.is-danger .confirm-accent {
+  background: linear-gradient(90deg, #d97757, #c95a3a);
+}
+
+/* =================================================================
+   END-SCREEN TAKEAWAYS
+   ================================================================= */
+.takeaways {
+  background: var(--bg-elev);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 18px 22px;
+  text-align: left;
+  margin-bottom: 28px;
+}
+.takeaways h3 {
+  margin: 0 0 12px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .25em;
+  text-transform: uppercase;
+  color: var(--azure-bright);
+}
+.takeaways ul {
+  margin: 0; padding-left: 18px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink-mute);
+}
+.takeaways ul li { margin-bottom: 6px; }
+.takeaways ul li strong { color: var(--ink); }
+.top-cards {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+  color: var(--ink-dim);
+}
+.top-cards strong { color: var(--ink-mute); font-weight: 600; }
+
+/* Visually-hidden but accessible-to-AT */
+.sr-only {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* =================================================================
+   END SCREEN
+   ================================================================= */
+#screen-end {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 50px 24px;
+  text-align: center;
+}
+.end-wrap { max-width: 640px; width: 100%; }
+.end-result {
+  font-family: var(--font-display);
+  font-size: clamp(40px, 7vw, 72px);
+  font-weight: 900;
+  letter-spacing: -.02em;
+  line-height: 1;
+  margin: 0 0 8px;
+  text-transform: uppercase;
+}
+.end-result.win  { color: var(--gold);  text-shadow: 0 0 30px rgba(216,161,74,.4); }
+.end-result.lose { color: var(--ruby);  text-shadow: 0 0 30px rgba(196,49,75,.4); }
+.end-sub { color: var(--ink-mute); margin: 0 0 30px; font-size: 16px; }
+.end-summary {
+  background: var(--bg-elev);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 22px;
+  text-align: left;
+  margin-bottom: 28px;
+}
+.end-summary h3 {
+  margin: 0 0 14px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .25em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+.end-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+}
+.end-row:last-child { border-bottom: none; }
+.end-row .stat-name { color: var(--ink-mute); font-weight: 600; }
+.end-row .num {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  min-width: 60px;
+  text-align: right;
+}
+.end-row .num.win { color: var(--ok); }
+.end-row .num.lose { color: var(--ruby); }
+.end-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+/* =================================================================
+   LOADING / EMPTY
+   ================================================================= */
+.loader {
+  display: grid;
+  place-items: center;
+  flex: 1;
+  color: var(--ink-mute);
+  font-size: 13px;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+}
+.loader .spin {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  border: 3px solid var(--line);
+  border-top-color: var(--azure-bright);
+  margin-bottom: 16px;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .loader .spin { animation: none; border-top-color: var(--ink); }
+}
+
+/* =================================================================
+   Footer
+   ================================================================= */
+.foot {
+  padding: 14px 22px;
+  border-top: 1px solid var(--line);
+  font-size: 11px;
+  color: var(--ink-dim);
+  text-align: center;
+}
+.foot a { color: var(--ink-mute); text-decoration: none; }
+.foot a:hover { color: var(--azure-bright); text-decoration: underline; }
+.foot-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 6px 8px;
+  color: var(--ink-mute);
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+.foot-row .foot-brand { font-weight: 700; color: var(--ink); letter-spacing: .02em; }
+.foot-row strong { color: var(--azure-bright); font-weight: 700; }
+.foot-row .foot-sep { color: var(--ink-dim); }
+.foot-sub { font-size: 11px; color: var(--ink-dim); }
+.foot-version {
+  display: inline-block;
+  padding: 2px 8px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .08em;
+  color: var(--ink-mute);
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 999px;
+}
+
+/* Sticky footer on the home/title screen — keeps brand visible at viewport bottom */
+body.home-screen .foot {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 5;
+  background: rgba(10, 16, 32, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+body.home-screen #screen-title { padding-bottom: 120px; }
+
+</style>
+</head>
+<body>
+
+<canvas id="globe-bg" aria-hidden="true"></canvas>
+
+<div class="app" id="app">
+
+  <!-- ================================================================
+       TOP BAR
+       ================================================================ -->
+  <header class="topbar" id="topbar">
+    <div class="brand">
+      <div class="mark" aria-hidden="true">
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <g transform="translate(28 34) rotate(-14)">
+            <rect x="-18" y="-24" width="36" height="48" rx="4" fill="#0f6cbd" stroke="#094780" stroke-width="1.5"/>
+            <rect x="-14" y="-20" width="28" height="40" rx="2" fill="none" stroke="#2596e7" stroke-width="0.9" opacity="0.7"/>
+          </g>
+          <g transform="translate(36 32) rotate(9)">
+            <rect x="-18" y="-24" width="36" height="48" rx="4" fill="#f7f5ec" stroke="#0a1424" stroke-width="1.5"/>
+            <text x="0" y="11" font-family="Arial Black,Impact,sans-serif" font-size="30" font-weight="900" fill="#0f6cbd" text-anchor="middle">A</text>
+            <text x="-12" y="-14" font-size="9" fill="#d8a14a" text-anchor="middle">★</text>
+          </g>
+        </svg>
+      </div>
+      <span class="brand-title">Top Trumps - Azure VM Edition</span>
+    </div>
+    <div class="topbar-status" id="topbar-status" aria-live="polite">
+      <span class="status-dot"></span>
+      <span class="status-text" id="topbar-status-text">Standing by</span>
+      <span class="status-sub" id="topbar-status-sub"></span>
+    </div>
+    <div class="topbar-actions">
+      <div class="topbar-meta" aria-hidden="true">
+        <span class="meta-chip meta-matches" id="meta-matches" title="Matches played this session">
+          <span class="meta-icon">⚑</span><span class="meta-val" id="meta-matches-val">0</span>
+        </span>
+      </div>
+      <button class="icon-btn sound-btn" id="btn-sound" title="Sound on/off (M)" aria-pressed="false" aria-label="Toggle sound">
+        <span class="sound-icon" id="sound-icon">🔇</span>
+      </button>
+      <div class="felt-wrap" id="felt-wrap">
+        <button class="icon-btn" id="btn-felt" title="Choose table" aria-haspopup="true" aria-expanded="false" aria-label="Choose table felt">🎲</button>
+        <div class="felt-pop" id="felt-pop" role="menu">
+          <span class="felt-title">Table</span>
+          <div class="felt-grid">
+            <button class="felt-swatch" data-felt="midnight" role="menuitemradio" aria-pressed="false"><span class="felt-chip"></span>Midnight</button>
+            <button class="felt-swatch" data-felt="azure"    role="menuitemradio" aria-pressed="true"><span class="felt-chip"></span>Azure</button>
+          </div>
+        </div>
+      </div>
+      <button class="icon-btn" id="btn-quit" title="Quit to title (Esc)" hidden>✕</button>
+    </div>
+  </header>
+
+  <!-- ================================================================
+       LOADING
+       ================================================================ -->
+  <section class="screen active" id="screen-loading">
+    <div class="loader">
+      <div class="spin" aria-hidden="true"></div>
+      <div>Shuffling the deck…</div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       TITLE
+       ================================================================ -->
+  <section class="screen" id="screen-title" aria-labelledby="title-h">
+    <div class="title-wrap">
+      <div class="title-eyebrow">A real-data card game</div>
+      <h1 class="title-main" id="title-h">
+        Azure Top<br>Trumps
+        <span class="sub">VM SKU Edition</span>
+      </h1>
+      <p class="title-tagline">
+        Every card is a real Azure Virtual Machine size with real specs and real prices.
+        Pick the stat you think will win the round. Highest takes both cards — except
+        for price, where lowest wins.
+      </p>
+
+      <div class="deck-strip" aria-hidden="true">
+        <div class="mini"></div><div class="mini"></div><div class="mini"></div>
+        <div class="mini"></div><div class="mini"></div>
+      </div>
+
+      <div class="difficulty" role="group" aria-labelledby="diff-label">
+        <div class="difficulty-label" id="diff-label">
+          CPU Difficulty<span class="diff-name" id="diff-name">Engineer</span>
+        </div>
+        <div class="difficulty-seg" role="radiogroup" aria-label="CPU difficulty">
+          <button type="button" class="diff-btn" role="radio" aria-checked="false" data-diff="1" title="Cadet — picks at random">1</button>
+          <button type="button" class="diff-btn" role="radio" aria-checked="false" data-diff="2" title="Rookie — mostly random">2</button>
+          <button type="button" class="diff-btn is-active" role="radio" aria-checked="true" data-diff="3" title="Engineer — balanced">3</button>
+          <button type="button" class="diff-btn" role="radio" aria-checked="false" data-diff="4" title="Architect — plays smart">4</button>
+          <button type="button" class="diff-btn" role="radio" aria-checked="false" data-diff="5" title="Oracle — peeks at your card">5</button>
+        </div>
+        <div class="difficulty-hint" id="diff-hint">Balanced — sometimes smart, sometimes random.</div>
+      </div>
+
+      <div class="title-actions">
+        <button class="btn btn-primary" id="btn-play">▶ Play Quickplay vs CPU</button>
+      </div>
+
+      <div class="title-meta" id="title-meta">Loading deck…</div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       MATCH
+       ================================================================ -->
+  <section class="screen" id="screen-match">
+    <div class="match-bar">
+      <div class="score-side" id="score-cpu" title="Cards remaining in CPU's deck — empty the deck to win">
+        <span class="pip" aria-hidden="true"></span>
+        <span class="who">CPU</span>
+        <span class="count" id="cpu-count">0</span>
+        <span class="count-lbl">cards</span>
+      </div>
+      <div class="match-center">
+        <div class="round-badge"><span class="round-label">Round</span> <span class="round-num" id="round-num">1</span></div>
+        <div class="pot empty" id="pot-display">No cards in pot</div>
+      </div>
+      <div class="score-side right" id="score-player" title="Cards remaining in your deck — don't let it hit zero">
+        <span class="count-lbl">cards</span>
+        <span class="count" id="player-count">0</span>
+        <span class="who">YOU</span>
+        <span class="pip" aria-hidden="true"></span>
+      </div>
+    </div>
+
+    <div class="table">
+      <div class="table-side" data-side="cpu">
+        <div class="side-label" id="cpu-label">CPU's top card</div>
+        <div class="side-stack" id="cpu-stack"></div>
+      </div>
+      <div class="table-side" data-side="player">
+        <div class="side-label" id="player-label">Your top card</div>
+        <div class="side-stack" id="player-stack"></div>
+      </div>
+    </div>
+
+    <div class="action-bar" id="action-bar">
+      <button class="continue-btn" id="continue-btn" type="button" hidden aria-label="Continue to next round">
+        <span class="continue-label">Continue</span>
+        <span class="continue-arrow" aria-hidden="true">▶</span>
+        <span class="continue-key" aria-hidden="true">Space</span>
+      </button>
+      <span class="hint" id="action-hint" aria-live="polite" aria-atomic="true">Pick a stat from your card to play it.</span>
+      <span class="legend-chip" aria-hidden="true">
+        <span><span class="ok">▲</span> higher wins</span>
+        <span>·</span>
+        <span><span class="down">▼</span> lower wins</span>
+      </span>
+      <span class="hint shortcut-hint"><kbd>1</kbd>–<kbd>6</kbd> stats</span>
+      <span class="action-bar-btns">
+        <button class="btn btn-ghost btn-sm" id="btn-restart" type="button" title="Restart match"><span class="btn-ic" aria-hidden="true">↻</span>Restart</button>
+        <button class="btn btn-ghost btn-sm" id="btn-quit-match" type="button" title="Quit to title"><span class="btn-ic" aria-hidden="true">✕</span>Quit</button>
+      </span>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       END
+       ================================================================ -->
+  <section class="screen" id="screen-end">
+    <div class="end-wrap">
+      <div class="end-eyebrow" id="end-eyebrow">Match complete</div>
+      <h2 class="end-result" id="end-result">YOU WIN</h2>
+      <p class="end-sub" id="end-sub">You ran the CPU out of cards.</p>
+
+      <div class="end-summary">
+        <h3>Round-by-stat breakdown</h3>
+        <div id="end-rows"></div>
+        <div class="top-cards" id="end-top-cards"></div>
+      </div>
+
+      <div class="takeaways" id="end-takeaways" hidden>
+        <h3>What this match taught you</h3>
+        <ul id="end-takeaways-list"></ul>
+      </div>
+
+      <div class="end-actions">
+        <button class="btn btn-primary" id="btn-rematch">Rematch</button>
+        <button class="btn btn-ghost" id="btn-back-title">Back to title</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       OVERLAYS
+       ================================================================ -->
+  <div class="info-overlay" id="info-overlay" role="dialog" aria-modal="true" aria-labelledby="info-h">
+    <div class="info-card" id="info-card">
+      <div class="info-accent"></div>
+      <button class="info-close" id="info-close" aria-label="Close">✕</button>
+      <div class="info-type" id="info-type">FAMILY TYPE</div>
+      <h4 id="info-h">Family</h4>
+      <p id="info-body">…</p>
+      <a class="info-link" id="info-link" href="#" target="_blank" rel="noopener" hidden>Read the Azure docs →</a>
+      <div class="info-rarity"><strong>Rarity</strong> reflects how exotic or specialised the SKU is — common = everyday workhorses, legendary = flagship GPU or huge-memory machines.</div>
+    </div>
+  </div>
+
+  <div class="confirm-overlay" id="confirm-overlay" role="dialog" aria-modal="true" aria-labelledby="confirm-h" aria-describedby="confirm-msg">
+    <div class="confirm-card" id="confirm-card">
+      <div class="confirm-accent"></div>
+      <div class="confirm-body">
+        <h3 id="confirm-h">Are you sure?</h3>
+        <p id="confirm-msg">…</p>
+      </div>
+      <div class="confirm-actions">
+        <button class="btn btn-ghost" id="confirm-cancel" type="button">Cancel</button>
+        <button class="btn btn-primary" id="confirm-ok" type="button">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="tutorial-overlay" id="tutorial-overlay" role="dialog" aria-modal="true" aria-labelledby="tut-h">
+    <div class="tutorial-card">
+      <h3 id="tut-h">How to play 🎴</h3>
+      <ol>
+        <li><strong>Pick the stat</strong> on your card you think will beat the CPU's hidden card. Click a row, or press <kbd>1</kbd>–<kbd>6</kbd>.</li>
+        <li><strong>Highest wins</strong> the round and takes both cards — except for <strong>Price</strong> (▼), where <em>lowest</em> wins.</li>
+        <li><strong>Ties</strong> send both cards to the pot. Next round's winner sweeps the pot too.</li>
+        <li><strong>Empty the CPU's deck</strong> to win the match. Each card is a real Azure VM with real specs.</li>
+      </ol>
+      <p class="tut-note">💡 Tap the <strong>ⓘ</strong> next to a card's family (e.g. "General Purpose") to learn what that VM family is for.</p>
+      <div class="tut-actions">
+        <button class="btn btn-primary" id="btn-tut-start">Got it — let's play</button>
+        <button class="btn btn-ghost" id="btn-tut-skip">Skip</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="foot">
+    <div class="foot-row">
+      <span class="foot-brand">DJ Tools</span>
+      <span>powered by <strong>GitHub Copilot CLI</strong></span>
+      <span class="foot-sep">·</span>
+      <a href="https://github.com/features/copilot/cli/" target="_blank" rel="noopener">Learn more <span aria-hidden="true">↗</span></a>
+      <span class="foot-sep">·</span>
+      <a href="https://github.com/DarrenJohns/djtools-azure-vm-sku-locator" target="_blank" rel="noopener">GitHub <span aria-hidden="true">↗</span></a>
+    </div>
+    <div class="foot-sub">
+      <span class="foot-version">v1.0.0</span>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+/* ===================================================================
+   AZURE TOP TRUMPS — game logic (single-file vanilla)
+   =================================================================== */
+
+/* ---------- 1. constants & helpers ---------- */
+
+const STATS = [
+  { key:'vcpus',           label:'vCPU',       dir:'higher', fmt:v => v,
+    hint:'compute capacity',
+    tooltip:'Virtual CPU count — logical processors exposed to the OS. More vCPUs = more parallel threads for web workers, build agents, and batch jobs. Higher wins.',
+    explainer:'More vCPUs → more parallel work (web workers, build agents, batch jobs).' },
+  { key:'memoryGB',        label:'Memory',     dir:'higher', fmt:v => `${v}<span class="unit">GB</span>`,
+    hint:'RAM capacity',
+    tooltip:'Installed RAM in gigabytes. Memory wins workloads that hold large datasets in memory — in-memory DBs, caches, JVM heaps, SAP HANA. Higher wins.',
+    explainer:'Memory wins workloads that hold large datasets in RAM — in-memory DBs, caches, JVM heaps, SAP HANA.' },
+  { key:'maxDataDisks',    label:'Data Disks', dir:'higher', fmt:v => `${v}<span class="unit">max</span>`,
+    hint:'storage scale-out',
+    tooltip:'Maximum number of attached data disks for this VM size. More disks let you stripe for higher IOPS/throughput.',
+    explainer:'More data disks = more IOPS/throughput by striping — useful for databases and file servers.' },
+  { key:'nics',            label:'NICs',       dir:'higher', fmt:v => `${v}<span class="unit">max</span>`,
+    hint:'max network interfaces',
+    tooltip:'Maximum number of network interface cards (NICs) attachable to this VM size — not bandwidth. More NICs enable segmentation (NVAs, multi-NIC appliances) and additional aggregate bandwidth.',
+    explainer:'More NICs = more network segmentation and aggregate bandwidth — matters for NVAs, multi-tier apps, HPC fabrics.' },
+  { key:'pricePerHourUSD', label:'Price',      dir:'lower',  fmt:v => v == null ? '—' : `$${v.toFixed(3)}/hr<span class="unit">USD</span>`,
+    hint:'PAYG Linux · lower wins',
+    tooltip:'PAYG Linux on-demand, USD per hour. Source: Azure Retail Prices API. Lower wins.',
+    explainer:'Lower price wins. Right-sizing beats buying horsepower you never use — measure first, scale up second.' },
+  { key:'powerScore',      label:'Power',      dir:'higher', fmt:v => `${v}/100`,
+    hint:'composite horsepower',
+    tooltip:'Synthetic 1–100 score for this game (not an Azure metric). Weighted blend: vCPU 25% · memory 25% · GPU 40% · disks 5% · NICs 5%, sqrt-scaled so flagships cap near 100.',
+    explainer:'Composite score weighted across vCPU, memory, GPU and disk — a rough "how beefy is this VM" thumb-rule.' },
+];
+
+const FAMILY_INFO = {
+  'General Purpose': {
+    summary: 'Balanced CPU-to-memory ratio. The default choice for web servers, small databases, dev/test, and most line-of-business apps. Includes the D-series and burstable B-series.',
+    docs: 'https://learn.microsoft.com/azure/virtual-machines/sizes/overview#general-purpose',
+  },
+  'Compute Optimized': {
+    summary: 'High CPU-to-memory ratio. Best for batch processing, web servers under load, application servers, network appliances, and gaming servers. Mostly the F-series.',
+    docs: 'https://learn.microsoft.com/azure/virtual-machines/sizes/overview#compute-optimized',
+  },
+  'Memory Optimized': {
+    summary: 'High memory-to-CPU ratio. Built for in-memory databases (SAP HANA), large relational databases, big-data analytics, and caching tiers. The E and M series live here.',
+    docs: 'https://learn.microsoft.com/azure/virtual-machines/sizes/overview#memory-optimized',
+  },
+  'Storage Optimized': {
+    summary: 'High disk throughput and IOPS, often with local NVMe. Made for big data, NoSQL clusters, data warehousing, and large transactional databases. The L-series.',
+    docs: 'https://learn.microsoft.com/azure/virtual-machines/sizes/overview#storage-optimized',
+  },
+  'GPU Accelerated': {
+    summary: 'NVIDIA / AMD GPUs onboard for AI training and inference, deep learning, scientific computing, visualisation, and remote graphics. The N-series (NC, ND, NV, NG).',
+    docs: 'https://learn.microsoft.com/azure/virtual-machines/sizes/overview#gpu-accelerated',
+  },
+  'HPC': {
+    summary: 'Tightly-coupled high-performance computing with InfiniBand interconnects and top-bin CPUs. Made for CFD, weather modelling, molecular dynamics, finite-element analysis. The H-series.',
+    docs: 'https://learn.microsoft.com/azure/virtual-machines/sizes-hpc',
+  },
+  'Confidential': {
+    summary: 'Hardware-based confidential computing (AMD SEV-SNP / Intel TDX). Memory is encrypted and isolated from the hypervisor — useful for regulated workloads and zero-trust scenarios. The DC and EC series.',
+    docs: 'https://learn.microsoft.com/azure/confidential-computing/confidential-vm-overview',
+  },
+};
+
+// Reference range used by the AI for its own-card evaluation.
+const STAT_REFS = {
+  vcpus:           [1, 192],
+  memoryGB:        [1, 4000],
+  maxDataDisks:    [1, 64],
+  nics:            [1, 8],
+  powerScore:      [1, 100],
+  // pricePerHourUSD intentionally absent — see pickStatForCPU
+};
+
+const FAMILY_CLASS = {
+  'General Purpose':   'ft-gp',
+  'Compute Optimized': 'ft-co',
+  'Memory Optimized':  'ft-mo',
+  'Storage Optimized': 'ft-so',
+  'GPU Accelerated':   'ft-gpu',
+  'HPC':               'ft-hpc',
+  'Confidential':      'ft-conf',
+};
+
+const RARITY_LABEL = {
+  common:'COMMON', uncommon:'UNCOMMON', rare:'RARE', epic:'EPIC', legendary:'LEGENDARY'
+};
+const RARITY_STARS = {
+  common:1, uncommon:2, rare:3, epic:4, legendary:5
+};
+
+const DECK_SIZE = 40;
+
+/* ---------- 1a. seeded RNG (mulberry32) for reproducible demos ---------- */
+const _seedParam = new URLSearchParams(location.search).get('seed');
+function _hashStr(s) {
+  let h = 1779033703 ^ s.length;
+  for (let i = 0; i < s.length; i++) {
+    h = Math.imul(h ^ s.charCodeAt(i), 3432918353);
+    h = (h << 13) | (h >>> 19);
+  }
+  return h >>> 0;
+}
+let _rngState = _seedParam
+  ? (/^-?\d+$/.test(_seedParam) ? (parseInt(_seedParam, 10) >>> 0) : _hashStr(_seedParam))
+  : (Math.floor(Math.random() * 0x100000000) >>> 0);
+function rng() {
+  _rngState = (_rngState + 0x6D2B79F5) >>> 0;
+  let t = _rngState;
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t = (t + Math.imul(t ^ (t >>> 7), t | 61)) ^ t;
+  return ((t ^ (t >>> 14)) >>> 0) / 0x100000000;
+}
+
+/* tiny DOM helpers */
+function h(tag, attrs, children) {
+  const el = document.createElement(tag);
+  if (attrs) for (const k in attrs) {
+    if (k === 'class') el.className = attrs[k];
+    else if (k === 'html') el.innerHTML = attrs[k];
+    else if (k.startsWith('on') && typeof attrs[k] === 'function') el.addEventListener(k.slice(2), attrs[k]);
+    else if (attrs[k] === true) el.setAttribute(k, '');
+    else if (attrs[k] != null && attrs[k] !== false) el.setAttribute(k, attrs[k]);
+  }
+  if (children != null) {
+    if (!Array.isArray(children)) children = [children];
+    for (const c of children) {
+      if (c == null || c === false) continue;
+      el.appendChild(c.nodeType ? c : document.createTextNode(String(c)));
+    }
+  }
+  return el;
+}
+function $(id) { return document.getElementById(id); }
+// Lowercase the "V" in Azure version suffixes (V2 → v2, DV2 → Dv2, etc.).
+// Preserves the NV-series family prefix (NV6, NV12, …) by negative lookbehind.
+function lcVersion(s) {
+  return String(s == null ? '' : s).replace(/(?<!N)V(\d)/g, 'v$1');
+}
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $(id).classList.add('active');
+  $('btn-quit').hidden = (id === 'screen-title' || id === 'screen-loading');
+  document.body.classList.toggle('bg-bright', id === 'screen-title' || id === 'screen-end');
+  document.body.classList.toggle('home-screen', id === 'screen-title');
+  document.body.classList.toggle('bg-dim', id === 'screen-match');
+  // Force-hide the Continue button if we navigate away mid-pause.
+  const cb = $('continue-btn');
+  if (cb && id !== 'screen-match') { cb.classList.remove('show'); cb.hidden = true; }
+  updateTopbarStatus(id);
+}
+
+/* Drive the topbar status pill from the current screen + match state. */
+/* Pick a short sub-label for the topbar status during a match — whose turn it is. */
+function matchSubText() {
+  if (G.phase === 'revealing' || G.phase === 'resolving') return 'Resolving';
+  if (G.phase === 'ended') return 'Match over';
+  if (G.turn === 'cpu')    return 'CPU pick';
+  if (G.turn === 'player') return 'Your pick';
+  return '';
+}
+
+function updateTopbarStatus(id) {
+  const pill = $('topbar-status');
+  const txt  = $('topbar-status-text');
+  const sub  = $('topbar-status-sub');
+  if (!pill || !txt || !sub) return;
+  pill.classList.remove('is-live', 'is-end');
+  if (id === 'screen-loading') {
+    txt.textContent = 'Loading';
+    sub.textContent = 'Fetching deck';
+  } else if (id === 'screen-title') {
+    txt.textContent = 'Standing by';
+    sub.textContent = 'Awaiting match';
+  } else if (id === 'screen-match') {
+    pill.classList.add('is-live');
+    txt.textContent = 'Live';
+    sub.textContent = matchSubText();
+  } else if (id === 'screen-end') {
+    pill.classList.add('is-end');
+    const won = (G.player && G.player.hand && G.player.hand.length > 0 && G.cpu.hand.length === 0);
+    txt.textContent = won ? 'Victory' : 'Match complete';
+    sub.textContent = 'Played ' + (G.matchesPlayed || 0);
+  } else {
+    txt.textContent = 'Standing by';
+    sub.textContent = '';
+  }
+}
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+/* Cinematic shuffle-and-deal animation played once when entering a match from
+   the title screen. Skipped on Rematch / Restart and under prefers-reduced-motion.
+   Purely visual: the real card state is already populated in startMatch(). */
+async function dealAnimation() {
+  if (reducedMotion()) return;
+  const table = document.querySelector('#screen-match .table');
+  const pStack = $('player-stack');
+  const cStack = $('cpu-stack');
+  if (!table || !pStack || !cStack) return;
+
+  // Defensive: clear any stale deal stage from a previous (interrupted) run.
+  table.querySelectorAll('.deal-stage').forEach(n => n.remove());
+
+  // Clear any stale card-stack content so the dealt deck reads as fresh deal.
+  pStack.innerHTML = '';
+  cStack.innerHTML = '';
+  // Drop any leftover verdict / flash classes from the previous match so the
+  // halo doesn't linger behind the dealt deck.
+  ['verdict-win', 'verdict-lose', 'verdict-tie', 'flash-win', 'flash-lose', 'flash-tie']
+    .forEach(c => { pStack.classList.remove(c); cStack.classList.remove(c); });
+
+  // Read destination coords relative to .table BEFORE mounting the stage.
+  const tRect = table.getBoundingClientRect();
+  const pRect = pStack.getBoundingClientRect();
+  const cRect = cStack.getBoundingClientRect();
+  const targets = [
+    { x: (pRect.left + pRect.right) / 2 - tRect.left, y: (pRect.top + pRect.bottom) / 2 - tRect.top, rot: -3 }, // player
+    { x: (cRect.left + cRect.right) / 2 - tRect.left, y: (cRect.top + cRect.bottom) / 2 - tRect.top, rot:  3 }, // cpu
+  ];
+  // Center of table (the deck origin).
+  const cx = tRect.width / 2;
+  const cy = tRect.height / 2;
+
+  // Build the stage.
+  const stage = document.createElement('div');
+  stage.className = 'deal-stage';
+  const deck = document.createElement('div');
+  deck.className = 'deal-deck';
+  const N = 6;
+  const cards = [];
+  for (let i = 0; i < N; i++) {
+    const c = document.createElement('div');
+    c.className = 'deal-card';
+    const back = cardBack();
+    back.setAttribute('aria-hidden', 'true');
+    c.appendChild(back);
+    deck.appendChild(c);
+    cards.push(c);
+  }
+  stage.appendChild(deck);
+  table.appendChild(stage);
+
+  // Capture matchToken so a Restart mid-animation aborts the rest cleanly.
+  const token = G.matchToken;
+  const aborted = () => G.matchToken !== token;
+
+  // Skip handler — Enter / Space / Escape jumps to the end.
+  let skipped = false;
+  const skip = (e) => {
+    if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') {
+      e.preventDefault();
+      skipped = true;
+    }
+  };
+  window.addEventListener('keydown', skip, true);
+
+  try {
+    // Phase 1 — shuffle wiggle (CSS animation on .deal-deck runs ~500ms).
+    const waitFor = async (ms) => {
+      const start = performance.now();
+      while (performance.now() - start < ms) {
+        if (skipped || aborted()) return;
+        await new Promise(r => requestAnimationFrame(r));
+      }
+    };
+    await waitFor(500);
+    if (aborted()) return;
+
+    // Phase 2 — arc-deal cards alternately to player / cpu side. Top of stack
+    // (index 5) flies first; staggered by ~180ms.
+    const order = [];
+    for (let i = N - 1; i >= 0; i--) order.push(i);
+    const stagger = skipped ? 0 : 180;
+    const flyDuration = skipped ? 0 : 420;
+    let lastDelay = 0;
+    order.forEach((cardIdx, k) => {
+      const target = targets[k % 2];
+      const card = cards[cardIdx];
+      const startAt = skipped ? 0 : k * stagger;
+      lastDelay = startAt + flyDuration;
+      setTimeout(() => {
+        if (aborted()) return;
+        card.style.setProperty('--tx', (target.x - cx) + 'px');
+        card.style.setProperty('--ty', (target.y - cy) + 'px');
+        card.style.setProperty('--trot', target.rot + 'deg');
+        card.classList.add('is-flying');
+      }, startAt);
+    });
+    await waitFor(lastDelay);
+    if (aborted()) return;
+
+    // Phase 3 — brief beat, then fade out and remove.
+    await waitFor(skipped ? 0 : 180);
+    if (aborted()) return;
+    stage.classList.add('is-fading');
+    await waitFor(skipped ? 0 : 200);
+  } finally {
+    window.removeEventListener('keydown', skip, true);
+    if (stage.parentNode) stage.parentNode.removeChild(stage);
+  }
+}
+
+/* Wait for the player to click Continue (or press Space/Enter), with an auto-advance
+   safety timeout so the game never stalls if the button is ignored. The countdown
+   pauses while the mouse is over any card stat row, so the player can read tooltips
+   without being rushed. */
+function waitForContinue(autoMs) {
+  return new Promise((resolve) => {
+    const btn = $('continue-btn');
+    if (!btn) { setTimeout(resolve, autoMs); return; }
+    let done = false;
+    let remaining = autoMs;
+    let lastTick = performance.now();
+    let rafId;
+    const isReading = () => !!document.querySelector('#screen-match .card .stat-row:hover, #screen-match .card:hover');
+    const tick = () => {
+      if (done) return;
+      const now = performance.now();
+      const dt = now - lastTick;
+      lastTick = now;
+      const paused = isReading();
+      if (!paused) {
+        remaining -= dt;
+        if (remaining <= 0) { finish(); return; }
+      }
+      btn.classList.toggle('is-paused', paused);
+      btn.style.setProperty('--progress', Math.max(0, (remaining / autoMs) * 100) + '%');
+      rafId = requestAnimationFrame(tick);
+    };
+    const finish = () => {
+      if (done) return;
+      done = true;
+      cancelAnimationFrame(rafId);
+      document.removeEventListener('keydown', onKey, true);
+      btn.removeEventListener('click', finish);
+      btn.classList.remove('show', 'is-paused');
+      btn.hidden = true;
+      resolve();
+    };
+    const onKey = (e) => {
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        e.stopPropagation();
+        finish();
+      }
+    };
+    btn.hidden = false;
+    btn.style.setProperty('--progress', '100%');
+    requestAnimationFrame(() => btn.classList.add('show'));
+    btn.addEventListener('click', finish);
+    document.addEventListener('keydown', onKey, true); // capture so we beat the global handler
+    rafId = requestAnimationFrame(tick);
+  });
+}
+function reducedMotion() {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+/* ---------- 2. family glyphs (inline SVG, no deps) ---------- */
+
+const GLYPHS = {
+  'GPU Accelerated': '<svg viewBox="0 0 64 64"><rect x="6" y="14" width="52" height="36" rx="4" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="20" cy="32" r="6" fill="currentColor"/><circle cx="44" cy="32" r="6" fill="currentColor"/><rect x="14" y="50" width="6" height="6" fill="currentColor"/><rect x="44" y="50" width="6" height="6" fill="currentColor"/></svg>',
+  'Memory Optimized': '<svg viewBox="0 0 64 64"><rect x="10" y="14" width="44" height="6" rx="1" fill="currentColor"/><rect x="10" y="24" width="44" height="6" rx="1" fill="currentColor" opacity=".75"/><rect x="10" y="34" width="44" height="6" rx="1" fill="currentColor" opacity=".5"/><rect x="10" y="44" width="44" height="6" rx="1" fill="currentColor" opacity=".25"/></svg>',
+  'Compute Optimized': '<svg viewBox="0 0 64 64"><path d="M34 6 L18 38 L30 38 L26 58 L48 28 L34 28 Z" fill="currentColor"/></svg>',
+  'General Purpose': '<svg viewBox="0 0 64 64"><rect x="10" y="10" width="20" height="20" fill="currentColor"/><rect x="34" y="10" width="20" height="20" fill="currentColor" opacity=".7"/><rect x="10" y="34" width="20" height="20" fill="currentColor" opacity=".55"/><rect x="34" y="34" width="20" height="20" fill="currentColor" opacity=".4"/></svg>',
+  'Storage Optimized': '<svg viewBox="0 0 64 64"><ellipse cx="32" cy="14" rx="20" ry="6" fill="currentColor"/><path d="M12 14 V32 a20 6 0 0 0 40 0 V14" fill="currentColor" opacity=".6"/><path d="M12 32 V50 a20 6 0 0 0 40 0 V32" fill="currentColor" opacity=".35"/></svg>',
+  'HPC': '<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="4" fill="currentColor"/><ellipse cx="32" cy="32" rx="22" ry="9" fill="none" stroke="currentColor" stroke-width="2"/><ellipse cx="32" cy="32" rx="22" ry="9" fill="none" stroke="currentColor" stroke-width="2" transform="rotate(60 32 32)"/><ellipse cx="32" cy="32" rx="22" ry="9" fill="none" stroke="currentColor" stroke-width="2" transform="rotate(-60 32 32)"/></svg>',
+  'Confidential': '<svg viewBox="0 0 64 64"><rect x="14" y="28" width="36" height="28" rx="3" fill="currentColor"/><path d="M22 28 V18 a10 10 0 0 1 20 0 V28" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="32" cy="42" r="3" fill="#fff"/></svg>',
+};
+
+/* ---------- 3. card render ---------- */
+
+function cardFront(card, opts = {}) {
+  const { pickable = false, pickedStat = null, statClasses = {} } = opts;
+
+  const stats = card.stats;
+  const statsRows = STATS.map((s, idx) => {
+    const v = stats[s.key];
+    const cls = ['stat-row', `stat-${s.key}`];
+    if (pickedStat === s.key) cls.push('is-picked');
+    if (statClasses[s.key]) cls.push(statClasses[s.key]);
+    const hasRichTip = !!s.tooltip;
+    const children = [
+      h('span', { class: 'stat-label' }, [
+        s.label,
+        h('span', { class: 'stat-dir' }, s.dir === 'higher' ? '▲' : '▼'),
+        h('span', { class: 'stat-hint' }, s.hint),
+      ]),
+      h('span', { class: 'stat-value', html: String(s.fmt(v) ?? '') }),
+    ];
+    if (hasRichTip) {
+      const tipKids = [
+        h('span', { class: 'tip-title' }, `${s.label} ${s.dir === 'higher' ? '▲ higher wins' : '▼ lower wins'}`),
+        h('span', { class: 'tip-body' }, s.tooltip),
+      ];
+      if (s.explainer) tipKids.push(h('span', { class: 'tip-extra' }, s.explainer));
+      children.push(h('span', { class: 'stat-tip', role: 'tooltip', 'aria-hidden': 'true' }, tipKids));
+    }
+    return h('button', {
+      class: cls.join(' '),
+      type: 'button',
+      'data-stat': s.key,
+      'data-idx': idx + 1,
+      tabindex: pickable && v != null ? '0' : '-1',
+      disabled: !pickable || v == null,
+      title: hasRichTip ? '' : (pickable ? `${s.label} — ${s.hint}` : s.hint),
+      'aria-label': hasRichTip ? `${s.label}. ${s.tooltip}` : undefined,
+    }, children);
+  });
+
+  const famClass = FAMILY_CLASS[card.familyType] || 'ft-gp';
+  const cardEl = h('div', {
+    class: `card ${famClass} rarity-${card.rarity}`,
+    'data-rarity': card.rarity,
+    'aria-label': `${lcVersion(card.displayName)}, ${card.familyType}, ${RARITY_LABEL[card.rarity]}`,
+  }, [
+    h('div', { class: 'card-accent' }),
+    h('div', { class: 'card-head' }, [
+      h('span', { class: 'card-region' }, `⬢ ${card.regionShort}`),
+      h('span', { class: 'card-rarity' }, [
+        h('span', { class: 'star' }, '★'.repeat(RARITY_STARS[card.rarity])),
+        ' ' + RARITY_LABEL[card.rarity],
+      ]),
+    ]),
+    h('div', { class: 'card-title' }, [
+      h('div', { class: 'card-name' }, lcVersion(card.displayName)),
+      h('div', { class: 'card-nick' }, '"' + card.nickname + '"'),
+      h('div', { class: 'card-fam' }, [
+        h('span', { class: 'dot' }),
+        h('span', { class: 'fam-id' }, lcVersion(card.familyDisplay)),
+        ' · ',
+        card.familyType,
+        h('button', {
+          class: 'info-pip',
+          type: 'button',
+          'aria-label': `About ${card.familyType}`,
+          'data-family-type': card.familyType,
+        }, 'i'),
+      ]),
+    ]),
+    h('div', { class: 'card-art' }, [
+      h('div', { class: 'art-watermark', html: GLYPHS[card.familyType] || GLYPHS['General Purpose'] }),
+      h('div', { class: 'glyph', html: GLYPHS[card.familyType] || GLYPHS['General Purpose'] }),
+      card.tags.gpu ? h('div', { class: 'gpu-tag' }, card.tags.gpu) : null,
+    ]),
+    h('div', { class: 'card-body' }, h('div', { class: 'card-stats' }, statsRows)),
+    h('div', { class: card.ability ? 'card-foot' : 'card-foot empty' },
+      card.ability ? [
+        h('span', { class: 'ability-title' }, card.ability.title),
+        h('span', { class: 'ability-desc' }, card.ability.description),
+        card.ability.url ? h('a', {
+          class: 'ability-link',
+          href: card.ability.url,
+          target: '_blank',
+          rel: 'noopener',
+          'aria-label': `Learn more about ${card.ability.title}`,
+          onclick: (ev) => ev.stopPropagation(),
+        }, 'Learn more ↗') : null,
+      ] : ['—']),
+    h('div', { class: 'card-foil', 'aria-hidden': 'true' }),
+  ]);
+
+  if (pickable) cardEl.classList.add('is-pickable');
+  return cardEl;
+}
+
+const BACK_MEDALLION_SVG = `
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="medGold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"  stop-color="#ffe6a8"/>
+      <stop offset="100%" stop-color="#d59b2a"/>
+    </linearGradient>
+  </defs>
+  <!-- outer hex ring -->
+  <polygon points="100,12 170,52 170,148 100,188 30,148 30,52"
+    fill="none" stroke="url(#medGold)" stroke-width="1" opacity="0.35"/>
+  <polygon points="100,22 162,57 162,143 100,178 38,143 38,57"
+    fill="none" stroke="rgba(255,255,255,.18)" stroke-width=".6"/>
+  <!-- inner ornamental ring -->
+  <circle cx="100" cy="100" r="62" fill="none" stroke="rgba(255,255,255,.10)" stroke-width=".5"/>
+</svg>`;
+
+const BACK_CORNER_SVG = `
+<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <path d="M2 2 L10 2 M2 2 L2 10" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+  <path d="M5 5 Q5 10 10 10 M5 5 Q10 5 10 10" stroke="currentColor" stroke-width="1" fill="none" opacity=".7"/>
+  <circle cx="3.5" cy="3.5" r="1.2" fill="currentColor" opacity=".75"/>
+</svg>`;
+
+function cardBack() {
+  return h('div', { class: 'card is-back', 'aria-hidden': 'true' }, [
+    h('div', { class: 'back-frame' }),
+    h('div', { class: 'back-corner tl', html: BACK_CORNER_SVG }),
+    h('div', { class: 'back-corner tr', html: BACK_CORNER_SVG }),
+    h('div', { class: 'back-corner br', html: BACK_CORNER_SVG }),
+    h('div', { class: 'back-corner bl', html: BACK_CORNER_SVG }),
+    h('div', { class: 'back-medallion', html: BACK_MEDALLION_SVG }),
+    h('img', { class: 'back-logo', src: 'azure-logo.png', alt: '', 'aria-hidden': 'true' }),
+    h('div', { class: 'back-wordmark top' }, 'AZURE TOP TRUMPS'),
+    h('div', { class: 'back-wordmark bottom' }, 'AZURE TOP TRUMPS'),
+    h('div', { class: 'back-sheen' }),
+  ]);
+}
+
+/* Mount a card-with-flip into a stack container.
+   Returns the flip-host element so caller can flip / animate it. */
+function mountFlipCard(stackEl, card, opts = {}) {
+  stackEl.innerHTML = '';
+  const front = cardFront(card, opts);
+  const back  = cardBack();
+  const host  = h('div', { class: 'flip-host' + (opts.startFlipped ? ' is-flipped' : '') }, [
+    h('div', { class: 'face front' }, front),
+    h('div', { class: 'face back'  }, back),
+  ]);
+  stackEl.appendChild(host);
+  return { host, front, back };
+}
+
+/* ---------- 4. game state ---------- */
+
+const G = {
+  data: null,             // loaded cards.json
+  player: { hand: [] },
+  cpu:    { hand: [] },
+  pot:    [],
+  round: 0,
+  turn: 'player',         // who picks the stat this round
+  phase: 'idle',          // idle | picking | revealing | resolving
+  pickedStat: null,
+  history: [],            // { stat, p, c, winner }
+  playerEls: null,        // { host, front, back }
+  cpuEls:    null,
+  tieShown:  false,       // has the "tie rule" callout been shown this match?
+  matchesPlayed: 0,
+  difficulty: 3,          // 1..5; default Engineer
+};
+
+/* ---------- 5. CPU AI ----------
+   Difficulty scale (G.difficulty 1-5):
+     1 Cadet     — fully random
+     2 Rookie    — 75% random, 25% smart
+     3 Engineer  — 40% random, 60% smart
+     4 Architect — fully smart (rank-based)
+     5 Oracle    — sees opponent's top card; picks the stat where CPU wins by largest margin */
+const DIFFICULTY_META = [
+  null,
+  { name: 'Cadet',     hint: 'Picks a stat at random. Easiest match.' },
+  { name: 'Rookie',    hint: 'Mostly random — occasionally clever.' },
+  { name: 'Engineer',  hint: 'Balanced — sometimes smart, sometimes random.' },
+  { name: 'Architect', hint: 'Plays its strongest stat every round.' },
+  { name: 'Oracle',    hint: 'Peeks at your card. Brutal — good luck.' },
+];
+const DIFFICULTY_SMART_P = [0, 0.0, 0.25, 0.60, 1.0, 1.0];
+
+function pickStatForCPU(card, allHandCards, opponentCard) {
+  const diff = (G && G.difficulty) || 3;
+
+  // Level 5: oracle — knows opponent's card; pick stat where CPU wins by the largest margin.
+  if (diff >= 5 && opponentCard) {
+    let bestKey = null, bestScore = -Infinity;
+    for (const s of STATS) {
+      const cv = card.stats[s.key], pv = opponentCard.stats[s.key];
+      if (cv == null) continue;
+      // null on opponent = auto-win for CPU
+      if (pv == null) { return s.key; }
+      const margin = (s.dir === 'higher') ? (cv - pv) : (pv - cv);
+      // Normalize roughly by range of stat across in-play cards
+      const vals = allHandCards.map(c => c.stats[s.key]).filter(x => x != null);
+      const range = Math.max(1e-9, Math.max(...vals) - Math.min(...vals));
+      const score = margin / range;
+      if (score > bestScore) { bestScore = score; bestKey = s.key; }
+    }
+    if (bestKey && bestScore > 0) return bestKey;
+    // fallthrough: no winning stat — fall back to smart pick
+  }
+
+  // Random-vs-smart blend
+  const pSmart = DIFFICULTY_SMART_P[diff] ?? 1.0;
+  if (Math.random() >= pSmart) {
+    const eligible = STATS.filter(s => card.stats[s.key] != null);
+    return eligible[Math.floor(Math.random() * eligible.length)].key;
+  }
+
+  // Smart: pick the stat where THIS card ranks highest within current pool.
+  let best = null, bestRank = -1;
+  for (const s of STATS) {
+    const v = card.stats[s.key];
+    if (v == null) continue;
+    const values = allHandCards
+      .map(c => c.stats[s.key])
+      .filter(x => x != null);
+    if (values.length < 4) continue;
+    let worse = 0;
+    for (const x of values) {
+      if (s.dir === 'higher' && v > x) worse++;
+      if (s.dir === 'lower'  && v < x) worse++;
+    }
+    const rank = worse / (values.length - 1);
+    if (rank > bestRank) { bestRank = rank; best = s; }
+  }
+  return (best || STATS[0]).key;
+}
+
+/* ---------- 6. round resolution ---------- */
+
+/**
+ * Compare a single stat between two cards.
+ * Returns 'player' | 'cpu' | 'tie'.
+ */
+function resolveStat(stat, pCard, cCard) {
+  const meta = STATS.find(s => s.key === stat);
+  const pv = pCard.stats[stat];
+  const cv = cCard.stats[stat];
+
+  // Null handling: a card with null on this stat auto-loses (unless both null = tie).
+  if (pv == null && cv == null) return 'tie';
+  if (pv == null) return 'cpu';
+  if (cv == null) return 'player';
+
+  if (pv === cv) return 'tie';
+  if (meta.dir === 'higher') return pv > cv ? 'player' : 'cpu';
+  /* lower */                  return pv < cv ? 'player' : 'cpu';
+}
+
+/* ---------- 7. UI render ---------- */
+
+function tweenCount(el, to, ms = 420) {
+  if (!el) return;
+  const from = parseInt(el.textContent, 10);
+  if (!isFinite(from) || from === to) { el.textContent = to; return; }
+  if (reducedMotion()) { el.textContent = to; el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); return; }
+  const start = performance.now();
+  el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump');
+  function step(now) {
+    const t = Math.min(1, (now - start) / ms);
+    const eased = 1 - Math.pow(1 - t, 3);
+    el.textContent = Math.round(from + (to - from) * eased);
+    if (t < 1) requestAnimationFrame(step);
+    else el.textContent = to;
+  }
+  requestAnimationFrame(step);
+}
+function renderMatchBar() {
+  tweenCount($('cpu-count'),    G.cpu.hand.length);
+  tweenCount($('player-count'), G.player.hand.length);
+  $('round-num').textContent    = G.round;
+
+  // Tug-of-war: push CPU share % into the match-bar so the bottom bar reflects the balance.
+  const total = G.player.hand.length + G.cpu.hand.length + G.pot.length;
+  const cpuShare = total > 0 ? (G.cpu.hand.length / total) * 100 : 50;
+  const bar = document.querySelector('.match-bar');
+  if (bar) bar.style.setProperty('--cpu-share', cpuShare.toFixed(1) + '%');
+
+  const pot = $('pot-display');
+  if (G.pot.length === 0) { pot.textContent = 'No cards in pot'; pot.classList.add('empty'); }
+  else { pot.textContent = `${G.pot.length} card${G.pot.length===1?'':'s'} in pot ⚡`; pot.classList.remove('empty'); }
+
+  $('score-cpu').classList.toggle('is-active',    G.turn === 'cpu'    && G.phase === 'picking');
+  $('score-player').classList.toggle('is-active', G.turn === 'player' && G.phase === 'picking');
+
+  // Keep the topbar status sub in sync with whose turn it is.
+  const sub = $('topbar-status-sub');
+  if (sub && document.querySelector('#screen-match.active')) {
+    sub.textContent = matchSubText();
+  }
+}
+
+function renderTopCards() {
+  const pTop = G.player.hand[0];
+  const cTop = G.cpu.hand[0];
+
+  // Player card — face-down to start. On the player's pick turn they tap to
+  // reveal (ritual); on the CPU's pick turn the card auto-flips during the
+  // reveal animation, so both cards turn over together.
+  const playerStartsFlipped = true;
+  const pPickable = (G.turn === 'player' && G.phase === 'picking');
+  G.playerEls = mountFlipCard($('player-stack'), pTop, {
+    pickable: pPickable,
+    pickedStat: G.pickedStat,
+    startFlipped: playerStartsFlipped,
+  });
+  G.playerEls.host.classList.add('enter');
+
+  // CPU card — face-down to start; flips on reveal
+  G.cpuEls = mountFlipCard($('cpu-stack'), cTop, {
+    pickable: false,
+    pickedStat: G.pickedStat,
+    startFlipped: true,
+  });
+  G.cpuEls.host.classList.add('enter');
+
+  // Wire up player picks
+  if (pPickable) {
+    G.playerEls.front.querySelectorAll('.stat-row').forEach(row => {
+      row.addEventListener('click', () => {
+        const stat = row.getAttribute('data-stat');
+        playerPicksStat(stat);
+      });
+    });
+  }
+}
+
+/* Flip the player's card from back to front and hand control to the player to
+   pick a stat. Called automatically a beat after the round starts so the
+   player still gets the flip moment without having to tap each round. */
+function revealPlayerCard() {
+  if (!G.playerEls) return;
+  const host = G.playerEls.host;
+  if (!host.classList.contains('is-flipped')) return;
+  host.classList.remove('is-flipped');
+  setHint('Your turn — pick a stat from your card.');
+  // Intentionally no auto-focus on a stat row — that would trigger the
+  // :focus-visible tooltip after the reveal. Keyboard users can Tab in
+  // when they're ready to pick.
+}
+
+/* ---------- 8. round flow ---------- */
+
+function setHint(text, kind) {
+  const el = $('action-hint');
+  el.textContent = text;
+  el.className = 'hint';
+  if (kind === 'win')  el.classList.add('banner');
+  if (kind === 'lose') el.classList.add('banner', 'lose');
+  if (kind === 'tie')  el.classList.add('banner', 'tie');
+}
+
+function startRound() {
+  G.round += 1;
+  G.pickedStat = null;
+  G.phase = 'picking';
+  // Clear last round's verdict UI (lift/dim on stacks).
+  ['player', 'cpu'].forEach(side => {
+    const stack = $(side + '-stack');
+    if (stack) stack.classList.remove('verdict-win', 'verdict-lose', 'verdict-tie', 'flash-win', 'flash-lose', 'flash-tie');
+  });
+  renderMatchBar();
+  renderTopCards();
+
+  if (G.turn === 'player') {
+    setHint('Dealing your card…');
+    // Auto-reveal the player's card after a beat so they still get the flip
+    // moment without tapping. Then prompt for the pick.
+    const token = G.matchToken;
+    setTimeout(() => {
+      if (G.matchToken !== token) return; // restart/quit happened during the beat
+      revealPlayerCard();
+    }, reducedMotion() ? 200 : 650);
+  } else {
+    setHint(`CPU is choosing…`);
+    // small delay so player sees the new card before CPU acts
+    setTimeout(() => {
+      const allInPlay = [...G.player.hand, ...G.cpu.hand, ...G.pot];
+      const stat = pickStatForCPU(G.cpu.hand[0], allInPlay, G.player.hand[0]);
+      cpuPicksStat(stat);
+    }, reducedMotion() ? 200 : 700);
+  }
+}
+
+function playerPicksStat(stat) {
+  if (G.phase !== 'picking' || G.turn !== 'player') return;
+  G.pickedStat = stat;
+  G.phase = 'revealing';
+  // highlight on player card
+  G.playerEls.front.querySelectorAll('.stat-row').forEach(r =>
+    r.classList.toggle('is-picked', r.getAttribute('data-stat') === stat));
+  // Drop focus so the row's `:focus-visible` tooltip doesn't linger over the result.
+  if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+  resolveAndAnimate();
+}
+
+function cpuPicksStat(stat) {
+  if (G.phase !== 'picking' || G.turn !== 'cpu') return;
+  G.pickedStat = stat;
+  G.phase = 'revealing';
+  // highlight on player card AND cpu card
+  G.playerEls.front.querySelectorAll('.stat-row').forEach(r =>
+    r.classList.toggle('is-picked', r.getAttribute('data-stat') === stat));
+  resolveAndAnimate();
+}
+
+async function resolveAndAnimate() {
+  const stat = G.pickedStat;
+  const pCard = G.player.hand[0];
+  const cCard = G.cpu.hand[0];
+  const winner = resolveStat(stat, pCard, cCard);
+  const meta = STATS.find(s => s.key === stat);
+  const matchToken = G.matchToken;  // captured so we can abort if Restart/Quit happens during the pause
+
+  // Dim non-picked rows on both cards so the eye is led to the comparison.
+  for (const els of [G.playerEls, G.cpuEls]) {
+    els.front.querySelectorAll('.stat-row').forEach(r => {
+      if (r.getAttribute('data-stat') !== stat) r.classList.add('is-other');
+    });
+  }
+
+  // Flip both cards face-up together for the reveal. On the player's turn the
+  // player card is already face-up (revealed at round start), so removing the
+  // class is a no-op there. On the CPU's turn this is what flips both cards
+  // in sync for the face-off.
+  G.cpuEls.host.classList.remove('is-flipped');
+  G.playerEls.host.classList.remove('is-flipped');
+  await delay(reducedMotion() ? 250 : 600);
+
+  // Highlight the winning row on both cards
+  for (const els of [G.playerEls, G.cpuEls]) {
+    const row = els.front.querySelector(`.stat-row[data-stat="${stat}"]`);
+    if (!row) continue;
+    if (winner === 'tie') row.classList.add('is-tie');
+    else {
+      const isWinnerSide =
+        (winner === 'player' && els === G.playerEls) ||
+        (winner === 'cpu'    && els === G.cpuEls);
+      row.classList.add(isWinnerSide ? 'is-winner' : 'is-loser');
+    }
+  }
+
+  // Side-stack flash halo so the outcome lands emotionally, plus persistent
+  // lift/dim verdict state that stays through the Continue pause.
+  const pStack = $('player-stack');
+  const cStack = $('cpu-stack');
+  pStack.classList.remove('flash-win', 'flash-lose', 'flash-tie', 'verdict-win', 'verdict-lose', 'verdict-tie');
+  cStack.classList.remove('flash-win', 'flash-lose', 'flash-tie', 'verdict-win', 'verdict-lose', 'verdict-tie');
+  void pStack.offsetWidth; void cStack.offsetWidth; // restart animations
+  if (winner === 'tie') {
+    pStack.classList.add('flash-tie', 'verdict-tie');
+    cStack.classList.add('flash-tie', 'verdict-tie');
+  } else if (winner === 'player') {
+    pStack.classList.add('flash-win', 'verdict-win');
+    cStack.classList.add('flash-lose', 'verdict-lose');
+  } else {
+    pStack.classList.add('flash-lose', 'verdict-lose');
+    cStack.classList.add('flash-win',  'verdict-win');
+  }
+
+  // Announce — with educational explainer appended.
+  const stripHtml = (s) => String(s).replace(/<[^>]*>/g, '');
+  const pv = stripHtml(meta.fmt(pCard.stats[stat]));
+  const cv = stripHtml(meta.fmt(cCard.stats[stat]));
+  const explainer = meta.explainer ? ` — ${meta.explainer}` : '';
+  if (winner === 'tie') {
+    let msg = `⚖ Tie on ${meta.label} (${pv} vs ${cv}) — both cards to the pot.`;
+    if (!G.tieShown) {
+      msg += ' Same player picks again; whoever wins next sweeps the pot.';
+      G.tieShown = true;
+    }
+    setHint(msg, 'tie');
+  } else if (winner === 'player') {
+    setHint(`✓ You win on ${meta.label} — ${pv} beats ${cv}.${explainer}`, 'win');
+  } else {
+    setHint(`✗ CPU wins on ${meta.label} — ${cv} beats ${pv}.${explainer}`, 'lose');
+  }
+
+  G.history.push({ stat, p: pCard.stats[stat], c: cCard.stats[stat], winner, pCardName: pCard.displayName, cCardName: cCard.displayName, pFamily: pCard.familyType, cFamily: cCard.familyType });
+
+  // Track CPU streak so we can pace the game when the player is losing repeatedly.
+  if (winner === 'cpu') G.cpuStreak = (G.cpuStreak || 0) + 1;
+  else G.cpuStreak = 0;
+
+  // Adaptive dwell — longer when the player didn't drive the round and longer on streaks.
+  const wasCpuTurn = (G.turn === 'cpu');
+  let dwell = reducedMotion() ? 800 : 1700;
+  if (!reducedMotion()) {
+    if (wasCpuTurn)         dwell += 800;
+    if (winner === 'cpu')   dwell += Math.min(G.cpuStreak, 3) * 400;
+  }
+
+  // Hand pacing to the player every round via the Continue button — gives them time to
+  // hover the CPU card and explore stat tooltips. Safety auto-advance after dwell + 4.5s.
+  if (!reducedMotion()) {
+    await waitForContinue(dwell + 4500);
+  } else {
+    await delay(dwell);
+  }
+
+  // Abort cleanly if the match was reset (Restart) or abandoned (Quit / Esc) while we were paused.
+  if (G.matchToken !== matchToken) return;
+  if (!document.querySelector('#screen-match.active')) return;
+
+  // Resolve: take cards
+  const pTop = G.player.hand.shift();
+  const cTop = G.cpu.hand.shift();
+  const pile = [pTop, cTop, ...G.pot];
+
+  if (winner === 'tie') {
+    G.pot = pile;
+    // Same player picks again next round
+  } else {
+    G.pot = [];
+    if (winner === 'player') {
+      G.player.hand.push(...pile);
+      G.turn = 'player';
+    } else {
+      G.cpu.hand.push(...pile);
+      G.turn = 'cpu';
+    }
+  }
+
+  renderMatchBar();
+
+  // Win check
+  if (G.player.hand.length === 0 || G.cpu.hand.length === 0) {
+    return endMatch();
+  }
+
+  // Next round
+  await delay(reducedMotion() ? 200 : 400);
+  startRound();
+}
+
+/* ---------- 9. start / end ---------- */
+
+async function startMatch(opts) {
+  if (!G.data) return;
+  const animate = !!(opts && opts.animate);
+  // Build a fresh shuffled deck of DECK_SIZE cards from the full pool.
+  const pool = G.data.cards.slice();
+  const deck = shuffle(pool).slice(0, DECK_SIZE);
+
+  // Deal alternately so both halves are statistically balanced.
+  G.player.hand = [];
+  G.cpu.hand = [];
+  for (let i = 0; i < deck.length; i++) {
+    (i % 2 === 0 ? G.player.hand : G.cpu.hand).push(deck[i]);
+  }
+  G.pot = [];
+  G.round = 0;
+  G.history = [];
+  G.tieShown = false;
+  G.cpuStreak = 0;
+  G.matchToken = (G.matchToken || 0) + 1;
+  G.matchesPlayed = (G.matchesPlayed || 0) + 1;
+  const _mv = $('meta-matches-val'); if (_mv) _mv.textContent = G.matchesPlayed;
+  // Hide the Continue button if a previous match left it showing.
+  const _cb = $('continue-btn'); if (_cb) { _cb.classList.remove('show'); _cb.hidden = true; }
+  G.cpuStreak = 0;
+  G.turn = rng() < 0.5 ? 'player' : 'cpu';
+  G.phase = 'idle';
+  G.pickedStat = null;
+
+  show('screen-match');
+  if (animate) {
+    // Force a layout pass so #player-stack / #cpu-stack have their rects ready.
+    void document.querySelector('#screen-match .table').offsetWidth;
+    await dealAnimation();
+    // Bail if user navigated away mid-animation.
+    if (!document.querySelector('#screen-match.active')) return;
+  }
+  startRound();
+}
+
+function endMatch() {
+  G.phase = 'ended';
+  const youWon = G.player.hand.length > 0;
+
+  $('end-result').textContent = youWon ? 'YOU WIN' : 'CPU WINS';
+  $('end-result').classList.toggle('win',  youWon);
+  $('end-result').classList.toggle('lose', !youWon);
+  $('end-sub').textContent = youWon
+    ? `You ran the CPU out of cards in ${G.round} rounds.`
+    : `The CPU emptied your deck in ${G.round} rounds.`;
+
+  // Per-stat breakdown: how many wins / ties / losses per stat?
+  const tally = {};
+  for (const s of STATS) tally[s.key] = { win: 0, lose: 0, tie: 0, playerPicks: 0, cpuPicks: 0 };
+  for (let i = 0; i < G.history.length; i++) {
+    const hh = G.history[i];
+    if (hh.winner === 'tie')         tally[hh.stat].tie++;
+    else if (hh.winner === 'player') tally[hh.stat].win++;
+    else                             tally[hh.stat].lose++;
+  }
+  // Reconstruct who-picked-what by walking the match again would be expensive;
+  // we don't store it directly. Approximate: a round where the winner gets next-pick.
+  // Instead, recompute from turn order: known starting turn + winner sequence.
+  // (We seed from the actual G.turn at endMatch — work backwards isn't reliable, so we just count winner-bias by stat.)
+
+  const rowsEl = $('end-rows');
+  rowsEl.innerHTML = '';
+  for (const s of STATS) {
+    const t = tally[s.key];
+    const total = t.win + t.lose + t.tie;
+    if (total === 0) continue;
+    rowsEl.appendChild(h2('div', { class:'end-row' }, [
+      h2('span', { class:'stat-name' }, `${s.label} (${s.dir === 'higher' ? '▲' : '▼'})`),
+      h2('span', { class:'num win' },  `+${t.win}`),
+      h2('span', { class:'num lose' }, `-${t.lose}` + (t.tie ? `  =${t.tie}` : '')),
+    ]));
+  }
+
+  // Top 3 winning cards (cards the *player* held that won their round).
+  const winningPlayerCards = {};
+  for (const hh of G.history) {
+    if (hh.winner === 'player') {
+      const key = hh.pCardName;
+      winningPlayerCards[key] = (winningPlayerCards[key] || 0) + 1;
+    }
+  }
+  const topCardEl = $('end-top-cards');
+  const topThree = Object.entries(winningPlayerCards)
+    .sort((a,b) => b[1] - a[1]).slice(0, 3);
+  if (topThree.length) {
+    topCardEl.innerHTML = '<strong>Your MVP cards:</strong> ' +
+      topThree.map(([n, c]) => `${lcVersion(n)} (${c} win${c===1?'':'s'})`).join(' · ');
+  } else {
+    topCardEl.innerHTML = '';
+  }
+
+  // "What this match taught you" — rule-based insights
+  const takeaways = buildTakeaways(tally, youWon);
+  const tEl = $('end-takeaways');
+  const tList = $('end-takeaways-list');
+  tList.innerHTML = '';
+  if (takeaways.length) {
+    for (const t of takeaways) {
+      tList.appendChild(h2('li', { html: t }));
+    }
+    tEl.hidden = false;
+  } else {
+    tEl.hidden = true;
+  }
+
+  show('screen-end');
+  // Victory FX: confetti + globe arc cascade.
+  if (youWon) triggerVictoryFx();
+  // Move focus to the rematch button for keyboard / SR users
+  setTimeout(() => { const b = $('btn-rematch'); if (b) b.focus({ preventScroll: true }); }, 80);
+}
+
+function triggerVictoryFx() {
+  if (reducedMotion()) return;
+  // Confetti
+  let layer = document.querySelector('.confetti-layer');
+  if (!layer) {
+    layer = document.createElement('div');
+    layer.className = 'confetti-layer';
+    document.body.appendChild(layer);
+  } else {
+    layer.innerHTML = '';
+  }
+  const palette = ['#0f6cbd', '#3b8de8', '#5fb8ff', '#7adc9a', '#ffd66b', '#f08a8a', '#c79bff'];
+  const W = window.innerWidth;
+  for (let i = 0; i < 90; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    const startX = Math.random() * W;
+    const drift = (Math.random() - 0.5) * W * 0.6;
+    const rot = (400 + Math.random() * 720) * (Math.random() < 0.5 ? -1 : 1);
+    const dur = 2.8 + Math.random() * 2.4;
+    const delay = Math.random() * 0.8;
+    const size = 6 + Math.random() * 8;
+    piece.style.left = startX + 'px';
+    piece.style.width = size + 'px';
+    piece.style.height = (size * 1.6) + 'px';
+    piece.style.background = palette[(Math.random() * palette.length) | 0];
+    piece.style.setProperty('--cx', drift + 'px');
+    piece.style.setProperty('--cr', rot + 'deg');
+    piece.style.animationDuration = dur + 's';
+    piece.style.animationDelay = delay + 's';
+    piece.style.borderRadius = Math.random() < 0.3 ? '50%' : '2px';
+    layer.appendChild(piece);
+  }
+  setTimeout(() => { if (layer && layer.parentNode) layer.parentNode.removeChild(layer); }, 6500);
+  // Globe burst — cascade of arcs lighting up the planet.
+  if (window.globeBurst) window.globeBurst(14);
+}
+// alias to avoid name collision with the loose `h` var used in history loops
+const h2 = h;
+
+/* Build 2-3 plain-English takeaways from match history. Pure rule logic. */
+function buildTakeaways(tally, youWon) {
+  const out = [];
+  const totalRounds = G.history.length;
+  if (totalRounds < 4) return out; // too short to learn from
+
+  // 1. Best/worst stat for the player
+  const ranked = STATS.map(s => {
+    const t = tally[s.key];
+    const total = t.win + t.lose + t.tie;
+    const rate = total ? (t.win - t.lose) / total : 0;
+    return { s, total, rate };
+  }).filter(r => r.total >= 2).sort((a,b) => b.rate - a.rate);
+
+  if (ranked.length) {
+    const best = ranked[0];
+    if (best.rate > 0.1) {
+      out.push(`<strong>${best.s.label}</strong> was your strongest play (net +${Math.round(best.rate*100)}%). ${best.s.explainer}`);
+    }
+    if (ranked.length > 1) {
+      const worst = ranked[ranked.length - 1];
+      if (worst.rate < -0.1) {
+        out.push(`<strong>${worst.s.label}</strong> didn't go your way (net ${Math.round(worst.rate*100)}%). The CPU likely had cards built for ${worst.s.label.toLowerCase()} — worth checking <em>which</em> Azure families lead on that stat.`);
+      }
+    }
+  }
+
+  // 2. Family bias on player wins — what family types tended to win for you?
+  const famWins = {};
+  for (const hh of G.history) {
+    if (hh.winner === 'player' && hh.pFamily) {
+      famWins[hh.pFamily] = (famWins[hh.pFamily] || 0) + 1;
+    }
+  }
+  const famArr = Object.entries(famWins).sort((a,b) => b[1] - a[1]);
+  if (famArr.length && famArr[0][1] >= 3) {
+    const [fam, n] = famArr[0];
+    out.push(`Your <strong>${fam}</strong> cards carried ${n} wins. Worth a deeper look at the ${fam.toLowerCase()} family next time you're sizing real workloads.`);
+  }
+
+  // 3. Close match nudge
+  if (out.length < 2) {
+    if (youWon && totalRounds > 25) {
+      out.push(`Long match (${totalRounds} rounds) — close fights are common when both decks have a mix of GPU, memory, and general-purpose cards. Diversity beats one-trick decks.`);
+    } else if (!youWon && totalRounds < 15) {
+      out.push(`Short loss (${totalRounds} rounds) — the CPU likely drew a few flagship cards (legendaries skew Power, Memory, GPU). Each match is a different deck.`);
+    }
+  }
+
+  return out.slice(0, 3);
+}
+
+/* ---------- 10. boot ---------- */
+
+async function boot() {
+  try {
+    const res = await fetch('data/cards.json', { cache: 'no-cache' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    G.data = await res.json();
+  } catch (err) {
+    $('screen-loading').innerHTML =
+      `<div class="loader"><div>Failed to load deck.<br><br><code>${err.message}</code><br><br>Check that <code>data/cards.json</code> exists.</div></div>`;
+    return;
+  }
+  // populate title meta
+  const totalCards = G.data.cards.length;
+  const regions    = G.data.regions.length;
+  const ts         = G.data.generated || '';
+  $('title-meta').innerHTML =
+    `<strong>1,000+</strong> Azure virtual machine SKUs · `
+    + `Each match draws a fresh shuffle of ${DECK_SIZE} cards`;
+  const dataStamp = $('data-stamp');
+  if (dataStamp) dataStamp.textContent = `data refreshed ${ts.slice(0,10) || 'recently'}`;
+  // Prominent data-pill on title screen
+  const pillStamp = $('data-pill-stamp');
+  if (pillStamp) {
+    const date = ts.slice(0, 10);
+    let agoText = '';
+    if (date) {
+      const diffDays = Math.max(0, Math.floor((Date.now() - new Date(ts).getTime()) / 86400000));
+      agoText = diffDays === 0 ? 'today' :
+                diffDays === 1 ? 'yesterday' :
+                diffDays < 30  ? `${diffDays}d ago` :
+                                 date;
+      pillStamp.textContent = `refreshed ${agoText}`;
+    } else {
+      pillStamp.textContent = 'refreshed recently';
+    }
+  }
+
+  // Show seed badge when ?seed= is in URL — useful for reproducible workshop demos.
+  if (_seedParam) {
+    const seedStamp = $('seed-stamp');
+    if (seedStamp) seedStamp.textContent = `  ·  seed=${_seedParam}`;
+  }
+
+  show('screen-title');
+}
+
+/* ---------- 11. wiring ---------- */
+
+const TUTORIAL_FLAG = 'azureTopTrumps.seenTutorial';
+
+function openTutorial(force) {
+  if (!force && localStorage.getItem(TUTORIAL_FLAG) === '1') return false;
+  $('tutorial-overlay').classList.add('is-open');
+  setTimeout(() => $('btn-tut-start').focus({ preventScroll: true }), 60);
+  return true;
+}
+function closeTutorial(markSeen) {
+  $('tutorial-overlay').classList.remove('is-open');
+  if (markSeen) localStorage.setItem(TUTORIAL_FLAG, '1');
+}
+
+/* Promise-based confirm modal replacing native confirm().
+   Usage: if (await confirmDialog({ title, message, okText, cancelText, danger })) { ... } */
+let _confirmResolver = null;
+function confirmDialog({ title = 'Are you sure?', message = '', okText = 'Confirm', cancelText = 'Cancel', danger = false } = {}) {
+  return new Promise((resolve) => {
+    if (_confirmResolver) { _confirmResolver(false); }
+    _confirmResolver = resolve;
+    $('confirm-h').textContent = title;
+    $('confirm-msg').textContent = message;
+    const ok = $('confirm-ok');
+    const cancel = $('confirm-cancel');
+    ok.textContent = okText;
+    cancel.textContent = cancelText;
+    const card = $('confirm-card');
+    card.classList.toggle('is-danger', !!danger);
+    $('confirm-overlay').classList.add('is-open');
+    setTimeout(() => ok.focus({ preventScroll: true }), 40);
+  });
+}
+function _resolveConfirm(value) {
+  if (!_confirmResolver) return;
+  const r = _confirmResolver;
+  _confirmResolver = null;
+  $('confirm-overlay').classList.remove('is-open');
+  r(value);
+}
+
+function openFamilyInfo(familyType, famClass) {
+  const info = FAMILY_INFO[familyType];
+  if (!info) return;
+  const card = $('info-card');
+  // Apply the family colour so the top accent bar matches the card on screen.
+  card.className = 'info-card ' + (famClass || FAMILY_CLASS[familyType] || 'ft-gp');
+  $('info-type').textContent = familyType.toUpperCase();
+  $('info-h').textContent = familyType;
+  $('info-body').textContent = info.summary;
+  const link = $('info-link');
+  if (info.docs) { link.href = info.docs; link.hidden = false; } else { link.hidden = true; }
+  $('info-overlay').classList.add('is-open');
+  setTimeout(() => $('info-close').focus({ preventScroll: true }), 60);
+}
+function closeFamilyInfo() {
+  $('info-overlay').classList.remove('is-open');
+}
+
+$('btn-play').addEventListener('click', () => {
+  if (!openTutorial(false)) startMatch({ animate: true });
+});
+
+/* ---- Ambient audio (procedural; no asset files) ---- */
+const Sound = (function(){
+  const LS_KEY = 'att.sound';
+  let ctx = null;
+  let master = null;
+  let padBus = null;
+  let bellBus = null;
+  let started = false;
+  let on = false;
+  let chordTimer = null;
+  let bellTimer = null;
+  // Roots for chord progression (in Hz). Slow Vangelis-y movement.
+  // I — vi — IV — V    (C — Am — F — G), starting low for spaciness.
+  // Each entry = [root, third, fifth, ninth] frequencies.
+  const PROG = [
+    [130.81, 196.00, 261.63, 392.00], // Cmaj9
+    [110.00, 164.81, 220.00, 329.63], // Am add9
+    [ 87.31, 174.61, 261.63, 349.23], // Fmaj9
+    [ 98.00, 146.83, 246.94, 392.00], // Gsus2
+  ];
+  let chordIdx = 0;
+
+  function now() { return ctx.currentTime; }
+
+  // Soft pad note: filtered triangle, slow ADSR.
+  function playPadNote(freq, startAt, dur, gain) {
+    const o = ctx.createOscillator();
+    o.type = 'triangle';
+    o.frequency.value = freq;
+    const f = ctx.createBiquadFilter();
+    f.type = 'lowpass';
+    f.frequency.value = 600;
+    f.Q.value = 0.7;
+    // Slow filter sweep adds movement
+    f.frequency.setValueAtTime(420, startAt);
+    f.frequency.linearRampToValueAtTime(900, startAt + dur * 0.5);
+    f.frequency.linearRampToValueAtTime(380, startAt + dur);
+
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, startAt);
+    g.gain.linearRampToValueAtTime(gain, startAt + 2.5);                // attack
+    g.gain.linearRampToValueAtTime(gain * 0.85, startAt + dur * 0.6);   // sustain dip
+    g.gain.linearRampToValueAtTime(0.0001, startAt + dur);              // release
+
+    o.connect(f).connect(g).connect(padBus);
+    o.start(startAt);
+    o.stop(startAt + dur + 0.05);
+  }
+
+  // Bell ping: sine with sharp attack + long exponential decay.
+  function playBell(freq, startAt, gain) {
+    const o = ctx.createOscillator();
+    o.type = 'sine';
+    o.frequency.value = freq;
+    // Subtle FM (a second sine modulating freq) for shimmer
+    const mod = ctx.createOscillator();
+    mod.type = 'sine';
+    mod.frequency.value = freq * 2.01;
+    const modG = ctx.createGain();
+    modG.gain.value = 6;
+    mod.connect(modG).connect(o.frequency);
+
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, startAt);
+    g.gain.linearRampToValueAtTime(gain, startAt + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, startAt + 4.5);
+
+    o.connect(g).connect(bellBus);
+    o.start(startAt); mod.start(startAt);
+    o.stop(startAt + 4.6); mod.stop(startAt + 4.6);
+  }
+
+  function scheduleChord() {
+    if (!on || !ctx) return;
+    const chord = PROG[chordIdx % PROG.length];
+    chordIdx++;
+    const t = now() + 0.05;
+    const dur = 14; // each chord ~14 seconds
+    // Spread voices with slight detune for warmth
+    playPadNote(chord[0],         t,      dur, 0.14);
+    playPadNote(chord[1] * 1.003, t + 0.4, dur - 0.4, 0.10);
+    playPadNote(chord[2] * 0.997, t + 0.9, dur - 0.9, 0.08);
+    playPadNote(chord[3],         t + 1.4, dur - 1.4, 0.06);
+    chordTimer = setTimeout(scheduleChord, (dur - 2) * 1000); // overlap tail
+  }
+
+  function scheduleBells() {
+    if (!on || !ctx) return;
+    const chord = PROG[(chordIdx + PROG.length - 1) % PROG.length];
+    // Choose a chord tone, two octaves up, occasionally a 9th for color
+    const pool = [chord[0]*4, chord[1]*4, chord[2]*4, chord[3]*4, chord[0]*6, chord[2]*6];
+    const f = pool[Math.floor(Math.random() * pool.length)];
+    playBell(f, now() + 0.05, 0.07);
+    // Random spacing 6-13s
+    const nextMs = 6000 + Math.random() * 7000;
+    bellTimer = setTimeout(scheduleBells, nextMs);
+  }
+
+  function ensureCtx() {
+    if (ctx) return;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    ctx = new AC();
+    master = ctx.createGain();
+    master.gain.value = 0;
+    // Buses with a touch of EQ via filters
+    padBus = ctx.createGain();
+    padBus.gain.value = 1.0;
+    bellBus = ctx.createGain();
+    bellBus.gain.value = 0.55;
+    // Gentle highshelf cut on pad to keep it soft
+    const padShelf = ctx.createBiquadFilter();
+    padShelf.type = 'highshelf';
+    padShelf.frequency.value = 2200;
+    padShelf.gain.value = -6;
+    padBus.connect(padShelf).connect(master);
+    bellBus.connect(master);
+    master.connect(ctx.destination);
+  }
+
+  function start() {
+    if (started || !ctx) return;
+    started = true;
+    chordIdx = 0;
+    scheduleChord();
+    // Start bells after a delay so the pad establishes first
+    bellTimer = setTimeout(scheduleBells, 4500);
+  }
+
+  function stopVoices() {
+    if (chordTimer) { clearTimeout(chordTimer); chordTimer = null; }
+    if (bellTimer)  { clearTimeout(bellTimer);  bellTimer  = null; }
+    started = false;
+  }
+
+  function setOn(v) {
+    on = !!v;
+    try { localStorage.setItem(LS_KEY, on ? '1' : '0'); } catch (e) {}
+    const btn = document.getElementById('btn-sound');
+    const icon = document.getElementById('sound-icon');
+    if (btn) btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    if (icon) icon.textContent = on ? '🔊' : '🔇';
+    if (on) {
+      ensureCtx();
+      if (!ctx) return;
+      if (ctx.state === 'suspended') ctx.resume();
+      start();
+      const t = now();
+      master.gain.cancelScheduledValues(t);
+      master.gain.setValueAtTime(master.gain.value, t);
+      master.gain.linearRampToValueAtTime(0.65, t + 1.4);
+    } else if (ctx && master) {
+      const t = now();
+      master.gain.cancelScheduledValues(t);
+      master.gain.setValueAtTime(master.gain.value, t);
+      master.gain.linearRampToValueAtTime(0.0001, t + 0.8);
+      setTimeout(stopVoices, 900);
+    }
+  }
+  function toggle() { setOn(!on); }
+  function init() {
+    const saved = localStorage.getItem(LS_KEY);
+    if (saved === '1') {
+      const onFirst = () => {
+        setOn(true);
+        window.removeEventListener('pointerdown', onFirst, true);
+        window.removeEventListener('keydown', onFirst, true);
+      };
+      window.addEventListener('pointerdown', onFirst, true);
+      window.addEventListener('keydown', onFirst, true);
+      const btn = document.getElementById('btn-sound');
+      const icon = document.getElementById('sound-icon');
+      if (btn) btn.setAttribute('aria-pressed', 'true');
+      if (icon) icon.textContent = '🔊';
+      on = true;
+    }
+  }
+  return { toggle, setOn, init };
+})();
+
+document.getElementById('btn-sound').addEventListener('click', () => Sound.toggle());
+Sound.init();
+
+/* ---------- Table felt picker ---------- */
+(function initFeltPicker() {
+  const LS_KEY = 'att-felt';
+  const VALID = new Set(['midnight', 'azure']);
+  const wrap = document.getElementById('felt-wrap');
+  const btn = document.getElementById('btn-felt');
+  const pop = document.getElementById('felt-pop');
+  if (!wrap || !btn || !pop) return;
+  const swatches = pop.querySelectorAll('.felt-swatch');
+  document.body.appendChild(pop);
+
+  function apply(name, persist) {
+    if (!VALID.has(name)) name = 'azure';
+    if (name === 'midnight') document.body.removeAttribute('data-felt');
+    else document.body.setAttribute('data-felt', name);
+    swatches.forEach(s => s.setAttribute('aria-pressed', s.dataset.felt === name ? 'true' : 'false'));
+    if (persist) { try { localStorage.setItem(LS_KEY, name); } catch (e) {} }
+  }
+
+  function openPop(open) {
+    pop.classList.toggle('is-open', open);
+    wrap.classList.toggle('is-open', open);
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    openPop(!pop.classList.contains('is-open'));
+  });
+  swatches.forEach(s => s.addEventListener('click', (e) => {
+    e.stopPropagation();
+    apply(s.dataset.felt, true);
+    openPop(false);
+  }));
+  document.addEventListener('click', (e) => {
+    if (pop.classList.contains('is-open') && !pop.contains(e.target) && !btn.contains(e.target)) openPop(false);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && pop.classList.contains('is-open')) openPop(false);
+  });
+
+  let saved = 'azure';
+  try { saved = localStorage.getItem(LS_KEY) || 'azure'; } catch (e) {}
+  apply(saved, false);
+})();
+window.addEventListener('keydown', (e) => {
+  if ((e.key === 'm' || e.key === 'M') && !e.ctrlKey && !e.metaKey && !e.altKey
+      && !/^(input|textarea|select)$/i.test((e.target && e.target.tagName) || '')) {
+    e.preventDefault();
+    Sound.toggle();
+  }
+});
+
+/* ---- Difficulty picker ---- */
+(function initDifficultyPicker(){
+  const LS_KEY = 'att.difficulty';
+  const saved = parseInt(localStorage.getItem(LS_KEY), 10);
+  if (saved >= 1 && saved <= 5) G.difficulty = saved;
+  const btns = document.querySelectorAll('.diff-btn');
+  const nameEl = $('diff-name');
+  const hintEl = $('diff-hint');
+  function apply(level) {
+    G.difficulty = level;
+    try { localStorage.setItem(LS_KEY, String(level)); } catch (e) {}
+    btns.forEach(b => {
+      const on = parseInt(b.dataset.diff, 10) === level;
+      b.classList.toggle('is-active', on);
+      b.setAttribute('aria-checked', on ? 'true' : 'false');
+    });
+    const meta = DIFFICULTY_META[level];
+    if (meta) {
+      if (nameEl) nameEl.textContent = meta.name;
+      if (hintEl) hintEl.textContent = meta.hint;
+    }
+  }
+  btns.forEach(b => b.addEventListener('click', () => apply(parseInt(b.dataset.diff, 10))));
+  apply(G.difficulty);
+})();
+$('btn-tut-start').addEventListener('click', () => { closeTutorial(true); startMatch({ animate: true }); });
+$('btn-tut-skip').addEventListener('click', () => { closeTutorial(true); });
+$('btn-rematch').addEventListener('click', () => startMatch({ animate: true }));
+$('btn-restart').addEventListener('click', async () => {
+  if (await confirmDialog({
+    title: 'Restart this match?',
+    message: 'Both decks will be reshuffled and dealt 20/20, and the round counter resets to 1.',
+    okText: 'Restart',
+    danger: true,
+  })) startMatch({ animate: true });
+});
+$('btn-quit-match').addEventListener('click', async () => {
+  if (await confirmDialog({
+    title: 'Quit this match?',
+    message: 'Your current progress will be lost and you\u2019ll return to the title screen.',
+    okText: 'Quit match',
+    danger: true,
+  })) show('screen-title');
+});
+$('btn-back-title').addEventListener('click', () => show('screen-title'));
+$('btn-quit').addEventListener('click', async () => {
+  if (await confirmDialog({
+    title: 'Quit this match?',
+    message: 'Your current progress will be lost and you\u2019ll return to the title screen.',
+    okText: 'Quit match',
+    danger: true,
+  })) show('screen-title');
+});
+
+// Confirm-modal wiring.
+$('confirm-ok').addEventListener('click', () => _resolveConfirm(true));
+$('confirm-cancel').addEventListener('click', () => _resolveConfirm(false));
+$('confirm-overlay').addEventListener('click', (e) => {
+  if (e.target === $('confirm-overlay')) _resolveConfirm(false);
+});
+$('info-close').addEventListener('click', closeFamilyInfo);
+$('info-overlay').addEventListener('click', (e) => {
+  if (e.target === $('info-overlay')) closeFamilyInfo();
+});
+
+// Delegated info-pip handler (cards remount every round).
+document.addEventListener('click', (e) => {
+  const pip = e.target.closest('.info-pip');
+  if (!pip) return;
+  e.stopPropagation();
+  e.preventDefault();
+  const familyType = pip.getAttribute('data-family-type');
+  const card = pip.closest('.card');
+  const famClass = card ? Array.from(card.classList).find(c => c.startsWith('ft-')) : null;
+  openFamilyInfo(familyType, famClass);
+});
+
+document.addEventListener('keydown', (e) => {
+  // Overlay-priority: Esc closes overlays first.
+  if (e.key === 'Escape') {
+    if ($('confirm-overlay').classList.contains('is-open')) { _resolveConfirm(false); return; }
+    if ($('info-overlay').classList.contains('is-open')) { closeFamilyInfo(); return; }
+    if ($('tutorial-overlay').classList.contains('is-open')) { closeTutorial(false); return; }
+    if (document.querySelector('#screen-match.active')) {
+      $('btn-quit-match').click();
+    } else if (document.querySelector('#screen-end.active')) {
+      show('screen-title');
+    }
+  } else if (e.key === 'Enter') {
+    if ($('confirm-overlay').classList.contains('is-open')) { e.preventDefault(); _resolveConfirm(true); return; }
+    if ($('tutorial-overlay').classList.contains('is-open')) { e.preventDefault(); closeTutorial(true); startMatch({ animate: true }); return; }
+    if (document.querySelector('#screen-title.active')) { e.preventDefault(); if (!openTutorial(false)) startMatch({ animate: true }); }
+    else if (document.querySelector('#screen-end.active')) {
+      e.preventDefault();
+      const b = $('btn-rematch');
+      if (b) b.click(); else startMatch();
+    }
+  }else if (/^[1-6]$/.test(e.key)) {
+    if ($('info-overlay').classList.contains('is-open')) return;
+    if ($('tutorial-overlay').classList.contains('is-open')) return;
+    if (G.phase === 'picking' && G.turn === 'player') {
+      const idx = parseInt(e.key, 10) - 1;
+      const stat = STATS[idx];
+      if (stat) playerPicksStat(stat.key);
+    }
+  } else if (e.key === '?' || (e.key === '/' && e.shiftKey)) {
+    // Quick help — re-open the tutorial.
+    openTutorial(true);
+  } else if (e.shiftKey && (e.key === 'W' || e.key === 'L')) {
+    // Dev shortcut: force end-of-match for testing the win/lose screens.
+    // Shift+W → player wins instantly. Shift+L → CPU wins instantly.
+    if (!document.querySelector('#screen-match.active')) return;
+    if (G.phase === 'ended') return;
+    e.preventDefault();
+    const playerWins = (e.key === 'W');
+    // Move all cards to the winner so the end screen reads correctly.
+    const all = [...G.player.hand, ...G.cpu.hand, ...G.pot];
+    if (playerWins) { G.player.hand = all; G.cpu.hand = []; }
+    else            { G.cpu.hand = all;    G.player.hand = []; }
+    G.pot = [];
+    endMatch();
+  }
+});
+
+boot();
+
+/* ===================================================================
+   ANIMATED GLOBE BACKGROUND
+   Dot-sphere planet with real Azure regions pulsing as nodes and
+   data-flow arcs between random region pairs. Pure canvas, no deps.
+   =================================================================== */
+(function GlobeBg() {
+  const canvas = document.getElementById('globe-bg');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let W = 0, H = 0, DPR = 1, cx = 0, cy = 0, R = 0;
+  let running = true;
+
+  // [lat, lon, name]  — real Azure regions
+  const REGIONS = [
+    [37.37, -79.82, 'East US'], [36.85, -76.98, 'East US 2'],
+    [47.23, -119.85, 'West US 2'], [33.45, -112.07, 'West US 3'],
+    [41.59, -93.62, 'Central US'], [29.42, -98.50, 'South Central US'],
+    [43.65, -79.38, 'Canada Central'], [46.81, -71.21, 'Canada East'],
+    [20.59, -100.39, 'Mexico Central'], [-23.55, -46.63, 'Brazil South'],
+    [53.35, -6.26, 'North Europe'], [52.37, 4.90, 'West Europe'],
+    [50.94, -0.80, 'UK South'], [46.38, 2.37, 'France Central'],
+    [50.11, 8.68, 'Germany WC'], [60.67, 17.14, 'Sweden Central'],
+    [59.91, 10.75, 'Norway East'], [47.45, 8.56, 'Switzerland N'],
+    [45.47, 9.19, 'Italy North'], [52.23, 21.01, 'Poland Central'],
+    [-25.73, 28.22, 'South Africa N'], [25.27, 55.30, 'UAE North'],
+    [31.77, 35.21, 'Israel Central'], [25.35, 51.18, 'Qatar Central'],
+    [18.52, 73.86, 'Central India'], [12.97, 80.22, 'South India'],
+    [22.27, 114.19, 'East Asia'], [1.28, 103.83, 'Southeast Asia'],
+    [35.68, 139.76, 'Japan East'], [37.57, 126.98, 'Korea Central'],
+    [-33.87, 151.21, 'Australia East'], [-37.81, 144.96, 'Australia SE'],
+  ];
+
+  function ll2v(lat, lon) {
+    const la = lat * Math.PI / 180, lo = lon * Math.PI / 180;
+    return [Math.cos(la) * Math.sin(lo), Math.sin(la), Math.cos(la) * Math.cos(lo)];
+  }
+  const regionVecs = REGIONS.map(r => ll2v(r[0], r[1]));
+
+  // Dot-sphere grid
+  const dots = [];
+  for (let lat = -84; lat <= 84; lat += 5) {
+    const circ = Math.cos(lat * Math.PI / 180);
+    const step = Math.max(5, Math.round(5 / Math.max(circ, 0.05)));
+    for (let lon = -180; lon < 180; lon += step) dots.push(ll2v(lat, lon));
+  }
+
+  const arcs = [];
+  function spawnArc() {
+    const a = (Math.random() * REGIONS.length) | 0;
+    let b = (Math.random() * REGIONS.length) | 0;
+    if (b === a) b = (b + 1) % REGIONS.length;
+    arcs.push({ a: regionVecs[a], b: regionVecs[b], t: 0, dur: 2.2 + Math.random() * 2.5 });
+  }
+  let arcTimer = 0;
+  for (let i = 0; i < 3; i++) spawnArc();
+
+  // Public: trigger a cascade of arcs (used by victory FX).
+  window.globeBurst = function (n = 12) {
+    if (reduced) return;
+    let i = 0;
+    const iv = setInterval(() => {
+      spawnArc();
+      if (++i >= n) clearInterval(iv);
+    }, 80);
+  };
+
+  function resize() {
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    canvas.width = W * DPR; canvas.height = H * DPR;
+    canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    cx = W * 0.5; cy = H * 0.52;
+    R = Math.min(W * 0.55, H * 0.55, 480);
+  }
+
+  function rotY(v, c, s) { return [v[0] * c + v[2] * s, v[1], -v[0] * s + v[2] * c]; }
+  function project(v) { return [cx + v[0] * R, cy - v[1] * R]; }
+
+  function slerp(a, b, t) {
+    const d = Math.max(-1, Math.min(1, a[0]*b[0] + a[1]*b[1] + a[2]*b[2]));
+    const omega = Math.acos(d);
+    if (omega < 1e-4) return a;
+    const so = Math.sin(omega);
+    const s1 = Math.sin((1 - t) * omega) / so, s2 = Math.sin(t * omega) / so;
+    return [a[0]*s1 + b[0]*s2, a[1]*s1 + b[1]*s2, a[2]*s1 + b[2]*s2];
+  }
+
+  let lastT = performance.now();
+  let rot = 0;
+
+  function frame(now) {
+    if (!running) return;
+    const dt = Math.min(0.05, (now - lastT) / 1000);
+    lastT = now;
+    if (!reduced) rot += dt * 0.06;
+
+    const cR = Math.cos(rot), sR = Math.sin(rot);
+    ctx.clearRect(0, 0, W, H);
+
+    // Soft azure halo
+    const g = ctx.createRadialGradient(cx, cy, R * 0.4, cx, cy, R * 1.55);
+    g.addColorStop(0, 'rgba(30, 110, 210, 0.14)');
+    g.addColorStop(0.55, 'rgba(15, 60, 130, 0.05)');
+    g.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(cx - R * 1.7, cy - R * 1.7, R * 3.4, R * 3.4);
+
+    // Sphere rim
+    ctx.beginPath();
+    ctx.arc(cx, cy, R, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(80, 150, 220, 0.10)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Land dots (front hemisphere)
+    for (const d of dots) {
+      const v = rotY(d, cR, sR);
+      if (v[2] < 0.02) continue;
+      const [px, py] = project(v);
+      const a = Math.pow(v[2], 0.7) * 0.32;
+      ctx.fillStyle = 'rgba(130, 185, 230,' + a + ')';
+      ctx.fillRect(px - 0.5, py - 0.5, 1.3, 1.3);
+    }
+
+    // Data-flow arcs
+    arcTimer += dt;
+    if (!reduced && arcTimer > 0.7 && arcs.length < 5) { spawnArc(); arcTimer = 0; }
+    for (let i = arcs.length - 1; i >= 0; i--) {
+      const ar = arcs[i];
+      ar.t += dt / ar.dur;
+      if (ar.t >= 1.35) { arcs.splice(i, 1); continue; }
+      const va = rotY(ar.a, cR, sR), vb = rotY(ar.b, cR, sR);
+      const head = Math.min(1, ar.t);
+      const trail = 0.28, segs = 16;
+      ctx.lineCap = 'round';
+      for (let k = 0; k < segs; k++) {
+        const u1 = head - ((k + 1) / segs) * trail;
+        const u2 = head - (k / segs) * trail;
+        if (u2 < 0) break;
+        const p1 = slerp(va, vb, Math.max(0, u1));
+        const p2 = slerp(va, vb, u2);
+        const e1 = 1 + Math.sin(Math.max(0, u1) * Math.PI) * 0.16;
+        const e2 = 1 + Math.sin(u2 * Math.PI) * 0.16;
+        const zAvg = (p1[2] + p2[2]) * 0.5;
+        if (zAvg < -0.25) continue;
+        const [x1, y1] = project([p1[0]*e1, p1[1]*e1, p1[2]*e1]);
+        const [x2, y2] = project([p2[0]*e2, p2[1]*e2, p2[2]*e2]);
+        const fade = (1 - k / segs) * Math.min(1, 1.35 - ar.t);
+        const front = Math.max(0.3, (zAvg + 1) * 0.5);
+        ctx.strokeStyle = 'rgba(90, 185, 255,' + (0.75 * fade * front) + ')';
+        ctx.lineWidth = 1.3 * fade;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
+        ctx.stroke();
+      }
+      // bright head
+      if (head < 1.001) {
+        const pH = slerp(va, vb, head);
+        const eH = 1 + Math.sin(head * Math.PI) * 0.16;
+        if (pH[2] > -0.25) {
+          const [hx, hy] = project([pH[0]*eH, pH[1]*eH, pH[2]*eH]);
+          const fade = Math.min(1, 1.35 - ar.t);
+          ctx.fillStyle = 'rgba(80, 180, 255,' + (0.4 * fade) + ')';
+          ctx.beginPath(); ctx.arc(hx, hy, 6, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = 'rgba(200, 235, 255,' + fade + ')';
+          ctx.beginPath(); ctx.arc(hx, hy, 2.2, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+    }
+
+    // Region nodes (pulsing)
+    const tPulse = now / 1000;
+    for (let i = 0; i < regionVecs.length; i++) {
+      const v = rotY(regionVecs[i], cR, sR);
+      if (v[2] < -0.05) continue;
+      const [px, py] = project(v);
+      const front = Math.max(0, v[2]);
+      const ph = 0.5 + 0.5 * Math.sin(tPulse * 1.8 + i * 0.7);
+      const a = (0.55 + ph * 0.45) * (0.35 + front * 0.65);
+      ctx.fillStyle = 'rgba(40, 140, 230,' + (0.22 * a) + ')';
+      ctx.beginPath(); ctx.arc(px, py, 5 + ph * 2.5, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = 'rgba(190, 230, 255,' + a + ')';
+      ctx.beginPath(); ctx.arc(px, py, 1.7, 0, Math.PI * 2); ctx.fill();
+    }
+
+    requestAnimationFrame(frame);
+  }
+
+  window.addEventListener('resize', resize);
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) { running = false; }
+    else if (!running) { running = true; lastT = performance.now(); requestAnimationFrame(frame); }
+  });
+
+  resize();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
