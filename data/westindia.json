@@ -1,8 +1,8 @@
 {
   "region": "westindia",
   "regionDisplayName": "West India",
-  "lastUpdated": "2026-05-02T08:16:26Z",
-  "skuCount": 201,
+  "lastUpdated": "2026-06-03T05:25:05Z",
+  "skuCount": 199,
   "skus": [
     {
       "name": "Standard_A1_v2",
@@ -2875,48 +2875,6 @@
       "premiumIO": false,
       "ephemeralOSDisk": false,
       "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [],
-      "restrictions": [
-        "NotAvailableForSubscription"
-      ]
-    },
-    {
-      "name": "Standard_E64is_v3",
-      "family": "standardEISv3Family",
-      "tier": "Standard",
-      "size": "E64is_v3",
-      "vCPUs": 64,
-      "memoryGB": 432.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V1,V2",
-      "acceleratedNetworking": true,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [],
-      "restrictions": [
-        "NotAvailableForSubscription"
-      ]
-    },
-    {
-      "name": "Standard_E64i_v3",
-      "family": "standardEIv3Family",
-      "tier": "Standard",
-      "size": "E64i_v3",
-      "vCPUs": 64,
-      "memoryGB": 432.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V1",
-      "acceleratedNetworking": true,
-      "premiumIO": false,
-      "ephemeralOSDisk": false,
-      "encryptionAtHost": false,
       "spotEligible": true,
       "zones": [],
       "restrictions": [

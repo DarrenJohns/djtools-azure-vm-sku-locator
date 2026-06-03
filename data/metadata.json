@@ -1,9 +1,5 @@
 {
-  "lastUpdatedDisplay": "May 2026",
-  "regionsWithData": 45,
-  "failedRegions": [],
-  "lastUpdated": "2026-05-02T08:28:06Z",
-  "physicalRegionCount": 62,
+  "lastUpdated": "2026-06-03T05:37:12Z",
   "availableRegions": [
     "eastus",
     "eastus2",
@@ -50,5 +46,9 @@
     "uaenorth",
     "qatarcentral",
     "israelcentral"
-  ]
+  ],
+  "physicalRegionCount": 62,
+  "failedRegions": [],
+  "lastUpdatedDisplay": "June 2026",
+  "regionsWithData": 45
 }

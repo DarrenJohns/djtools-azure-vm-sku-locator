@@ -1,7 +1,7 @@
 {
   "region": "canadacentral",
   "regionDisplayName": "Canada Central",
-  "lastUpdated": "2026-05-02T07:51:17Z",
+  "lastUpdated": "2026-06-03T04:58:43Z",
   "skuCount": 1003,
   "skus": [
     {
@@ -5461,7 +5461,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1"
       ],
@@ -5482,7 +5482,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1"
       ],

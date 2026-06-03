@@ -1,7 +1,7 @@
 {
   "region": "westus",
   "regionDisplayName": "West US",
-  "lastUpdated": "2026-05-02T07:43:54Z",
+  "lastUpdated": "2026-06-03T04:51:03Z",
   "skuCount": 1070,
   "skus": [
     {
@@ -4351,7 +4351,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [],
       "restrictions": []
     },
@@ -4370,7 +4370,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [],
       "restrictions": []
     },
