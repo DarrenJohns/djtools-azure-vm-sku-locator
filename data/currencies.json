@@ -1,19 +1,5 @@
 [
   { "code": "USD", "symbol": "US$", "name": "US Dollar", "decimalPlaces": 4 },
   { "code": "AUD", "symbol": "A$", "name": "Australian Dollar", "decimalPlaces": 4 },
-  { "code": "BRL", "symbol": "R$", "name": "Brazilian Real", "decimalPlaces": 4 },
-  { "code": "CAD", "symbol": "C$", "name": "Canadian Dollar", "decimalPlaces": 4 },
-  { "code": "CHF", "symbol": "CHF", "name": "Swiss Franc", "decimalPlaces": 4 },
-  { "code": "CNY", "symbol": "¥", "name": "Chinese Yuan", "decimalPlaces": 4 },
-  { "code": "DKK", "symbol": "kr", "name": "Danish Krone", "decimalPlaces": 4 },
-  { "code": "EUR", "symbol": "€", "name": "Euro", "decimalPlaces": 4 },
-  { "code": "GBP", "symbol": "£", "name": "British Pound", "decimalPlaces": 4 },
-  { "code": "INR", "symbol": "₹", "name": "Indian Rupee", "decimalPlaces": 4 },
-  { "code": "JPY", "symbol": "¥", "name": "Japanese Yen", "decimalPlaces": 2 },
-  { "code": "KRW", "symbol": "₩", "name": "Korean Won", "decimalPlaces": 2 },
-  { "code": "NOK", "symbol": "kr", "name": "Norwegian Krone", "decimalPlaces": 4 },
-  { "code": "NZD", "symbol": "NZ$", "name": "New Zealand Dollar", "decimalPlaces": 4 },
-  { "code": "RUB", "symbol": "₽", "name": "Russian Ruble", "decimalPlaces": 4 },
-  { "code": "SEK", "symbol": "kr", "name": "Swedish Krona", "decimalPlaces": 4 },
-  { "code": "TWD", "symbol": "NT$", "name": "Taiwan Dollar", "decimalPlaces": 2 }
+  { "code": "NZD", "symbol": "NZ$", "name": "New Zealand Dollar", "decimalPlaces": 4 }
 ]

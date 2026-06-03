@@ -165,8 +165,9 @@ jobs:
         run: |
           $config = Get-Content "config.json" | ConvertFrom-Json
           $regions = $config.targetRegions
-          $currencies = $config.supportedCurrencies
-          if (-not $currencies) { $currencies = @("USD") }
+          # Fetch pricing for key currencies only (USD, AUD, NZD) to stay within 6h limit.
+          # Each currency × 47 regions × 2 passes (PAYG + RI) takes ~1h.
+          $currencies = @("USD", "AUD", "NZD")
           foreach ($currency in $currencies) {
             Write-Host "=== Fetching pricing in $currency ==="
             foreach ($region in $regions) {
@@ -188,7 +189,7 @@ jobs:
               Copy-Item $usdFile $compatFile -Force
             }
           }
-          Write-Host "[OK] Pricing data refresh complete ($($currencies.Count) currencies)"
+          Write-Host "[OK] Pricing data refresh complete ($($currencies.Count) currencies: USD, AUD, NZD)"
         shell: pwsh
 
       - name: Fetch disk SKU data

@@ -70,7 +70,7 @@ def fetch_batched(api_sku_names, region_name, currency, price_type):
                         url = None
 
         if i + BATCH_SIZE < len(api_sku_names):
-            time.sleep(0.5)
+            time.sleep(0.2)
     return items
 
 
