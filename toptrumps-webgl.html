@@ -1755,6 +1755,28 @@ button { font: inherit; color: inherit; }
   50%      { background-position: 100% 100%; }
 }
 
+/* WebGL foil overlay (Phase 1C) — layered on top of the CSS .card-foil
+   and replaces it visually when active. Each rare+ card gets its own
+   tiny Three.js renderer; pointer position drives a specular highlight. */
+.card .foil-webgl {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: var(--radius);
+  z-index: 5;
+  mix-blend-mode: screen;
+  opacity: 0;
+  transition: opacity .35s ease;
+  width: 100%;
+  height: 100%;
+}
+.card.has-webgl-foil .foil-webgl { opacity: 1; }
+.card.has-webgl-foil .card-foil  { opacity: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .card .foil-webgl { display: none; }
+  .card.has-webgl-foil .card-foil { opacity: 1; }
+}
+
 /* Rarity border / outer glow */
 .card.rarity-common      { box-shadow: var(--shadow-card); }
 .card.rarity-uncommon    { box-shadow: var(--shadow-card), 0 0 0 1px var(--r-uncommon), 0 0 14px rgba(78,163,107,.18); }
@@ -3111,6 +3133,9 @@ function mountFlipCard(stackEl, card, opts = {}) {
     h('div', { class: 'face back'  }, back),
   ]);
   stackEl.appendChild(host);
+  // Attach WebGL foil overlay for rare+ cards. The hook is registered
+  // by the deferred Three.js module; if WebGL failed, this is a no-op.
+  if (window.__attachFoilOverlay) window.__attachFoilOverlay(front);
   return { host, front, back };
 }
 
@@ -3626,38 +3651,43 @@ function endMatch() {
 
 function triggerVictoryFx() {
   if (reducedMotion()) return;
-  // Confetti
-  let layer = document.querySelector('.confetti-layer');
-  if (!layer) {
-    layer = document.createElement('div');
-    layer.className = 'confetti-layer';
-    document.body.appendChild(layer);
+  // WebGL GPU confetti (Phase 1D) — falls back to CSS pieces if unavailable.
+  if (window.__webglConfetti) {
+    window.__webglConfetti({ count: 1400 });
   } else {
-    layer.innerHTML = '';
+    // CSS confetti fallback (original implementation)
+    let layer = document.querySelector('.confetti-layer');
+    if (!layer) {
+      layer = document.createElement('div');
+      layer.className = 'confetti-layer';
+      document.body.appendChild(layer);
+    } else {
+      layer.innerHTML = '';
+    }
+    const palette = ['#0f6cbd', '#3b8de8', '#5fb8ff', '#7adc9a', '#ffd66b', '#f08a8a', '#c79bff'];
+    const W = window.innerWidth;
+    for (let i = 0; i < 90; i++) {
+      const piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      const startX = Math.random() * W;
+      const drift = (Math.random() - 0.5) * W * 0.6;
+      const rot = (400 + Math.random() * 720) * (Math.random() < 0.5 ? -1 : 1);
+      const dur = 2.8 + Math.random() * 2.4;
+      const delay = Math.random() * 0.8;
+      const size = 6 + Math.random() * 8;
+      piece.style.left = startX + 'px';
+      piece.style.width = size + 'px';
+      piece.style.height = (size * 1.6) + 'px';
+      piece.style.background = palette[(Math.random() * palette.length) | 0];
+      piece.style.setProperty('--cx', drift + 'px');
+      piece.style.setProperty('--cr', rot + 'deg');
+      piece.style.animationDuration = dur + 's';
+      piece.style.animationDelay = delay + 's';
+      piece.style.borderRadius = Math.random() < 0.3 ? '50%' : '2px';
+      layer.appendChild(piece);
+    }
+    setTimeout(() => { if (layer && layer.parentNode) layer.parentNode.removeChild(layer); }, 6500);
   }
-  const palette = ['#0f6cbd', '#3b8de8', '#5fb8ff', '#7adc9a', '#ffd66b', '#f08a8a', '#c79bff'];
-  const W = window.innerWidth;
-  for (let i = 0; i < 90; i++) {
-    const piece = document.createElement('div');
-    piece.className = 'confetti-piece';
-    const startX = Math.random() * W;
-    const drift = (Math.random() - 0.5) * W * 0.6;
-    const rot = (400 + Math.random() * 720) * (Math.random() < 0.5 ? -1 : 1);
-    const dur = 2.8 + Math.random() * 2.4;
-    const delay = Math.random() * 0.8;
-    const size = 6 + Math.random() * 8;
-    piece.style.left = startX + 'px';
-    piece.style.width = size + 'px';
-    piece.style.height = (size * 1.6) + 'px';
-    piece.style.background = palette[(Math.random() * palette.length) | 0];
-    piece.style.setProperty('--cx', drift + 'px');
-    piece.style.setProperty('--cr', rot + 'deg');
-    piece.style.animationDuration = dur + 's';
-    piece.style.animationDelay = delay + 's';
-    piece.style.borderRadius = Math.random() < 0.3 ? '50%' : '2px';
-    layer.appendChild(piece);
-  }
-  setTimeout(() => { if (layer && layer.parentNode) layer.parentNode.removeChild(layer); }, 6500);
   // Globe burst — cascade of arcs lighting up the planet.
   if (window.globeBurst) window.globeBurst(14);
 }
@@ -4760,6 +4790,335 @@ document.addEventListener('visibilitychange', () => {
 
 requestAnimationFrame(frame);
 console.info('[toptrumps-webgl] Three.js r' + THREE.REVISION + ' globe initialised');
+
+// =====================================================================
+// Phase 1C — Foil overlay for rare+ cards.
+// Each rare/epic/legendary card gets its own tiny Three.js renderer
+// drawing a holographic shader onto a transparent overlay canvas.
+// =====================================================================
+const FOIL_COLOR = {
+  rare:      new THREE.Color(0x2596e7),
+  epic:      new THREE.Color(0xb074e8),
+  legendary: new THREE.Color(0xf0a93b),
+};
+const foilQuadGeo = new THREE.PlaneGeometry(2, 2);
+const foilInstances = new WeakSet();
+
+function attachFoilOverlay(cardEl) {
+  if (!cardEl || reduced) return;
+  if (foilInstances.has(cardEl)) return;
+  const rarity = cardEl.dataset.rarity;
+  const baseColor = FOIL_COLOR[rarity];
+  if (!baseColor) return;
+
+  const foilCanvas = document.createElement('canvas');
+  foilCanvas.className = 'foil-webgl';
+  foilCanvas.setAttribute('aria-hidden', 'true');
+  cardEl.appendChild(foilCanvas);
+
+  let foilRenderer;
+  try {
+    foilRenderer = new THREE.WebGLRenderer({
+      canvas: foilCanvas,
+      alpha: true,
+      antialias: false,
+      premultipliedAlpha: false,
+    });
+  } catch (e) {
+    foilCanvas.remove();
+    return;
+  }
+  foilRenderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  foilRenderer.setClearColor(0x000000, 0);
+
+  const foilScene = new THREE.Scene();
+  const foilCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+  const foilMat = new THREE.ShaderMaterial({
+    uniforms: {
+      uTime:      { value: 0 },
+      uMouse:     { value: new THREE.Vector2(0.5, 0.5) },
+      uHover:     { value: 0 },
+      uBaseColor: { value: baseColor.clone() },
+    },
+    transparent: true,
+    depthWrite: false,
+    vertexShader: /* glsl */`
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: /* glsl */`
+      uniform float uTime;
+      uniform vec2  uMouse;
+      uniform float uHover;
+      uniform vec3  uBaseColor;
+      varying vec2  vUv;
+      void main() {
+        vec2 uv = vUv;
+        // Diagonal hue stripe modulated by mouse position + time drift
+        float t = (uv.x + uv.y) * 0.5
+                + (uMouse.x - 0.5) * 0.5
+                - (uMouse.y - 0.5) * 0.35
+                + uTime * 0.04;
+        float band = sin(t * 14.0) * 0.5 + 0.5;
+        // Rainbow shimmer
+        vec3 rainbow = vec3(
+          sin(t * 6.28318 + 0.0)   * 0.5 + 0.5,
+          sin(t * 6.28318 + 2.094) * 0.5 + 0.5,
+          sin(t * 6.28318 + 4.188) * 0.5 + 0.5
+        );
+        // Specular highlight near pointer (active only while hovering)
+        vec2 d2 = uv - uMouse;
+        float dist2 = dot(d2, d2);
+        float specular = exp(-dist2 * 16.0) * uHover;
+        // Edge fade so the overlay doesn't fight the card border
+        vec2 e = abs(uv - 0.5) * 2.0;
+        float edgeMask = 1.0 - smoothstep(0.78, 1.0, max(e.x, e.y));
+        // Combine
+        vec3 col = mix(uBaseColor, rainbow, 0.55 * band);
+        col += vec3(1.0) * specular * 0.7;
+        float alpha = (0.10 + 0.18 * band + specular)
+                    * (0.35 + 0.65 * uHover)
+                    * edgeMask;
+        gl_FragColor = vec4(col, alpha);
+      }
+    `,
+  });
+  const foilQuad = new THREE.Mesh(foilQuadGeo, foilMat);
+  foilScene.add(foilQuad);
+
+  // Match canvas size to card
+  const ro = new ResizeObserver(entries => {
+    const r = entries[0];
+    if (!r) return;
+    const w = Math.max(1, r.contentRect.width);
+    const h = Math.max(1, r.contentRect.height);
+    foilRenderer.setSize(w, h, false);
+  });
+  ro.observe(cardEl);
+
+  // Pointer tracking
+  let pointerOver = false;
+  let hoverTarget = 0;
+  cardEl.addEventListener('pointerenter', () => { pointerOver = true; hoverTarget = 1; });
+  cardEl.addEventListener('pointerleave', () => { pointerOver = false; hoverTarget = 0; });
+  cardEl.addEventListener('pointermove', (ev) => {
+    if (!pointerOver) return;
+    const rect = cardEl.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+    const u = (ev.clientX - rect.left) / rect.width;
+    const v = 1.0 - (ev.clientY - rect.top) / rect.height;
+    foilMat.uniforms.uMouse.value.set(u, v);
+  });
+
+  cardEl.classList.add('has-webgl-foil');
+  foilInstances.add(cardEl);
+
+  let foilLast = performance.now();
+  function foilFrame(now) {
+    // Stop & dispose when the card leaves the DOM
+    if (!foilCanvas.isConnected) {
+      ro.disconnect();
+      foilMat.dispose();
+      foilRenderer.dispose();
+      return;
+    }
+    const dt = Math.min(0.05, (now - foilLast) / 1000);
+    foilLast = now;
+    // Smooth hover
+    const cur = foilMat.uniforms.uHover.value;
+    foilMat.uniforms.uHover.value = cur + (hoverTarget - cur) * Math.min(1, dt * 8);
+    // Idle auto-tilt when not hovered, so the shimmer stays alive
+    if (!pointerOver) {
+      const ax = 0.5 + Math.sin(now * 0.0007) * 0.3;
+      const ay = 0.5 + Math.cos(now * 0.0009) * 0.3;
+      foilMat.uniforms.uMouse.value.set(ax, ay);
+    }
+    foilMat.uniforms.uTime.value = now / 1000;
+    foilRenderer.render(foilScene, foilCam);
+    requestAnimationFrame(foilFrame);
+  }
+  requestAnimationFrame(foilFrame);
+}
+window.__attachFoilOverlay = attachFoilOverlay;
+
+// =====================================================================
+// Phase 1D — GPU confetti via Three.js Points.
+// One persistent full-viewport canvas + renderer, lazily initialised
+// on the first burst. Vertex shader handles physics (gravity + drift)
+// so the CPU only sets attributes once per burst.
+// =====================================================================
+let confettiState = null;
+function initConfetti() {
+  if (confettiState) return confettiState;
+  const cCanvas = document.createElement('canvas');
+  cCanvas.id = 'confetti-canvas';
+  cCanvas.setAttribute('aria-hidden', 'true');
+  cCanvas.style.cssText = 'position:fixed; inset:0; width:100vw; height:100vh; pointer-events:none; z-index:9999;';
+  document.body.appendChild(cCanvas);
+  let cRenderer;
+  try {
+    cRenderer = new THREE.WebGLRenderer({
+      canvas: cCanvas,
+      alpha: true,
+      antialias: false,
+      premultipliedAlpha: false,
+    });
+  } catch (e) {
+    cCanvas.remove();
+    return null;
+  }
+  cRenderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  cRenderer.setClearColor(0x000000, 0);
+  const cScene = new THREE.Scene();
+  const cCam = new THREE.Camera(); // identity — we write clip-space in the VS
+  function cResize() {
+    cRenderer.setSize(window.innerWidth, window.innerHeight, false);
+  }
+  window.addEventListener('resize', cResize);
+  cResize();
+  confettiState = { canvas: cCanvas, renderer: cRenderer, scene: cScene, camera: cCam, points: null, mat: null, geo: null, startedAt: 0, duration: 0 };
+  return confettiState;
+}
+
+function fireConfetti(opts = {}) {
+  const state = initConfetti();
+  if (!state) return;
+  const count = Math.max(50, Math.min(3000, opts.count || 1200));
+
+  // Dispose any previous burst
+  if (state.points) {
+    state.scene.remove(state.points);
+    state.geo.dispose();
+    state.mat.dispose();
+  }
+
+  const palette = [
+    new THREE.Color(0x0f6cbd),
+    new THREE.Color(0x3b8de8),
+    new THREE.Color(0x5fb8ff),
+    new THREE.Color(0x7adc9a),
+    new THREE.Color(0xffd66b),
+    new THREE.Color(0xf08a8a),
+    new THREE.Color(0xc79bff),
+    new THREE.Color(0xffffff),
+  ];
+
+  const positions = new Float32Array(count * 3); // start position (xyz in NDC-ish 0..1)
+  const velocities = new Float32Array(count * 3); // vx, vy, _unused
+  const colors = new Float32Array(count * 3);
+  const sizes = new Float32Array(count);
+  const flutter = new Float32Array(count * 2); // freq, phase
+  const delays = new Float32Array(count);
+
+  for (let i = 0; i < count; i++) {
+    // Spawn near top, across full width
+    positions[i*3]   = Math.random();              // x in 0..1
+    positions[i*3+1] = 1.02 + Math.random() * 0.10; // y just above viewport
+    positions[i*3+2] = 0;
+    // Initial velocity — strong downward fall, mild horizontal
+    velocities[i*3]   = (Math.random() - 0.5) * 0.18;
+    velocities[i*3+1] = -0.05 - Math.random() * 0.10;
+    velocities[i*3+2] = 0;
+    const col = palette[(Math.random() * palette.length) | 0];
+    colors[i*3] = col.r; colors[i*3+1] = col.g; colors[i*3+2] = col.b;
+    sizes[i] = 6 + Math.random() * 10;
+    flutter[i*2]   = 2.0 + Math.random() * 3.0; // freq Hz-ish
+    flutter[i*2+1] = Math.random() * 6.283;     // phase
+    delays[i] = Math.random() * 0.7;
+  }
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position',  new THREE.BufferAttribute(positions, 3));
+  geo.setAttribute('aVelocity', new THREE.BufferAttribute(velocities, 3));
+  geo.setAttribute('aColor',    new THREE.BufferAttribute(colors, 3));
+  geo.setAttribute('aSize',     new THREE.BufferAttribute(sizes, 1));
+  geo.setAttribute('aFlutter',  new THREE.BufferAttribute(flutter, 2));
+  geo.setAttribute('aDelay',    new THREE.BufferAttribute(delays, 1));
+
+  const mat = new THREE.ShaderMaterial({
+    uniforms: {
+      uTime:        { value: 0 },
+      uPixelRatio:  { value: Math.min(window.devicePixelRatio || 1, 2) },
+      uGravity:     { value: 0.6 },
+      uLife:        { value: 4.0 },
+    },
+    transparent: true,
+    depthWrite: false,
+    vertexShader: /* glsl */`
+      attribute vec3  aVelocity;
+      attribute vec3  aColor;
+      attribute float aSize;
+      attribute vec2  aFlutter;
+      attribute float aDelay;
+      uniform float uTime;
+      uniform float uPixelRatio;
+      uniform float uGravity;
+      uniform float uLife;
+      varying vec3  vColor;
+      varying float vAlpha;
+      void main() {
+        float t = max(0.0, uTime - aDelay);
+        float lifeT = t / uLife;
+        float x = position.x + aVelocity.x * t + sin(t * aFlutter.x + aFlutter.y) * 0.04;
+        float y = position.y + aVelocity.y * t - 0.5 * uGravity * t * t;
+        gl_Position = vec4(x * 2.0 - 1.0, y * 2.0 - 1.0, 0.0, 1.0);
+        gl_PointSize = aSize * uPixelRatio * (1.0 - lifeT * 0.25);
+        vColor = aColor;
+        vAlpha = clamp(1.0 - lifeT, 0.0, 1.0);
+        if (lifeT > 1.0 || t <= 0.0 || y < -0.1) {
+          gl_PointSize = 0.0;
+          vAlpha = 0.0;
+        }
+      }
+    `,
+    fragmentShader: /* glsl */`
+      varying vec3  vColor;
+      varying float vAlpha;
+      void main() {
+        vec2 c = gl_PointCoord - 0.5;
+        float d = max(abs(c.x), abs(c.y));
+        if (d > 0.5) discard;
+        float edge = smoothstep(0.5, 0.40, d);
+        gl_FragColor = vec4(vColor, vAlpha * edge);
+      }
+    `,
+  });
+
+  const points = new THREE.Points(geo, mat);
+  state.scene.add(points);
+  state.points = points;
+  state.geo = geo;
+  state.mat = mat;
+  state.startedAt = performance.now();
+  state.duration = 5.0; // total render duration in seconds
+
+  let running = true;
+  function loop(now) {
+    if (!running) return;
+    const t = (now - state.startedAt) / 1000;
+    mat.uniforms.uTime.value = t;
+    state.renderer.render(state.scene, state.camera);
+    if (t > state.duration) {
+      running = false;
+      state.scene.remove(points);
+      geo.dispose();
+      mat.dispose();
+      state.points = null;
+      state.geo = null;
+      state.mat = null;
+      // Clear the canvas
+      state.renderer.clear();
+      return;
+    }
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+}
+window.__webglConfetti = fireConfetti;
+
 })();
 </script>
 
