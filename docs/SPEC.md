@@ -219,3 +219,24 @@ All UI sections are organized into **6 tabs** using a sticky tab strip below the
 - **Runner**: Self-hosted runner
 - **Environment**: `production` (enables GitHub deployment tracking)
 - **Staged deploy**: Only `index.html`, `config.json`, and `data/` are deployed (not scripts, docs, etc.)
+
+## 9. Experimental WebGL Top Trumps Build
+
+A second, optional build of the Top Trumps companion ships alongside the stable file:
+
+- **File**: `toptrumps-webgl.html` (forked from `toptrumps.html`, same game logic and data)
+- **Dependency**: Three.js r170 ES module, vendored locally at `vendor/three.module.min.js` (MIT, ~675 KB). Loaded via a native browser **import map** — no CDN, no build step, no npm.
+- **Three additions over the stable build:**
+  1. **3D globe background** — replaces the existing Canvas2D `GlobeBg` IIFE with a Three.js `SphereGeometry` + custom `ShaderMaterial` (procedural dot grid, fresnel rim, additive halo, pulsing region nodes, animated great-circle arc bursts).
+  2. **Holographic foil overlay** on rare/epic/legendary cards — per-card mini `WebGLRenderer` + `ShaderMaterial` driven by pointer position (hue band, rainbow shimmer, specular hot-spot, edge fade).
+  3. **GPU confetti** on win — Three.js `Points` system (~1400 particles, vertex-shader physics: gravity + per-particle flutter) replacing the CSS `@keyframes confettiFall` pieces.
+- **Fallbacks**:
+  - If `new THREE.WebGLRenderer()` throws on load, the BETA chip switches to "BETA · 2D fallback" and the original `runCanvas2DGlobe()` is invoked. Cards render without the foil overlay; confetti uses the original CSS implementation.
+  - `prefers-reduced-motion` halts the globe RAF after one frame, skips foil RAF loops, and bypasses the confetti burst entirely (matching the stable build behaviour).
+- **Discovery**: a small "✨ WebGL beta" chip in the stable build's topbar links to `toptrumps-webgl.html`; the WebGL build's topbar has a reciprocal "← Stable" link.
+- **Global contracts** preserved on the WebGL build:
+  - `window.globeBurst(n)` — arc cascade trigger (same signature as Canvas2D)
+  - `window.runCanvas2DGlobe()` — fallback init
+  - `window.__attachFoilOverlay(cardEl)` — called from `mountFlipCard`
+  - `window.__webglConfetti({count})` — called from `triggerVictoryFx`
+- **Deployment**: ships from the same site root via the same SWA deploy. The `vendor/` directory is included in the deploy staging.

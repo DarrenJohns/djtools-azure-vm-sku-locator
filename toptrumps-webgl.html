@@ -344,6 +344,16 @@ button { font: inherit; color: inherit; }
   border-color: var(--line);
 }
 .meta-chip.beta-chip.is-fallback .meta-dot { background: var(--ink-dim); box-shadow: none; }
+.meta-chip-link {
+  text-decoration: none;
+  color: var(--ink-mute);
+  transition: filter .15s ease, transform .15s ease, color .15s ease;
+}
+.meta-chip-link:hover, .meta-chip-link:focus-visible {
+  filter: brightness(1.18);
+  transform: translateY(-1px);
+  color: var(--ink);
+}
 .sound-btn { font-size: 15px; line-height: 1; }
 .sound-btn[aria-pressed="true"] {
   color: var(--azure-bright);
@@ -2395,6 +2405,7 @@ body.home-screen #screen-title { padding-bottom: 120px; }
           <span class="meta-icon">⚑</span><span class="meta-val" id="meta-matches-val">0</span>
         </span>
       </div>
+      <a class="meta-chip meta-chip-link" href="./toptrumps.html" title="Back to the stable build" rel="noopener">← Stable</a>
       <button class="icon-btn sound-btn" id="btn-sound" title="Sound on/off (M)" aria-pressed="false" aria-label="Toggle sound">
         <span class="sound-icon" id="sound-icon">🔇</span>
       </button>

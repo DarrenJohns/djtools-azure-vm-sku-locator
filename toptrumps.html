@@ -325,6 +325,17 @@ button { font: inherit; color: inherit; }
 .meta-chip .meta-val { color: var(--ink); font-variant-numeric: tabular-nums; }
 .meta-chip .meta-greek { color: var(--azure-bright); margin-left: 1px; }
 .meta-version { color: var(--ink-dim); }
+.meta-chip-link {
+  text-decoration: none;
+  background: linear-gradient(135deg, rgba(255,214,107,.18), rgba(199,155,255,.16));
+  border-color: rgba(255,214,107,.45);
+  color: #ffd66b;
+  transition: filter .15s ease, transform .15s ease;
+}
+.meta-chip-link:hover, .meta-chip-link:focus-visible {
+  filter: brightness(1.18);
+  transform: translateY(-1px);
+}
 .sound-btn { font-size: 15px; line-height: 1; }
 .sound-btn[aria-pressed="true"] {
   color: var(--azure-bright);
@@ -2351,6 +2362,7 @@ body.home-screen #screen-title { padding-bottom: 120px; }
           <span class="meta-icon">⚑</span><span class="meta-val" id="meta-matches-val">0</span>
         </span>
       </div>
+      <a class="meta-chip meta-chip-link" href="./toptrumps-webgl.html" title="Try the experimental WebGL build" rel="noopener">✨ WebGL beta</a>
       <button class="icon-btn sound-btn" id="btn-sound" title="Sound on/off (M)" aria-pressed="false" aria-label="Toggle sound">
         <span class="sound-icon" id="sound-icon">🔇</span>
       </button>

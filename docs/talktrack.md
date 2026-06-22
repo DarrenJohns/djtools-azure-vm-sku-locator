@@ -88,6 +88,7 @@
 - **Keyboard shortcuts** — press **?** for the full list, **1–6** to switch tabs
 - **Region proximity** — suggests nearby regions when no results found
 - **Data Refresh Summary** — click ℹ️ to see all data sets and their sources
+- **Top Trumps companion** — a standalone card game at `/toptrumps.html`, built on the same SKU data. An **experimental WebGL build** lives at `/toptrumps-webgl.html` with a Three.js 3D globe, holographic foil on rare+ cards, and GPU confetti on win — accessed via the "✨ WebGL beta" chip in the topbar.
 
 ## How It Was Built (3 min)
 

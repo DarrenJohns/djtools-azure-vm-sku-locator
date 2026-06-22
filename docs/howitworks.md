@@ -145,7 +145,7 @@ The app is hosted on Azure Static Web Apps (Free tier) with a custom domain and 
 Push to main → GitHub Actions → swa deploy (staging folder) → Live
 ```
 
-Only web-servable files are deployed (`index.html`, `config.json`, `data/`). Scripts and docs are excluded.
+Only web-servable files are deployed (`index.html`, `toptrumps.html`, `toptrumps-webgl.html`, `config.json`, `data/`, `vendor/`). Scripts and docs are excluded.
 
 ### Data Refresh Pipeline
 ```
@@ -153,3 +153,38 @@ Monthly trigger → fetch VM/disk/pricing (×17 currencies)/retirement data → 
 ```
 
 The refresh pipeline runs on a self-hosted runner with Azure CLI access.
+
+## Experimental WebGL Top Trumps Build
+
+`toptrumps-webgl.html` is an experimental WebGL fork of the Top Trumps companion. It ships alongside `toptrumps.html` and is intentionally a separate file so the stable build stays at zero JS dependencies.
+
+### Dependency
+- **Three.js r170 ES module**, vendored locally at `vendor/three.module.min.js` (MIT, ~675 KB).
+- Loaded via a native browser **import map** — no CDN, no build step, no npm.
+  ```html
+  <script type="importmap">
+    { "imports": { "three": "./vendor/three.module.min.js" } }
+  </script>
+  <script type="module">
+    import * as THREE from 'three';
+    // ...
+  </script>
+  ```
+
+### What WebGL adds
+1. **3D globe background** — replaces the Canvas2D `GlobeBg` IIFE with a Three.js `SphereGeometry` + custom `ShaderMaterial`. Procedural dot grid via `fract(lonBand)/fract(latBand) + smoothstep`, fresnel rim via `pow(1 - dot(N, V), 2.2)`, additive halo on a `BackSide` shell. 32 Azure region nodes as pulsing `Points`. Great-circle arcs rendered as `LineBasicMaterial` with vertex-color trails fading per frame. Auto-rotates at `0.06 rad/s`.
+2. **Holographic foil overlay** on rare/epic/legendary cards — per-card mini `WebGLRenderer` + `ShaderMaterial` on a `PlaneGeometry(2,2)` quad. Pointer-driven hue band (`sin(t * 14)`), rainbow shimmer (RGB sinusoids out of phase), specular hot-spot (`exp(-dist² * 16) * uHover`), edge fade. Smoothed hover transition `cur + (target - cur) * min(1, dt * 8)`. Auto-tilts via `sin(now * 0.0007) * 0.3` when idle.
+3. **GPU confetti** on win — Three.js `Points` system (~1400 particles) with vertex-shader physics. Each particle has `position`, `aVelocity`, `aColor`, `aSize`, `aFlutter` (freq + phase), `aDelay`. Vertex shader integrates: `x = pos.x + vx*t + sin(t * freq + phase) * 0.04; y = pos.y + vy*t - 0.5 * gravity * t²`. Maps `0..1 → -1..1` clip space directly with an identity `THREE.Camera`. Discards via `gl_PointSize = 0` when life exceeds limit or below screen.
+
+### Fallbacks
+- If `new THREE.WebGLRenderer()` throws on load, `markFallback(reason)` is called: the BETA chip switches to "BETA · 2D fallback" and `runCanvas2DGlobe()` is invoked. Cards render without the foil overlay; confetti uses the CSS implementation.
+- `prefers-reduced-motion` stops the globe RAF after one frame, skips foil RAF loops, and bypasses the confetti burst entirely.
+
+### Global contracts preserved
+- `window.globeBurst(n)` — arc cascade trigger (matches the Canvas2D API).
+- `window.runCanvas2DGlobe()` — fallback init.
+- `window.__attachFoilOverlay(cardEl)` — attached to `mountFlipCard`'s post-build hook.
+- `window.__webglConfetti({count})` — called from `triggerVictoryFx`.
+
+### Discovery
+A small "✨ WebGL beta" chip in `toptrumps.html`'s topbar links to `toptrumps-webgl.html`; the WebGL build has a reciprocal "← Stable" chip linking back.
