@@ -3675,6 +3675,35 @@ async function resolveAndAnimate() {
   if (G.matchToken !== matchToken) return;
   if (!document.querySelector('#screen-match.active')) return;
 
+  // 3D card-transfer slide: fly the loser's lifted card onto the winner's
+  // pile so the transfer reads physically. The slid entry's stackEl stays
+  // pointed at the loser side, so the next renderTopCards → mountFlipCard
+  // → evictAtStack call disposes it cleanly. Tie cards are left in place
+  // (they cross-fade out as the new pair mounts; mid-air collision in the
+  // table center doesn't add clarity).
+  if (winner !== 'tie' && !reducedMotion()
+      && window.__webgl3D && window.__webgl3D.slide) {
+    const loserEls = (winner === 'player') ? G.cpuEls : G.playerEls;
+    const winStackEl = (winner === 'player') ? pStack : cStack;
+    if (loserEls && loserEls.lifted) {
+      const wr = winStackEl.getBoundingClientRect();
+      // Small Z-rotation jitter so it doesn't land perfectly square on top
+      // of the existing lifted card — reads as a card tossed onto a pile.
+      const jitter = (Math.random() - 0.5) * 0.12; // ±~3.4 deg
+      await window.__webgl3D.slide(
+        loserEls.lifted,
+        wr.left + wr.width / 2,
+        wr.top  + wr.height / 2,
+        { duration: 520, arcHeight: 200, rotZJitter: jitter }
+      );
+      // Short beat so the pile visibly "absorbs" the card before the
+      // next round renders over the top.
+      await delay(120);
+      if (G.matchToken !== matchToken) return;
+      if (!document.querySelector('#screen-match.active')) return;
+    }
+  }
+
   // Resolve: take cards
   const pTop = G.player.hand.shift();
   const cTop = G.cpu.hand.shift();
@@ -4875,6 +4904,7 @@ function updateFaceVisibility(entry) {
 }
 
 function realignCard(entry) {
+  if (entry.isAnimating) return; // a slide tween owns position; don't snap back
   const rect = entry.stackEl.getBoundingClientRect();
   entry.rect = rect;
   const W = window.innerWidth, H = window.innerHeight;
@@ -5055,6 +5085,54 @@ function flipCard3D(entry, fromY, toY, duration, onMid) {
   entry.flipTween = requestAnimationFrame(step);
 }
 
+// Tween a lifted CSS3DObject from its current world position to a target
+// viewport pixel position along a 3D arc (Z bow toward camera, slight X
+// back-tilt at apex). Used to "transfer" the loser's card onto the
+// winner's pile when a round resolves. Sets entry.isAnimating so the
+// per-frame realignCard skips it during the slide. The caller is
+// expected to dispose the entry (e.g. via evictAtStack at the next
+// renderTopCards) shortly after the returned promise resolves.
+function slideCardTo3D(entry, toViewportX, toViewportY, opts) {
+  if (!entry || !entry.obj) return Promise.resolve();
+  const o = opts || {};
+  const duration  = o.duration  || 540;
+  const arcHeight = o.arcHeight || 180;
+  const tiltMax   = o.tiltMax   || 0.22;
+  const rotZ      = o.rotZJitter || 0; // radians added to final rotation.z
+  const W = window.innerWidth, H = window.innerHeight;
+  const toWX   = toViewportX - W / 2;
+  const toWY   = -(toViewportY - H / 2);
+  const fromWX = entry.obj.position.x;
+  const fromWY = entry.obj.position.y;
+  const fromRZ = entry.obj.rotation.z;
+  entry.isAnimating = true;
+  if (entry.flipTween) { cancelAnimationFrame(entry.flipTween); entry.flipTween = null; }
+  return new Promise(resolve => {
+    const start = performance.now();
+    function step(now) {
+      const t = Math.min(1, (now - start) / duration);
+      const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+      const arc = Math.sin(eased * Math.PI);
+      entry.obj.position.x = fromWX + (toWX - fromWX) * eased;
+      entry.obj.position.y = fromWY + (toWY - fromWY) * eased;
+      entry.obj.position.z = arc * arcHeight;
+      entry.obj.rotation.x = arc * tiltMax;
+      entry.obj.rotation.z = fromRZ + rotZ * eased;
+      updateFaceVisibility(entry);
+      if (t < 1) requestAnimationFrame(step);
+      else {
+        entry.obj.position.set(toWX, toWY, 0);
+        entry.obj.rotation.x = 0;
+        // Keep isAnimating true — realignCard would otherwise snap the
+        // card back to its loser-side anchor between resolve() and the
+        // next renderTopCards eviction.
+        resolve();
+      }
+    }
+    requestAnimationFrame(step);
+  });
+}
+
 // CSS3D animation loop. Runs alongside the globe loop; cheap because
 // CSS3DRenderer only updates transforms on existing DOM nodes.
 // Realign every frame so lifted cards track their anchor stack live
@@ -5085,6 +5163,7 @@ window.__webgl3D = {
   flip: flipCard3D,
   updateFaceVisibility,
   deal: dealCard3D,
+  slide: slideCardTo3D,
   clearAll: clearAllCards,
 };
 console.info('[toptrumps-webgl] CSS3DRenderer ready (' + cssCards.length + ' cards)');
