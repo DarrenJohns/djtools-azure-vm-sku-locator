@@ -1911,6 +1911,31 @@ button { font: inherit; color: inherit; }
 .flip-host.is-flipped > .face.front { transform: rotateY(180deg) translateZ(40px); pointer-events: none; }
 .flip-host.is-flipped > .face.back  { transform: rotateY(0deg) translateZ(0); pointer-events: auto; }
 
+/* Phase 2A — 3D mode (host lifted into CSS3DRenderer scene).
+   CSS3DRenderer drives the rotation via matrix3d on .flip-host; we
+   strip the host's own perspective (CSS3DRenderer provides one) and
+   pin each face. Visibility is toggled imperatively from JS based on
+   live rotation (see flipCard3D) because backface-visibility doesn't
+   reliably cull through CSS3DRenderer's matrix3d composition. */
+.flip-host.is-3d { perspective: none !important; }
+.flip-host.is-3d > .face {
+  transition: none !important;
+  opacity: 1 !important;
+  backface-visibility: visible !important;
+  -webkit-backface-visibility: visible !important;
+}
+.flip-host.is-3d > .face.front,
+.flip-host.is-3d.is-flipped > .face.front {
+  transform: rotateY(0deg) !important;
+  pointer-events: auto;
+}
+.flip-host.is-3d > .face.back,
+.flip-host.is-3d.is-flipped > .face.back {
+  transform: rotateY(180deg) !important;
+  pointer-events: none;
+}
+.flip-host.is-3d > .face[data-face-hidden="1"] { visibility: hidden !important; }
+
 /* Tappable card back — invites the player to reveal their card. */
 .face.back.is-tappable { cursor: pointer; transition: filter .25s ease; }
 .face.back.is-tappable:hover { filter: brightness(1.08) drop-shadow(0 0 18px rgba(80,180,255,.35)); }
@@ -3136,6 +3161,11 @@ function cardBack() {
 /* Mount a card-with-flip into a stack container.
    Returns the flip-host element so caller can flip / animate it. */
 function mountFlipCard(stackEl, card, opts = {}) {
+  // If a previous mount lifted a card into the CSS3D scene, evict it now
+  // so it doesn't outlive its anchor.
+  if (window.__webgl3D && window.__webgl3D.evictAtStack) {
+    window.__webgl3D.evictAtStack(stackEl);
+  }
   stackEl.innerHTML = '';
   const front = cardFront(card, opts);
   const back  = cardBack();
@@ -3147,7 +3177,37 @@ function mountFlipCard(stackEl, card, opts = {}) {
   // Attach WebGL foil overlay for rare+ cards. The hook is registered
   // by the deferred Three.js module; if WebGL failed, this is a no-op.
   if (window.__attachFoilOverlay) window.__attachFoilOverlay(front);
-  return { host, front, back };
+  // Phase 2A — optionally lift this card's host into the CSS3D scene.
+  // The lift swaps the host's parent (out of stackEl into the scene's
+  // DOM element) but keeps it as a real DOM node, so keyboard focus,
+  // stat clicks, links and ARIA all continue to work.
+  let lifted = null;
+  if (opts.use3D && window.__webgl3D && window.__webgl3D.lift) {
+    lifted = window.__webgl3D.lift(stackEl, host);
+    // Initial rotation matches the is-flipped state (PI = back showing).
+    if (lifted) {
+      lifted.obj.rotation.y = opts.startFlipped ? Math.PI : 0;
+      if (window.__webgl3D.updateFaceVisibility) {
+        window.__webgl3D.updateFaceVisibility(lifted);
+      }
+      // Drive rotation from class changes the rest of the game code already
+      // performs (host.classList.add/remove('is-flipped')). The card stays
+      // a regular DOM node; we just animate the scene-graph rotation when
+      // the class flips.
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const FLIP_MS = reducedMotion ? 1 : 700;
+      const mo = new MutationObserver(() => {
+        const wantsBack = host.classList.contains('is-flipped');
+        const fromY = lifted.obj.rotation.y;
+        const toY   = wantsBack ? Math.PI : 0;
+        if (Math.abs(fromY - toY) < 1e-3) return;
+        window.__webgl3D.flip(lifted, fromY, toY, FLIP_MS);
+      });
+      mo.observe(host, { attributes: true, attributeFilter: ['class'] });
+      lifted.observer = mo;
+    }
+  }
+  return { host, front, back, lifted };
 }
 
 /* ---------- 4. game state ---------- */
@@ -3312,6 +3372,7 @@ function renderTopCards() {
     pickable: pPickable,
     pickedStat: G.pickedStat,
     startFlipped: playerStartsFlipped,
+    use3D: true, // Phase 2A — lift player's top card into the CSS3D scene
   });
   G.playerEls.host.classList.add('enter');
 
@@ -4229,239 +4290,57 @@ document.addEventListener('keydown', (e) => {
 });
 
 boot();
-
-/* ===================================================================
-   ANIMATED GLOBE BACKGROUND — Canvas2D fallback
-   The WebGL Three.js globe (loaded as a module below) is the default.
-   This Canvas2D implementation only runs if WebGL init fails.
-   Dot-sphere planet with real Azure regions pulsing as nodes and
-   data-flow arcs between random region pairs. Pure canvas, no deps.
-   =================================================================== */
-window.runCanvas2DGlobe = function GlobeBg() {
-  const canvas = document.getElementById('globe-bg');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let W = 0, H = 0, DPR = 1, cx = 0, cy = 0, R = 0;
-  let running = true;
-
-  // [lat, lon, name]  — real Azure regions
-  const REGIONS = [
-    [37.37, -79.82, 'East US'], [36.85, -76.98, 'East US 2'],
-    [47.23, -119.85, 'West US 2'], [33.45, -112.07, 'West US 3'],
-    [41.59, -93.62, 'Central US'], [29.42, -98.50, 'South Central US'],
-    [43.65, -79.38, 'Canada Central'], [46.81, -71.21, 'Canada East'],
-    [20.59, -100.39, 'Mexico Central'], [-23.55, -46.63, 'Brazil South'],
-    [53.35, -6.26, 'North Europe'], [52.37, 4.90, 'West Europe'],
-    [50.94, -0.80, 'UK South'], [46.38, 2.37, 'France Central'],
-    [50.11, 8.68, 'Germany WC'], [60.67, 17.14, 'Sweden Central'],
-    [59.91, 10.75, 'Norway East'], [47.45, 8.56, 'Switzerland N'],
-    [45.47, 9.19, 'Italy North'], [52.23, 21.01, 'Poland Central'],
-    [-25.73, 28.22, 'South Africa N'], [25.27, 55.30, 'UAE North'],
-    [31.77, 35.21, 'Israel Central'], [25.35, 51.18, 'Qatar Central'],
-    [18.52, 73.86, 'Central India'], [12.97, 80.22, 'South India'],
-    [22.27, 114.19, 'East Asia'], [1.28, 103.83, 'Southeast Asia'],
-    [35.68, 139.76, 'Japan East'], [37.57, 126.98, 'Korea Central'],
-    [-33.87, 151.21, 'Australia East'], [-37.81, 144.96, 'Australia SE'],
-  ];
-
-  function ll2v(lat, lon) {
-    const la = lat * Math.PI / 180, lo = lon * Math.PI / 180;
-    return [Math.cos(la) * Math.sin(lo), Math.sin(la), Math.cos(la) * Math.cos(lo)];
-  }
-  const regionVecs = REGIONS.map(r => ll2v(r[0], r[1]));
-
-  // Dot-sphere grid
-  const dots = [];
-  for (let lat = -84; lat <= 84; lat += 5) {
-    const circ = Math.cos(lat * Math.PI / 180);
-    const step = Math.max(5, Math.round(5 / Math.max(circ, 0.05)));
-    for (let lon = -180; lon < 180; lon += step) dots.push(ll2v(lat, lon));
-  }
-
-  const arcs = [];
-  function spawnArc() {
-    const a = (Math.random() * REGIONS.length) | 0;
-    let b = (Math.random() * REGIONS.length) | 0;
-    if (b === a) b = (b + 1) % REGIONS.length;
-    arcs.push({ a: regionVecs[a], b: regionVecs[b], t: 0, dur: 2.2 + Math.random() * 2.5 });
-  }
-  let arcTimer = 0;
-  for (let i = 0; i < 3; i++) spawnArc();
-
-  // Public: trigger a cascade of arcs (used by victory FX).
-  window.globeBurst = function (n = 12) {
-    if (reduced) return;
-    let i = 0;
-    const iv = setInterval(() => {
-      spawnArc();
-      if (++i >= n) clearInterval(iv);
-    }, 80);
-  };
-
-  function resize() {
-    DPR = Math.min(window.devicePixelRatio || 1, 2);
-    W = window.innerWidth; H = window.innerHeight;
-    canvas.width = W * DPR; canvas.height = H * DPR;
-    canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
-    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    cx = W * 0.5; cy = H * 0.52;
-    R = Math.min(W * 0.55, H * 0.55, 480);
-  }
-
-  function rotY(v, c, s) { return [v[0] * c + v[2] * s, v[1], -v[0] * s + v[2] * c]; }
-  function project(v) { return [cx + v[0] * R, cy - v[1] * R]; }
-
-  function slerp(a, b, t) {
-    const d = Math.max(-1, Math.min(1, a[0]*b[0] + a[1]*b[1] + a[2]*b[2]));
-    const omega = Math.acos(d);
-    if (omega < 1e-4) return a;
-    const so = Math.sin(omega);
-    const s1 = Math.sin((1 - t) * omega) / so, s2 = Math.sin(t * omega) / so;
-    return [a[0]*s1 + b[0]*s2, a[1]*s1 + b[1]*s2, a[2]*s1 + b[2]*s2];
-  }
-
-  let lastT = performance.now();
-  let rot = 0;
-
-  function frame(now) {
-    if (!running) return;
-    const dt = Math.min(0.05, (now - lastT) / 1000);
-    lastT = now;
-    if (!reduced) rot += dt * 0.06;
-
-    const cR = Math.cos(rot), sR = Math.sin(rot);
-    ctx.clearRect(0, 0, W, H);
-
-    // Soft azure halo
-    const g = ctx.createRadialGradient(cx, cy, R * 0.4, cx, cy, R * 1.55);
-    g.addColorStop(0, 'rgba(30, 110, 210, 0.14)');
-    g.addColorStop(0.55, 'rgba(15, 60, 130, 0.05)');
-    g.addColorStop(1, 'rgba(0, 0, 0, 0)');
-    ctx.fillStyle = g;
-    ctx.fillRect(cx - R * 1.7, cy - R * 1.7, R * 3.4, R * 3.4);
-
-    // Sphere rim
-    ctx.beginPath();
-    ctx.arc(cx, cy, R, 0, Math.PI * 2);
-    ctx.strokeStyle = 'rgba(80, 150, 220, 0.10)';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-
-    // Land dots (front hemisphere)
-    for (const d of dots) {
-      const v = rotY(d, cR, sR);
-      if (v[2] < 0.02) continue;
-      const [px, py] = project(v);
-      const a = Math.pow(v[2], 0.7) * 0.32;
-      ctx.fillStyle = 'rgba(130, 185, 230,' + a + ')';
-      ctx.fillRect(px - 0.5, py - 0.5, 1.3, 1.3);
-    }
-
-    // Data-flow arcs
-    arcTimer += dt;
-    if (!reduced && arcTimer > 0.7 && arcs.length < 5) { spawnArc(); arcTimer = 0; }
-    for (let i = arcs.length - 1; i >= 0; i--) {
-      const ar = arcs[i];
-      ar.t += dt / ar.dur;
-      if (ar.t >= 1.35) { arcs.splice(i, 1); continue; }
-      const va = rotY(ar.a, cR, sR), vb = rotY(ar.b, cR, sR);
-      const head = Math.min(1, ar.t);
-      const trail = 0.28, segs = 16;
-      ctx.lineCap = 'round';
-      for (let k = 0; k < segs; k++) {
-        const u1 = head - ((k + 1) / segs) * trail;
-        const u2 = head - (k / segs) * trail;
-        if (u2 < 0) break;
-        const p1 = slerp(va, vb, Math.max(0, u1));
-        const p2 = slerp(va, vb, u2);
-        const e1 = 1 + Math.sin(Math.max(0, u1) * Math.PI) * 0.16;
-        const e2 = 1 + Math.sin(u2 * Math.PI) * 0.16;
-        const zAvg = (p1[2] + p2[2]) * 0.5;
-        if (zAvg < -0.25) continue;
-        const [x1, y1] = project([p1[0]*e1, p1[1]*e1, p1[2]*e1]);
-        const [x2, y2] = project([p2[0]*e2, p2[1]*e2, p2[2]*e2]);
-        const fade = (1 - k / segs) * Math.min(1, 1.35 - ar.t);
-        const front = Math.max(0.3, (zAvg + 1) * 0.5);
-        ctx.strokeStyle = 'rgba(90, 185, 255,' + (0.75 * fade * front) + ')';
-        ctx.lineWidth = 1.3 * fade;
-        ctx.beginPath();
-        ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
-        ctx.stroke();
-      }
-      // bright head
-      if (head < 1.001) {
-        const pH = slerp(va, vb, head);
-        const eH = 1 + Math.sin(head * Math.PI) * 0.16;
-        if (pH[2] > -0.25) {
-          const [hx, hy] = project([pH[0]*eH, pH[1]*eH, pH[2]*eH]);
-          const fade = Math.min(1, 1.35 - ar.t);
-          ctx.fillStyle = 'rgba(80, 180, 255,' + (0.4 * fade) + ')';
-          ctx.beginPath(); ctx.arc(hx, hy, 6, 0, Math.PI * 2); ctx.fill();
-          ctx.fillStyle = 'rgba(200, 235, 255,' + fade + ')';
-          ctx.beginPath(); ctx.arc(hx, hy, 2.2, 0, Math.PI * 2); ctx.fill();
-        }
-      }
-    }
-
-    // Region nodes (pulsing)
-    const tPulse = now / 1000;
-    for (let i = 0; i < regionVecs.length; i++) {
-      const v = rotY(regionVecs[i], cR, sR);
-      if (v[2] < -0.05) continue;
-      const [px, py] = project(v);
-      const front = Math.max(0, v[2]);
-      const ph = 0.5 + 0.5 * Math.sin(tPulse * 1.8 + i * 0.7);
-      const a = (0.55 + ph * 0.45) * (0.35 + front * 0.65);
-      ctx.fillStyle = 'rgba(40, 140, 230,' + (0.22 * a) + ')';
-      ctx.beginPath(); ctx.arc(px, py, 5 + ph * 2.5, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = 'rgba(190, 230, 255,' + a + ')';
-      ctx.beginPath(); ctx.arc(px, py, 1.7, 0, Math.PI * 2); ctx.fill();
-    }
-
-    requestAnimationFrame(frame);
-  }
-
-  window.addEventListener('resize', resize);
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) { running = false; }
-    else if (!running) { running = true; lastT = performance.now(); requestAnimationFrame(frame); }
-  });
-
-  resize();
-  requestAnimationFrame(frame);
-};
 </script>
 
 <!-- ===================================================================
-     THREE.JS GLOBE BACKGROUND (WebGL)
-     The WebGL build. Replaces the Canvas2D globe with a 3D Three.js
-     scene reusing the same #globe-bg canvas. On WebGL failure, falls
-     back to window.runCanvas2DGlobe().
+     THREE.JS GLOBE BACKGROUND (WebGL) + CSS3D CARD SCENE
+     The WebGL build. Three.js drives the 3D globe in #globe-bg and a
+     CSS3DRenderer scene overlays the page for 3D cards.
+     On WebGL init failure this build redirects to the stable
+     Canvas2D build at ./toptrumps.html?webglfail=1.
      =================================================================== -->
 <script type="importmap">
 {
   "imports": {
-    "three": "./vendor/three.module.min.js"
+    "three": "./vendor/three.module.min.js",
+    "three/addons/renderers/CSS3DRenderer.js": "./vendor/CSS3DRenderer.js"
   }
 }
 </script>
 <script type="module">
 import * as THREE from 'three';
+import { CSS3DRenderer, CSS3DObject } from 'three/addons/renderers/CSS3DRenderer.js';
 
 const canvas = document.getElementById('globe-bg');
 const betaChip = document.getElementById('meta-beta');
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+// WebGL is required for this build. On init failure, redirect to the
+// stable Canvas2D build at ./toptrumps.html with a short banner so the
+// user understands why the page navigated. No in-page 2D fallback.
 function markFallback(reason) {
-  console.warn('[toptrumps-webgl] WebGL globe unavailable, falling back to Canvas2D:', reason);
+  console.warn('[toptrumps-webgl] WebGL unavailable, redirecting to ./toptrumps.html:', reason);
+  try {
+    const banner = document.createElement('div');
+    banner.setAttribute('role', 'status');
+    banner.style.cssText = [
+      'position:fixed', 'inset:auto 0 0 0', 'z-index:99999',
+      'background:#1a1f2e', 'color:#fff', 'padding:12px 16px',
+      'font:600 14px system-ui,sans-serif', 'text-align:center',
+      'border-top:1px solid rgba(255,255,255,.15)'
+    ].join(';');
+    banner.textContent = 'WebGL unavailable — switching to the stable build…';
+    document.body.appendChild(banner);
+  } catch (_) { /* DOM may not be ready; redirect anyway */ }
   if (betaChip) {
     betaChip.classList.add('is-fallback');
     const v = betaChip.querySelector('.meta-val');
-    if (v) v.textContent = 'BETA · 2D fallback';
-    betaChip.title = 'WebGL unavailable — running Canvas2D fallback (' + reason + ')';
+    if (v) v.textContent = 'BETA · redirecting…';
+    betaChip.title = 'WebGL unavailable (' + reason + ')';
   }
-  if (typeof window.runCanvas2DGlobe === 'function') window.runCanvas2DGlobe();
+  setTimeout(() => {
+    window.location.replace('./toptrumps.html?webglfail=1');
+  }, 600);
 }
 
 (function initWebGLGlobe() {
@@ -4801,6 +4680,181 @@ document.addEventListener('visibilitychange', () => {
 
 requestAnimationFrame(frame);
 console.info('[toptrumps-webgl] Three.js r' + THREE.REVISION + ' globe initialised');
+
+// =====================================================================
+// Phase 2A — CSS3D card scene.
+// CSS3DRenderer overlays a DOM scene on top of the WebGL globe. Cards
+// remain real DOM elements (so stat buttons / links / focus / a11y all
+// still work) but are positioned and rotated by Three.js. The renderer
+// element sits above the WebGL canvas (z-index 1) and below confetti.
+// =====================================================================
+const cssScene = new THREE.Scene();
+const cssCamera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 5000);
+function setCssCameraDistance() {
+  const fovRad = cssCamera.fov * Math.PI / 180;
+  // World units == screen pixels at z=0.
+  cssCamera.position.z = (window.innerHeight / 2) / Math.tan(fovRad / 2);
+}
+setCssCameraDistance();
+
+const cssRenderer = new CSS3DRenderer();
+cssRenderer.setSize(window.innerWidth, window.innerHeight);
+const cssEl = cssRenderer.domElement;
+cssEl.id = 'css3d-root';
+cssEl.style.position = 'fixed';
+cssEl.style.inset = '0';
+cssEl.style.zIndex = '5';        // local to .app (topbar is z:10, screens default z:auto)
+cssEl.style.pointerEvents = 'none'; // children re-enable per-card
+// Append to .app so the topbar's z-index 10 within .app's stacking
+// context still wins. Fallback to body if .app is missing.
+(document.querySelector('.app') || document.body).appendChild(cssEl);
+
+function cssResize() {
+  const W = window.innerWidth, H = window.innerHeight;
+  cssCamera.aspect = W / H;
+  setCssCameraDistance();
+  cssCamera.updateProjectionMatrix();
+  cssRenderer.setSize(W, H);
+}
+window.addEventListener('resize', cssResize);
+
+const cssCards = []; // { obj, stackEl, hostEl, rect, flipTween }
+
+function liftCardTo3D(stackEl, hostEl) {
+  if (!stackEl || !hostEl) return null;
+  // Snapshot the anchor rect BEFORE detaching so we can size the host
+  // explicitly. Once the host moves into cssEl, its width/height:100%
+  // CSS would otherwise resolve against the full viewport.
+  const rect = stackEl.getBoundingClientRect();
+  hostEl.style.width = rect.width + 'px';
+  hostEl.style.height = rect.height + 'px';
+  // Detach host from its DOM parent (stackEl). The empty stackEl keeps
+  // its layout slot (320x500) so getBoundingClientRect stays valid for
+  // realign on resize/scroll.
+  if (hostEl.parentNode) hostEl.parentNode.removeChild(hostEl);
+  hostEl.style.pointerEvents = 'auto';
+  hostEl.classList.add('is-3d');
+  const frontEl = hostEl.querySelector(':scope > .face.front');
+  const backEl  = hostEl.querySelector(':scope > .face.back');
+  const obj = new CSS3DObject(hostEl);
+  cssScene.add(obj);
+  const entry = { obj, stackEl, hostEl, frontEl, backEl, rect: null, flipTween: null };
+  cssCards.push(entry);
+  realignCard(entry);
+  updateFaceVisibility(entry);
+  return entry;
+}
+
+// Show front when the host rotation has the front facing camera,
+// otherwise show back. We use visibility instead of backface-visibility
+// because the latter does not cull reliably through CSS3DRenderer's
+// matrix3d composition.
+function updateFaceVisibility(entry) {
+  if (!entry || !entry.frontEl || !entry.backEl) return;
+  // Normalise rotation.y into [-PI, PI].
+  let a = entry.obj.rotation.y % (Math.PI * 2);
+  if (a > Math.PI) a -= Math.PI * 2;
+  if (a < -Math.PI) a += Math.PI * 2;
+  const frontFacing = Math.abs(a) < Math.PI / 2;
+  entry.frontEl.setAttribute('data-face-hidden', frontFacing ? '0' : '1');
+  entry.backEl.setAttribute('data-face-hidden', frontFacing ? '1' : '0');
+}
+
+function realignCard(entry) {
+  const rect = entry.stackEl.getBoundingClientRect();
+  entry.rect = rect;
+  const W = window.innerWidth, H = window.innerHeight;
+  // World coords: origin at screen center, Y up.
+  entry.obj.position.x = (rect.left + rect.width / 2) - W / 2;
+  entry.obj.position.y = -((rect.top + rect.height / 2) - H / 2);
+  // Re-sync size in case layout shifted (e.g. window resize).
+  if (entry.hostEl) {
+    entry.hostEl.style.width = rect.width + 'px';
+    entry.hostEl.style.height = rect.height + 'px';
+  }
+}
+
+function realignAllCards() { cssCards.forEach(realignCard); }
+window.addEventListener('resize', realignAllCards);
+window.addEventListener('scroll', realignAllCards, { passive: true });
+
+function removeCardFrom3D(entry) {
+  if (!entry) return;
+  if (entry.observer) { try { entry.observer.disconnect(); } catch (_) {} entry.observer = null; }
+  if (entry.flipTween) { cancelAnimationFrame(entry.flipTween); entry.flipTween = null; }
+  cssScene.remove(entry.obj);
+  if (entry.hostEl) {
+    entry.hostEl.classList.remove('is-3d');
+    entry.hostEl.style.pointerEvents = '';
+    entry.hostEl.style.width = '';
+    entry.hostEl.style.height = '';
+    if (entry.frontEl) entry.frontEl.removeAttribute('data-face-hidden');
+    if (entry.backEl)  entry.backEl.removeAttribute('data-face-hidden');
+    // Detach from CSS3DRenderer DOM tree; the caller (mountFlipCard) is
+    // about to wipe stackEl so we don't reattach it.
+    if (entry.hostEl.parentNode) entry.hostEl.parentNode.removeChild(entry.hostEl);
+  }
+  const i = cssCards.indexOf(entry);
+  if (i >= 0) cssCards.splice(i, 1);
+}
+
+function evictAtStack(stackEl) {
+  for (let i = cssCards.length - 1; i >= 0; i--) {
+    if (cssCards[i].stackEl === stackEl) removeCardFrom3D(cssCards[i]);
+  }
+}
+
+// Animate a CSS3DObject's rotation.y from a -> b over duration ms.
+// Optional onMid fires once when rotation crosses PI/2 (useful for
+// swapping which face is visible during a 3D flip).
+function flipCard3D(entry, fromY, toY, duration, onMid) {
+  if (!entry) return;
+  if (entry.flipTween) cancelAnimationFrame(entry.flipTween);
+  const start = performance.now();
+  const delta = toY - fromY;
+  let midFired = false;
+  function step(now) {
+    const t = Math.min(1, (now - start) / duration);
+    const eased = 0.5 - 0.5 * Math.cos(Math.PI * t); // cosine ease
+    entry.obj.rotation.y = fromY + delta * eased;
+    updateFaceVisibility(entry);
+    if (!midFired && Math.abs(entry.obj.rotation.y - (fromY + delta * 0.5)) <= Math.abs(delta) * 0.05) {
+      midFired = true;
+      if (onMid) onMid();
+    }
+    if (t < 1) entry.flipTween = requestAnimationFrame(step);
+    else { entry.obj.rotation.y = toY; updateFaceVisibility(entry); entry.flipTween = null; }
+  }
+  entry.flipTween = requestAnimationFrame(step);
+}
+
+// CSS3D animation loop. Runs alongside the globe loop; cheap because
+// CSS3DRenderer only updates transforms on existing DOM nodes.
+let cssRunning = true;
+function cssFrame() {
+  if (!cssRunning) return;
+  cssRenderer.render(cssScene, cssCamera);
+  requestAnimationFrame(cssFrame);
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) cssRunning = false;
+  else if (!cssRunning) { cssRunning = true; requestAnimationFrame(cssFrame); }
+});
+requestAnimationFrame(cssFrame);
+
+window.__webgl3D = {
+  scene: cssScene,
+  camera: cssCamera,
+  renderer: cssRenderer,
+  lift: liftCardTo3D,
+  remove: removeCardFrom3D,
+  evictAtStack,
+  realign: realignCard,
+  realignAll: realignAllCards,
+  flip: flipCard3D,
+  updateFaceVisibility,
+};
+console.info('[toptrumps-webgl] CSS3DRenderer ready (' + cssCards.length + ' cards)');
 
 // =====================================================================
 // Phase 1C — Foil overlay for rare+ cards.
