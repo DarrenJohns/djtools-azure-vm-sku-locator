@@ -1271,7 +1271,10 @@ button { font: inherit; color: inherit; }
   position: absolute;
   inset: 0;
   pointer-events: none;
-  z-index: 40;
+  /* Must sit BELOW #css3d-root (z:5 inside .app) so 3D arc-deal cards
+     render above the still-stacked remainder of the deck. Children
+     (.deal-card) use local z-indices via this stacking context. */
+  z-index: 4;
   transition: opacity .25s ease;
 }
 .deal-stage.is-fading { opacity: 0; }
@@ -2785,6 +2788,7 @@ function lcVersion(s) {
   return String(s == null ? '' : s).replace(/(?<!N)V(\d)/g, 'v$1');
 }
 function show(id) {
+  const wasMatch = document.querySelector('#screen-match.active') !== null;
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   $(id).classList.add('active');
   $('btn-quit').hidden = (id === 'screen-title' || id === 'screen-loading');
@@ -2794,6 +2798,13 @@ function show(id) {
   // Force-hide the Continue button if we navigate away mid-pause.
   const cb = $('continue-btn');
   if (cb && id !== 'screen-match') { cb.classList.remove('show'); cb.hidden = true; }
+  // Leaving the match: bump matchToken so any pending deal setTimeouts
+  // see aborted(), and evict every CSS3D card so lifted player/CPU
+  // cards and any in-flight deal arcs don't float over other screens.
+  if (wasMatch && id !== 'screen-match') {
+    G.matchToken = (G.matchToken || 0) + 1;
+    if (window.__webgl3D && window.__webgl3D.clearAll) window.__webgl3D.clearAll();
+  }
   updateTopbarStatus(id);
 }
 
@@ -2909,6 +2920,15 @@ async function dealAnimation() {
   };
   window.addEventListener('keydown', skip, true);
 
+  // Hoisted outside `try` so the `finally` block can still see them when an
+  // early-return or throw happens (otherwise: ReferenceError in cleanup).
+  const use3DDeal = !!(window.__webgl3D && window.__webgl3D.deal);
+  const dealHandles = [];
+  // Flipped to true once the 3D deal path completes successfully so the
+  // `finally` block leaves the assembled stack alone — renderTopCards
+  // then fades it out under the freshly lifted top cards.
+  let dealSucceeded = false;
+
   try {
     // Phase 1 — shuffle wiggle (CSS animation on .deal-deck runs ~500ms).
     const waitFor = async (ms) => {
@@ -2922,36 +2942,93 @@ async function dealAnimation() {
     if (aborted()) return;
 
     // Phase 2 — arc-deal cards alternately to player / cpu side. Top of stack
-    // (index 5) flies first; staggered by ~180ms.
+    // (index 5) flies first; staggered. When the CSS3D scene is available we
+    // tween a real 3D arc (Z bow, X tilt, Z roll) via window.__webgl3D.deal;
+    // otherwise we fall back to the CSS keyframe path (`is-flying`).
     const order = [];
     for (let i = N - 1; i >= 0; i--) order.push(i);
-    const stagger = skipped ? 0 : 180;
-    const flyDuration = skipped ? 0 : 420;
+    const stagger = skipped ? 0 : (use3DDeal ? 220 : 180);
+    const flyDuration = skipped ? 0 : (use3DDeal ? 620 : 420);
     let lastDelay = 0;
     order.forEach((cardIdx, k) => {
       const target = targets[k % 2];
       const card = cards[cardIdx];
       const startAt = skipped ? 0 : k * stagger;
       lastDelay = startAt + flyDuration;
+      // Per-side stack index (0 = bottom of pile, increments upward).
+      // Each new card lands slightly forward + offset for a hand-dealt
+      // stacking feel. Jitter is deterministic per card so a Restart
+      // produces the same pile shape rather than reshuffling visually.
+      const stackIdx = Math.floor(k / 2);
+      const jitterSeed = (k * 9301 + 49297) % 233280;
+      const jx = ((jitterSeed % 100) / 100 - 0.5) * 6;       // -3..+3 px
+      const jy = (((jitterSeed >> 3) % 100) / 100 - 0.5) * 4; // -2..+2 px
+      const jr = (((jitterSeed >> 6) % 100) / 100 - 0.5) * 4; // -2..+2 deg
       setTimeout(() => {
         if (aborted()) return;
-        card.style.setProperty('--tx', (target.x - cx) + 'px');
-        card.style.setProperty('--ty', (target.y - cy) + 'px');
-        card.style.setProperty('--trot', target.rot + 'deg');
-        card.classList.add('is-flying');
+        if (use3DDeal && !skipped) {
+          // Hide the DOM card; the 3D arc takes over visually.
+          card.style.visibility = 'hidden';
+          const targetRect = (k % 2 === 0 ? pRect : cRect);
+          const h = window.__webgl3D.deal({
+            fromX: tRect.left + cx,
+            fromY: tRect.top + cy,
+            toX: (targetRect.left + targetRect.right) / 2,
+            toY: (targetRect.top + targetRect.bottom) / 2,
+            toRotZ: target.rot * Math.PI / 180,
+            duration: flyDuration,
+            arcHeight: 240,
+            stayOnLand: true,
+            // Each successive card sits ~1.4px closer to camera and a
+            // hair higher on screen — reads as a growing pile.
+            landZ: stackIdx * 1.4,
+            landXOffset: jx,
+            landYOffset: -stackIdx * 1.2 + jy,
+            landRotZJitter: jr * Math.PI / 180,
+          });
+          if (h) dealHandles.push(h);
+        } else {
+          card.style.setProperty('--tx', (target.x - cx) + 'px');
+          card.style.setProperty('--ty', (target.y - cy) + 'px');
+          card.style.setProperty('--trot', target.rot + 'deg');
+          card.classList.add('is-flying');
+        }
       }, startAt);
     });
     await waitFor(lastDelay);
     if (aborted()) return;
 
-    // Phase 3 — brief beat, then fade out and remove.
-    await waitFor(skipped ? 0 : 180);
-    if (aborted()) return;
-    stage.classList.add('is-fading');
-    await waitFor(skipped ? 0 : 200);
+    // Phase 3 — in 3D mode the cards have landed in a visible stack and
+    // we leave them in scene. Hand off the handles to renderTopCards
+    // (via G._dealHandles); it will fade them out as the lifted top
+    // cards mount, so the dealt pile reads as the deck the top card
+    // lifts off. The CSS fallback keeps the original beat+fade.
+    if (use3DDeal) {
+      G._suppressEnter = true;
+      G._dealHandles = dealHandles.slice();
+      if (!skipped) await waitFor(180);
+      if (aborted()) return;
+      dealSucceeded = true;
+    } else {
+      await waitFor(skipped ? 0 : 180);
+      if (aborted()) return;
+      stage.classList.add('is-fading');
+      await waitFor(skipped ? 0 : 200);
+    }
   } finally {
     window.removeEventListener('keydown', skip, true);
     if (stage.parentNode) stage.parentNode.removeChild(stage);
+    if (!dealSucceeded) {
+      // Aborted / skipped / errored — wipe everything we created.
+      if (dealHandles.length) {
+        for (const h of dealHandles) { try { h.cancel(); } catch (_) {} }
+      }
+      // Belt-and-braces: nuke any deal-card hosts that survived dispose
+      // (e.g. CSS3DRenderer hadn't appended them yet when cancel ran).
+      document.querySelectorAll('[data-deal-card]').forEach(n => n.parentNode && n.parentNode.removeChild(n));
+      G._dealHandles = null;
+    }
+    dealHandles.length = 0;
   }
 }
 
@@ -3374,7 +3451,11 @@ function renderTopCards() {
     startFlipped: playerStartsFlipped,
     use3D: true, // Phase 2A — lift player's top card into the CSS3D scene
   });
-  G.playerEls.host.classList.add('enter');
+  // Skip the 350ms opacity fade-in immediately after a 3D arc-deal — the
+  // deal animation already moved the card into place, so any fade-in just
+  // looks like a flicker. Flag is set in dealAnimation and consumed once.
+  const _suppressEnter = !!G._suppressEnter;
+  if (!_suppressEnter) G.playerEls.host.classList.add('enter');
 
   // CPU card — face-down to start; flips on reveal
   G.cpuEls = mountFlipCard($('cpu-stack'), cTop, {
@@ -3383,7 +3464,28 @@ function renderTopCards() {
     startFlipped: true,
     use3D: true, // Phase 2B — lift CPU's top card into the CSS3D scene
   });
-  G.cpuEls.host.classList.add('enter');
+  if (!_suppressEnter) G.cpuEls.host.classList.add('enter');
+  G._suppressEnter = false;
+
+  // Hand-off from dealAnimation: the dealt 3D stack is sitting in front
+  // of the freshly lifted top cards. Fade it out over ~320ms so it reads
+  // as "top card lifts off the deck", not "stack vanishes". Lifted cards
+  // are anchored at the same stack center but at z=0; the dealt pile is
+  // at z>0 so it occludes them until the fade exposes them underneath.
+  if (G._dealHandles && G._dealHandles.length) {
+    const handles = G._dealHandles;
+    G._dealHandles = null;
+    handles.forEach(h => {
+      const el = h && h.obj && h.obj.element;
+      if (el) {
+        el.style.transition = 'opacity 320ms ease-out';
+        el.style.opacity = '0';
+      }
+    });
+    setTimeout(() => {
+      handles.forEach(h => { try { h.cancel(); } catch (_) {} });
+    }, 360);
+  }
 
   // Wire up player picks
   if (pPickable) {
@@ -3609,6 +3711,17 @@ async function resolveAndAnimate() {
 async function startMatch(opts) {
   if (!G.data) return;
   const animate = !!(opts && opts.animate);
+  // Wipe any CSS3D residue (lifted top cards, in-flight deal arcs, stale
+  // .deal-stage elements) before building the new match. `show()` only
+  // clears on match→non-match; restarts that stay on the match screen
+  // (or come from screen-end) would otherwise leave ghosts behind.
+  if (window.__webgl3D && window.__webgl3D.clearAll) window.__webgl3D.clearAll();
+  document.querySelectorAll('.deal-stage').forEach(n => n.remove());
+  document.querySelectorAll('[data-deal-card]').forEach(n => n.parentNode && n.parentNode.removeChild(n));
+  // Drop any stale deal-stack handles from a deal we just aborted; the
+  // underlying CSS3DObjects have already been cancelled by clearAll().
+  G._dealHandles = null;
+  G._suppressEnter = false;
   // Build a fresh shuffled deck of DECK_SIZE cards from the full pool.
   const pool = G.data.cards.slice();
   const deck = shuffle(pool).slice(0, DECK_SIZE);
@@ -4805,35 +4918,152 @@ function evictAtStack(stackEl) {
   }
 }
 
+// Phase 2C — fly a back-only card from a viewport pixel position to
+// another viewport pixel position, along a 3D arc (bow toward camera
+// at midpoint), with a small back-tilt and roll. One-shot: the card
+// is created, tweened, and disposed. Returns a handle with cancel().
+const flyingDeals = new Set();
+function dealCard3D(opts) {
+  const {
+    fromX, fromY, toX, toY,
+    fromRotZ = 0, toRotZ = 0,
+    width = 320, height = 500,
+    duration = 600, arcHeight = 220, tiltMax = 0.28,
+    onLand,
+    // Stack-on-land options: when stayOnLand is true the card settles at
+    // the target with these offsets applied and is NOT disposed. The
+    // caller owns the handle until it explicitly disposes or fades it.
+    stayOnLand = false,
+    landZ = 0,
+    landXOffset = 0,
+    landYOffset = 0,
+    landRotZJitter = 0,
+  } = opts || {};
+  const W = window.innerWidth, H = window.innerHeight;
+  const fromWX = fromX - W / 2, fromWY = -(fromY - H / 2);
+  const toWX   = toX   - W / 2, toWY   = -(toY   - H / 2);
+
+  // Build a back-only flip-host; reuses .is-3d face conventions so the
+  // back artwork renders right-side up under matrix3d.
+  const host = document.createElement('div');
+  host.className = 'flip-host is-3d is-flipped is-deal-card';
+  host.setAttribute('data-deal-card', '1');
+  host.style.width  = width  + 'px';
+  host.style.height = height + 'px';
+  host.style.pointerEvents = 'none';
+  const frontFace = document.createElement('div');
+  frontFace.className = 'face front';
+  frontFace.setAttribute('data-face-hidden', '1');
+  const backFace = document.createElement('div');
+  backFace.className = 'face back';
+  backFace.appendChild(cardBack());
+  host.appendChild(frontFace);
+  host.appendChild(backFace);
+
+  const obj = new CSS3DObject(host);
+  obj.position.set(fromWX, fromWY, 0);
+  obj.rotation.set(0, Math.PI, fromRotZ); // back toward camera
+  cssScene.add(obj);
+
+  const start = performance.now();
+  const dx = toWX - fromWX, dy = toWY - fromWY, drz = toRotZ - fromRotZ;
+  let raf = null;
+  let disposed = false;
+  const handle = { obj, cancel: null };
+  function dispose() {
+    if (disposed) return;
+    disposed = true;
+    flyingDeals.delete(handle);
+    if (raf) cancelAnimationFrame(raf);
+    cssScene.remove(obj);
+    if (host.parentNode) host.parentNode.removeChild(host);
+  }
+  handle.cancel = dispose;
+  flyingDeals.add(handle);
+  function step(now) {
+    if (disposed) return;
+    const t = Math.min(1, (now - start) / duration);
+    // ease in-out cubic
+    const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    obj.position.x = fromWX + dx * eased;
+    obj.position.y = fromWY + dy * eased;
+    obj.position.z = Math.sin(eased * Math.PI) * arcHeight; // +Z = toward camera
+    obj.rotation.x = Math.sin(eased * Math.PI) * tiltMax;   // tilt back at apex
+    obj.rotation.y = Math.PI;                                // back faces camera throughout
+    obj.rotation.z = fromRotZ + drz * eased;
+    if (t < 1) {
+      raf = requestAnimationFrame(step);
+    } else {
+      // Settle at target. With stayOnLand we keep the card in the scene
+      // so successive deals visibly grow a stack; the caller (deal loop)
+      // later fades and disposes the surviving handles.
+      obj.position.set(toWX + landXOffset, toWY + landYOffset, landZ);
+      obj.rotation.set(0, Math.PI, toRotZ + landRotZJitter);
+      raf = null;
+      if (onLand) onLand();
+      if (!stayOnLand) dispose();
+    }
+  }
+  raf = requestAnimationFrame(step);
+  return handle;
+}
+
+// Remove every 3D card from the scene (lifted player/CPU cards and any
+// in-flight deal arcs). Called when leaving the match screen so cards
+// don't outlive their stack anchors.
+function clearAllCards() {
+  for (let i = cssCards.length - 1; i >= 0; i--) removeCardFrom3D(cssCards[i]);
+  flyingDeals.forEach(h => h.cancel());
+  flyingDeals.clear();
+}
+
 // Animate a CSS3DObject's rotation.y from a -> b over duration ms.
 // Optional onMid fires once when rotation crosses PI/2 (useful for
 // swapping which face is visible during a 3D flip).
+// Also drives a small Z lift (~40px toward camera at midpoint) and a
+// subtle X tilt so the flip feels like a physical card spun on a finger
+// rather than a flat 2D rotation. Z/X are restored to 0 at the end.
 function flipCard3D(entry, fromY, toY, duration, onMid) {
   if (!entry) return;
   if (entry.flipTween) cancelAnimationFrame(entry.flipTween);
   const start = performance.now();
   const delta = toY - fromY;
+  const liftZ = 40;        // peak forward lift in CSS pixels
+  const tiltX = 0.12;      // peak back-tilt in radians (~7 deg)
   let midFired = false;
   function step(now) {
     const t = Math.min(1, (now - start) / duration);
-    const eased = 0.5 - 0.5 * Math.cos(Math.PI * t); // cosine ease
+    const eased = 0.5 - 0.5 * Math.cos(Math.PI * t); // cosine ease (y rotation)
+    const arc = Math.sin(Math.PI * t);               // 0→1→0 for lift/tilt
     entry.obj.rotation.y = fromY + delta * eased;
+    entry.obj.position.z = arc * liftZ;
+    entry.obj.rotation.x = arc * tiltX;
     updateFaceVisibility(entry);
     if (!midFired && Math.abs(entry.obj.rotation.y - (fromY + delta * 0.5)) <= Math.abs(delta) * 0.05) {
       midFired = true;
       if (onMid) onMid();
     }
     if (t < 1) entry.flipTween = requestAnimationFrame(step);
-    else { entry.obj.rotation.y = toY; updateFaceVisibility(entry); entry.flipTween = null; }
+    else {
+      entry.obj.rotation.y = toY;
+      entry.obj.position.z = 0;
+      entry.obj.rotation.x = 0;
+      updateFaceVisibility(entry);
+      entry.flipTween = null;
+    }
   }
   entry.flipTween = requestAnimationFrame(step);
 }
 
 // CSS3D animation loop. Runs alongside the globe loop; cheap because
 // CSS3DRenderer only updates transforms on existing DOM nodes.
+// Realign every frame so lifted cards track their anchor stack live
+// (covers CSS transitions on .side-stack like verdict-win lift+scale,
+// which the resize/scroll listeners alone can't catch).
 let cssRunning = true;
 function cssFrame() {
   if (!cssRunning) return;
+  realignAllCards();
   cssRenderer.render(cssScene, cssCamera);
   requestAnimationFrame(cssFrame);
 }
@@ -4854,6 +5084,8 @@ window.__webgl3D = {
   realignAll: realignAllCards,
   flip: flipCard3D,
   updateFaceVisibility,
+  deal: dealCard3D,
+  clearAll: clearAllCards,
 };
 console.info('[toptrumps-webgl] CSS3DRenderer ready (' + cssCards.length + ' cards)');
 
