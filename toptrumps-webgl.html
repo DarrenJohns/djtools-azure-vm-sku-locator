@@ -2826,6 +2826,7 @@ function show(id) {
   if (wasMatch && id !== 'screen-match') {
     G.matchToken = (G.matchToken || 0) + 1;
     if (window.__webgl3D && window.__webgl3D.clearAll) window.__webgl3D.clearAll();
+    if (window.__cardMesh && window.__cardMesh.clearAll) window.__cardMesh.clearAll();
   }
   updateTopbarStatus(id);
 }
@@ -3257,6 +3258,340 @@ function cardBack() {
   ]);
 }
 
+/* ---------- 3b. card art bake (Phase 3 — mesh-card texture source) ----------
+   Renders a card to a high-DPI offscreen canvas using Canvas2D so the
+   WebGL mesh-card path can wrap it in a CanvasTexture. Deliberately a
+   simplified, larger-typography variant of the DOM card — the WebGL
+   build is meant to look different from the stable build.
+   Synchronous bake. Family glyphs are async-loaded SVG → bitmap; if
+   one isn't ready when a card bakes, the glyph slot is left empty
+   (visually fine — gradient + family stripe still read). Glyph load
+   typically completes within the first 50ms after page load. */
+(function initCardArt() {
+  const TEX_W = 1280, TEX_H = 2000;  // 4× of CSS 320×500
+  const PAD = 64;
+
+  const FAM_COLOR = {
+    'General Purpose':   '#0f6cbd',
+    'Compute Optimized': '#e97548',
+    'Memory Optimized':  '#8764b8',
+    'Storage Optimized': '#038387',
+    'GPU Accelerated':   '#c4314b',
+    'HPC':               '#4f52b2',
+    'Confidential':      '#7a7574',
+  };
+  const RARITY_COLOR = {
+    common:     '#b9bcc6',
+    uncommon:   '#4ea36b',
+    rare:       '#2596e7',
+    epic:       '#b074e8',
+    legendary:  '#f0a93b',
+  };
+
+  // Pre-rasterize each family glyph SVG to a 512×512 canvas. Done
+  // async at module init; bake() falls back to glyph-less if not ready.
+  const glyphCanvases = {};
+  Object.entries(GLYPHS).forEach(([family, svg]) => {
+    const c = document.createElement('canvas');
+    c.width = 512; c.height = 512;
+    const ctx = c.getContext('2d');
+    const img = new Image();
+    img.onload = () => { ctx.drawImage(img, 0, 0, 512, 512); glyphCanvases[family] = c; };
+    img.onerror = () => { /* leave unset; bake will skip */ };
+    img.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+      svg.replace(/currentColor/g, '#e6e8ed')
+    );
+  });
+
+  const frontCache = new Map(); // card.id → HTMLCanvasElement
+  let backCanvas = null;
+
+  function bakeFront(card) {
+    const cached = frontCache.get(card.id);
+    if (cached) return cached;
+    const c = document.createElement('canvas');
+    c.width = TEX_W; c.height = TEX_H;
+    drawFront(c.getContext('2d'), card);
+    frontCache.set(card.id, c);
+    return c;
+  }
+
+  function bakeBack() {
+    if (backCanvas) return backCanvas;
+    backCanvas = document.createElement('canvas');
+    backCanvas.width = TEX_W; backCanvas.height = TEX_H;
+    drawBack(backCanvas.getContext('2d'));
+    return backCanvas;
+  }
+
+  function drawFront(ctx, card) {
+    const famColor    = FAM_COLOR[card.familyType] || '#0f6cbd';
+    const rarityColor = RARITY_COLOR[card.rarity]   || '#b9bcc6';
+    const W = TEX_W, H = TEX_H;
+
+    // Background — dark navy vertical gradient
+    const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
+    bgGrad.addColorStop(0, '#1d2027');
+    bgGrad.addColorStop(1, '#11131a');
+    ctx.fillStyle = bgGrad;
+    roundRect(ctx, 0, 0, W, H, 56); ctx.fill();
+
+    // Family-colored accent stripe (top)
+    ctx.fillStyle = famColor;
+    roundRectTop(ctx, 0, 0, W, 80, 56); ctx.fill();
+
+    // Rarity-tinted inner border
+    ctx.strokeStyle = rarityColor;
+    ctx.lineWidth = 8;
+    roundRect(ctx, 16, 16, W - 32, H - 32, 48); ctx.stroke();
+
+    // Subtle vignette
+    const vg = ctx.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, H * 0.8);
+    vg.addColorStop(0, 'rgba(0,0,0,0)');
+    vg.addColorStop(1, 'rgba(0,0,0,0.4)');
+    ctx.fillStyle = vg;
+    roundRect(ctx, 16, 16, W - 32, H - 32, 48); ctx.fill();
+
+    // Header — region pill (left)
+    ctx.font = '600 44px Inter, system-ui, sans-serif';
+    ctx.fillStyle = '#e6e8ed';
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'left';
+    ctx.fillText('⬢ ' + card.regionShort, PAD, 150);
+
+    // Header — rarity (right)
+    const stars = '★'.repeat(RARITY_STARS[card.rarity] || 1);
+    ctx.font = '700 44px Inter, system-ui, sans-serif';
+    ctx.fillStyle = rarityColor;
+    ctx.textAlign = 'right';
+    ctx.fillText(stars + '  ' + (RARITY_LABEL[card.rarity] || ''), W - PAD, 150);
+    ctx.textAlign = 'left';
+
+    // Title — card name (auto-shrink for long names)
+    let nameFontPx = 92;
+    ctx.font = '800 ' + nameFontPx + 'px Inter, system-ui, sans-serif';
+    while (ctx.measureText(card.displayName).width > W - PAD * 2 && nameFontPx > 48) {
+      nameFontPx -= 4;
+      ctx.font = '800 ' + nameFontPx + 'px Inter, system-ui, sans-serif';
+    }
+    ctx.fillStyle = '#f5f6f8';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText(card.displayName, PAD, 280);
+
+    // Nickname
+    ctx.font = 'italic 500 44px Inter, system-ui, sans-serif';
+    ctx.fillStyle = '#9aa0b0';
+    ctx.fillText('"' + (card.nickname || '') + '"', PAD, 340);
+
+    // Family pill
+    ctx.fillStyle = famColor;
+    ctx.beginPath(); ctx.arc(PAD + 14, 405, 14, 0, Math.PI * 2); ctx.fill();
+    ctx.font = '600 36px Inter, system-ui, sans-serif';
+    ctx.fillStyle = '#cfd3df';
+    ctx.fillText((card.familyDisplay || '').trim() + '  ·  ' + card.familyType, PAD + 40, 405);
+    ctx.textBaseline = 'middle';
+
+    // Art zone — large tinted family glyph
+    const glyph = glyphCanvases[card.familyType];
+    if (glyph) {
+      ctx.save();
+      ctx.globalAlpha = 0.18;
+      const gSize = 620;
+      ctx.drawImage(glyph, (W - gSize) / 2, 470, gSize, gSize);
+      ctx.restore();
+      // Light famColor wash on top to tint
+      ctx.save();
+      ctx.globalCompositeOperation = 'overlay';
+      ctx.globalAlpha = 0.35;
+      ctx.fillStyle = famColor;
+      ctx.fillRect((W - 620) / 2, 470, 620, 620);
+      ctx.restore();
+    }
+
+    // GPU badge (top-right of art zone if card has gpu tag)
+    if (card.tags && card.tags.gpu) {
+      ctx.font = '800 56px Inter, system-ui, sans-serif';
+      ctx.fillStyle = '#f0a93b';
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('GPU · ' + card.tags.gpu, W - PAD, 560);
+      ctx.textAlign = 'left';
+    }
+
+    // Stats — 6 rows from y=1170 down
+    const STAT_DEFS = [
+      { key: 'vcpus',           label: 'vCPU',       arrow: '▲', fmt: v => String(v ?? '—') },
+      { key: 'memoryGB',        label: 'Memory',     arrow: '▲', fmt: v => v == null ? '—' : v + ' GB' },
+      { key: 'maxDataDisks',    label: 'Data Disks', arrow: '▲', fmt: v => v == null ? '—' : String(v) },
+      { key: 'nics',            label: 'NICs',       arrow: '▲', fmt: v => v == null ? '—' : String(v) },
+      { key: 'pricePerHourUSD', label: 'Price',      arrow: '▼', fmt: v => v == null ? '—' : '$' + v.toFixed(3) + '/hr' },
+      { key: 'powerScore',      label: 'Power',      arrow: '▲', fmt: v => v == null ? '—' : v + ' / 100' },
+    ];
+    const statsY0 = 1170;
+    const rowH = 90;
+    STAT_DEFS.forEach((s, i) => {
+      const y = statsY0 + i * rowH;
+      // Divider
+      ctx.strokeStyle = '#2a2e3a';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(PAD, y - rowH / 2 + 4);
+      ctx.lineTo(W - PAD, y - rowH / 2 + 4);
+      ctx.stroke();
+      // Label
+      ctx.font = '600 42px Inter, system-ui, sans-serif';
+      ctx.fillStyle = '#a8aeba';
+      ctx.textBaseline = 'middle';
+      ctx.textAlign = 'left';
+      ctx.fillText(s.label, PAD, y);
+      // Arrow
+      ctx.font = '600 42px Inter, system-ui, sans-serif';
+      ctx.fillStyle = s.arrow === '▲' ? '#4ea36b' : '#c4314b';
+      ctx.fillText(s.arrow, PAD + 320, y);
+      // Value (right, monospace, bold)
+      ctx.font = '800 56px "JetBrains Mono", "SF Mono", Menlo, monospace';
+      ctx.fillStyle = '#f5f6f8';
+      ctx.textAlign = 'right';
+      ctx.fillText(s.fmt(card.stats ? card.stats[s.key] : null), W - PAD, y);
+    });
+    ctx.textAlign = 'left';
+
+    // Footer divider
+    ctx.strokeStyle = '#2a2e3a';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(PAD, 1720); ctx.lineTo(W - PAD, 1720); ctx.stroke();
+
+    // Ability footer
+    if (card.ability) {
+      ctx.font = '800 44px Inter, system-ui, sans-serif';
+      ctx.fillStyle = rarityColor;
+      ctx.textBaseline = 'alphabetic';
+      ctx.fillText(card.ability.title || '', PAD, 1790);
+      ctx.font = '500 32px Inter, system-ui, sans-serif';
+      ctx.fillStyle = '#b9bcc6';
+      wrapText(ctx, card.ability.description || '', PAD, 1840, W - PAD * 2, 42, 4);
+    }
+  }
+
+  function drawBack(ctx) {
+    const W = TEX_W, H = TEX_H;
+
+    // Deep blue radial background
+    const bgGrad = ctx.createRadialGradient(W / 2, H / 2, 100, W / 2, H / 2, 1300);
+    bgGrad.addColorStop(0, '#173766');
+    bgGrad.addColorStop(1, '#0a1a30');
+    ctx.fillStyle = bgGrad;
+    roundRect(ctx, 0, 0, W, H, 56); ctx.fill();
+
+    // Hex frames
+    drawHex(ctx, W / 2, H / 2, 540, 'rgba(216,161,74,0.5)', 5);
+    drawHex(ctx, W / 2, H / 2, 470, 'rgba(255,255,255,0.13)', 1.5);
+    drawHex(ctx, W / 2, H / 2, 400, 'rgba(255,255,255,0.08)', 1);
+
+    // Concentric rings
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    ctx.lineWidth = 1;
+    for (let r = 200; r < 380; r += 60) {
+      ctx.beginPath(); ctx.arc(W / 2, H / 2, r, 0, Math.PI * 2); ctx.stroke();
+    }
+
+    // Wordmarks top + bottom
+    ctx.font = '900 60px Inter, system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(216,161,74,0.9)';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('AZURE TOP TRUMPS', W / 2, 230);
+    ctx.fillText('AZURE TOP TRUMPS', W / 2, H - 230);
+
+    // Centered TT mark
+    ctx.font = '900 380px Inter, system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    ctx.fillText('TT', W / 2, H / 2 - 30);
+
+    // Subtitle
+    ctx.font = '500 36px Inter, system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.55)';
+    ctx.fillText('Azure VM SKUs · 2026', W / 2, H / 2 + 220);
+
+    // Diagonal sheen
+    ctx.save();
+    const sheen = ctx.createLinearGradient(0, H * 0.2, W, H * 0.45);
+    sheen.addColorStop(0,   'rgba(255,255,255,0)');
+    sheen.addColorStop(0.5, 'rgba(255,255,255,0.04)');
+    sheen.addColorStop(1,   'rgba(255,255,255,0)');
+    ctx.fillStyle = sheen;
+    ctx.fillRect(0, 0, W, H);
+    ctx.restore();
+
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+  }
+
+  function drawHex(ctx, cx, cy, r, color, width) {
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width;
+    ctx.beginPath();
+    for (let i = 0; i < 6; i++) {
+      const a = Math.PI / 3 * i - Math.PI / 2;
+      const x = cx + r * Math.cos(a);
+      const y = cy + r * Math.sin(a);
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.closePath(); ctx.stroke();
+  }
+
+  function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y); ctx.arcTo(x + w, y, x + w, y + r, r);
+    ctx.lineTo(x + w, y + h - r); ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+    ctx.lineTo(x + r, y + h); ctx.arcTo(x, y + h, x, y + h - r, r);
+    ctx.lineTo(x, y + r); ctx.arcTo(x, y, x + r, y, r);
+    ctx.closePath();
+  }
+  function roundRectTop(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y); ctx.arcTo(x + w, y, x + w, y + r, r);
+    ctx.lineTo(x + w, y + h); ctx.lineTo(x, y + h);
+    ctx.lineTo(x, y + r); ctx.arcTo(x, y, x + r, y, r);
+    ctx.closePath();
+  }
+  function wrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines) {
+    const words = String(text || '').split(/\s+/);
+    let line = '';
+    let lines = 0;
+    for (let n = 0; n < words.length; n++) {
+      const test = line ? line + ' ' + words[n] : words[n];
+      if (ctx.measureText(test).width > maxWidth && line) {
+        ctx.fillText(line, x, y);
+        line = words[n];
+        y += lineHeight;
+        lines++;
+        if (lines >= (maxLines - 1)) {
+          // last line — measure and ellipsize remaining
+          let rest = words.slice(n).join(' ');
+          while (rest && ctx.measureText(rest + '…').width > maxWidth) {
+            rest = rest.slice(0, -1);
+          }
+          ctx.fillText(rest + (rest === words.slice(n).join(' ') ? '' : '…'), x, y);
+          return;
+        }
+      } else {
+        line = test;
+      }
+    }
+    if (line) ctx.fillText(line, x, y);
+  }
+
+  window.__cardArt = {
+    W: TEX_W, H: TEX_H,
+    bakeFront, bakeBack,
+    clear() { frontCache.clear(); backCanvas = null; },
+  };
+  console.info('[toptrumps-webgl] Card art baker ready (' + TEX_W + '×' + TEX_H + ')');
+})();
+
 /* Mount a card-with-flip into a stack container.
    Returns the flip-host element so caller can flip / animate it. */
 function mountFlipCard(stackEl, card, opts = {}) {
@@ -3264,6 +3599,10 @@ function mountFlipCard(stackEl, card, opts = {}) {
   // so it doesn't outlive its anchor.
   if (window.__webgl3D && window.__webgl3D.evictAtStack) {
     window.__webgl3D.evictAtStack(stackEl);
+  }
+  // Phase 3.5 — also evict any prior mesh card mounted on this stack.
+  if (window.__cardMesh && window.__cardMesh.evictAtStack) {
+    window.__cardMesh.evictAtStack(stackEl);
   }
   stackEl.innerHTML = '';
   const front = cardFront(card, opts);
@@ -3281,6 +3620,7 @@ function mountFlipCard(stackEl, card, opts = {}) {
   // DOM element) but keeps it as a real DOM node, so keyboard focus,
   // stat clicks, links and ARIA all continue to work.
   let lifted = null;
+  let meshEntry = null;
   if (opts.use3D && window.__webgl3D && window.__webgl3D.lift) {
     lifted = window.__webgl3D.lift(stackEl, host);
     // Initial rotation matches the is-flipped state (PI = back showing).
@@ -3288,6 +3628,14 @@ function mountFlipCard(stackEl, card, opts = {}) {
       lifted.obj.rotation.y = opts.startFlipped ? Math.PI : 0;
       if (window.__webgl3D.updateFaceVisibility) {
         window.__webgl3D.updateFaceVisibility(lifted);
+      }
+      // Phase 3.5 — also mount a mesh card overlay on top of the CSS3D
+      // card. The mesh becomes the visible card; the DOM card behind
+      // remains in place to handle pointer events (stat clicks, focus).
+      if (window.__cardMesh && window.__cardMesh.mount) {
+        meshEntry = window.__cardMesh.mount(stackEl, host, card, {
+          startFlipped: !!opts.startFlipped,
+        });
       }
       // Drive rotation from class changes the rest of the game code already
       // performs (host.classList.add/remove('is-flipped')). The card stays
@@ -3301,12 +3649,20 @@ function mountFlipCard(stackEl, card, opts = {}) {
         const toY   = wantsBack ? Math.PI : 0;
         if (Math.abs(fromY - toY) < 1e-3) return;
         window.__webgl3D.flip(lifted, fromY, toY, FLIP_MS);
+        // Phase 3.5 — flip the mesh card in lockstep with the CSS3D card.
+        if (meshEntry && window.__cardMesh && window.__cardMesh.flip) {
+          const mFrom = meshEntry.pivot.rotation.y;
+          const mTo   = wantsBack ? Math.PI : 0;
+          if (Math.abs(mFrom - mTo) > 1e-3) {
+            window.__cardMesh.flip(meshEntry, mFrom, mTo, FLIP_MS);
+          }
+        }
       });
       mo.observe(host, { attributes: true, attributeFilter: ['class'] });
       lifted.observer = mo;
     }
   }
-  return { host, front, back, lifted };
+  return { host, front, back, lifted, meshEntry };
 }
 
 /* ---------- 4. game state ---------- */
@@ -3726,12 +4082,23 @@ async function resolveAndAnimate() {
       // Small Z-rotation jitter so it doesn't land perfectly square on top
       // of the existing lifted card — reads as a card tossed onto a pile.
       const jitter = (Math.random() - 0.5) * 0.12; // ±~3.4 deg
-      await window.__webgl3D.slide(
+      const cssSlide = window.__webgl3D.slide(
         loserEls.lifted,
         wr.left + wr.width / 2,
         wr.top  + wr.height / 2,
         { duration: 520, arcHeight: 200, rotZJitter: jitter }
       );
+      // Phase 3.5 — slide the mesh card in lockstep with the CSS3D card.
+      let meshSlide = Promise.resolve();
+      if (loserEls.meshEntry && window.__cardMesh && window.__cardMesh.slide) {
+        const fromWorld = {
+          x: loserEls.meshEntry.pivot.position.x,
+          y: loserEls.meshEntry.pivot.position.y,
+        };
+        const toWorld = window.__cardMesh.viewportToWorld(wr);
+        meshSlide = window.__cardMesh.slide(loserEls.meshEntry, fromWorld, toWorld, 520);
+      }
+      await Promise.all([cssSlide, meshSlide]);
       // Short beat so the pile visibly "absorbs" the card before the
       // next round renders over the top.
       await delay(120);
@@ -3781,6 +4148,7 @@ async function startMatch(opts) {
   // clears on match→non-match; restarts that stay on the match screen
   // (or come from screen-end) would otherwise leave ghosts behind.
   if (window.__webgl3D && window.__webgl3D.clearAll) window.__webgl3D.clearAll();
+  if (window.__cardMesh && window.__cardMesh.clearAll) window.__cardMesh.clearAll();
   document.querySelectorAll('.deal-stage').forEach(n => n.remove());
   document.querySelectorAll('[data-deal-card]').forEach(n => n.parentNode && n.parentNode.removeChild(n));
   // Drop any stale deal-stack handles from a deal we just aborted; the
@@ -4859,6 +5227,378 @@ document.addEventListener('visibilitychange', () => {
 
 requestAnimationFrame(frame);
 console.info('[toptrumps-webgl] Three.js r' + THREE.REVISION + ' globe initialised');
+
+// =====================================================================
+// Phase 3 — Mesh card scene.
+// True 3D card meshes rendered through a DEDICATED WebGLRenderer whose
+// canvas sits above the CSS3D layer (z-index 6) so meshes appear over
+// the rest of the UI. Uses the same coordinate convention as the CSS3D
+// scene (1 world unit = 1 screen pixel at z=0) so screen positions
+// translate 1:1 between layers.
+//
+// Cards: pivot Object3D with three child meshes:
+//   - frontPlate: ShapeGeometry(roundedRect), MeshPhysicalMaterial w/ front texture
+//   - backPlate:  ShapeGeometry(roundedRect), MeshPhysicalMaterial w/ back texture, rotated 180° Y
+//   - edgeFrame:  ExtrudeGeometry(roundedRect, depth), single edge-tone material
+//
+// Phase 4 (post-fx) will fold this back into a shared renderer with the
+// globe via EffectComposer + render targets. For Phase 3 the two
+// renderers are independent — simplest path, no global stacking risk.
+// =====================================================================
+const cardCanvas = document.createElement('canvas');
+cardCanvas.id = 'card-mesh-root';
+Object.assign(cardCanvas.style, {
+  position: 'fixed', inset: '0',
+  width: '100vw', height: '100vh',
+  zIndex: '6',
+  pointerEvents: 'none',
+  display: 'block',
+});
+document.body.appendChild(cardCanvas);
+
+const cardRenderer = new THREE.WebGLRenderer({
+  canvas: cardCanvas,
+  alpha: true,
+  antialias: true,
+  powerPreference: 'high-performance',
+});
+cardRenderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+cardRenderer.setSize(window.innerWidth, window.innerHeight, false);
+cardRenderer.setClearColor(0x000000, 0); // fully transparent
+cardRenderer.outputColorSpace = THREE.SRGBColorSpace;
+cardRenderer.toneMapping = THREE.ACESFilmicToneMapping;
+cardRenderer.toneMappingExposure = 1.0;
+
+const cardScene = new THREE.Scene();
+const cardCamera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 5000);
+function setCardCameraDistance() {
+  const fovRad = cardCamera.fov * Math.PI / 180;
+  cardCamera.position.z = (window.innerHeight / 2) / Math.tan(fovRad / 2);
+}
+setCardCameraDistance();
+
+// Lighting rig — directional key + ambient + hemisphere fill. A
+// slow-orbiting point light brings the foil/clearcoat to life. Lights
+// live in world space so all cards share them.
+const keyLight = new THREE.DirectionalLight(0xfff5e0, 1.4);
+keyLight.position.set(300, 600, 800);
+cardScene.add(keyLight);
+const ambient = new THREE.AmbientLight(0x6a8eb6, 0.55);
+cardScene.add(ambient);
+const hemi = new THREE.HemisphereLight(0xfff5e0, 0x202840, 0.35);
+cardScene.add(hemi);
+// Orbiting point light gives the metallic foil moving highlights.
+const orbitLight = new THREE.PointLight(0xffe8b0, 6.0, 0, 0); // intensity, distance=0=infinite, decay=0=constant
+orbitLight.position.set(0, 0, 400);
+cardScene.add(orbitLight);
+
+function resizeCardScene() {
+  cardRenderer.setSize(window.innerWidth, window.innerHeight, false);
+  cardCamera.aspect = window.innerWidth / window.innerHeight;
+  setCardCameraDistance();
+  cardCamera.updateProjectionMatrix();
+}
+window.addEventListener('resize', resizeCardScene);
+
+// Shared rounded-rect Shape (CSS card is 320×500) — used for both the
+// flat plates (front/back textures) and the extruded edge frame.
+const CARD_W = 320, CARD_H = 500, CARD_DEPTH = 6, CARD_R = 14; // CARD_R matches DOM .card --radius
+function buildRoundedShape(w, h, r) {
+  const shape = new THREE.Shape();
+  const x = -w / 2, y = -h / 2;
+  shape.moveTo(x + r, y);
+  shape.lineTo(x + w - r, y);
+  shape.quadraticCurveTo(x + w, y, x + w, y + r);
+  shape.lineTo(x + w, y + h - r);
+  shape.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  shape.lineTo(x + r, y + h);
+  shape.quadraticCurveTo(x, y + h, x, y + h - r);
+  shape.lineTo(x, y + r);
+  shape.quadraticCurveTo(x, y, x + r, y);
+  return shape;
+}
+const cardShape = buildRoundedShape(CARD_W, CARD_H, CARD_R);
+const cardPlateGeo = new THREE.ShapeGeometry(cardShape, 12);
+// ShapeGeometry UVs are in shape coordinates. Re-map to [0,1] based on
+// the shape's bounding box so a square texture maps cleanly.
+(function remapPlateUVs() {
+  cardPlateGeo.computeBoundingBox();
+  const bb = cardPlateGeo.boundingBox;
+  const uv = cardPlateGeo.attributes.uv;
+  const pos = cardPlateGeo.attributes.position;
+  const dx = bb.max.x - bb.min.x, dy = bb.max.y - bb.min.y;
+  for (let i = 0; i < uv.count; i++) {
+    const u = (pos.getX(i) - bb.min.x) / dx;
+    // Texture origin is top-left, world Y is bottom-up, so flip V.
+    const v = 1.0 - (pos.getY(i) - bb.min.y) / dy;
+    uv.setXY(i, u, v);
+  }
+  uv.needsUpdate = true;
+})();
+
+const cardEdgeGeo = new THREE.ExtrudeGeometry(cardShape, {
+  depth: CARD_DEPTH,
+  bevelEnabled: true,
+  bevelThickness: 0.8,
+  bevelSize: 0.8,
+  bevelSegments: 2,
+  curveSegments: 6,
+});
+// Center the extrude on z so depth straddles z=0 (matching plate positions).
+cardEdgeGeo.translate(0, 0, -CARD_DEPTH / 2);
+const cardEdgeMat = new THREE.MeshPhysicalMaterial({
+  color: 0x1d2027,
+  roughness: 0.6,
+  metalness: 0.3,
+});
+
+const RARITY_MAT_PARAMS = {
+  common:    { roughness: 0.85, metalness: 0.05, clearcoat: 0.0, iridescence: 0.0, emissiveIntensity: 0.0 },
+  uncommon:  { roughness: 0.7,  metalness: 0.15, clearcoat: 0.2, iridescence: 0.0, emissiveIntensity: 0.04 },
+  rare:      { roughness: 0.4,  metalness: 0.5,  clearcoat: 0.7, iridescence: 0.3, emissiveIntensity: 0.08 },
+  epic:      { roughness: 0.3,  metalness: 0.7,  clearcoat: 0.9, iridescence: 0.4, emissiveIntensity: 0.12 },
+  legendary: { roughness: 0.2,  metalness: 0.85, clearcoat: 1.0, iridescence: 0.6, emissiveIntensity: 0.16 },
+};
+const RARITY_EMISSIVE = {
+  common:    0x000000,
+  uncommon:  0x103018,
+  rare:      0x081830,
+  epic:      0x1a0a2e,
+  legendary: 0x3a1f00,
+};
+
+function makeCardMaterial(texture, rarity) {
+  const p = RARITY_MAT_PARAMS[rarity] || RARITY_MAT_PARAMS.common;
+  const mat = new THREE.MeshPhysicalMaterial({
+    map: texture,
+    roughness: p.roughness,
+    metalness: p.metalness,
+    clearcoat: p.clearcoat,
+    clearcoatRoughness: 0.2,
+    iridescence: p.iridescence,
+    iridescenceIOR: 1.5,
+    iridescenceThicknessRange: [120, 380],
+    emissive: new THREE.Color(RARITY_EMISSIVE[rarity] || 0x000000),
+    emissiveIntensity: p.emissiveIntensity,
+    emissiveMap: texture,
+    side: THREE.FrontSide,
+  });
+  return mat;
+}
+
+const meshCards = []; // entries: { pivot, frontMesh, backMesh, edgeMesh, stackEl, hostEl, frontTex, backTex, frontMat, backMat, flipTween, slideTween, deckOffset, isMesh: true }
+
+function viewportToWorld(rect) {
+  const W = window.innerWidth, H = window.innerHeight;
+  return {
+    x: (rect.left + rect.width / 2) - W / 2,
+    y: -((rect.top + rect.height / 2) - H / 2),
+  };
+}
+
+function mountMeshCard(stackEl, hostEl, card, opts = {}) {
+  if (!stackEl || !card || !window.__cardArt) return null;
+  // Bake textures (cached per card.id; back is shared).
+  const frontCanvas = window.__cardArt.bakeFront(card);
+  const backCanvas  = window.__cardArt.bakeBack();
+  const frontTex = new THREE.CanvasTexture(frontCanvas);
+  frontTex.colorSpace = THREE.SRGBColorSpace;
+  frontTex.anisotropy = cardRenderer.capabilities.getMaxAnisotropy();
+  frontTex.needsUpdate = true;
+  const backTex = new THREE.CanvasTexture(backCanvas);
+  backTex.colorSpace = THREE.SRGBColorSpace;
+  backTex.anisotropy = cardRenderer.capabilities.getMaxAnisotropy();
+  backTex.needsUpdate = true;
+
+  const frontMat = makeCardMaterial(frontTex, card.rarity);
+  const backMat  = makeCardMaterial(backTex,  'rare'); // back gets a modest sheen regardless of rarity
+
+  const pivot = new THREE.Object3D();
+
+  const frontMesh = new THREE.Mesh(cardPlateGeo, frontMat);
+  frontMesh.position.z = CARD_DEPTH / 2 + 0.02;
+  pivot.add(frontMesh);
+
+  const backMesh = new THREE.Mesh(cardPlateGeo, backMat);
+  backMesh.position.z = -(CARD_DEPTH / 2 + 0.02);
+  backMesh.rotation.y = Math.PI;
+  pivot.add(backMesh);
+
+  const edgeMesh = new THREE.Mesh(cardEdgeGeo, cardEdgeMat);
+  pivot.add(edgeMesh);
+
+  // Phase 3.5 — keep the source DOM host fully visible AND interactive.
+  // The mesh card's canvas has pointer-events: none, so clicks pass
+  // through to the DOM host behind it (stat-row click handlers etc.
+  // still fire normally). The mesh occludes the DOM visually because
+  // its textures are fully opaque and aligned 1:1 to the host's rect.
+  if (hostEl) {
+    hostEl.dataset.meshLifted = '1';
+  }
+
+  // Initial rotation matches the requested face. is-flipped on the
+  // host means "back showing" in the CSS3D world, so pivot rotates PI.
+  const wantBack = !!(hostEl && hostEl.classList.contains('is-flipped'));
+  pivot.rotation.y = wantBack ? Math.PI : 0;
+
+  cardScene.add(pivot);
+
+  const entry = {
+    isMesh: true,
+    pivot, frontMesh, backMesh, edgeMesh,
+    stackEl, hostEl,
+    frontTex, backTex, frontMat, backMat,
+    rarity: card.rarity,
+    cardId: card.id,
+    flipTween: null, slideTween: null,
+    deckOffset: null,
+    isAnimating: false,
+    observer: null,
+  };
+  meshCards.push(entry);
+  realignMeshCard(entry);
+  return entry;
+}
+
+function realignMeshCard(entry) {
+  if (!entry || entry.isAnimating) return;
+  const rect = entry.stackEl.getBoundingClientRect();
+  const pos = viewportToWorld(rect);
+  entry.pivot.position.x = pos.x + (entry.deckOffset ? entry.deckOffset.x : 0);
+  entry.pivot.position.y = pos.y + (entry.deckOffset ? entry.deckOffset.y : 0);
+  if (entry.deckOffset) entry.pivot.position.z = entry.deckOffset.z;
+}
+function realignAllMeshCards() { meshCards.forEach(realignMeshCard); }
+window.addEventListener('resize', realignAllMeshCards);
+window.addEventListener('scroll', realignAllMeshCards, { passive: true });
+
+function unmountMeshCard(entry) {
+  if (!entry) return;
+  if (entry.observer) { try { entry.observer.disconnect(); } catch (_) {} entry.observer = null; }
+  if (entry.flipTween) cancelAnimationFrame(entry.flipTween);
+  if (entry.slideTween) cancelAnimationFrame(entry.slideTween);
+  cardScene.remove(entry.pivot);
+  // Dispose per-card resources. Geometry is shared (cardPlateGeo /
+  // cardEdgeGeo) so we only dispose materials + textures.
+  if (entry.frontTex) entry.frontTex.dispose();
+  if (entry.backTex)  entry.backTex.dispose();
+  if (entry.frontMat) entry.frontMat.dispose();
+  if (entry.backMat)  entry.backMat.dispose();
+  if (entry.hostEl) {
+    delete entry.hostEl.dataset.meshLifted;
+  }
+  const i = meshCards.indexOf(entry);
+  if (i >= 0) meshCards.splice(i, 1);
+}
+
+function evictMeshAtStack(stackEl) {
+  for (let i = meshCards.length - 1; i >= 0; i--) {
+    if (meshCards[i].stackEl === stackEl) unmountMeshCard(meshCards[i]);
+  }
+}
+
+function flipMeshCard(entry, fromY, toY, duration) {
+  if (!entry) return;
+  if (entry.flipTween) cancelAnimationFrame(entry.flipTween);
+  const start = performance.now();
+  const delta = toY - fromY;
+  const liftZ = 40, tiltX = 0.12;
+  function step(now) {
+    const t = Math.min(1, (now - start) / duration);
+    const eased = 0.5 - 0.5 * Math.cos(Math.PI * t);
+    const arc = Math.sin(Math.PI * t);
+    entry.pivot.rotation.y = fromY + delta * eased;
+    entry.pivot.position.z = (entry.deckOffset ? entry.deckOffset.z : 0) + arc * liftZ;
+    entry.pivot.rotation.x = arc * tiltX;
+    if (t < 1) entry.flipTween = requestAnimationFrame(step);
+    else {
+      entry.pivot.rotation.y = toY;
+      entry.pivot.position.z = (entry.deckOffset ? entry.deckOffset.z : 0);
+      entry.pivot.rotation.x = 0;
+      entry.flipTween = null;
+    }
+  }
+  entry.flipTween = requestAnimationFrame(step);
+}
+
+function slideMeshCard(entry, fromWorld, toWorld, duration) {
+  if (!entry) return Promise.resolve();
+  return new Promise(resolve => {
+    if (entry.slideTween) cancelAnimationFrame(entry.slideTween);
+    entry.isAnimating = true;
+    const start = performance.now();
+    function step(now) {
+      const t = Math.min(1, (now - start) / duration);
+      const eased = 0.5 - 0.5 * Math.cos(Math.PI * t);
+      entry.pivot.position.x = fromWorld.x + (toWorld.x - fromWorld.x) * eased;
+      entry.pivot.position.y = fromWorld.y + (toWorld.y - fromWorld.y) * eased;
+      // Slight arc lift to sell motion
+      entry.pivot.position.z = Math.sin(Math.PI * t) * 30;
+      if (t < 1) entry.slideTween = requestAnimationFrame(step);
+      else {
+        entry.pivot.position.x = toWorld.x;
+        entry.pivot.position.y = toWorld.y;
+        entry.pivot.position.z = 0;
+        entry.slideTween = null;
+        // Leave isAnimating=true so realignMeshCard doesn't snap the
+        // mesh back to its (loser-side) stackEl before the next round
+        // evicts it. Eviction happens in mountFlipCard.
+        resolve();
+      }
+    }
+    entry.slideTween = requestAnimationFrame(step);
+  });
+}
+
+function clearAllMeshCards() {
+  for (let i = meshCards.length - 1; i >= 0; i--) unmountMeshCard(meshCards[i]);
+}
+
+// Per-frame card-scene tick + render loop. Runs continuously so flips,
+// slides and the orbiting key light update independent of the globe
+// loop (which gates itself when prefers-reduced-motion is set).
+let _orbitT0 = performance.now();
+let _cardLastT = performance.now();
+function tickCardScene(now, dt) {
+  if (!reduced) {
+    const t = (now - _orbitT0) / 1000;
+    const r = 500;
+    orbitLight.position.x = Math.cos(t * 0.4) * r;
+    orbitLight.position.y = Math.sin(t * 0.4) * (r * 0.5);
+    orbitLight.position.z = 300 + Math.sin(t * 0.6) * 100;
+  }
+  realignAllMeshCards();
+}
+let _cardRunning = true;
+function cardFrame(now) {
+  if (!_cardRunning) return;
+  const dt = Math.min(0.05, (now - _cardLastT) / 1000);
+  _cardLastT = now;
+  tickCardScene(now, dt);
+  cardRenderer.render(cardScene, cardCamera);
+  requestAnimationFrame(cardFrame);
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { _cardRunning = false; }
+  else if (!_cardRunning) { _cardRunning = true; _cardLastT = performance.now(); requestAnimationFrame(cardFrame); }
+});
+requestAnimationFrame(cardFrame);
+
+window.__cardMesh = {
+  scene: cardScene,
+  camera: cardCamera,
+  mount: mountMeshCard,
+  unmount: unmountMeshCard,
+  evictAtStack: evictMeshAtStack,
+  realign: realignMeshCard,
+  realignAll: realignAllMeshCards,
+  flip: flipMeshCard,
+  slide: slideMeshCard,
+  clearAll: clearAllMeshCards,
+  viewportToWorld,
+  CARD_W, CARD_H, CARD_DEPTH,
+};
+console.info('[toptrumps-webgl] Mesh card scene ready (' + CARD_W + '×' + CARD_H + '×' + CARD_DEPTH + ')');
 
 // =====================================================================
 // Phase 2A — CSS3D card scene.
