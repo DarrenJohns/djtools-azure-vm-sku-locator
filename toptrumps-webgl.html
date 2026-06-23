@@ -1785,6 +1785,28 @@ button { font: inherit; color: inherit; }
 }
 .card.has-webgl-foil .foil-webgl { opacity: 1; }
 .card.has-webgl-foil .card-foil  { opacity: 0; }
+/* The foil's pointer-driven specular hotspot can wash out a stat row
+   the player is reading. While a stat row is hovered/focused on the
+   pickable card, dim the foil so the label and value stay legible. */
+.card.is-pickable.has-webgl-foil:has(.stat-row:hover) .foil-webgl,
+.card.is-pickable.has-webgl-foil:has(.stat-row:focus-visible) .foil-webgl {
+  opacity: .25;
+}
+/* While a card is mid-flip, hide the foil entirely. mix-blend-mode
+   forces per-frame backdrop rasterization which makes the 3D spin
+   visibly stutter on rare+ cards. We use a data attribute (not a
+   class) so the MutationObserver in mountFlipCard — which only
+   watches `class` — doesn't re-enter the flip on every toggle. */
+.flip-host[data-flipping] .foil-webgl { opacity: 0 !important; transition: opacity 80ms ease-out; }
+
+/* Phase 2D — hide the deck-stack cards while any top card is
+   mid-flip. With CSS3DRenderer's perspective and tightly-spaced z
+   layers, the lifted card briefly becomes edge-on at 90° of its
+   Y rotation and exposes the cards behind it, which reads as the
+   top card "clipping through" the pile. Fading the stack out for
+   the duration of the flip removes the artefact entirely. */
+[data-deck-stack] { transition: opacity 180ms ease-out; }
+#css3d-root.is-flipping [data-deck-stack] { opacity: 0; }
 @media (prefers-reduced-motion: reduce) {
   .card .foil-webgl { display: none; }
   .card.has-webgl-foil .card-foil { opacity: 1; }
@@ -3467,6 +3489,20 @@ function renderTopCards() {
   if (!_suppressEnter) G.cpuEls.host.classList.add('enter');
   G._suppressEnter = false;
 
+  // Phase 2D — render the rest of each hand as a thin 3D back-stack
+  // behind the lifted top card. Re-rendered every round so the pile
+  // visibly thins as cards are lost and grows as they are won.
+  // Wrapped so a render error never blocks the reveal flow that
+  // follows in startRound.
+  if (window.__webgl3D && window.__webgl3D.renderDeckStack) {
+    try {
+      window.__webgl3D.renderDeckStack($('player-stack'), G.player.hand.length - 1);
+      window.__webgl3D.renderDeckStack($('cpu-stack'),    G.cpu.hand.length    - 1);
+    } catch (err) {
+      console.warn('[toptrumps-webgl] renderDeckStack failed', err);
+    }
+  }
+
   // Hand-off from dealAnimation: the dealt 3D stack is sitting in front
   // of the freshly lifted top cards. Fade it out over ~320ms so it reads
   // as "top card lifts off the deck", not "stack vanishes". Lifted cards
@@ -4911,10 +4947,22 @@ function realignCard(entry) {
   // World coords: origin at screen center, Y up.
   entry.obj.position.x = (rect.left + rect.width / 2) - W / 2;
   entry.obj.position.y = -((rect.top + rect.height / 2) - H / 2);
-  // Re-sync size in case layout shifted (e.g. window resize).
-  if (entry.hostEl) {
+  // Phase 2D deck-stack offsets layer on top of the anchor so the rest
+  // of the pile sits behind/below the lifted top card with per-card
+  // jitter. z stays static across frames (set once at mount).
+  if (entry.deckOffset) {
+    entry.obj.position.x += entry.deckOffset.x;
+    entry.obj.position.y += entry.deckOffset.y;
+    entry.obj.position.z = entry.deckOffset.z;
+  }
+  // Re-sync size only when the rect actually changed (e.g. resize),
+  // not every frame — repeated style writes thrash layout and visibly
+  // judder the 3D flip when many cards are in the scene.
+  if (entry.hostEl && (entry._lastW !== rect.width || entry._lastH !== rect.height)) {
     entry.hostEl.style.width = rect.width + 'px';
     entry.hostEl.style.height = rect.height + 'px';
+    entry._lastW = rect.width;
+    entry._lastH = rect.height;
   }
 }
 
@@ -4953,6 +5001,11 @@ function evictAtStack(stackEl) {
 // at midpoint), with a small back-tilt and roll. One-shot: the card
 // is created, tweened, and disposed. Returns a handle with cancel().
 const flyingDeals = new Set();
+// Set of entries currently mid-flip. Used to gate the cssEl
+// `is-flipping` class so the deck stack hides for the duration of any
+// in-progress spin and prevents the lifted card from clipping through
+// the pile.
+const activeFlips = new Set();
 function dealCard3D(opts) {
   const {
     fromX, fromY, toX, toY,
@@ -5038,13 +5091,88 @@ function dealCard3D(opts) {
   return handle;
 }
 
-// Remove every 3D card from the scene (lifted player/CPU cards and any
-// in-flight deal arcs). Called when leaving the match screen so cards
-// don't outlive their stack anchors.
+// Phase 2D — render the rest of the deck behind the lifted top card as
+// a thin stack of CSS3D back cards. Gives each pile visible thickness
+// that shrinks/grows as cards are won and lost. Capped at
+// MAX_DECK_VISIBLE so very large hands don't bloat the scene; the cap
+// only changes apparent depth, not gameplay.
+const MAX_DECK_VISIBLE = 12;
+function mountDeckStackCard(stackEl, deckOffset, width, height) {
+  const host = document.createElement('div');
+  host.className = 'flip-host is-3d is-flipped';
+  host.setAttribute('data-deck-stack', '1');
+  host.style.width  = width  + 'px';
+  host.style.height = height + 'px';
+  host.style.pointerEvents = 'none';
+  const frontFace = document.createElement('div');
+  frontFace.className = 'face front';
+  frontFace.setAttribute('data-face-hidden', '1');
+  const backFace = document.createElement('div');
+  backFace.className = 'face back';
+  backFace.appendChild(cardBack());
+  host.appendChild(frontFace);
+  host.appendChild(backFace);
+  const obj = new CSS3DObject(host);
+  // Show back toward camera. Z roll applied per stack card for jitter.
+  obj.rotation.set(0, Math.PI, deckOffset.rotZ || 0);
+  cssScene.add(obj);
+  const entry = {
+    obj, stackEl, hostEl: host,
+    frontEl: frontFace, backEl: backFace,
+    rect: null, flipTween: null,
+    deckOffset, // { x, y, z, rotZ } layered on top of stack anchor
+    isDeckStack: true,
+  };
+  cssCards.push(entry);
+  realignCard(entry);
+  return entry;
+}
+
+function renderDeckStack3D(stackEl, count) {
+  if (!stackEl) return [];
+  // Wipe any prior deck-stack cards at this stack; leave the lifted top
+  // card (no isDeckStack flag) untouched so we don't fight mountFlipCard.
+  for (let i = cssCards.length - 1; i >= 0; i--) {
+    if (cssCards[i].stackEl === stackEl && cssCards[i].isDeckStack) {
+      removeCardFrom3D(cssCards[i]);
+    }
+  }
+  const visible = Math.max(0, Math.min(count | 0, MAX_DECK_VISIBLE));
+  if (!visible) return [];
+  const rect = stackEl.getBoundingClientRect();
+  const w = rect.width  || 320;
+  const h = rect.height || 500;
+  const entries = [];
+  // Deterministic per-index jitter — re-renders/restarts reproduce the
+  // same pile shape so it looks stable, not noisy.
+  for (let i = 0; i < visible; i++) {
+    const seed = (i * 9301 + 49297) % 233280;
+    const jx = ((seed % 100) / 100 - 0.5) * 5;          // ±2.5 px
+    const jy = (((seed >> 3) % 100) / 100 - 0.5) * 4;   // ±2 px
+    const jr = (((seed >> 6) % 100) / 100 - 0.5) * 3;   // ±1.5 deg
+    // i=0 is the bottommost card. z grows more negative per card so
+    // deeper cards sit further from the camera. A tiny per-card y nudge
+    // makes a faint band peek out below the lifted top card.
+    const z = -0.8 - i * 1.0;
+    entries.push(mountDeckStackCard(stackEl, {
+      x: jx,
+      y: jy + i * 0.5,
+      z,
+      rotZ: jr * Math.PI / 180,
+    }, w, h));
+  }
+  return entries;
+}
+
+// Remove every 3D card from the scene (lifted player/CPU cards, deck
+// stacks, and any in-flight deal arcs). Called when leaving the match
+// screen so cards don't outlive their stack anchors.
 function clearAllCards() {
   for (let i = cssCards.length - 1; i >= 0; i--) removeCardFrom3D(cssCards[i]);
   flyingDeals.forEach(h => h.cancel());
   flyingDeals.clear();
+  activeFlips.clear();
+  if (cssEl) cssEl.classList.remove('is-flipping');
 }
 
 // Animate a CSS3DObject's rotation.y from a -> b over duration ms.
@@ -5061,6 +5189,16 @@ function flipCard3D(entry, fromY, toY, duration, onMid) {
   const liftZ = 40;        // peak forward lift in CSS pixels
   const tiltX = 0.12;      // peak back-tilt in radians (~7 deg)
   let midFired = false;
+  // mix-blend-mode on the foil overlay makes the flip stutter on
+  // rare+ cards. Use a data attribute (not a class) so the host's
+  // MutationObserver — which is scoped to the `class` attribute —
+  // doesn't see this and re-enter flipCard3D recursively.
+  if (entry.hostEl) entry.hostEl.setAttribute('data-flipping', '1');
+  // Mark the CSS3D root so the deck stack fades out for the spin
+  // (prevents the lifted card from visibly clipping through the pile
+  // when it goes edge-on at 90°).
+  activeFlips.add(entry);
+  if (cssEl) cssEl.classList.add('is-flipping');
   function step(now) {
     const t = Math.min(1, (now - start) / duration);
     const eased = 0.5 - 0.5 * Math.cos(Math.PI * t); // cosine ease (y rotation)
@@ -5080,6 +5218,9 @@ function flipCard3D(entry, fromY, toY, duration, onMid) {
       entry.obj.rotation.x = 0;
       updateFaceVisibility(entry);
       entry.flipTween = null;
+      if (entry.hostEl) entry.hostEl.removeAttribute('data-flipping');
+      activeFlips.delete(entry);
+      if (cssEl && activeFlips.size === 0) cssEl.classList.remove('is-flipping');
     }
   }
   entry.flipTween = requestAnimationFrame(step);
@@ -5164,6 +5305,7 @@ window.__webgl3D = {
   updateFaceVisibility,
   deal: dealCard3D,
   slide: slideCardTo3D,
+  renderDeckStack: renderDeckStack3D,
   clearAll: clearAllCards,
 };
 console.info('[toptrumps-webgl] CSS3DRenderer ready (' + cssCards.length + ' cards)');
