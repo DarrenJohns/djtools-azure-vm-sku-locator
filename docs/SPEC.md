@@ -240,3 +240,13 @@ A second, optional build of the Top Trumps companion ships alongside the stable 
   - `window.__attachFoilOverlay(cardEl)` — called from `mountFlipCard`
   - `window.__webglConfetti({count})` — called from `triggerVictoryFx`
 - **Deployment**: ships from the same site root via the same SWA deploy. The `vendor/` directory is included in the deploy staging.
+
+### 9.1 CSS3D card transport (Phase 2A–2D)
+
+The WebGL build adds a `CSS3DRenderer` layer (vendored at `vendor/CSS3DRenderer.js`) for true-3D card motion that the stable CSS-transform build can't deliver:
+
+- **Lift to 3D** (Phase 2A/2B). When a hand's top card mounts, the host `<div>` is moved into a `CSS3DObject` parented to a dedicated `CSS3D` scene. Viewport coordinates map to world coords as `worldX = viewportX - W/2`, `worldY = -(viewportY - H/2)`, with the camera distance set so 1 world unit = 1 screen pixel at z=0. `realignCard` keeps the 3D object's transform in sync with the DOM rect on resize / layout change.
+- **3D arc-deal** (Phase 2C). At round start, each card flies in along a Bezier arc with rotation. After resolve, the loser's top card slides to the winner's pile, then fades.
+- **Persistent deck depth** (Phase 2D). Each side renders up to `MAX_DECK_VISIBLE = 12` face-down cards behind the lifted top card via `renderDeckStack3D`, with small jitter (±2.5px x, ±2px y, ±1.5° rotZ, z = −0.8 − i·1.0). Stack entries are flagged `isDeckStack: true` so the existing `clearAllCards` / per-round eviction paths sweep them automatically.
+- **Flip polish**. `flipCard3D` runs the Y rotation as a cosine-eased tween with a peak forward lift (`liftZ = 40`) and a slight back-tilt (`tiltX = 0.12`). During the flip, the foil overlay is hidden (its `mix-blend-mode: screen` blow forces per-frame backdrop rasterization that visibly stutters the spin), and the deck stack fades out (cards rotating to 90° of Y go near-edge-on and would otherwise expose the pile behind, reading as clipping).
+- **MutationObserver discipline**. `mountFlipCard` watches the host's `class` attribute to translate game-side `.is-flipped` toggles into `flipCard3D` calls. **The flip implementation must not toggle any class on the host**, or it re-enters the observer and breaks game flow. The fix uses two non-class signals: a `data-flipping` attribute on the host (for foil suppression CSS) and an `activeFlips` Set gating an `is-flipping` class on `#css3d-root` (for deck-stack suppression CSS).

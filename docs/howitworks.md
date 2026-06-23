@@ -188,3 +188,24 @@ The refresh pipeline runs on a self-hosted runner with Azure CLI access.
 
 ### Discovery
 A small "✨ WebGL beta" chip in `toptrumps.html`'s topbar links to `toptrumps-webgl.html`; the WebGL build has a reciprocal "← Stable" chip linking back.
+
+### CSS3D card transport (Phase 2A–2D)
+
+On top of the three WebGL additions above, the build runs a parallel `CSS3DRenderer` scene (vendored at `vendor/CSS3DRenderer.js`) that owns the top card on each side plus a stack of face-down cards behind it. This is what gives the WebGL build true depth-of-stage motion that the CSS-transform stable build can't reach.
+
+**Coordinate system.** A `PerspectiveCamera(fov=50)` sits at `z = (H/2)/tan(fov/2)` so 1 world unit equals 1 screen pixel at `z=0`. Viewport-space rects map as `worldX = viewportX - W/2`, `worldY = -(viewportY - H/2)`. The renderer's DOM element (`#css3d-root`) is `position: fixed; inset: 0; z-index: 5; pointer-events: none;` — children re-enable pointer events per card.
+
+**Lifecycle (mount→fly→flip→slide→evict).**
+1. **Lift** (`mountFlipCard`): the host `<div>` for the current top card is moved into a `CSS3DObject` and tracked in `cssCards`. `realignCard` keeps the 3D transform aligned with the DOM rect on resize and layout changes, and caches width/height writes so it only touches `style.width` / `style.height` when the rect actually changes.
+2. **Arc-deal** (Phase 2C): at round start each card flies in along a quadratic-Bezier arc with rotation. The handle is tracked in `flyingDeals` and cancellable from `clearAllCards`.
+3. **Flip** (`flipCard3D`): cosine-eased Y rotation with peak forward lift (`liftZ = 40`) and back-tilt (`tiltX = 0.12`). `updateFaceVisibility` swaps front/back DOM nodes around the 90° mark via `onMid`.
+4. **Round-end slide**: the loser's top card arcs to the winner's pile and fades; the winner's card returns to base.
+5. **Deck stack** (Phase 2D): `renderDeckStack3D` mounts up to `MAX_DECK_VISIBLE = 12` face-down cards behind each top card, with small jitter (±2.5px x, ±2px y, ±1.5° rotZ, z = −0.8 − i·1.0). Entries are flagged `isDeckStack: true` so `clearAllCards` / per-round eviction sweeps them automatically.
+
+**Flip-stutter and clipping fixes.**
+- The foil overlay uses `mix-blend-mode: screen`, which forces a per-frame backdrop rasterization. During the spin this caused visible jitter on rare+ cards. Fix: hide the foil for the duration of the flip via a `data-flipping` **attribute** on the host (see MO discipline below). CSS: `.flip-host[data-flipping] .foil-webgl { opacity: 0; transition: opacity 80ms; }`.
+- At the 90° mark of the Y rotation the lifted card is edge-on (~0px wide on screen), so the deck stack behind it is briefly fully visible — the player reads it as the top card "clipping through" the pile. Fix: an `activeFlips` Set in module scope toggles an `is-flipping` class on `#css3d-root` while any card is mid-flip; CSS fades `[data-deck-stack]` to `opacity: 0` for 180ms.
+
+**MutationObserver discipline (critical).** `mountFlipCard` watches the host's `class` attribute (`attributeFilter: ['class']`) to convert game-side `.is-flipped` toggles into `flipCard3D` calls. **Never toggle a class on the host inside `flipCard3D`** — the observer re-enters and breaks game flow at the `cpuPicksStat` setTimeout. The data-attribute / `#css3d-root`-class split above is deliberate: both signals are invisible to the MO.
+
+**Module exports** (live on `window.__webgl3D`): `mountFlipCard`, `unmountFlipCard`, `flip`, `dealFromTo`, `slideToPile`, `renderDeckStack`, plus `clearAllCards` for screen-change cleanup.
