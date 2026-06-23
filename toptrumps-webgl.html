@@ -3329,199 +3329,188 @@ function cardBack() {
     const rarityColor = RARITY_COLOR[card.rarity]   || '#b9bcc6';
     const W = TEX_W, H = TEX_H;
 
-    // Background — dark navy vertical gradient
-    const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
-    bgGrad.addColorStop(0, '#1d2027');
-    bgGrad.addColorStop(1, '#11131a');
-    ctx.fillStyle = bgGrad;
+    // Outer frame — deep charcoal so the family band reads as a panel.
+    ctx.fillStyle = '#0e1117';
     roundRect(ctx, 0, 0, W, H, 56); ctx.fill();
 
-    // Family-colored accent stripe (top)
+    // Family-colored TOP BAND — 360px tall, holds title + nickname + rarity.
+    // Big enough to read clearly when downsampled to 320px screen width.
     ctx.fillStyle = famColor;
-    roundRectTop(ctx, 0, 0, W, 80, 56); ctx.fill();
+    roundRectTop(ctx, 0, 0, W, 360, 56); ctx.fill();
 
-    // Rarity-tinted inner border
-    ctx.strokeStyle = rarityColor;
-    ctx.lineWidth = 8;
-    roundRect(ctx, 16, 16, W - 32, H - 32, 48); ctx.stroke();
-
-    // Subtle vignette
-    const vg = ctx.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, H * 0.8);
-    vg.addColorStop(0, 'rgba(0,0,0,0)');
-    vg.addColorStop(1, 'rgba(0,0,0,0.4)');
-    ctx.fillStyle = vg;
-    roundRect(ctx, 16, 16, W - 32, H - 32, 48); ctx.fill();
-
-    // Header — region pill (left)
-    ctx.font = '600 44px Inter, system-ui, sans-serif';
-    ctx.fillStyle = '#e6e8ed';
-    ctx.textBaseline = 'middle';
-    ctx.textAlign = 'left';
-    ctx.fillText('⬢ ' + card.regionShort, PAD, 150);
-
-    // Header — rarity (right)
+    // Rarity star chip — top-right of family band
     const stars = '★'.repeat(RARITY_STARS[card.rarity] || 1);
-    ctx.font = '700 44px Inter, system-ui, sans-serif';
-    ctx.fillStyle = rarityColor;
-    ctx.textAlign = 'right';
-    ctx.fillText(stars + '  ' + (RARITY_LABEL[card.rarity] || ''), W - PAD, 150);
-    ctx.textAlign = 'left';
-
-    // Title — card name (auto-shrink for long names)
-    let nameFontPx = 92;
-    ctx.font = '800 ' + nameFontPx + 'px Inter, system-ui, sans-serif';
-    while (ctx.measureText(card.displayName).width > W - PAD * 2 && nameFontPx > 48) {
-      nameFontPx -= 4;
-      ctx.font = '800 ' + nameFontPx + 'px Inter, system-ui, sans-serif';
-    }
-    ctx.fillStyle = '#f5f6f8';
-    ctx.textBaseline = 'alphabetic';
-    ctx.fillText(card.displayName, PAD, 280);
-
-    // Nickname
-    ctx.font = 'italic 500 44px Inter, system-ui, sans-serif';
-    ctx.fillStyle = '#9aa0b0';
-    ctx.fillText('"' + (card.nickname || '') + '"', PAD, 340);
-
-    // Family pill
-    ctx.fillStyle = famColor;
-    ctx.beginPath(); ctx.arc(PAD + 14, 405, 14, 0, Math.PI * 2); ctx.fill();
-    ctx.font = '600 36px Inter, system-ui, sans-serif';
-    ctx.fillStyle = '#cfd3df';
-    ctx.fillText((card.familyDisplay || '').trim() + '  ·  ' + card.familyType, PAD + 40, 405);
+    ctx.save();
+    ctx.fillStyle = 'rgba(0,0,0,0.32)';
+    const chipW = 60 + stars.length * 80;
+    roundRect(ctx, W - PAD - chipW, 60, chipW, 100, 50); ctx.fill();
+    ctx.font = '900 72px Inter, system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
     ctx.textBaseline = 'middle';
+    ctx.textAlign = 'center';
+    ctx.fillText(stars, W - PAD - chipW / 2, 112);
+    ctx.restore();
 
-    // Art zone — large tinted family glyph
+    // Region pill — top-left of family band
+    ctx.font = '700 52px Inter, system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.95)';
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'left';
+    ctx.fillText('⬢ ' + (card.regionShort || ''), PAD, 112);
+
+    // Title — HUGE, white, auto-shrink for long names
+    let nameFontPx = 120;
+    ctx.font = '900 ' + nameFontPx + 'px Inter, system-ui, sans-serif';
+    while (ctx.measureText(card.displayName).width > W - PAD * 2 && nameFontPx > 56) {
+      nameFontPx -= 6;
+      ctx.font = '900 ' + nameFontPx + 'px Inter, system-ui, sans-serif';
+    }
+    ctx.fillStyle = '#ffffff';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText(card.displayName, PAD, 260);
+
+    // Nickname — italic, semi-transparent white
+    ctx.font = 'italic 600 48px Inter, system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    ctx.fillText('"' + (card.nickname || '') + '"', PAD, 330);
+
+    // Family glyph — big watermark in the artwork zone (y 380-1100)
     const glyph = glyphCanvases[card.familyType];
     if (glyph) {
       ctx.save();
-      ctx.globalAlpha = 0.18;
-      const gSize = 620;
-      ctx.drawImage(glyph, (W - gSize) / 2, 470, gSize, gSize);
-      ctx.restore();
-      // Light famColor wash on top to tint
-      ctx.save();
-      ctx.globalCompositeOperation = 'overlay';
-      ctx.globalAlpha = 0.35;
-      ctx.fillStyle = famColor;
-      ctx.fillRect((W - 620) / 2, 470, 620, 620);
+      ctx.globalAlpha = 0.32;
+      const gSize = 720;
+      ctx.drawImage(glyph, (W - gSize) / 2, 410, gSize, gSize);
       ctx.restore();
     }
+    // Family + rarity label centered in artwork zone, layered over glyph
+    ctx.font = '800 56px Inter, system-ui, sans-serif';
+    ctx.fillStyle = famColor;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    // Background plate so label stays readable
+    ctx.save();
+    ctx.fillStyle = 'rgba(0,0,0,0.55)';
+    const labelText = (RARITY_LABEL[card.rarity] || '').toUpperCase() + ' · ' + (card.familyType || '').toUpperCase();
+    const labelMetrics = (ctx.font = '800 56px Inter, system-ui, sans-serif', ctx.measureText(labelText));
+    const lblW = labelMetrics.width + 60;
+    roundRect(ctx, (W - lblW) / 2, 1100, lblW, 86, 43); ctx.fill();
+    ctx.restore();
+    ctx.font = '800 56px Inter, system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(labelText, W / 2, 1145);
 
-    // GPU badge (top-right of art zone if card has gpu tag)
+    // GPU badge (if applicable) — top-right under chip
     if (card.tags && card.tags.gpu) {
-      ctx.font = '800 56px Inter, system-ui, sans-serif';
+      ctx.save();
       ctx.fillStyle = '#f0a93b';
-      ctx.textAlign = 'right';
+      roundRect(ctx, W - PAD - 360, 230, 360, 76, 38); ctx.fill();
+      ctx.font = '800 48px Inter, system-ui, sans-serif';
+      ctx.fillStyle = '#1a1d24';
+      ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText('GPU · ' + card.tags.gpu, W - PAD, 560);
-      ctx.textAlign = 'left';
+      ctx.fillText('GPU · ' + card.tags.gpu, W - PAD - 180, 268);
+      ctx.restore();
     }
 
-    // Stats — 6 rows from y=1170 down
-    const STAT_DEFS = [
-      { key: 'vcpus',           label: 'vCPU',       arrow: '▲', fmt: v => String(v ?? '—') },
-      { key: 'memoryGB',        label: 'Memory',     arrow: '▲', fmt: v => v == null ? '—' : v + ' GB' },
-      { key: 'maxDataDisks',    label: 'Data Disks', arrow: '▲', fmt: v => v == null ? '—' : String(v) },
-      { key: 'nics',            label: 'NICs',       arrow: '▲', fmt: v => v == null ? '—' : String(v) },
-      { key: 'pricePerHourUSD', label: 'Price',      arrow: '▼', fmt: v => v == null ? '—' : '$' + v.toFixed(3) + '/hr' },
-      { key: 'powerScore',      label: 'Power',      arrow: '▲', fmt: v => v == null ? '—' : v + ' / 100' },
+    // STATS PANEL — cream inset, 4 big stats in 2×2 grid
+    ctx.fillStyle = '#f5f1e3';
+    roundRect(ctx, PAD - 16, 1230, W - (PAD - 16) * 2, 720, 40); ctx.fill();
+
+    // Family-colored strip at top of panel
+    ctx.fillStyle = famColor;
+    ctx.fillRect(PAD - 16, 1230, W - (PAD - 16) * 2, 8);
+
+    // 4 stats in 2x2 grid
+    const cells = [
+      { label: 'vCPU',     val: card.stats && card.stats.vcpus != null ? String(card.stats.vcpus) : '—' },
+      { label: 'MEMORY',   val: card.stats && card.stats.memoryGB != null ? card.stats.memoryGB + ' GB' : '—' },
+      { label: 'DISKS',    val: card.stats && card.stats.maxDataDisks != null ? String(card.stats.maxDataDisks) : '—' },
+      { label: 'POWER',    val: card.stats && card.stats.powerScore != null ? card.stats.powerScore + '/100' : '—' },
     ];
-    const statsY0 = 1170;
-    const rowH = 90;
-    STAT_DEFS.forEach((s, i) => {
-      const y = statsY0 + i * rowH;
-      // Divider
-      ctx.strokeStyle = '#2a2e3a';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.moveTo(PAD, y - rowH / 2 + 4);
-      ctx.lineTo(W - PAD, y - rowH / 2 + 4);
-      ctx.stroke();
+    const cellW = (W - (PAD - 16) * 2) / 2;
+    const cellH = 340;
+    const gx0 = PAD - 16;
+    const gy0 = 1260;
+    cells.forEach((c, i) => {
+      const col = i % 2, row = Math.floor(i / 2);
+      const cx = gx0 + col * cellW + cellW / 2;
+      const cy = gy0 + row * cellH + cellH / 2;
       // Label
-      ctx.font = '600 42px Inter, system-ui, sans-serif';
-      ctx.fillStyle = '#a8aeba';
-      ctx.textBaseline = 'middle';
-      ctx.textAlign = 'left';
-      ctx.fillText(s.label, PAD, y);
-      // Arrow
-      ctx.font = '600 42px Inter, system-ui, sans-serif';
-      ctx.fillStyle = s.arrow === '▲' ? '#4ea36b' : '#c4314b';
-      ctx.fillText(s.arrow, PAD + 320, y);
-      // Value (right, monospace, bold)
-      ctx.font = '800 56px "JetBrains Mono", "SF Mono", Menlo, monospace';
-      ctx.fillStyle = '#f5f6f8';
-      ctx.textAlign = 'right';
-      ctx.fillText(s.fmt(card.stats ? card.stats[s.key] : null), W - PAD, y);
-    });
-    ctx.textAlign = 'left';
-
-    // Footer divider
-    ctx.strokeStyle = '#2a2e3a';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.moveTo(PAD, 1720); ctx.lineTo(W - PAD, 1720); ctx.stroke();
-
-    // Ability footer
-    if (card.ability) {
-      ctx.font = '800 44px Inter, system-ui, sans-serif';
-      ctx.fillStyle = rarityColor;
+      ctx.font = '700 42px Inter, system-ui, sans-serif';
+      ctx.fillStyle = '#6a6e78';
+      ctx.textAlign = 'center';
       ctx.textBaseline = 'alphabetic';
-      ctx.fillText(card.ability.title || '', PAD, 1790);
-      ctx.font = '500 32px Inter, system-ui, sans-serif';
-      ctx.fillStyle = '#b9bcc6';
-      wrapText(ctx, card.ability.description || '', PAD, 1840, W - PAD * 2, 42, 4);
-    }
+      ctx.fillText(c.label, cx, cy - 30);
+      // Value — HUGE
+      ctx.font = '900 100px Inter, system-ui, sans-serif';
+      ctx.fillStyle = '#1a1d24';
+      ctx.fillText(c.val, cx, cy + 60);
+    });
+
+    // Divider between cells
+    ctx.strokeStyle = 'rgba(0,0,0,0.10)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(W / 2, 1260 + 40);
+    ctx.lineTo(W / 2, 1230 + 720 - 40);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(gx0 + 40, 1260 + cellH);
+    ctx.lineTo(gx0 + (W - (PAD - 16) * 2) - 40, 1260 + cellH);
+    ctx.stroke();
+
+    // Rarity-tinted outer border (last so it sits on top)
+    ctx.strokeStyle = rarityColor;
+    ctx.lineWidth = 10;
+    roundRect(ctx, 20, 20, W - 40, H - 40, 44); ctx.stroke();
   }
 
   function drawBack(ctx) {
     const W = TEX_W, H = TEX_H;
 
-    // Deep blue radial background
-    const bgGrad = ctx.createRadialGradient(W / 2, H / 2, 100, W / 2, H / 2, 1300);
-    bgGrad.addColorStop(0, '#173766');
+    // Bold deep-blue field with bright radial center.
+    const bgGrad = ctx.createRadialGradient(W / 2, H / 2, 200, W / 2, H / 2, 1400);
+    bgGrad.addColorStop(0, '#2e64bf');
+    bgGrad.addColorStop(0.6, '#173766');
     bgGrad.addColorStop(1, '#0a1a30');
     ctx.fillStyle = bgGrad;
     roundRect(ctx, 0, 0, W, H, 56); ctx.fill();
 
-    // Hex frames
-    drawHex(ctx, W / 2, H / 2, 540, 'rgba(216,161,74,0.5)', 5);
-    drawHex(ctx, W / 2, H / 2, 470, 'rgba(255,255,255,0.13)', 1.5);
-    drawHex(ctx, W / 2, H / 2, 400, 'rgba(255,255,255,0.08)', 1);
+    // Bright gold hex frames (high opacity so they survive downsampling)
+    drawHex(ctx, W / 2, H / 2, 620, 'rgba(240,169,59,0.85)', 12);
+    drawHex(ctx, W / 2, H / 2, 540, 'rgba(255,255,255,0.40)', 4);
+    drawHex(ctx, W / 2, H / 2, 460, 'rgba(255,255,255,0.22)', 2);
 
-    // Concentric rings
-    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-    ctx.lineWidth = 1;
-    for (let r = 200; r < 380; r += 60) {
+    // Concentric rings (subtle interior detail)
+    ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+    ctx.lineWidth = 2;
+    for (let r = 220; r < 440; r += 80) {
       ctx.beginPath(); ctx.arc(W / 2, H / 2, r, 0, Math.PI * 2); ctx.stroke();
     }
 
-    // Wordmarks top + bottom
-    ctx.font = '900 60px Inter, system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(216,161,74,0.9)';
+    // BIG centered "TT" mark in bright white
+    ctx.font = '900 480px Inter, system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('AZURE TOP TRUMPS', W / 2, 230);
-    ctx.fillText('AZURE TOP TRUMPS', W / 2, H - 230);
+    ctx.fillText('TT', W / 2, H / 2 - 60);
 
-    // Centered TT mark
-    ctx.font = '900 380px Inter, system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(255,255,255,0.92)';
-    ctx.fillText('TT', W / 2, H / 2 - 30);
+    // Subtitle directly under TT
+    ctx.font = '700 56px Inter, system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    ctx.fillText('AZURE VM SKUs', W / 2, H / 2 + 280);
 
-    // Subtitle
-    ctx.font = '500 36px Inter, system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(255,255,255,0.55)';
-    ctx.fillText('Azure VM SKUs · 2026', W / 2, H / 2 + 220);
+    // Wordmarks — top + bottom in BOLD bright gold
+    ctx.font = '900 80px Inter, system-ui, sans-serif';
+    ctx.fillStyle = '#f0a93b';
+    ctx.fillText('TOP TRUMPS', W / 2, 200);
+    ctx.fillText('TOP TRUMPS', W / 2, H - 200);
 
-    // Diagonal sheen
-    ctx.save();
-    const sheen = ctx.createLinearGradient(0, H * 0.2, W, H * 0.45);
-    sheen.addColorStop(0,   'rgba(255,255,255,0)');
-    sheen.addColorStop(0.5, 'rgba(255,255,255,0.04)');
-    sheen.addColorStop(1,   'rgba(255,255,255,0)');
-    ctx.fillStyle = sheen;
-    ctx.fillRect(0, 0, W, H);
-    ctx.restore();
+    // Outer rarity-neutral border
+    ctx.strokeStyle = 'rgba(240,169,59,0.65)';
+    ctx.lineWidth = 10;
+    roundRect(ctx, 20, 20, W - 40, H - 40, 44); ctx.stroke();
 
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
@@ -5266,7 +5255,11 @@ cardRenderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 cardRenderer.setSize(window.innerWidth, window.innerHeight, false);
 cardRenderer.setClearColor(0x000000, 0); // fully transparent
 cardRenderer.outputColorSpace = THREE.SRGBColorSpace;
-cardRenderer.toneMapping = THREE.ACESFilmicToneMapping;
+// Phase 3 — NoToneMapping. The card textures are pre-authored sRGB
+// and the front/back faces use MeshBasicMaterial (unlit), so ACES
+// would only crush dark values. Edge band uses MeshStandardMaterial,
+// which still picks up the lights without tone-mapping concerns.
+cardRenderer.toneMapping = THREE.NoToneMapping;
 cardRenderer.toneMappingExposure = 1.0;
 
 const cardScene = new THREE.Scene();
@@ -5280,15 +5273,15 @@ setCardCameraDistance();
 // Lighting rig — directional key + ambient + hemisphere fill. A
 // slow-orbiting point light brings the foil/clearcoat to life. Lights
 // live in world space so all cards share them.
-const keyLight = new THREE.DirectionalLight(0xfff5e0, 1.4);
+const keyLight = new THREE.DirectionalLight(0xfff5e0, 2.2);
 keyLight.position.set(300, 600, 800);
 cardScene.add(keyLight);
-const ambient = new THREE.AmbientLight(0x6a8eb6, 0.55);
+const ambient = new THREE.AmbientLight(0xc8d4e6, 1.0);
 cardScene.add(ambient);
-const hemi = new THREE.HemisphereLight(0xfff5e0, 0x202840, 0.35);
+const hemi = new THREE.HemisphereLight(0xfff5e0, 0x202840, 0.6);
 cardScene.add(hemi);
 // Orbiting point light gives the metallic foil moving highlights.
-const orbitLight = new THREE.PointLight(0xffe8b0, 6.0, 0, 0); // intensity, distance=0=infinite, decay=0=constant
+const orbitLight = new THREE.PointLight(0xffe8b0, 4.0, 0, 0); // intensity, distance=0=infinite, decay=0=constant
 orbitLight.position.set(0, 0, 400);
 cardScene.add(orbitLight);
 
@@ -5321,6 +5314,10 @@ const cardShape = buildRoundedShape(CARD_W, CARD_H, CARD_R);
 const cardPlateGeo = new THREE.ShapeGeometry(cardShape, 12);
 // ShapeGeometry UVs are in shape coordinates. Re-map to [0,1] based on
 // the shape's bounding box so a square texture maps cleanly.
+// NOTE: CanvasTexture defaults to flipY = true, which already aligns
+// canvas-top (y=0 in 2D context) with UV V=1. So V here must increase
+// WITH world Y, not against it — otherwise the card art shows upside
+// down. Same applies to U for the front face.
 (function remapPlateUVs() {
   cardPlateGeo.computeBoundingBox();
   const bb = cardPlateGeo.boundingBox;
@@ -5329,8 +5326,7 @@ const cardPlateGeo = new THREE.ShapeGeometry(cardShape, 12);
   const dx = bb.max.x - bb.min.x, dy = bb.max.y - bb.min.y;
   for (let i = 0; i < uv.count; i++) {
     const u = (pos.getX(i) - bb.min.x) / dx;
-    // Texture origin is top-left, world Y is bottom-up, so flip V.
-    const v = 1.0 - (pos.getY(i) - bb.min.y) / dy;
+    const v = (pos.getY(i) - bb.min.y) / dy;
     uv.setXY(i, u, v);
   }
   uv.needsUpdate = true;
@@ -5338,52 +5334,55 @@ const cardPlateGeo = new THREE.ShapeGeometry(cardShape, 12);
 
 const cardEdgeGeo = new THREE.ExtrudeGeometry(cardShape, {
   depth: CARD_DEPTH,
-  bevelEnabled: true,
-  bevelThickness: 0.8,
-  bevelSize: 0.8,
-  bevelSegments: 2,
-  curveSegments: 6,
+  // Bevel disabled — the bevel envelope extends past `depth` by
+  // bevelThickness on each end, which clipped through the textured
+  // plates and produced solid edge-color cards (z-fight). Sharp 90°
+  // edges look correct on a card anyway. A subtle round can be re-
+  // added later as a separate, behind-the-plate mesh if desired.
+  bevelEnabled: false,
+  curveSegments: 8,
 });
 // Center the extrude on z so depth straddles z=0 (matching plate positions).
 cardEdgeGeo.translate(0, 0, -CARD_DEPTH / 2);
-const cardEdgeMat = new THREE.MeshPhysicalMaterial({
-  color: 0x1d2027,
-  roughness: 0.6,
-  metalness: 0.3,
+const cardEdgeMat = new THREE.MeshStandardMaterial({
+  color: 0x2a2e3a,
+  roughness: 0.55,
+  metalness: 0.25,
 });
 
 const RARITY_MAT_PARAMS = {
-  common:    { roughness: 0.85, metalness: 0.05, clearcoat: 0.0, iridescence: 0.0, emissiveIntensity: 0.0 },
-  uncommon:  { roughness: 0.7,  metalness: 0.15, clearcoat: 0.2, iridescence: 0.0, emissiveIntensity: 0.04 },
-  rare:      { roughness: 0.4,  metalness: 0.5,  clearcoat: 0.7, iridescence: 0.3, emissiveIntensity: 0.08 },
-  epic:      { roughness: 0.3,  metalness: 0.7,  clearcoat: 0.9, iridescence: 0.4, emissiveIntensity: 0.12 },
-  legendary: { roughness: 0.2,  metalness: 0.85, clearcoat: 1.0, iridescence: 0.6, emissiveIntensity: 0.16 },
+  // Phase 3 — keep metalness LOW so the printed (texture) card content
+  // is fully readable. Rarity differentiation comes from clearcoat,
+  // iridescence, and a small emissive boost rather than mirror metal.
+  common:    { roughness: 0.75, metalness: 0.02, clearcoat: 0.0, iridescence: 0.0, emissiveIntensity: 0.05 },
+  uncommon:  { roughness: 0.6,  metalness: 0.05, clearcoat: 0.25, iridescence: 0.0, emissiveIntensity: 0.10 },
+  rare:      { roughness: 0.45, metalness: 0.08, clearcoat: 0.55, iridescence: 0.25, emissiveIntensity: 0.16 },
+  epic:      { roughness: 0.35, metalness: 0.12, clearcoat: 0.8, iridescence: 0.4, emissiveIntensity: 0.22 },
+  legendary: { roughness: 0.28, metalness: 0.15, clearcoat: 1.0, iridescence: 0.55, emissiveIntensity: 0.28 },
 };
 const RARITY_EMISSIVE = {
-  common:    0x000000,
-  uncommon:  0x103018,
-  rare:      0x081830,
-  epic:      0x1a0a2e,
-  legendary: 0x3a1f00,
+  // Emissive uses the base texture as the emissive map (via emissiveMap),
+  // so this color tints how strongly the card art self-illuminates.
+  // White means the card glows in its own colors; warm tints add mood.
+  common:    0x404040,
+  uncommon:  0x607060,
+  rare:      0x4a6890,
+  epic:      0x6a4a8c,
+  legendary: 0x8a6020,
 };
 
 function makeCardMaterial(texture, rarity) {
-  const p = RARITY_MAT_PARAMS[rarity] || RARITY_MAT_PARAMS.common;
-  const mat = new THREE.MeshPhysicalMaterial({
+  // Phase 3 — MeshBasicMaterial guarantees the bake is 100% readable
+  // regardless of scene lighting / tone mapping. The 3D feel comes
+  // from genuine geometry (edge band, flip arc, slide tilt) plus the
+  // globe / particles behind, not from PBR shading on the face. The
+  // gloss / foil overlay can be added back as a Phase 4 transparent
+  // physical-material overlay mesh once the basics read correctly.
+  return new THREE.MeshBasicMaterial({
     map: texture,
-    roughness: p.roughness,
-    metalness: p.metalness,
-    clearcoat: p.clearcoat,
-    clearcoatRoughness: 0.2,
-    iridescence: p.iridescence,
-    iridescenceIOR: 1.5,
-    iridescenceThicknessRange: [120, 380],
-    emissive: new THREE.Color(RARITY_EMISSIVE[rarity] || 0x000000),
-    emissiveIntensity: p.emissiveIntensity,
-    emissiveMap: texture,
     side: THREE.FrontSide,
+    toneMapped: false,
   });
-  return mat;
 }
 
 const meshCards = []; // entries: { pivot, frontMesh, backMesh, edgeMesh, stackEl, hostEl, frontTex, backTex, frontMat, backMat, flipTween, slideTween, deckOffset, isMesh: true }
@@ -5401,6 +5400,13 @@ function mountMeshCard(stackEl, hostEl, card, opts = {}) {
   // Bake textures (cached per card.id; back is shared).
   const frontCanvas = window.__cardArt.bakeFront(card);
   const backCanvas  = window.__cardArt.bakeBack();
+  // Diagnostic: sample a known-bright pixel from the front bake. If
+  // this logs all zeros, the bake didn't actually draw (font / canvas
+  // / context problem). If it logs non-zero, the texture is real and
+  // any "black card" issue lives in the material / lighting path.
+  // (Phase-3 diagnostics removed — root cause was z-fighting between
+  // the flat plate and the extruded edge caps; fixed by separating
+  // their z-positions. Bake content is verified correct.)
   const frontTex = new THREE.CanvasTexture(frontCanvas);
   frontTex.colorSpace = THREE.SRGBColorSpace;
   frontTex.anisotropy = cardRenderer.capabilities.getMaxAnisotropy();
@@ -5411,16 +5417,23 @@ function mountMeshCard(stackEl, hostEl, card, opts = {}) {
   backTex.needsUpdate = true;
 
   const frontMat = makeCardMaterial(frontTex, card.rarity);
-  const backMat  = makeCardMaterial(backTex,  'rare'); // back gets a modest sheen regardless of rarity
+  // Back: low-metal, modest clearcoat — uniform across all cards so the
+  // back deck always reads the same regardless of front rarity.
+  const backMat  = makeCardMaterial(backTex,  'uncommon');
 
   const pivot = new THREE.Object3D();
 
+  // The extruded edge geometry has flat front/back caps at z=±CARD_DEPTH/2.
+  // Push the textured plates clear of those caps (0.5 units in front)
+  // so the depth buffer doesn't z-fight at the card's screen distance.
+  // Without this gap the dark edge color wins and the texture vanishes.
+  const PLATE_OFFSET = 0.5;
   const frontMesh = new THREE.Mesh(cardPlateGeo, frontMat);
-  frontMesh.position.z = CARD_DEPTH / 2 + 0.02;
+  frontMesh.position.z = CARD_DEPTH / 2 + PLATE_OFFSET;
   pivot.add(frontMesh);
 
   const backMesh = new THREE.Mesh(cardPlateGeo, backMat);
-  backMesh.position.z = -(CARD_DEPTH / 2 + 0.02);
+  backMesh.position.z = -(CARD_DEPTH / 2 + PLATE_OFFSET);
   backMesh.rotation.y = Math.PI;
   pivot.add(backMesh);
 
