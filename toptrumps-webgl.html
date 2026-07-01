@@ -1852,14 +1852,10 @@ body.has-baked-back .card.is-back .back-corner { display: none !important; }
    watches `class` — doesn't re-enter the flip on every toggle. */
 .flip-host[data-flipping] .foil-webgl { opacity: 0 !important; transition: opacity 80ms ease-out; }
 
-/* Phase 2D — hide the deck-stack cards while any top card is
-   mid-flip. With CSS3DRenderer's perspective and tightly-spaced z
-   layers, the lifted card briefly becomes edge-on at 90° of its
-   Y rotation and exposes the cards behind it, which reads as the
-   top card "clipping through" the pile. Fading the stack out for
-   the duration of the flip removes the artefact entirely. */
-[data-deck-stack] { transition: opacity 180ms ease-out; }
-#css3d-root.is-flipping [data-deck-stack] { opacity: 0; }
+/* Keep deck-stack cards visible during flips so pile continuity is
+   preserved. Depth separation and stronger 3D turnover motion handle
+   the edge-on readability without fading the stack out. */
+[data-deck-stack] { opacity: 1; }
 @media (prefers-reduced-motion: reduce) {
   .card .foil-webgl { display: none; }
   .card.has-webgl-foil .card-foil { opacity: 1; }
@@ -6710,28 +6706,41 @@ function evictMeshAtStack(stackEl) {
 function flipMeshCard(entry, fromY, toY, duration) {
   if (!entry) return;
   if (entry.flipTween) cancelAnimationFrame(entry.flipTween);
-  // Phase 3.6 — mesh stays hidden throughout the flip. The CSS3D
-  // layer rotates the DOM card in lockstep, which carries the
-  // original design (glyph, info pip, hover, tooltips) across the
-  // spin. The mesh tween still runs so pivot.rotation tracks the
-  // CSS3D obj (used by later pulse / slide math), but with the
-  // front + edge invisible nothing is drawn.
+  // Keep mesh surfaces hidden during turnover so the DOM card artwork is
+  // the single visible front style from start to settle.
+  entry.isAnimating = true;
   const start = performance.now();
-  const delta = toY - fromY;
-  const liftZ = 40, tiltX = 0.12;
+  const baseX = entry.pivot.position.x;
+  const baseY = entry.pivot.position.y;
+  const baseZ = entry.pivot.position.z;
+  const baseRZ = entry.pivot.rotation.z;
+  const baseSX = entry.pivot.scale.x;
+  const baseSY = entry.pivot.scale.y;
+  const baseSZ = entry.pivot.scale.z;
+  const cardHalfW = (CARD_W * baseSX) * 0.5;
   function step(now) {
     const t = Math.min(1, (now - start) / duration);
-    const eased = 0.5 - 0.5 * Math.cos(Math.PI * t);
-    const arc = Math.sin(Math.PI * t);
-    entry.pivot.rotation.y = fromY + delta * eased;
-    entry.pivot.position.z = (entry.deckOffset ? entry.deckOffset.z : 0) + arc * liftZ;
-    entry.pivot.rotation.x = arc * tiltX;
+    const m = sampleFlipMotion(t, fromY, toY, cardHalfW);
+    entry.pivot.rotation.y = m.y;
+    entry.pivot.rotation.x = m.tiltX;
+    entry.pivot.rotation.z = baseRZ + m.rollZ;
+    entry.pivot.position.x = baseX + m.peelX;
+    entry.pivot.position.y = baseY + m.heaveY;
+    entry.pivot.position.z = baseZ + m.liftZ;
+    entry.pivot.scale.x = baseSX * (1 - 0.09 * m.bend);
+    entry.pivot.scale.y = baseSY * (1 + 0.045 * m.bend);
+    entry.pivot.scale.z = baseSZ;
     if (t < 1) entry.flipTween = requestAnimationFrame(step);
     else {
       entry.pivot.rotation.y = toY;
-      entry.pivot.position.z = (entry.deckOffset ? entry.deckOffset.z : 0);
+      entry.pivot.rotation.z = baseRZ;
+      entry.pivot.position.x = baseX;
+      entry.pivot.position.y = baseY;
+      entry.pivot.position.z = baseZ;
       entry.pivot.rotation.x = 0;
+      entry.pivot.scale.set(baseSX, baseSY, baseSZ);
       entry.flipTween = null;
+      entry.isAnimating = false;
       syncMeshInteractive(entry);
     }
   }
@@ -7151,11 +7160,6 @@ function evictAtStack(stackEl) {
 // at midpoint), with a small back-tilt and roll. One-shot: the card
 // is created, tweened, and disposed. Returns a handle with cancel().
 const flyingDeals = new Set();
-// Set of entries currently mid-flip. Used to gate the cssEl
-// `is-flipping` class so the deck stack hides for the duration of any
-// in-progress spin and prevents the lifted card from clipping through
-// the pile.
-const activeFlips = new Set();
 function dealCard3D(opts) {
   const {
     fromX, fromY, toX, toY,
@@ -7337,8 +7341,6 @@ function clearAllCards() {
   for (let i = cssCards.length - 1; i >= 0; i--) removeCardFrom3D(cssCards[i]);
   flyingDeals.forEach(h => h.cancel());
   flyingDeals.clear();
-  activeFlips.clear();
-  if (cssEl) cssEl.classList.remove('is-flipping');
   document.querySelectorAll('.side-stack.has-lifted-3d').forEach(el => el.classList.remove('has-lifted-3d'));
 }
 
@@ -7348,46 +7350,74 @@ function clearAllCards() {
 // Also drives a small Z lift (~40px toward camera at midpoint) and a
 // subtle X tilt so the flip feels like a physical card spun on a finger
 // rather than a flat 2D rotation. Z/X are restored to 0 at the end.
+function sampleFlipMotion(t, fromY, toY, cardHalfW = 160) {
+  const eased = 0.5 - 0.5 * Math.cos(Math.PI * t);
+  const arc = Math.sin(Math.PI * t); // 0->1->0
+  const delta = toY - fromY;
+  const dir = delta >= 0 ? 1 : -1;
+  const bend = Math.pow(arc, 1.45);
+  const reach = Math.max(110, Math.min(220, cardHalfW));
+  return {
+    y: fromY + delta * eased + Math.sin(Math.PI * t * 1.28) * 0.06 * dir * arc,
+    liftZ: arc * (52 + reach * 0.16),
+    tiltX: arc * 0.26 + Math.sin(Math.PI * t * 2) * 0.035,
+    rollZ: Math.sin(Math.PI * t) * Math.sin(Math.PI * t) * 0.19 * dir,
+    peelX: Math.sin(Math.PI * t) * reach * 0.22 * dir,
+    heaveY: -Math.sin(Math.PI * t) * 10,
+    bend,
+    midProgress: eased,
+  };
+}
+
 function flipCard3D(entry, fromY, toY, duration, onMid) {
   if (!entry) return;
   if (entry.flipTween) cancelAnimationFrame(entry.flipTween);
   const start = performance.now();
-  const delta = toY - fromY;
-  const liftZ = 40;        // peak forward lift in CSS pixels
-  const tiltX = 0.12;      // peak back-tilt in radians (~7 deg)
+  const baseX = entry.obj.position.x;
+  const baseY = entry.obj.position.y;
+  const baseZ = entry.obj.position.z;
+  const baseRZ = entry.obj.rotation.z;
+  const baseSX = entry.obj.scale.x;
+  const baseSY = entry.obj.scale.y;
+  const baseSZ = entry.obj.scale.z;
+  const cardHalfW = ((entry.rect && entry.rect.width) || entry._lastW || 320) * 0.5;
+  entry.isAnimating = true;
   let midFired = false;
   // mix-blend-mode on the foil overlay makes the flip stutter on
   // rare+ cards. Use a data attribute (not a class) so the host's
   // MutationObserver — which is scoped to the `class` attribute —
   // doesn't see this and re-enter flipCard3D recursively.
   if (entry.hostEl) entry.hostEl.setAttribute('data-flipping', '1');
-  // Mark the CSS3D root so the deck stack fades out for the spin
-  // (prevents the lifted card from visibly clipping through the pile
-  // when it goes edge-on at 90°).
-  activeFlips.add(entry);
-  if (cssEl) cssEl.classList.add('is-flipping');
   function step(now) {
     const t = Math.min(1, (now - start) / duration);
-    const eased = 0.5 - 0.5 * Math.cos(Math.PI * t); // cosine ease (y rotation)
-    const arc = Math.sin(Math.PI * t);               // 0→1→0 for lift/tilt
-    entry.obj.rotation.y = fromY + delta * eased;
-    entry.obj.position.z = arc * liftZ;
-    entry.obj.rotation.x = arc * tiltX;
+    const m = sampleFlipMotion(t, fromY, toY, cardHalfW);
+    entry.obj.rotation.y = m.y;
+    entry.obj.rotation.x = m.tiltX;
+    entry.obj.rotation.z = baseRZ + m.rollZ;
+    entry.obj.position.x = baseX + m.peelX;
+    entry.obj.position.y = baseY + m.heaveY;
+    entry.obj.position.z = baseZ + m.liftZ;
+    entry.obj.scale.x = baseSX * (1 - 0.09 * m.bend);
+    entry.obj.scale.y = baseSY * (1 + 0.045 * m.bend);
+    entry.obj.scale.z = baseSZ;
     updateFaceVisibility(entry);
-    if (!midFired && Math.abs(entry.obj.rotation.y - (fromY + delta * 0.5)) <= Math.abs(delta) * 0.05) {
+    if (!midFired && m.midProgress >= 0.5) {
       midFired = true;
       if (onMid) onMid();
     }
     if (t < 1) entry.flipTween = requestAnimationFrame(step);
     else {
       entry.obj.rotation.y = toY;
-      entry.obj.position.z = 0;
+      entry.obj.rotation.z = baseRZ;
+      entry.obj.position.x = baseX;
+      entry.obj.position.y = baseY;
+      entry.obj.position.z = baseZ;
       entry.obj.rotation.x = 0;
+      entry.obj.scale.set(baseSX, baseSY, baseSZ);
       updateFaceVisibility(entry);
       entry.flipTween = null;
+      entry.isAnimating = false;
       if (entry.hostEl) entry.hostEl.removeAttribute('data-flipping');
-      activeFlips.delete(entry);
-      if (cssEl && activeFlips.size === 0) cssEl.classList.remove('is-flipping');
     }
   }
   entry.flipTween = requestAnimationFrame(step);
