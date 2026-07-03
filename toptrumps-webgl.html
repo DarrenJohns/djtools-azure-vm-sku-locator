@@ -6205,6 +6205,13 @@ resize();
 // --- Animation loop ---
 let running = true;
 let lastT = performance.now();
+// Decorative globe is throttled to ~31fps: it's a slowly-spinning background,
+// so halving its render cadence is imperceptible yet frees a large slice of GPU
+// / main-thread time for the card-flip layers to hit 60fps. The performance
+// governor still measures the TRUE display rate on every raw rAF tick (below),
+// so this intentional cap never trips a false "slow machine" downgrade.
+const GLOBE_FRAME_DT = 1 / 31;
+let _globeAcc = GLOBE_FRAME_DT; // render on the very first frame
 
 // --- Adaptive performance governor (+ optional FPS HUD via ?fps=1) ---
 // The core/memory heuristic that picks the quality tier can't see the GPU,
@@ -6258,9 +6265,18 @@ function governPerf(dt) {
 
 function frame(now) {
   if (!running) return;
-  const dt = Math.min(0.05, (now - lastT) / 1000);
+  // Reschedule up-front at the native display cadence (unless reduced-motion,
+  // which renders a single static frame). The governor samples this true rate.
+  if (!reduced) requestAnimationFrame(frame);
+  const rawDt = Math.min(0.05, (now - lastT) / 1000);
   lastT = now;
-  governPerf(dt);
+  governPerf(rawDt);
+  // Throttle the heavy globe body to ~31fps. Skipped ticks accumulate their
+  // dt so the spin/breathe stay time-correct when we do render.
+  _globeAcc += rawDt;
+  if (!reduced && _globeAcc < GLOBE_FRAME_DT) return;
+  const dt = Math.min(0.05, _globeAcc);
+  _globeAcc = 0;
   fxState.breathe += dt;
   const breathe = Math.sin(fxState.breathe * 0.85) * 0.028 * (1 - Math.min(1, fxState.kick));
   fxState.kick = Math.max(0, fxState.kick - dt * 2.5);
@@ -6326,11 +6342,10 @@ function frame(now) {
   } else {
     renderer.render(scene, camera);
   }
-  if (!reduced) requestAnimationFrame(frame);
 }
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) { running = false; }
-  else if (!running) { running = true; lastT = performance.now(); requestAnimationFrame(frame); }
+  else if (!running) { running = true; lastT = performance.now(); _globeAcc = GLOBE_FRAME_DT; requestAnimationFrame(frame); }
 });
 
 requestAnimationFrame(frame);
