@@ -1864,16 +1864,20 @@ body.has-baked-back .card.is-back .back-corner { display: none !important; }
 /* Rarity border / outer glow */
 .card.rarity-common      { box-shadow: var(--shadow-card); }
 .card.rarity-uncommon    { box-shadow: var(--shadow-card), 0 0 0 1px var(--r-uncommon), 0 0 14px rgba(78,163,107,.18); }
-.card.rarity-rare        { box-shadow: var(--shadow-card), 0 0 0 1.25px var(--r-rare), 0 0 18px rgba(37,150,231,.22); }
-.card.rarity-epic        { box-shadow: var(--shadow-card), 0 0 0 1.5px var(--r-epic),  0 0 22px rgba(176,116,232,.34); animation: epicGlow 4s ease-in-out infinite; }
-.card.rarity-legendary   { box-shadow: var(--shadow-card), 0 0 0 2px   var(--r-legendary), 0 0 28px rgba(240,169,59,.5); animation: legendaryGlow 3.5s ease-in-out infinite; }
+.card.rarity-rare        { box-shadow: var(--shadow-card), 0 0 0 1.25px var(--r-rare), 0 0 22px rgba(37,150,231,.30); animation: rareGlow 4.5s ease-in-out infinite; }
+.card.rarity-epic        { box-shadow: var(--shadow-card), 0 0 0 1.5px var(--r-epic),  0 0 30px rgba(176,116,232,.46); animation: epicGlow 4s ease-in-out infinite; }
+.card.rarity-legendary   { box-shadow: var(--shadow-card), 0 0 0 2px   var(--r-legendary), 0 0 40px rgba(240,169,59,.62); animation: legendaryGlow 3.5s ease-in-out infinite; }
+@keyframes rareGlow {
+  0%, 100% { box-shadow: var(--shadow-card), 0 0 0 1.25px var(--r-rare), 0 0 16px rgba(37,150,231,.24); }
+  50%      { box-shadow: var(--shadow-card), 0 0 0 1.25px var(--r-rare), 0 0 26px rgba(37,150,231,.40); }
+}
 @keyframes epicGlow {
-  0%, 100% { box-shadow: var(--shadow-card), 0 0 0 1.5px var(--r-epic), 0 0 18px rgba(176,116,232,.28); }
-  50%      { box-shadow: var(--shadow-card), 0 0 0 1.5px var(--r-epic), 0 0 28px rgba(176,116,232,.55); }
+  0%, 100% { box-shadow: var(--shadow-card), 0 0 0 1.5px var(--r-epic), 0 0 22px rgba(176,116,232,.36); }
+  50%      { box-shadow: var(--shadow-card), 0 0 0 1.5px var(--r-epic), 0 0 38px rgba(176,116,232,.66); }
 }
 @keyframes legendaryGlow {
-  0%, 100% { box-shadow: var(--shadow-card), 0 0 0 2px var(--r-legendary), 0 0 22px rgba(240,169,59,.4); }
-  50%      { box-shadow: var(--shadow-card), 0 0 0 2px var(--r-legendary), 0 0 38px rgba(240,169,59,.75); }
+  0%, 100% { box-shadow: var(--shadow-card), 0 0 0 2px var(--r-legendary), 0 0 28px rgba(240,169,59,.5); }
+  50%      { box-shadow: var(--shadow-card), 0 0 0 2px var(--r-legendary), 0 0 50px rgba(240,169,59,.85); }
 }
 
 /* Legendary sparkle accents (CSS-only) */
@@ -1948,7 +1952,7 @@ body.has-baked-back .card.is-back .back-corner { display: none !important; }
   .card.rarity-rare .card-foil,
   .card.rarity-epic .card-foil,
   .card.rarity-legendary .card-foil { animation: none; }
-  .card.rarity-epic, .card.rarity-legendary { animation: none; }
+  .card.rarity-rare, .card.rarity-epic, .card.rarity-legendary { animation: none; }
   .card.rarity-legendary .card-foil::before,
   .card.rarity-legendary .card-foil::after { animation: none; opacity: .8; }
   .stat-row.is-winner { animation: none; }
@@ -7855,6 +7859,13 @@ const FOIL_COLOR = {
   epic:      new THREE.Color(0xb074e8),
   legendary: new THREE.Color(0xf0a93b),
 };
+// Per-rarity always-on glow strength — how luminous the foil reads at
+// rest (no hover). Legendary blooms hardest, rare is subtle.
+const FOIL_GLOW = {
+  rare:      0.30,
+  epic:      0.48,
+  legendary: 0.72,
+};
 const foilQuadGeo = new THREE.PlaneGeometry(2, 2);
 const foilInstances = new WeakSet();
 
@@ -7864,6 +7875,7 @@ function attachFoilOverlay(cardEl) {
   const rarity = cardEl.dataset.rarity;
   const baseColor = FOIL_COLOR[rarity];
   if (!baseColor) return;
+  const glowStrength = FOIL_GLOW[rarity] || 0.3;
 
   const foilCanvas = document.createElement('canvas');
   foilCanvas.className = 'foil-webgl';
@@ -7893,6 +7905,7 @@ function attachFoilOverlay(cardEl) {
       uMouse:     { value: new THREE.Vector2(0.5, 0.5) },
       uHover:     { value: 0 },
       uBaseColor: { value: baseColor.clone() },
+      uGlow:      { value: glowStrength },
     },
     transparent: true,
     depthWrite: false,
@@ -7908,6 +7921,7 @@ function attachFoilOverlay(cardEl) {
       uniform vec2  uMouse;
       uniform float uHover;
       uniform vec3  uBaseColor;
+      uniform float uGlow;
       varying vec2  vUv;
       void main() {
         vec2 uv = vUv;
@@ -7930,12 +7944,22 @@ function attachFoilOverlay(cardEl) {
         // Edge fade so the overlay doesn't fight the card border
         vec2 e = abs(uv - 0.5) * 2.0;
         float edgeMask = 1.0 - smoothstep(0.78, 1.0, max(e.x, e.y));
+        // Always-on rarity emissive: a rim glow concentrated toward the
+        // card border plus a gentle full-face shimmer, both scaled by the
+        // per-rarity uGlow. This makes rare+ cards read luminous at rest,
+        // not just on hover. A slow breathing pulse keeps it alive.
+        float rim = smoothstep(0.55, 0.98, max(e.x, e.y));
+        float breathe = 0.72 + 0.28 * sin(uTime * 1.6);
+        float shimmer = 0.5 + 0.5 * band;
+        float emissive = uGlow * breathe * (rim * 0.85 + 0.18 * shimmer);
         // Combine
         vec3 col = mix(uBaseColor, rainbow, 0.55 * band);
+        col += uBaseColor * emissive * 1.4;
         col += vec3(1.0) * specular * 0.7;
         float alpha = (0.10 + 0.18 * band + specular)
                     * (0.35 + 0.65 * uHover)
                     * edgeMask;
+        alpha = max(alpha, emissive * edgeMask);
         gl_FragColor = vec4(col, alpha);
       }
     `,
