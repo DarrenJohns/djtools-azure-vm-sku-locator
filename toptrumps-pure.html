@@ -232,6 +232,17 @@ function lcVersion(s) {
 function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 
+  /* family glyph set (harvested — baker rasterizes these to canvas) */
+const GLYPHS = {
+  'GPU Accelerated': '<svg viewBox="0 0 64 64"><rect x="6" y="14" width="52" height="36" rx="4" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="20" cy="32" r="6" fill="currentColor"/><circle cx="44" cy="32" r="6" fill="currentColor"/><rect x="14" y="50" width="6" height="6" fill="currentColor"/><rect x="44" y="50" width="6" height="6" fill="currentColor"/></svg>',
+  'Memory Optimized': '<svg viewBox="0 0 64 64"><rect x="10" y="14" width="44" height="6" rx="1" fill="currentColor"/><rect x="10" y="24" width="44" height="6" rx="1" fill="currentColor" opacity=".75"/><rect x="10" y="34" width="44" height="6" rx="1" fill="currentColor" opacity=".5"/><rect x="10" y="44" width="44" height="6" rx="1" fill="currentColor" opacity=".25"/></svg>',
+  'Compute Optimized': '<svg viewBox="0 0 64 64"><path d="M34 6 L18 38 L30 38 L26 58 L48 28 L34 28 Z" fill="currentColor"/></svg>',
+  'General Purpose': '<svg viewBox="0 0 64 64"><rect x="10" y="10" width="20" height="20" fill="currentColor"/><rect x="34" y="10" width="20" height="20" fill="currentColor" opacity=".7"/><rect x="10" y="34" width="20" height="20" fill="currentColor" opacity=".55"/><rect x="34" y="34" width="20" height="20" fill="currentColor" opacity=".4"/></svg>',
+  'Storage Optimized': '<svg viewBox="0 0 64 64"><ellipse cx="32" cy="14" rx="20" ry="6" fill="currentColor"/><path d="M12 14 V32 a20 6 0 0 0 40 0 V14" fill="currentColor" opacity=".6"/><path d="M12 32 V50 a20 6 0 0 0 40 0 V32" fill="currentColor" opacity=".35"/></svg>',
+  'HPC': '<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="4" fill="currentColor"/><ellipse cx="32" cy="32" rx="22" ry="9" fill="none" stroke="currentColor" stroke-width="2"/><ellipse cx="32" cy="32" rx="22" ry="9" fill="none" stroke="currentColor" stroke-width="2" transform="rotate(60 32 32)"/><ellipse cx="32" cy="32" rx="22" ry="9" fill="none" stroke="currentColor" stroke-width="2" transform="rotate(-60 32 32)"/></svg>',
+  'Confidential': '<svg viewBox="0 0 64 64"><rect x="14" y="28" width="36" height="28" rx="3" fill="currentColor"/><path d="M22 28 V18 a10 10 0 0 1 20 0 V28" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="32" cy="42" r="3" fill="#fff"/></svg>',
+};
+
   /* ---------- 3b. card art bake (Phase 3 — mesh-card texture source) ----------
    Renders a card to a high-DPI offscreen canvas using Canvas2D so the
    WebGL mesh-card path can wrap it in a CanvasTexture. Deliberately a
@@ -1143,8 +1154,10 @@ function resolveStat(stat, pCard, cCard) {
   function flipCard(g, faceUp, dur = 620) {
     if (g.userData.flipping) return;
     g.userData.flipping = true;
-    const from = g.userData.faceUp ? Math.PI : 0;
-    const to   = faceUp ? Math.PI : 0;
+    // Front plane faces +Z, so rotation.y = 0 shows the front (face up) and
+    // rotation.y = π shows the back (face down).
+    const from = g.userData.faceUp ? 0 : Math.PI;
+    const to   = faceUp ? 0 : Math.PI;
     tween({
       dur,
       update: (e) => {
@@ -1192,7 +1205,8 @@ function resolveStat(stat, pCard, cCard) {
     document.getElementById('cpu-count').textContent = G.cpu.hand.length;
 
     heroCard = makeCard(G.player.hand[0]);
-    heroCard.userData.faceUp = false;          // start face down
+    heroCard.userData.faceUp = false;          // start face down…
+    heroCard.rotation.y = Math.PI;             // …so the back faces the camera
     scene.add(heroCard);
     layoutHero();
   }
