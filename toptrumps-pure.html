@@ -1230,13 +1230,31 @@ function resolveStat(stat, pCard, cCard) {
   const tableGroup = new THREE.Group();
   tableGroup.rotation.x = -0.08;                   // gentle recline → depth without overlap
   scene.add(tableGroup);
-  camera.position.set(0, 0.15, 12.4);
-  camera.lookAt(0, 0, 0);
 
   const PLAYER_SLOT = new THREE.Vector3(0, -1.82, 0);
   const CPU_SLOT    = new THREE.Vector3(0,  1.82, 0);
   const PLAYER_PILE = new THREE.Vector3(0, -5.6, 0.5);
   const CPU_PILE    = new THREE.Vector3(0,  5.6, 0.5);
+
+  /* Responsive framing: pull the camera back just far enough that the whole
+     two-card stack (plus margin) fits the viewport at ANY aspect ratio, so the
+     cards never clip or drift off-centre on tall, wide, or split windows. */
+  const FIT_MARGIN = 1.12;                          // 12% breathing room
+  function fitCamera() {
+    const aspect = camera.aspect;
+    const half = THREE.MathUtils.degToRad(camera.fov) / 2;
+    // total world extent the framing must cover
+    const stackH = (CPU_SLOT.y - PLAYER_SLOT.y) + CARD_H;   // top card top → bottom card bottom
+    const stackW = CARD_W;
+    const needH  = stackH * FIT_MARGIN;
+    const needW  = stackW * FIT_MARGIN;
+    // distance so the vertical extent fits, and so the horizontal extent fits
+    const dForH = (needH / 2) / Math.tan(half);
+    const dForW = (needW / 2) / (Math.tan(half) * aspect);
+    const d = Math.max(dForH, dForW);
+    camera.position.set(0, 0.15, d);
+    camera.lookAt(0, 0, 0);
+  }
 
   let playerCard = null, cpuCard = null;
 
@@ -1479,6 +1497,7 @@ function resolveStat(stat, pCard, cCard) {
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
+    fitCamera();
   }
   window.addEventListener('resize', resize);
   resize();
