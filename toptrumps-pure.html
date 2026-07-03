@@ -1110,8 +1110,8 @@ function resolveStat(stat, pCard, cCard) {
     // MeshBasicMaterial: baked art already carries its own shading, so the
     // back can never render "darker" than its static state (kills the old I3
     // dark-back regression by construction). Lit materials come in Phase 4.
-    const frontMat = new THREE.MeshBasicMaterial({ map: frontTex, toneMapped: false });
-    const backMat  = new THREE.MeshBasicMaterial({ map: backTex,  toneMapped: false });
+    const frontMat = new THREE.MeshBasicMaterial({ map: frontTex, toneMapped: false, transparent: true });
+    const backMat  = new THREE.MeshBasicMaterial({ map: backTex,  toneMapped: false, transparent: true });
 
     const front = new THREE.Mesh(cardGeo, frontMat);
     const back  = new THREE.Mesh(cardGeo, backMat);
@@ -1121,7 +1121,11 @@ function resolveStat(stat, pCard, cCard) {
     back.position.z  = -0.006;
 
     g.add(front, back);
+    g.userData.front = front;
+    g.userData.back  = back;
+    g.userData.setOpacity = (o) => { frontMat.opacity = o; backMat.opacity = o; };
     g.userData.dispose = () => {
+      if (g.userData.hl) { g.userData.hl.material.dispose(); }
       frontTex.dispose(); backTex.dispose();
       frontMat.dispose(); backMat.dispose();
     };
@@ -1151,31 +1155,31 @@ function resolveStat(stat, pCard, cCard) {
   /* A flip is ONE rotation tween on ONE object. Lift + scale bump both
      return to zero at the endpoints, so the card lands exactly on its rest
      transform with no pop. faceUp is the *target* state. */
-  function flipCard(g, faceUp, dur = 620) {
-    if (g.userData.flipping) return;
+  function flipCard(g, faceUp, dur = 620, onDone) {
+    if (g.userData.flipping) { onDone && onDone(); return; }
+    if (g.userData.faceUp === faceUp) { onDone && onDone(); return; }
     g.userData.flipping = true;
     // Front plane faces +Z, so rotation.y = 0 shows the front (face up) and
     // rotation.y = π shows the back (face down).
     const from = g.userData.faceUp ? 0 : Math.PI;
     const to   = faceUp ? 0 : Math.PI;
+    const baseZ = g.userData.baseZ || 0;
     tween({
       dur,
       update: (e) => {
         g.rotation.y = from + (to - from) * e;
         const arc = Math.sin(e * Math.PI);        // 0→1→0 across the flip
-        g.position.z = arc * 0.9;                 // lift toward camera mid-flip
+        g.position.z = baseZ + arc * 0.9;         // lift toward camera mid-flip
         const s = 1 + arc * 0.06;                 // subtle scale bump
         g.scale.set(s, s, s);
       },
       done: () => {
         g.rotation.y = to;
-        g.position.z = 0;
+        g.position.z = baseZ;
         g.scale.set(1, 1, 1);
         g.userData.faceUp = faceUp;
         g.userData.flipping = false;
-        announce(faceUp
-          ? `Revealed ${g.userData.card.displayName || 'card'}.`
-          : 'Card face down.');
+        onDone && onDone();
       }
     });
   }
@@ -1184,54 +1188,289 @@ function resolveStat(stat, pCard, cCard) {
   const a11y = document.getElementById('a11y');
   function announce(msg) { if (a11y) a11y.textContent = msg; }
 
-  /* ---- game state (subset — full flow arrives in Phase 2) ------------- */
-  const G = { data: null, player: { hand: [] }, cpu: { hand: [] } };
-  let heroCard = null;   // the single demo card proving the single-owner flip
+  /* ---- shared card layout constants (baker-derived) -------------------
+     Both the reveal highlight (below) and Phase-3 raycast picking map stat
+     rows using THESE numbers, so they can never drift from the baked art. */
+  const TEX_H     = art.H;                         // 2000
+  const STATS_Y0  = 870, STATS_Y1 = 1630;          // stat-band top/bottom in tex px
+  const ROW_H_PX  = (STATS_Y1 - STATS_Y0) / STATS.length;
+  // texture-pixel Y → card-local Y (texture top = card top = +CARD_H/2)
+  const texYToLocal = (py) => CARD_H / 2 - (py / TEX_H) * CARD_H;
+  const rowMidPx    = (i)  => STATS_Y0 + (i + 0.5) * ROW_H_PX;
 
-  function layoutHero() {
-    if (!heroCard) return;
-    heroCard.position.x = 0;
-    heroCard.position.y = 0;
+  /* reveal highlight — an additive quad parented to the card group. It faces
+     +Z, so it is back-face-culled (invisible) while the card is face-down and
+     only shows once the front is toward the camera. Single owner: it rides the
+     card's own transform, it is not a second card. */
+  const HL_GEO = new THREE.PlaneGeometry(CARD_W * 0.9, (ROW_H_PX / TEX_H) * CARD_H);
+  const HL = { pick: 0xf5c542, win: 0x37d67a, lose: 0xef5350, tie: 0xffb300 };
+  function showPick(cardG, idx, colorHex, opacity = 0.55) {
+    let m = cardG.userData.hl;
+    if (!m) {
+      m = new THREE.Mesh(HL_GEO, new THREE.MeshBasicMaterial({
+        transparent: true, opacity: 0, blending: THREE.AdditiveBlending,
+        depthWrite: false, toneMapped: false
+      }));
+      m.position.z = 0.02;
+      cardG.add(m);
+      cardG.userData.hl = m;
+    }
+    m.material.color.setHex(colorHex);
+    m.position.y = texYToLocal(rowMidPx(idx));
+    // ease opacity in
+    tween({ dur: 220, update: (e) => { m.material.opacity = opacity * e; },
+            done: () => { m.material.opacity = opacity; } });
+  }
+  function clearPick(cardG) {
+    const m = cardG && cardG.userData.hl;
+    if (m) m.material.opacity = 0;
   }
 
-  function buildDemo() {
-    // Fresh shuffled deck; deal alternately (mirrors startMatch).
+  /* ---- table: single owner of the two in-play card meshes -------------- */
+  const tableGroup = new THREE.Group();
+  tableGroup.rotation.x = -0.08;                   // gentle recline → depth without overlap
+  scene.add(tableGroup);
+  camera.position.set(0, 0.15, 12.4);
+  camera.lookAt(0, 0, 0);
+
+  const PLAYER_SLOT = new THREE.Vector3(0, -1.82, 0);
+  const CPU_SLOT    = new THREE.Vector3(0,  1.82, 0);
+  const PLAYER_PILE = new THREE.Vector3(0, -5.6, 0.5);
+  const CPU_PILE    = new THREE.Vector3(0,  5.6, 0.5);
+
+  let playerCard = null, cpuCard = null;
+
+  function placeCard(cardG, slot, faceUp) {
+    cardG.position.copy(slot);
+    cardG.userData.baseZ = slot.z;
+    cardG.userData.faceUp = faceUp;
+    cardG.rotation.y = faceUp ? 0 : Math.PI;
+  }
+  function disposeCard(cardG) {
+    if (!cardG) return;
+    tableGroup.remove(cardG);
+    cardG.userData.dispose && cardG.userData.dispose();
+  }
+
+  /* slide a resolved card toward the winner's pile (or the pot centre on a
+     tie), shrinking + fading, then dispose. Pure function of eased t (G4). */
+  function sweep(cardG, dest, done) {
+    const from = cardG.position.clone();
+    tween({
+      dur: 460,
+      update: (e) => {
+        cardG.position.lerpVectors(from, dest, e);
+        const s = 1 - 0.45 * e;
+        cardG.scale.set(s, s, s);
+        cardG.userData.setOpacity(1 - e);
+      },
+      done: () => { disposeCard(cardG); done && done(); }
+    });
+  }
+
+  /* ---- HUD ------------------------------------------------------------- */
+  const elYou  = document.getElementById('you-count');
+  const elCpu  = document.getElementById('cpu-count');
+  const elHint = document.getElementById('hint');
+  function updateHUD() {
+    elYou.textContent = G.player.hand.length;
+    elCpu.textContent = G.cpu.hand.length;
+  }
+  function setHint(msg) { if (elHint) elHint.textContent = msg; }
+
+  /* ---- game state (G2: this state drives everything; it never touches a
+     mesh directly — the table functions above are the only mesh owner) --- */
+  const _diffParam = parseInt(new URLSearchParams(location.search).get('diff'), 10);
+  const G = {
+    data: null,
+    player: { hand: [] }, cpu: { hand: [] },
+    pot: [], round: 0, turn: 'player', phase: 'idle',
+    pickedStat: null, history: [],
+    difficulty: (_diffParam >= 1 && _diffParam <= 5) ? _diffParam : 3,
+    matchToken: 0
+  };
+  const beat = (ms) => new Promise(r => setTimeout(r, ms));
+
+  function startMatch() {
     const deck = shuffle(G.data.cards.slice()).slice(0, DECK_SIZE);
     G.player.hand = []; G.cpu.hand = [];
     for (let i = 0; i < deck.length; i++) {
       (i % 2 === 0 ? G.player.hand : G.cpu.hand).push(deck[i]);
     }
-    document.getElementById('you-count').textContent = G.player.hand.length;
-    document.getElementById('cpu-count').textContent = G.cpu.hand.length;
-
-    heroCard = makeCard(G.player.hand[0]);
-    heroCard.userData.faceUp = false;          // start face down…
-    heroCard.rotation.y = Math.PI;             // …so the back faces the camera
-    scene.add(heroCard);
-    layoutHero();
+    G.pot = []; G.round = 0; G.history = [];
+    G.turn = rng() < 0.5 ? 'player' : 'cpu';
+    G.phase = 'idle';
+    G.matchToken++;
+    disposeCard(playerCard); disposeCard(cpuCard);
+    playerCard = cpuCard = null;
+    updateHUD();
+    startRound();
   }
 
-  /* ---- interaction: click / space toggles the hero flip (Phase 1) ----- */
-  const raycaster = new THREE.Raycaster();
-  const pointer   = new THREE.Vector2();
-
-  function pointerHitsHero(clientX, clientY) {
-    if (!heroCard) return false;
-    const r = canvas.getBoundingClientRect();
-    pointer.x =  ((clientX - r.left) / r.width)  * 2 - 1;
-    pointer.y = -((clientY - r.top)  / r.height) * 2 + 1;
-    raycaster.setFromCamera(pointer, camera);
-    return raycaster.intersectObject(heroCard, true).length > 0;
+  function spawnRoundCards() {
+    disposeCard(playerCard); disposeCard(cpuCard);
+    playerCard = makeCard(G.player.hand[0]);
+    cpuCard    = makeCard(G.cpu.hand[0]);
+    placeCard(playerCard, PLAYER_SLOT, false);
+    placeCard(cpuCard,    CPU_SLOT,    false);
+    tableGroup.add(playerCard, cpuCard);
   }
-  canvas.addEventListener('pointerdown', (e) => {
-    if (pointerHitsHero(e.clientX, e.clientY)) toggleHero();
-  });
+
+  function startRound() {
+    G.round += 1;
+    G.pickedStat = null;
+    G.phase = 'picking';
+    spawnRoundCards();
+    updateHUD();
+    const token = G.matchToken;
+
+    if (G.turn === 'player') {
+      setHint('Dealing your card…');
+      announce(`Round ${G.round}. Your turn.`);
+      setTimeout(() => {
+        if (G.matchToken !== token) return;
+        flipCard(playerCard, true, 620, () => {
+          if (G.matchToken !== token) return;
+          setHint('Your pick — press 1–6 to choose a stat');
+          announce(`Your card: ${G.player.hand[0].displayName}. Choose a stat, 1 to 6.`);
+        });
+      }, 420);
+    } else {
+      setHint('CPU is choosing…');
+      announce(`Round ${G.round}. CPU's turn.`);
+      setTimeout(() => {
+        if (G.matchToken !== token) return;
+        const inPlay = [...G.player.hand, ...G.cpu.hand, ...G.pot];
+        const stat = pickStatForCPU(G.cpu.hand[0], inPlay, G.player.hand[0]);
+        cpuPicksStat(stat);
+      }, 700);
+    }
+  }
+
+  function playerPicksStat(key) {
+    if (G.phase !== 'picking' || G.turn !== 'player') return;
+    G.pickedStat = key; G.phase = 'revealing';
+    reveal(key);
+  }
+  function cpuPicksStat(key) {
+    if (G.phase !== 'picking' || G.turn !== 'cpu') return;
+    G.pickedStat = key; G.phase = 'revealing';
+    reveal(key);
+  }
+
+  async function reveal(key) {
+    const token = G.pickedStat && G.matchToken;
+    const idx   = STATS.findIndex(s => s.key === key);
+    const meta  = STATS[idx];
+    const pCard = G.player.hand[0], cCard = G.cpu.hand[0];
+    playerCard.scale.set(1, 1, 1);                // cancel any breathing residue
+
+    // gold pick highlight on both cards
+    showPick(playerCard, idx, HL.pick);
+    showPick(cpuCard,    idx, HL.pick);
+    setHint(`${meta.label} — ${G.turn === 'cpu' ? 'CPU chose' : 'you chose'} it`);
+
+    // flip up whichever cards are still face-down (cpu always; player on cpu turn)
+    await new Promise((res) => {
+      let pending = 0;
+      const bump = () => { if (--pending <= 0) res(); };
+      [playerCard, cpuCard].forEach(c => { if (!c.userData.faceUp) { pending++; } });
+      if (pending === 0) return res();
+      [playerCard, cpuCard].forEach(c => { if (!c.userData.faceUp) flipCard(c, true, 600, bump); });
+    });
+    if (G.matchToken !== token) return;
+
+    await beat(260);
+    if (G.matchToken !== token) return;
+
+    const winner = resolveStat(key, pCard, cCard);
+    const pv = pCard.stats[key], cv = cCard.stats[key];
+    const fmt = (x) => String(meta.fmt ? meta.fmt(x) : x).replace(/<[^>]*>/g, '');
+    // recolor picked row: winner green, loser red, tie amber
+    if (winner === 'tie') {
+      showPick(playerCard, idx, HL.tie, 0.6);
+      showPick(cpuCard,    idx, HL.tie, 0.6);
+      setHint(`Tie on ${meta.label} — cards go to the pot`);
+      announce(`Tie on ${meta.label}. Both ${fmt(pv)}. ${G.pot.length + 2} cards to the pot.`);
+    } else {
+      showPick(playerCard, idx, winner === 'player' ? HL.win : HL.lose, 0.6);
+      showPick(cpuCard,    idx, winner === 'cpu'    ? HL.win : HL.lose, 0.6);
+      const youWord = winner === 'player' ? 'You win' : 'CPU wins';
+      setHint(`${youWord} — ${meta.label} ${fmt(winner === 'player' ? pv : cv)} beats ${fmt(winner === 'player' ? cv : pv)}`);
+      announce(`${meta.label}: you ${fmt(pv)}, CPU ${fmt(cv)}. ${youWord}.`);
+    }
+
+    await beat(winner === 'tie' ? 900 : 1050);
+    if (G.matchToken !== token) return;
+    resolveRound(winner, key);
+  }
+
+  function resolveRound(winner, key) {
+    const token = G.matchToken;
+    G.history.push({ round: G.round, stat: key, winner });
+
+    const pTop = G.player.hand.shift();
+    const cTop = G.cpu.hand.shift();
+    const pile = [pTop, cTop, ...G.pot];
+
+    let pDest, cDest;
+    if (winner === 'tie') {
+      G.pot = pile;                       // carries; same player picks again
+      pDest = cDest = new THREE.Vector3(0, 0, -0.4);
+    } else {
+      G.pot = [];
+      if (winner === 'player') { G.player.hand.push(...pile); G.turn = 'player'; pDest = cDest = PLAYER_PILE; }
+      else                     { G.cpu.hand.push(...pile);    G.turn = 'cpu';    pDest = cDest = CPU_PILE; }
+    }
+
+    const localP = playerCard, localC = cpuCard;
+    playerCard = cpuCard = null;
+    let swept = 0;
+    const after = () => {
+      if (++swept < 2) return;
+      if (G.matchToken !== token) return;
+      updateHUD();
+      if (G.player.hand.length === 0 || G.cpu.hand.length === 0) return endMatch();
+      setTimeout(() => { if (G.matchToken === token) startRound(); }, 260);
+    };
+    sweep(localP, pDest, after);
+    sweep(localC, cDest, after);
+  }
+
+  function endMatch() {
+    G.phase = 'gameover';
+    const youWon = G.player.hand.length > 0;
+    setHint(youWon ? '🏆 You win the match!  Press R to play again'
+                   : '💻 CPU wins the match.  Press R to play again');
+    announce(youWon
+      ? `You win the match with ${G.player.hand.length} cards. Press R to play again.`
+      : `CPU wins the match. Press R to play again.`);
+  }
+
+  /* ---- input: stat picking (1–6) + restart (R) ------------------------- */
   window.addEventListener('keydown', (e) => {
-    if (e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); toggleHero(); }
+    if (/^[1-6]$/.test(e.key)) {
+      if (G.phase === 'picking' && G.turn === 'player') {
+        const s = STATS[parseInt(e.key, 10) - 1];
+        if (s) playerPicksStat(s.key);
+      }
+    } else if (e.key === 'r' || e.key === 'R') {
+      if (G.phase === 'gameover' || G.phase === 'picking') startMatch();
+    }
   });
-  function toggleHero() {
-    if (!heroCard || heroCard.userData.flipping) return;
-    flipCard(heroCard, !heroCard.userData.faceUp);
+
+  /* test-only observation hook (does not own or mutate meshes) */
+  if (new URLSearchParams(location.search).get('debug') === '1') {
+    window.__pure = {
+      status: () => ({ phase: G.phase, turn: G.turn, round: G.round,
+                       you: G.player.hand.length, cpu: G.cpu.hand.length,
+                       pot: G.pot.length }),
+      pick: (n) => {
+        if (G.phase === 'picking' && G.turn === 'player') {
+          const s = STATS[n - 1]; if (s) playerPicksStat(s.key);
+        }
+      }
+    };
   }
 
   /* ---- resize --------------------------------------------------------- */
@@ -1246,13 +1485,13 @@ function resolveStat(stat, pCard, cCard) {
 
   /* ---- single render loop (G3: one renderer, one loop, one context) --- */
   function frame() {
-    const now = performance.now();
-    stepTweens(now);
-    // gentle idle float so a resting card never looks frozen
-    if (heroCard && !heroCard.userData.flipping) {
+    stepTweens(performance.now());
+    // subtle "breathing" on the pickable player card so it reads as active
+    if (playerCard && G.phase === 'picking' && G.turn === 'player'
+        && !playerCard.userData.flipping && playerCard.userData.faceUp) {
       const t = clock.getElapsedTime();
-      heroCard.rotation.z = Math.sin(t * 0.6) * 0.015;
-      heroCard.position.y = Math.sin(t * 0.9) * 0.05;
+      const s = 1 + Math.sin(t * 2.2) * 0.012;
+      playerCard.scale.set(s, s, s);
     }
     renderer.render(scene, camera);
     requestAnimationFrame(frame);
@@ -1271,11 +1510,9 @@ function resolveStat(stat, pCard, cCard) {
       lmsg.innerHTML = `Failed to load deck.<br><code>${err.message}</code>`;
       return;
     }
-    buildDemo();
     loading.classList.add('gone');
-    const hint = document.getElementById('hint');
-    hint.textContent = 'Click the card (or press Space) to flip';
     requestAnimationFrame(frame);
+    startMatch();
   }
   boot();
   </script>
