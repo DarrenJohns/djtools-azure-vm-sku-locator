@@ -4353,16 +4353,39 @@ function renderTopCards() {
   if (G._dealHandles && G._dealHandles.length) {
     const handles = G._dealHandles;
     G._dealHandles = null;
+    // Symmetric crossfade: the dealt pile sits in front (z>0) of the freshly
+    // mounted lifted top cards and deck stacks. Fading the pile out while the
+    // incoming cards hard-pop at full opacity reads as a jump-cut between two
+    // slightly different arrangements. Instead fade the incoming cards IN over
+    // the same window the pile fades OUT so the handoff dissolves seamlessly.
+    const HANDOFF_MS = 200;
+    const fadeInHost = (host) => {
+      if (!host) return;
+      host.style.transition = 'none';
+      host.style.opacity = '0';
+      void host.offsetWidth;
+      requestAnimationFrame(() => {
+        host.style.transition = `opacity ${HANDOFF_MS}ms ease-out`;
+        host.style.opacity = '1';
+        setTimeout(() => { host.style.transition = ''; host.style.opacity = ''; }, HANDOFF_MS + 40);
+      });
+    };
+    fadeInHost(G.playerEls && G.playerEls.host);
+    fadeInHost(G.cpuEls && G.cpuEls.host);
+    if (window.__webgl3D && window.__webgl3D.fadeDeckStackIn) {
+      window.__webgl3D.fadeDeckStackIn($('player-stack'), HANDOFF_MS);
+      window.__webgl3D.fadeDeckStackIn($('cpu-stack'), HANDOFF_MS);
+    }
     handles.forEach(h => {
       const el = h && h.obj && h.obj.element;
       if (el) {
-        el.style.transition = 'opacity 140ms ease-out';
+        el.style.transition = `opacity ${HANDOFF_MS}ms ease-out`;
         el.style.opacity = '0';
       }
     });
     setTimeout(() => {
       handles.forEach(h => { try { h.cancel(); } catch (_) {} });
-    }, 170);
+    }, HANDOFF_MS + 30);
   }
 
   // Wire up player picks
@@ -7587,6 +7610,33 @@ function setDeckStackVisibility(stackEl, visible) {
   }
 }
 
+// Crossfade the deck-stack fillers in from transparent over `ms`. Used at
+// the deal->play handoff so the pile fillers dissolve into the settled deck
+// stack instead of hard-popping behind the fading dealt pile (a jump-cut).
+function fadeDeckStackIn(stackEl, ms) {
+  if (!stackEl) return;
+  const hosts = [];
+  for (const c of cssCards) {
+    if (c.stackEl === stackEl && c.isDeckStack && c.hostEl) hosts.push(c.hostEl);
+  }
+  if (!hosts.length) return;
+  hosts.forEach(el => {
+    el.style.transition = 'none';
+    el.style.opacity = '0';
+  });
+  // Force a reflow so the 0 baseline is committed before the transition.
+  void hosts[0].offsetWidth;
+  requestAnimationFrame(() => {
+    hosts.forEach(el => {
+      el.style.transition = `opacity ${ms}ms ease-out`;
+      el.style.opacity = '1';
+    });
+    setTimeout(() => {
+      hosts.forEach(el => { el.style.transition = ''; });
+    }, ms + 40);
+  });
+}
+
 // Remove every 3D card from the scene (lifted player/CPU cards, deck
 // stacks, and any in-flight deal arcs). Called when leaving the match
 // screen so cards don't outlive their stack anchors.
@@ -7773,6 +7823,7 @@ window.__webgl3D = {
   slide: slideCardTo3D,
   renderDeckStack: renderDeckStack3D,
   setDeckStackVisibility,
+  fadeDeckStackIn,
   clearAll: clearAllCards,
 };
 console.info('[toptrumps-webgl] CSS3DRenderer ready (' + cssCards.length + ' cards)');
