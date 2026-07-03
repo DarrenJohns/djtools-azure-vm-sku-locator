@@ -5789,6 +5789,7 @@ const postFx = (() => {
       uAberration: { value: QUALITY.tier === 'medium' ? 0.0008 : 0.00125 },
       uPulse: { value: 0 },
       uGlowBoost: { value: 0 },
+      uBloomBase: { value: QUALITY.tier === 'medium' ? 0.10 : 0.15 },
       uRippleT: { value: 2.0 },
       uRippleCenter: { value: new THREE.Vector2(0.5, 0.5) },
       uRippleAmp: { value: 0 },
@@ -5813,6 +5814,7 @@ const postFx = (() => {
       uniform float uAberration;
       uniform float uPulse;
       uniform float uGlowBoost;
+      uniform float uBloomBase;
       uniform float uRippleT;
       uniform vec2 uRippleCenter;
       uniform float uRippleAmp;
@@ -5844,22 +5846,37 @@ const postFx = (() => {
         col.g = texture2D(uSceneTex, uv).g;
         col.b = texture2D(uSceneTex, uv - dir * ca).b;
 
-        // Selective highlight glow (boosted on win moments).
+        // Selective highlight bloom — always-on soft baseline (uBloomBase)
+        // plus an event boost (uGlowBoost) on win/finale moments. Two sample
+        // rings (tight inner + wide outer) give a smooth bloom falloff around
+        // the atmosphere, halo and region nodes so the globe reads luminous
+        // at rest, not just on wins. Isolated to the globe context.
         float luma = dot(col, vec3(0.2126, 0.7152, 0.0722));
         vec3 glow = vec3(0.0);
-        float glowAmt = uGlowBoost * 0.24;
+        float glowAmt = uBloomBase + uGlowBoost * 0.24;
         if (glowAmt > 0.0001) {
           vec2 px = 1.0 / uResolution;
-          vec2 off = px * (2.0 + 10.0 * glowAmt);
-          vec3 s1 = texture2D(uSceneTex, uv + vec2( off.x, 0.0)).rgb;
-          vec3 s2 = texture2D(uSceneTex, uv + vec2(-off.x, 0.0)).rgb;
-          vec3 s3 = texture2D(uSceneTex, uv + vec2(0.0,  off.y)).rgb;
-          vec3 s4 = texture2D(uSceneTex, uv + vec2(0.0, -off.y)).rgb;
-          vec3 s5 = texture2D(uSceneTex, uv + off * vec2( 0.7,  0.7)).rgb;
-          vec3 s6 = texture2D(uSceneTex, uv + off * vec2(-0.7, -0.7)).rgb;
-          vec3 avg = (s1 + s2 + s3 + s4 + s5 + s6) / 6.0;
-          float bright = smoothstep(0.63, 0.9, luma);
-          glow = avg * bright * glowAmt;
+          vec2 off1 = px * (2.0 + 6.0 * glowAmt);
+          vec2 off2 = px * (5.0 + 16.0 * glowAmt);
+          // Inner ring — tight, preserves shape.
+          vec3 i1 = texture2D(uSceneTex, uv + vec2( off1.x, 0.0)).rgb;
+          vec3 i2 = texture2D(uSceneTex, uv + vec2(-off1.x, 0.0)).rgb;
+          vec3 i3 = texture2D(uSceneTex, uv + vec2(0.0,  off1.y)).rgb;
+          vec3 i4 = texture2D(uSceneTex, uv + vec2(0.0, -off1.y)).rgb;
+          vec3 i5 = texture2D(uSceneTex, uv + off1 * vec2( 0.7,  0.7)).rgb;
+          vec3 i6 = texture2D(uSceneTex, uv + off1 * vec2(-0.7, -0.7)).rgb;
+          // Outer ring — wide, soft halo.
+          vec3 o1 = texture2D(uSceneTex, uv + vec2( off2.x, 0.0)).rgb;
+          vec3 o2 = texture2D(uSceneTex, uv + vec2(-off2.x, 0.0)).rgb;
+          vec3 o3 = texture2D(uSceneTex, uv + vec2(0.0,  off2.y)).rgb;
+          vec3 o4 = texture2D(uSceneTex, uv + vec2(0.0, -off2.y)).rgb;
+          vec3 o5 = texture2D(uSceneTex, uv + off2 * vec2( 0.7, -0.7)).rgb;
+          vec3 o6 = texture2D(uSceneTex, uv + off2 * vec2(-0.7,  0.7)).rgb;
+          vec3 inner = (i1 + i2 + i3 + i4 + i5 + i6) / 6.0;
+          vec3 outer = (o1 + o2 + o3 + o4 + o5 + o6) / 6.0;
+          vec3 avg = mix(inner, outer, 0.55);
+          float bright = smoothstep(0.55, 0.92, luma);
+          glow = avg * bright * glowAmt * 1.15;
         }
         col += glow;
 
