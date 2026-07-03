@@ -4119,17 +4119,29 @@ function mountFlipCard(stackEl, card, opts = {}) {
       const FLIP_MS = reducedMotion ? 1 : 700;
       const mo = new MutationObserver(() => {
         const wantsBack = host.classList.contains('is-flipped');
-        const fromY = lifted.obj.rotation.y;
-        const toY   = wantsBack ? Math.PI : 0;
-        if (Math.abs(fromY - toY) < 1e-3) return;
-        window.__webgl3D.flip(lifted, fromY, toY, FLIP_MS);
-        // Phase 3.5 — flip the mesh card in lockstep with the CSS3D card.
+        const toY = wantsBack ? Math.PI : 0;
         if (meshEntry && window.__cardMesh && window.__cardMesh.flip) {
           const mFrom = meshEntry.pivot.rotation.y;
-          const mTo   = wantsBack ? Math.PI : 0;
-          if (Math.abs(mFrom - mTo) > 1e-3) {
-            window.__cardMesh.flip(meshEntry, mFrom, mTo, FLIP_MS);
+          if (Math.abs(mFrom - toY) > 1e-3) {
+            // Mesh proxy is the sole visual owner of the flip animation.
+            // Hide the CSS3D object entirely via .visible so CSS3DRenderer
+            // sets display:none during the proxy window.
+            lifted.obj.visible = false;
+            // Pre-set final rotation so the CSS3D card shows the right face
+            // the moment it becomes visible again after the proxy finishes.
+            lifted.obj.rotation.y = toY;
+            if (window.__webgl3D.updateFaceVisibility) window.__webgl3D.updateFaceVisibility(lifted);
+            window.__cardMesh.flip(meshEntry, mFrom, toY, FLIP_MS, lifted);
+          } else {
+            // No tween is needed; ensure the CSS3D card is visible + correct.
+            lifted.obj.visible = true;
+            lifted.obj.rotation.y = toY;
+            if (window.__webgl3D.updateFaceVisibility) window.__webgl3D.updateFaceVisibility(lifted);
           }
+        } else {
+          const fromY = lifted.obj.rotation.y;
+          if (Math.abs(fromY - toY) < 1e-3) return;
+          window.__webgl3D.flip(lifted, fromY, toY, FLIP_MS);
         }
       });
       mo.observe(host, { attributes: true, attributeFilter: ['class'] });
@@ -5422,7 +5434,7 @@ const QUALITY = (() => {
   if (mem <= 4 || cores <= 4) {
     return { tier: 'medium', maxDpr: 1.5, globeW: 72, globeH: 48, haloW: 52, haloH: 28, stars: 480, maxArcs: 9 };
   }
-  return { tier: 'high', maxDpr: 2, globeW: 96, globeH: 64, haloW: 64, haloH: 32, stars: 900, maxArcs: 12 };
+  return { tier: 'high', maxDpr: 1.5, globeW: 96, globeH: 64, haloW: 64, haloH: 32, stars: 900, maxArcs: 12 };
 })();
 
 // WebGL is required for this build. On init failure, redirect to the
@@ -5580,7 +5592,7 @@ scene.add(globe);
 const haloMat = new THREE.ShaderMaterial({
   uniforms: { uColor: { value: new THREE.Color(0x125890) } },
   side: THREE.BackSide,
-  transparent: true,
+  transparent: false,
   depthWrite: false,
   blending: THREE.AdditiveBlending,
   vertexShader: /* glsl */`
@@ -6193,10 +6205,62 @@ resize();
 // --- Animation loop ---
 let running = true;
 let lastT = performance.now();
+
+// --- Adaptive performance governor (+ optional FPS HUD via ?fps=1) ---
+// The core/memory heuristic that picks the quality tier can't see the GPU,
+// so a strong-CPU / weak-GPU laptop gets classified 'high' yet can't sustain
+// the full-resolution globe + post-FX pass — which shows up as a jerky card
+// flip. Watch the rolling frame time and, if we're persistently under ~50fps,
+// shed the most expensive background work in stages (drop internal render
+// resolution, then disable the post-FX pass). Downgrade only, with a settle
+// window, so it can't oscillate or fight the animation.
+const PERF_HUD = /[?&]fps\b/.test(location.search);
+const _perfHud = PERF_HUD ? (() => {
+  const el = document.createElement('div');
+  el.style.cssText = 'position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:99999;'
+    + 'font:600 12px ui-monospace,monospace;background:rgba(0,0,0,.6);color:#8fe;'
+    + 'padding:4px 8px;border-radius:6px;pointer-events:none';
+  document.body.appendChild(el);
+  return el;
+})() : null;
+let _perfAccum = 0, _perfFrames = 0, _perfStep = 0;
+function governPerf(dt) {
+  _perfAccum += dt; _perfFrames++;
+  if (_perfFrames < 60) return;            // evaluate roughly once per second
+  const fps = _perfFrames / Math.max(1e-4, _perfAccum);
+  _perfAccum = 0; _perfFrames = 0;
+  if (_perfHud) {
+    _perfHud.textContent = 'FPS ' + fps.toFixed(0)
+      + ' · dpr ' + renderer.getPixelRatio().toFixed(2)
+      + (postFx.enabled ? '' : ' · fx off');
+  }
+  if (fps >= 50) return;                   // smooth enough — leave quality as-is
+  if (_perfStep === 0) {                    // stage 1 — lower internal resolution
+    _perfStep = 1;
+    const lowDpr = Math.min(renderer.getPixelRatio(), 1.25);
+    renderer.setPixelRatio(lowDpr);
+    cardRenderer.setPixelRatio(lowDpr);
+    const W = window.innerWidth, H = window.innerHeight;
+    if (postFx.enabled) {
+      postFx.target.setSize(Math.max(1, Math.floor(W * lowDpr)), Math.max(1, Math.floor(H * lowDpr)));
+      postFx.material.uniforms.uResolution.value.set(
+        Math.max(1, Math.floor(W * lowDpr)), Math.max(1, Math.floor(H * lowDpr)));
+    }
+    console.info('[toptrumps-webgl] perf governor: lowered render DPR to', lowDpr);
+  } else if (_perfStep === 1) {             // stage 2 — drop the post-FX pass
+    _perfStep = 2;
+    if (postFx.enabled) {
+      postFx.enabled = false;
+      console.info('[toptrumps-webgl] perf governor: disabled post-FX for smoother animation');
+    }
+  }
+}
+
 function frame(now) {
   if (!running) return;
   const dt = Math.min(0.05, (now - lastT) / 1000);
   lastT = now;
+  governPerf(dt);
   fxState.breathe += dt;
   const breathe = Math.sin(fxState.breathe * 0.85) * 0.028 * (1 - Math.min(1, fxState.kick));
   fxState.kick = Math.max(0, fxState.kick - dt * 2.5);
@@ -6307,7 +6371,7 @@ const cardRenderer = new THREE.WebGLRenderer({
   antialias: true,
   powerPreference: 'high-performance',
 });
-cardRenderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+cardRenderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, QUALITY.maxDpr));
 cardRenderer.setSize(window.innerWidth, window.innerHeight, false);
 cardRenderer.setClearColor(0x000000, 0); // fully transparent
 cardRenderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -6368,6 +6432,9 @@ function buildRoundedShape(w, h, r) {
 }
 const cardShape = buildRoundedShape(CARD_W, CARD_H, CARD_R);
 const cardPlateGeo = new THREE.ShapeGeometry(cardShape, 12);
+// High-segment proxy used only during turnover so visible bend can be
+// vertex-deformed (ShapeGeometry is too low-density to show curvature).
+const cardFlipGeo = new THREE.PlaneGeometry(CARD_W, CARD_H, 48, 28);
 // ShapeGeometry UVs are in shape coordinates. Re-map to [0,1] based on
 // the shape's bounding box so a square texture maps cleanly.
 // NOTE: CanvasTexture defaults to flipY = true, which already aligns
@@ -6509,6 +6576,34 @@ const CARD_FRAG_SHADER = /* glsl */`
   }
 `;
 
+const CARD_FLIP_VERT_SHADER = /* glsl */`
+  varying vec2 vUv;
+  uniform float u_bend;
+  uniform float u_bendDir;
+  void main() {
+    vUv = uv;
+    vec3 p = position;
+    float hinge = u_bendDir >= 0.0 ? (1.0 - uv.x) : uv.x;
+    float peel = pow(clamp(hinge, 0.0, 1.0), 1.35);
+    p.z += peel * peel * u_bend;
+    p.x += u_bendDir * peel * u_bend * 0.16;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
+  }
+`;
+
+const CARD_FLIP_FRAG_SHADER = /* glsl */`
+  precision highp float;
+  varying vec2 vUv;
+  uniform sampler2D u_texture;
+  uniform float u_gain;
+  void main() {
+    vec4 tex = texture2D(u_texture, vUv);
+    gl_FragColor = vec4(tex.rgb * u_gain, tex.a);
+    #include <tonemapping_fragment>
+    #include <colorspace_fragment>
+  }
+`;
+
 function makeCardMaterial(texture, rarity) {
   const holo = RARITY_HOLO_STRENGTH[rarity] != null
     ? RARITY_HOLO_STRENGTH[rarity]
@@ -6530,6 +6625,25 @@ function makeCardMaterial(texture, rarity) {
   // Tag so the per-frame tick can find these cheaply.
   mat.userData.isCardShader = true;
   return mat;
+}
+
+function makeFlipProxyMaterial(texture, gain = 1.0) {
+  return new THREE.ShaderMaterial({
+    uniforms: {
+      u_texture: { value: texture },
+      u_bend: { value: 0 },
+      u_bendDir: { value: 1 },
+      u_gain: { value: gain },
+    },
+    vertexShader: CARD_FLIP_VERT_SHADER,
+    fragmentShader: CARD_FLIP_FRAG_SHADER,
+    side: THREE.FrontSide,
+    transparent: false,
+    alphaTest: 0.08,
+    toneMapped: false,
+    depthWrite: false,
+    depthTest: false,
+  });
 }
 
 const meshCards = []; // entries: { pivot, frontMesh, backMesh, edgeMesh, stackEl, hostEl, frontTex, backTex, frontMat, backMat, flipTween, slideTween, deckOffset, isMesh: true }
@@ -6576,6 +6690,10 @@ function mountMeshCard(stackEl, hostEl, card, opts = {}) {
     side: THREE.FrontSide,
     toneMapped: false,
   });
+  const flipFrontMat = makeFlipProxyMaterial(frontTex, 1.0);
+  // Slight gain keeps the proxy back visually aligned with the static
+  // baked back while the turnover proxy is active.
+  const flipBackMat  = makeFlipProxyMaterial(backTex, 1.06);
 
   const pivot = new THREE.Object3D();
 
@@ -6596,6 +6714,19 @@ function mountMeshCard(stackEl, hostEl, card, opts = {}) {
   const edgeMesh = new THREE.Mesh(cardEdgeGeo, cardEdgeMat);
   pivot.add(edgeMesh);
 
+  const flipProxy = new THREE.Object3D();
+  const flipFront = new THREE.Mesh(cardFlipGeo, flipFrontMat);
+  flipFront.position.z = CARD_DEPTH / 2 + PLATE_OFFSET;
+  flipFront.renderOrder = 1200;
+  flipProxy.add(flipFront);
+  const flipBack = new THREE.Mesh(cardFlipGeo, flipBackMat);
+  flipBack.position.z = -(CARD_DEPTH / 2 + PLATE_OFFSET);
+  flipBack.rotation.y = Math.PI;
+  flipBack.renderOrder = 1201;
+  flipProxy.add(flipBack);
+  flipProxy.visible = false;
+  cardScene.add(flipProxy);
+
   // Phase 3.5 — keep the source DOM host fully visible AND interactive.
   // The mesh card's canvas has pointer-events: none, so clicks pass
   // through to the DOM host behind it (stat-row click handlers etc.
@@ -6615,6 +6746,7 @@ function mountMeshCard(stackEl, hostEl, card, opts = {}) {
   const entry = {
     isMesh: true,
     pivot, frontMesh, backMesh, edgeMesh,
+    flipProxy, flipFront, flipBack, flipFrontMat, flipBackMat,
     stackEl, hostEl,
     frontTex, backTex, frontMat, backMat,
     rarity: card.rarity,
@@ -6622,6 +6754,7 @@ function mountMeshCard(stackEl, hostEl, card, opts = {}) {
     flipTween: null, slideTween: null,
     deckOffset: null,
     isAnimating: false,
+    flipEpoch: 0,
     observer: null,
   };
   meshCards.push(entry);
@@ -6669,7 +6802,14 @@ function realignMeshCard(entry) {
   // correct scale to apply to the mesh pivot.
   if (!entry.pulseActive) {
     const s = rect.width / CARD_W;
-    if (isFinite(s) && s > 0) entry.pivot.scale.setScalar(s);
+    if (isFinite(s) && s > 0) {
+      entry.pivot.scale.setScalar(s);
+      if (entry.flipProxy) entry.flipProxy.scale.setScalar(s);
+    }
+  }
+  if (entry.flipProxy && !entry.flipProxy.visible) {
+    entry.flipProxy.position.copy(entry.pivot.position);
+    entry.flipProxy.rotation.copy(entry.pivot.rotation);
   }
 }
 function realignAllMeshCards() { meshCards.forEach(realignMeshCard); }
@@ -6678,19 +6818,25 @@ window.addEventListener('scroll', realignAllMeshCards, { passive: true });
 
 function unmountMeshCard(entry) {
   if (!entry) return;
+  entry.flipEpoch = (entry.flipEpoch || 0) + 1;
+  resetMeshFlipVisual(entry);
   if (entry.observer) { try { entry.observer.disconnect(); } catch (_) {} entry.observer = null; }
   if (entry.pickableObserver) { try { entry.pickableObserver.disconnect(); } catch (_) {} entry.pickableObserver = null; }
   if (entry._unsubBackRefresh) { try { entry._unsubBackRefresh(); } catch (_) {} entry._unsubBackRefresh = null; }
   if (entry.flipTween) cancelAnimationFrame(entry.flipTween);
   if (entry.slideTween) cancelAnimationFrame(entry.slideTween);
   cardScene.remove(entry.pivot);
+  if (entry.flipProxy) cardScene.remove(entry.flipProxy);
   // Dispose per-card resources. Geometry is shared (cardPlateGeo /
   // cardEdgeGeo) so we only dispose materials + textures.
   if (entry.frontTex) entry.frontTex.dispose();
   if (entry.backTex)  entry.backTex.dispose();
   if (entry.frontMat) entry.frontMat.dispose();
   if (entry.backMat)  entry.backMat.dispose();
+  if (entry.flipFrontMat) entry.flipFrontMat.dispose();
+  if (entry.flipBackMat)  entry.flipBackMat.dispose();
   if (entry.hostEl) {
+    entry.hostEl.style.opacity = '';
     delete entry.hostEl.dataset.meshLifted;
   }
   const i = meshCards.indexOf(entry);
@@ -6703,11 +6849,35 @@ function evictMeshAtStack(stackEl) {
   }
 }
 
-function flipMeshCard(entry, fromY, toY, duration) {
+function resetMeshFlipVisual(entry) {
   if (!entry) return;
-  if (entry.flipTween) cancelAnimationFrame(entry.flipTween);
-  // Keep mesh surfaces hidden during turnover so the DOM card artwork is
-  // the single visible front style from start to settle.
+  if (entry.flipProxy) entry.flipProxy.visible = false;
+  if (entry.flipFront) entry.flipFront.visible = false;
+  if (entry.flipBack)  entry.flipBack.visible  = false;
+  if (entry.flipFrontMat && entry.flipFrontMat.uniforms) entry.flipFrontMat.uniforms.u_bend.value = 0;
+  if (entry.flipBackMat && entry.flipBackMat.uniforms) entry.flipBackMat.uniforms.u_bend.value = 0;
+  if (entry.hostEl) entry.hostEl.style.opacity = '';
+  // Restore CSS3D card visibility if it was hidden for this flip.
+  if (entry._css3dEntry && entry._css3dEntry.obj) {
+    entry._css3dEntry.obj.visible = true;
+    if (window.__webgl3D && window.__webgl3D.updateFaceVisibility) {
+      window.__webgl3D.updateFaceVisibility(entry._css3dEntry);
+    }
+    entry._css3dEntry = null;
+  }
+  entry._deckHidden = false;
+}
+
+function flipMeshCard(entry, fromY, toY, duration, css3dEntry) {
+  if (!entry) return;
+  if (entry.flipTween) {
+    cancelAnimationFrame(entry.flipTween);
+    entry.flipTween = null;
+    resetMeshFlipVisual(entry);
+  }
+  // Store the CSS3D object so resetMeshFlipVisual can restore it on settle/cancel.
+  if (css3dEntry) entry._css3dEntry = css3dEntry;
+  // Use a dedicated proxy as the single visual owner for the entire flip.
   entry.isAnimating = true;
   const start = performance.now();
   const baseX = entry.pivot.position.x;
@@ -6718,18 +6888,63 @@ function flipMeshCard(entry, fromY, toY, duration) {
   const baseSY = entry.pivot.scale.y;
   const baseSZ = entry.pivot.scale.z;
   const cardHalfW = (CARD_W * baseSX) * 0.5;
+  const bendDir = (toY - fromY) >= 0 ? 1 : -1;
+  const FLIP_PROXY_Z_BIAS = 120;
+  const epoch = (entry.flipEpoch || 0) + 1;
+  const startFront = Math.abs(fromY) < Math.PI / 2;
+  const endFront = Math.abs(toY) < Math.PI / 2;
+  let proxyFrontVisible = startFront;
+  const SWITCH_HYSTERESIS = 0.035;
+  entry.flipEpoch = epoch;
+  if (entry.flipProxy) {
+    entry.flipProxy.visible = false;
+    entry.flipProxy.position.copy(entry.pivot.position);
+    entry.flipProxy.position.z += FLIP_PROXY_Z_BIAS;
+    entry.flipProxy.rotation.copy(entry.pivot.rotation);
+    entry.flipProxy.scale.copy(entry.pivot.scale);
+  }
+  if (entry.frontMesh) entry.frontMesh.visible = false;
+  if (entry.backMesh) entry.backMesh.visible = false;
+  if (entry.edgeMesh) entry.edgeMesh.visible = false;
+  if (entry.hostEl) entry.hostEl.style.opacity = '0';
   function step(now) {
+    if (entry.flipEpoch !== epoch) return;
     const t = Math.min(1, (now - start) / duration);
     const m = sampleFlipMotion(t, fromY, toY, cardHalfW);
+    const blend = flipMeshBlend(t);
     entry.pivot.rotation.y = m.y;
     entry.pivot.rotation.x = m.tiltX;
     entry.pivot.rotation.z = baseRZ + m.rollZ;
     entry.pivot.position.x = baseX + m.peelX;
     entry.pivot.position.y = baseY + m.heaveY;
     entry.pivot.position.z = baseZ + m.liftZ;
-    entry.pivot.scale.x = baseSX * (1 - 0.09 * m.bend);
-    entry.pivot.scale.y = baseSY * (1 + 0.045 * m.bend);
+    entry.pivot.scale.x = baseSX * (1 - 0.10 * m.bend);
+    entry.pivot.scale.y = baseSY * (1 + 0.05 * m.bend);
     entry.pivot.scale.z = baseSZ;
+    if (entry.flipProxy) {
+      entry.flipProxy.position.copy(entry.pivot.position);
+      entry.flipProxy.position.z += FLIP_PROXY_Z_BIAS;
+      entry.flipProxy.rotation.copy(entry.pivot.rotation);
+      entry.flipProxy.scale.copy(entry.pivot.scale);
+      entry.flipProxy.visible = true;
+    }
+    // Deterministic face ownership during the curved turn: hold the start
+    // face for the first half, then switch once for the destination face.
+    // This prevents wrong-face flashes from roll/tilt camera heuristics.
+    if (m.midProgress <= (0.5 - SWITCH_HYSTERESIS)) proxyFrontVisible = startFront;
+    else if (m.midProgress >= (0.5 + SWITCH_HYSTERESIS)) proxyFrontVisible = endFront;
+    if (entry.flipFront) entry.flipFront.visible = proxyFrontVisible;
+    if (entry.flipBack)  entry.flipBack.visible  = !proxyFrontVisible;
+    if (entry.hostEl) entry.hostEl.style.opacity = '0';
+    const bendVal = 48 * m.bend * blend;
+    if (entry.flipFrontMat && entry.flipFrontMat.uniforms) {
+      entry.flipFrontMat.uniforms.u_bend.value = bendVal;
+      entry.flipFrontMat.uniforms.u_bendDir.value = bendDir;
+    }
+    if (entry.flipBackMat && entry.flipBackMat.uniforms) {
+      entry.flipBackMat.uniforms.u_bend.value = bendVal;
+      entry.flipBackMat.uniforms.u_bendDir.value = bendDir;
+    }
     if (t < 1) entry.flipTween = requestAnimationFrame(step);
     else {
       entry.pivot.rotation.y = toY;
@@ -6739,6 +6954,7 @@ function flipMeshCard(entry, fromY, toY, duration) {
       entry.pivot.position.z = baseZ;
       entry.pivot.rotation.x = 0;
       entry.pivot.scale.set(baseSX, baseSY, baseSZ);
+      resetMeshFlipVisual(entry);
       entry.flipTween = null;
       entry.isAnimating = false;
       syncMeshInteractive(entry);
@@ -6757,11 +6973,14 @@ function syncMeshInteractive(entry) {
   if (!entry || !entry.frontMesh) return;
   if (entry.flipTween || entry.slideTween || entry.pulseActive) return;
   entry.frontMesh.visible = false;
+  if (entry.backMesh) entry.backMesh.visible = false;
   if (entry.edgeMesh) entry.edgeMesh.visible = false;
+  if (entry.flipProxy) entry.flipProxy.visible = false;
 }
 
 function slideMeshCard(entry, fromWorld, toWorld, duration, opts) {
   if (!entry) return Promise.resolve();
+  resetMeshFlipVisual(entry);
   const o = opts || {};
   const D         = duration || 520;
   const arcHeight = o.arcHeight != null ? o.arcHeight : 200;
@@ -7050,6 +7269,7 @@ function liftCardTo3D(stackEl, hostEl) {
   // realign on resize/scroll.
   if (hostEl.parentNode) hostEl.parentNode.removeChild(hostEl);
   hostEl.style.pointerEvents = 'auto';
+  hostEl.style.zIndex = '80';
   hostEl.classList.add('is-3d');
   const frontEl = hostEl.querySelector(':scope > .face.front');
   const backEl  = hostEl.querySelector(':scope > .face.back');
@@ -7133,6 +7353,7 @@ function removeCardFrom3D(entry) {
   if (entry.hostEl) {
     entry.hostEl.classList.remove('is-3d');
     entry.hostEl.style.pointerEvents = '';
+    entry.hostEl.style.zIndex = '';
     entry.hostEl.style.width = '';
     entry.hostEl.style.height = '';
     if (entry.frontEl) entry.frontEl.removeAttribute('data-face-hidden');
@@ -7258,6 +7479,7 @@ function mountDeckStackCard(stackEl, deckOffset, width, height) {
   host.style.width  = width  + 'px';
   host.style.height = height + 'px';
   host.style.pointerEvents = 'none';
+  host.style.zIndex = '10';
   const frontFace = document.createElement('div');
   frontFace.className = 'face front';
   frontFace.setAttribute('data-face-hidden', '1');
@@ -7334,6 +7556,16 @@ function renderDeckStack3D(stackEl, count) {
   return existing;
 }
 
+function setDeckStackVisibility(stackEl, visible) {
+  if (!stackEl) return;
+  const opacity = visible ? '1' : '0';
+  for (const c of cssCards) {
+    if (c.stackEl === stackEl && c.isDeckStack && c.hostEl) {
+      c.hostEl.style.opacity = opacity;
+    }
+  }
+}
+
 // Remove every 3D card from the scene (lifted player/CPU cards, deck
 // stacks, and any in-flight deal arcs). Called when leaving the match
 // screen so cards don't outlive their stack anchors.
@@ -7355,18 +7587,28 @@ function sampleFlipMotion(t, fromY, toY, cardHalfW = 160) {
   const arc = Math.sin(Math.PI * t); // 0->1->0
   const delta = toY - fromY;
   const dir = delta >= 0 ? 1 : -1;
-  const bend = Math.pow(arc, 1.45);
+  const bend = Math.pow(arc, 1.24);
   const reach = Math.max(110, Math.min(220, cardHalfW));
   return {
-    y: fromY + delta * eased + Math.sin(Math.PI * t * 1.28) * 0.06 * dir * arc,
-    liftZ: arc * (52 + reach * 0.16),
-    tiltX: arc * 0.26 + Math.sin(Math.PI * t * 2) * 0.035,
-    rollZ: Math.sin(Math.PI * t) * Math.sin(Math.PI * t) * 0.19 * dir,
-    peelX: Math.sin(Math.PI * t) * reach * 0.22 * dir,
+    y: fromY + delta * eased + Math.sin(Math.PI * t * 1.24) * 0.06 * dir * arc,
+    liftZ: arc * (64 + reach * 0.22),
+    tiltX: arc * 0.30 + Math.sin(Math.PI * t * 2.0) * 0.035,
+    rollZ: Math.sin(Math.PI * t) * Math.sin(Math.PI * t) * 0.18 * dir,
+    peelX: Math.sin(Math.PI * t) * reach * 0.30 * dir,
     heaveY: -Math.sin(Math.PI * t) * 10,
-    bend,
+    bend: bend * 0.88,
     midProgress: eased,
   };
+}
+
+function flipMeshBlend(t) {
+  const smoothstep = (a, b, x) => {
+    const k = Math.max(0, Math.min(1, (x - a) / (b - a)));
+    return k * k * (3 - 2 * k);
+  };
+  const fadeIn = smoothstep(0.08, 0.24, t);
+  const fadeOut = 1 - smoothstep(0.76, 0.94, t);
+  return Math.max(0, Math.min(1, fadeIn * fadeOut));
 }
 
 function flipCard3D(entry, fromY, toY, duration, onMid) {
@@ -7387,7 +7629,10 @@ function flipCard3D(entry, fromY, toY, duration, onMid) {
   // rare+ cards. Use a data attribute (not a class) so the host's
   // MutationObserver — which is scoped to the `class` attribute —
   // doesn't see this and re-enter flipCard3D recursively.
-  if (entry.hostEl) entry.hostEl.setAttribute('data-flipping', '1');
+  if (entry.hostEl) {
+    entry.hostEl.setAttribute('data-flipping', '1');
+    entry.hostEl.style.zIndex = '120';
+  }
   function step(now) {
     const t = Math.min(1, (now - start) / duration);
     const m = sampleFlipMotion(t, fromY, toY, cardHalfW);
@@ -7417,7 +7662,10 @@ function flipCard3D(entry, fromY, toY, duration, onMid) {
       updateFaceVisibility(entry);
       entry.flipTween = null;
       entry.isAnimating = false;
-      if (entry.hostEl) entry.hostEl.removeAttribute('data-flipping');
+      if (entry.hostEl) {
+        entry.hostEl.removeAttribute('data-flipping');
+        entry.hostEl.style.zIndex = '80';
+      }
     }
   }
   entry.flipTween = requestAnimationFrame(step);
@@ -7503,6 +7751,7 @@ window.__webgl3D = {
   deal: dealCard3D,
   slide: slideCardTo3D,
   renderDeckStack: renderDeckStack3D,
+  setDeckStackVisibility,
   clearAll: clearAllCards,
 };
 console.info('[toptrumps-webgl] CSS3DRenderer ready (' + cssCards.length + ' cards)');
@@ -7544,7 +7793,7 @@ function attachFoilOverlay(cardEl) {
     foilCanvas.remove();
     return;
   }
-  foilRenderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  foilRenderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, QUALITY.maxDpr));
   foilRenderer.setClearColor(0x000000, 0);
 
   const foilScene = new THREE.Scene();
@@ -7686,7 +7935,7 @@ function initConfetti() {
     cCanvas.remove();
     return null;
   }
-  cRenderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  cRenderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, QUALITY.maxDpr));
   cRenderer.setClearColor(0x000000, 0);
   const cScene = new THREE.Scene();
   const cCam = new THREE.Camera(); // identity — we write clip-space in the VS
@@ -7757,7 +8006,7 @@ function fireConfetti(opts = {}) {
   const mat = new THREE.ShaderMaterial({
     uniforms: {
       uTime:        { value: 0 },
-      uPixelRatio:  { value: Math.min(window.devicePixelRatio || 1, 2) },
+      uPixelRatio:  { value: Math.min(window.devicePixelRatio || 1, QUALITY.maxDpr) },
       uGravity:     { value: 0.6 },
       uLife:        { value: 4.0 },
     },
