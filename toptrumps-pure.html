@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Azure Top Trumps — Pure WebGL</title>
+<style>
+  :root {
+    --bg0: #05070d;
+    --bg1: #0a1526;
+    --ink: #eaf2ff;
+    --muted: #9fb3d0;
+    --accent: #37b6ff;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg0); color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; overflow: hidden; }
+  #stage { position: fixed; inset: 0; display: block; touch-action: none; }
+  /* radial ambience behind the canvas */
+  body::before {
+    content: ""; position: fixed; inset: 0; z-index: -1;
+    background:
+      radial-gradient(120% 90% at 50% -10%, #12294a 0%, var(--bg1) 45%, var(--bg0) 100%);
+  }
+
+  /* ---- HUD ---- */
+  #hud { position: fixed; left: 0; right: 0; top: 0; z-index: 5;
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding: 14px 18px; pointer-events: none; }
+  #hud .brand { font-weight: 700; letter-spacing: .3px; }
+  #hud .brand small { display: block; font-weight: 500; color: var(--muted); font-size: 12px; }
+  #hud .counts { text-align: right; font-variant-numeric: tabular-nums; }
+  #hud .counts b { color: var(--accent); }
+
+  #hint { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%);
+    z-index: 5; color: var(--muted); font-size: 14px; letter-spacing: .2px;
+    background: rgba(6,12,24,.55); border: 1px solid rgba(120,160,220,.18);
+    padding: 8px 16px; border-radius: 999px; backdrop-filter: blur(6px);
+    transition: opacity .4s ease; }
+
+  /* ---- loading / error ---- */
+  #loading { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center;
+    background: var(--bg0); transition: opacity .5s ease; }
+  #loading .spin { width: 46px; height: 46px; border-radius: 50%;
+    border: 3px solid rgba(120,160,220,.25); border-top-color: var(--accent);
+    animation: spin 900ms linear infinite; }
+  #loading .msg { margin-top: 16px; color: var(--muted); font-size: 14px; }
+  #loading.err .spin { display: none; }
+  #loading.gone { opacity: 0; pointer-events: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ---- accessibility mirror (screen-reader only) ---- */
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+</style>
+</head>
+<body>
+  <canvas id="stage"></canvas>
+
+  <div id="hud">
+    <div class="brand">Azure Top Trumps <small>Pure WebGL build</small></div>
+    <div class="counts">You <b id="you-count">0</b> · CPU <b id="cpu-count">0</b></div>
+  </div>
+
+  <div id="hint">Loading deck…</div>
+
+  <div id="loading">
+    <div style="text-align:center">
+      <div class="spin"></div>
+      <div class="msg" id="loading-msg">Loading deck…</div>
+    </div>
+  </div>
+
+  <!-- one-way accessibility mirror (populated by the renderer, never an animation owner) -->
+  <div id="a11y" class="sr-only" aria-live="polite"></div>
+
+  <script type="importmap">
+  { "imports": { "three": "./vendor/three.module.min.js" } }
+  </script>
+
+  <script type="module">
+  import * as THREE from 'three';
+
+  /* ===================================================================== *
+   *  HARVESTED — verbatim reusable blocks from toptrumps-webgl.html        *
+   *  (pure data + baker + AI; no DOM-card / CSS3D ownership)               *
+   * ===================================================================== */
+
+  const STATS = [
+  { key:'vcpus',           label:'vCPU',       dir:'higher', fmt:v => v,
+    hint:'compute capacity',
+    tooltip:'Virtual CPU count — logical processors exposed to the OS. More vCPUs = more parallel threads for web workers, build agents, and batch jobs. Higher wins.',
+    explainer:'More vCPUs → more parallel work (web workers, build agents, batch jobs).' },
+  { key:'memoryGB',        label:'Memory',     dir:'higher', fmt:v => `${v}<span class="unit">GB</span>`,
+    hint:'RAM capacity',
+    tooltip:'Installed RAM in gigabytes. Memory wins workloads that hold large datasets in memory — in-memory DBs, caches, JVM heaps, SAP HANA. Higher wins.',
+    explainer:'Memory wins workloads that hold large datasets in RAM — in-memory DBs, caches, JVM heaps, SAP HANA.' },
+  { key:'maxDataDisks',    label:'Data Disks', dir:'higher', fmt:v => `${v}<span class="unit">max</span>`,
+    hint:'storage scale-out',
+    tooltip:'Maximum number of attached data disks for this VM size. More disks let you stripe for higher IOPS/throughput.',
+    explainer:'More data disks = more IOPS/throughput by striping — useful for databases and file servers.' },
+  { key:'nics',            label:'NICs',       dir:'higher', fmt:v => `${v}<span class="unit">max</span>`,
+    hint:'max network interfaces',
+    tooltip:'Maximum number of network interface cards (NICs) attachable to this VM size — not bandwidth. More NICs enable segmentation (NVAs, multi-NIC appliances) and additional aggregate bandwidth.',
+    explainer:'More NICs = more network segmentation and aggregate bandwidth — matters for NVAs, multi-tier apps, HPC fabrics.' },
+  { key:'pricePerHourUSD', label:'Price',      dir:'lower',  fmt:v => v == null ? '—' : `$${v.toFixed(3)}/hr<span class="unit">USD</span>`,
+    hint:'PAYG Linux · lower wins',
+    tooltip:'PAYG Linux on-demand, USD per hour. Source: Azure Retail Prices API. Lower wins.',
+    explainer:'Lower price wins. Right-sizing beats buying horsepower you never use — measure first, scale up second.' },
+  { key:'powerScore',      label:'Power',      dir:'higher', fmt:v => `${v}/100`,
+    hint:'composite horsepower',
+    tooltip:'Synthetic 1–100 score for this game (not an Azure metric). Weighted blend: vCPU 25% · memory 25% · GPU 40% · disks 5% · NICs 5%, sqrt-scaled so flagships cap near 100.',
+    explainer:'Composite score weighted across vCPU, memory, GPU and disk — a rough "how beefy is this VM" thumb-rule.' },
+];
+
+const FAMILY_INFO = {
+  'General Purpose': {
+    summary: 'Balanced CPU-to-memory ratio. The default choice for web servers, small databases, dev/test, and most line-of-business apps. Includes the D-series and burstable B-series.',
+    docs: 'https://learn.microsoft.com/azure/virtual-machines/sizes/overview#general-purpose',
+  },
+  'Compute Optimized': {
+    summary: 'High CPU-to-memory ratio. Best for batch processing, web servers under load, application servers, network appliances, and gaming servers. Mostly the F-series.',
+    docs: 'https://learn.microsoft.com/azure/virtual-machines/sizes/overview#compute-optimized',
+  },
+  'Memory Optimized': {
+    summary: 'High memory-to-CPU ratio. Built for in-memory databases (SAP HANA), large relational databases, big-data analytics, and caching tiers. The E and M series live here.',
+    docs: 'https://learn.microsoft.com/azure/virtual-machines/sizes/overview#memory-optimized',
+  },
+  'Storage Optimized': {
+    summary: 'High disk throughput and IOPS, often with local NVMe. Made for big data, NoSQL clusters, data warehousing, and large transactional databases. The L-series.',
+    docs: 'https://learn.microsoft.com/azure/virtual-machines/sizes/overview#storage-optimized',
+  },
+  'GPU Accelerated': {
+    summary: 'NVIDIA / AMD GPUs onboard for AI training and inference, deep learning, scientific computing, visualisation, and remote graphics. The N-series (NC, ND, NV, NG).',
+    docs: 'https://learn.microsoft.com/azure/virtual-machines/sizes/overview#gpu-accelerated',
+  },
+  'HPC': {
+    summary: 'Tightly-coupled high-performance computing with InfiniBand interconnects and top-bin CPUs. Made for CFD, weather modelling, molecular dynamics, finite-element analysis. The H-series.',
+    docs: 'https://learn.microsoft.com/azure/virtual-machines/sizes-hpc',
+  },
+  'Confidential': {
+    summary: 'Hardware-based confidential computing (AMD SEV-SNP / Intel TDX). Memory is encrypted and isolated from the hypervisor — useful for regulated workloads and zero-trust scenarios. The DC and EC series.',
+    docs: 'https://learn.microsoft.com/azure/confidential-computing/confidential-vm-overview',
+  },
+};
+
+// Reference range used by the AI for its own-card evaluation.
+const STAT_REFS = {
+  vcpus:           [1, 192],
+  memoryGB:        [1, 4000],
+  maxDataDisks:    [1, 64],
+  nics:            [1, 8],
+  powerScore:      [1, 100],
+  // pricePerHourUSD intentionally absent — see pickStatForCPU
+};
+
+const FAMILY_CLASS = {
+  'General Purpose':   'ft-gp',
+  'Compute Optimized': 'ft-co',
+  'Memory Optimized':  'ft-mo',
+  'Storage Optimized': 'ft-so',
+  'GPU Accelerated':   'ft-gpu',
+  'HPC':               'ft-hpc',
+  'Confidential':      'ft-conf',
+};
+
+const RARITY_LABEL = {
+  common:'COMMON', uncommon:'UNCOMMON', rare:'RARE', epic:'EPIC', legendary:'LEGENDARY'
+};
+const RARITY_STARS = {
+  common:1, uncommon:2, rare:3, epic:4, legendary:5
+};
+
+const DECK_SIZE = 40;
+
+/* ---------- 1a. seeded RNG (mulberry32) for reproducible demos ---------- */
+const _seedParam = new URLSearchParams(location.search).get('seed');
+function _hashStr(s) {
+  let h = 1779033703 ^ s.length;
+  for (let i = 0; i < s.length; i++) {
+    h = Math.imul(h ^ s.charCodeAt(i), 3432918353);
+    h = (h << 13) | (h >>> 19);
+  }
+  return h >>> 0;
+}
+let _rngState = _seedParam
+  ? (/^-?\d+$/.test(_seedParam) ? (parseInt(_seedParam, 10) >>> 0) : _hashStr(_seedParam))
+  : (Math.floor(Math.random() * 0x100000000) >>> 0);
+function rng() {
+  _rngState = (_rngState + 0x6D2B79F5) >>> 0;
+  let t = _rngState;
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t = (t + Math.imul(t ^ (t >>> 7), t | 61)) ^ t;
+  return ((t ^ (t >>> 14)) >>> 0) / 0x100000000;
+}
+
+/* tiny DOM helpers */
+function h(tag, attrs, children) {
+  const el = document.createElement(tag);
+  if (attrs) for (const k in attrs) {
+    if (k === 'class') el.className = attrs[k];
+    else if (k === 'html') el.innerHTML = attrs[k];
+    else if (k.startsWith('on') && typeof attrs[k] === 'function') el.addEventListener(k.slice(2), attrs[k]);
+    else if (attrs[k] === true) el.setAttribute(k, '');
+    else if (attrs[k] != null && attrs[k] !== false) el.setAttribute(k, attrs[k]);
+  }
+  if (children != null) {
+    if (!Array.isArray(children)) children = [children];
+    for (const c of children) {
+      if (c == null || c === false) continue;
+      el.appendChild(c.nodeType ? c : document.createTextNode(String(c)));
+    }
+  }
+  return el;
+}
+function $(id) { return document.getElementById(id); }
+// Lowercase the "V" in Azure version suffixes (V2 → v2, DV2 → Dv2, etc.).
+// Preserves the NV-series family prefix (NV6, NV12, …) by negative lookbehind.
+function lcVersion(s) {
+  return String(s == null ? '' : s).replace(/(?<!N)V(\d)/g, 'v$1');
+}
+
+
+  function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+
+  /* ---------- 3b. card art bake (Phase 3 — mesh-card texture source) ----------
+   Renders a card to a high-DPI offscreen canvas using Canvas2D so the
+   WebGL mesh-card path can wrap it in a CanvasTexture. Deliberately a
+   simplified, larger-typography variant of the DOM card — the WebGL
+   build is meant to look different from the stable build.
+   Synchronous bake. Family glyphs are async-loaded SVG → bitmap; if
+   one isn't ready when a card bakes, the glyph slot is left empty
+   (visually fine — gradient + family stripe still read). Glyph load
+   typically completes within the first 50ms after page load. */
+(function initCardArt() {
+  const TEX_W = 1280, TEX_H = 2000;  // 4× of CSS 320×500
+  const PAD = 64;
+
+  const FAM_COLOR = {
+    'General Purpose':   '#0f6cbd',
+    'Compute Optimized': '#e97548',
+    'Memory Optimized':  '#8764b8',
+    'Storage Optimized': '#038387',
+    'GPU Accelerated':   '#c4314b',
+    'HPC':               '#4f52b2',
+    'Confidential':      '#7a7574',
+  };
+  const RARITY_COLOR = {
+    common:     '#b9bcc6',
+    uncommon:   '#4ea36b',
+    rare:       '#2596e7',
+    epic:       '#b074e8',
+    legendary:  '#f0a93b',
+  };
+
+  // Pre-rasterize each family glyph SVG to a 512×512 canvas, tinted
+  // in its own family color so it can sit on the white card front
+  // exactly the way the original DOM card's .glyph element does
+  // (`color: var(--fam)`). bake() falls back to glyph-less if the
+  // image hasn't loaded yet.
+  const glyphCanvases = {};
+  Object.entries(GLYPHS).forEach(([family, svg]) => {
+    const c = document.createElement('canvas');
+    c.width = 512; c.height = 512;
+    const ctx = c.getContext('2d');
+    const img = new Image();
+    img.onload = () => {
+      ctx.drawImage(img, 0, 0, 512, 512);
+      glyphCanvases[family] = c;
+      // Invalidate any cached bakes that completed before this glyph
+      // loaded so a re-bake will include the tinted glyph.
+      if (typeof frontCache !== 'undefined') frontCache.clear();
+    };
+    img.onerror = () => { /* leave unset; bake will skip */ };
+    img.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+      svg.replace(/currentColor/g, FAM_COLOR[family] || '#0f6cbd')
+    );
+  });
+
+  const frontCache = new Map(); // card.id → HTMLCanvasElement
+  let backCanvas = null;
+
+  // Azure "A" logo — same PNG the CSS3D card backs use. Preload at
+  // module init so it's almost certainly ready by the time the first
+  // mesh card mounts. If it isn't yet, bakeBack draws everything else
+  // and the logo pops in via onBackRefresh once it loads.
+  const azureLogoImg = new Image();
+  azureLogoImg.decoding = 'async';
+  const backRefreshListeners = [];
+  azureLogoImg.addEventListener('load', () => {
+    backCanvas = null;
+    for (const cb of backRefreshListeners.slice()) { try { cb(); } catch (_) {} }
+  });
+  azureLogoImg.src = 'azure-logo.png';
+
+  // Pre-bake the hex-tile background pattern once. The original CSS
+  // back tiles a 56×48 SVG at 6% white. Match exactly at 4× scale.
+  let hexTilePattern = null;
+  (function buildHexTile() {
+    const TW = 224, TH = 192; // 4× of the original 56×48 CSS tile
+    const t = document.createElement('canvas');
+    t.width = TW; t.height = TH;
+    const tx = t.getContext('2d');
+    tx.strokeStyle = 'rgba(255,255,255,0.06)';
+    tx.lineWidth = 4; // 1 CSS px scaled
+    const polys = [
+      [14,0, 28,8, 28,24, 14,32, 0,24, 0,8],
+      [42,0, 56,8, 56,24, 42,32, 28,24, 28,8],
+      [14,32, 28,40, 28,48, 14,48],
+      [0,48, 14,48, 14,32, 0,24],
+      [42,32, 56,24, 56,48, 42,48],
+    ];
+    for (const p of polys) {
+      tx.beginPath();
+      for (let i = 0; i < p.length; i += 2) {
+        const x = p[i] * 4, y = p[i + 1] * 4;
+        if (i === 0) tx.moveTo(x, y); else tx.lineTo(x, y);
+      }
+      tx.closePath();
+      tx.stroke();
+    }
+    hexTilePattern = t;
+  })();
+
+  function bakeFront(card) {
+    const cached = frontCache.get(card.id);
+    if (cached) return cached;
+    const c = document.createElement('canvas');
+    c.width = TEX_W; c.height = TEX_H;
+    drawFront(c.getContext('2d'), card);
+    frontCache.set(card.id, c);
+    return c;
+  }
+
+  function bakeBack() {
+    if (backCanvas) return backCanvas;
+    backCanvas = document.createElement('canvas');
+    backCanvas.width = TEX_W; backCanvas.height = TEX_H;
+    drawBack(backCanvas.getContext('2d'));
+    return backCanvas;
+  }
+
+  function drawFront(ctx, card) {
+    const famColor    = FAM_COLOR[card.familyType] || '#0f6cbd';
+    const rarityColor = RARITY_COLOR[card.rarity]   || '#b9bcc6';
+    const W = TEX_W, H = TEX_H;
+
+    // === Original DOM card layout, faithfully baked ===
+    // The DOM card (toptrumps.html cardFront) is: white background,
+    // thin family-colored top accent, dark text, small centered family
+    // glyph in family color, six stat rows on white, cream ability
+    // footer. We mirror that here so the mesh card shown over the
+    // CSS3D DOM card has the same visual design — no second style
+    // to maintain.
+    // Card body — white with the same 14 CSS-px (= 56 texture-px)
+    // corner radius the DOM .card uses.
+    ctx.fillStyle = '#ffffff';
+    roundRect(ctx, 0, 0, W, H, 56); ctx.fill();
+
+    // Thin family-colored top accent (matches .card-accent height 8px = 32 tex-px)
+    ctx.fillStyle = famColor;
+    roundRectTop(ctx, 0, 0, W, 32, 56); ctx.fill();
+
+    // --- HEADER ROW (region pill left, rarity stars+word right) ---
+    const HEAD_Y = 100; // vertical mid of the head row
+    // Region pill — family-colored hex-ish chip with white text
+    ctx.save();
+    ctx.font = '800 38px ui-monospace, "SF Mono", Menlo, Consolas, monospace';
+    const regionText = '⬢ ' + (card.regionShort || '');
+    const regW = ctx.measureText(regionText).width + 60;
+    const regH = 68;
+    const regX = PAD;
+    const regY = HEAD_Y - regH / 2;
+    ctx.fillStyle = famColor;
+    roundRect(ctx, regX, regY, regW, regH, 14); ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'left';
+    ctx.fillText(regionText, regX + 30, HEAD_Y);
+    ctx.restore();
+
+    // Rarity stars + word — rarity-colored text, no chip background,
+    // right-aligned to match the DOM .card-rarity (color: var(--rar)).
+    const stars = '★'.repeat(RARITY_STARS[card.rarity] || 1);
+    const rarityWord = (RARITY_LABEL[card.rarity] || '').toUpperCase();
+    ctx.save();
+    ctx.fillStyle = rarityColor;
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'right';
+    ctx.font = '800 40px Inter, system-ui, sans-serif';
+    const wordW = ctx.measureText(' ' + rarityWord).width;
+    ctx.fillText(rarityWord, W - PAD, HEAD_Y);
+    ctx.font = '900 44px Inter, system-ui, sans-serif';
+    ctx.fillText(stars, W - PAD - wordW, HEAD_Y);
+    ctx.restore();
+
+    // --- TITLE BLOCK (name, nickname, family chip) ---
+    ctx.textBaseline = 'alphabetic';
+    ctx.textAlign = 'left';
+    // Card name — huge dark text. Auto-shrink for very long names.
+    const displayName = lcVersion(card.displayName || '');
+    let nameFontPx = 130;
+    ctx.font = '900 ' + nameFontPx + 'px Inter, system-ui, sans-serif';
+    while (ctx.measureText(displayName).width > W - PAD * 2 && nameFontPx > 64) {
+      nameFontPx -= 6;
+      ctx.font = '900 ' + nameFontPx + 'px Inter, system-ui, sans-serif';
+    }
+    ctx.fillStyle = '#15171c';
+    ctx.fillText(displayName, PAD, 290);
+
+    // Nickname — italic muted gray
+    ctx.font = 'italic 600 56px Inter, system-ui, sans-serif';
+    ctx.fillStyle = '#687085';
+    ctx.fillText('“' + (card.nickname || '') + '”', PAD, 360);
+
+    // Family chip row — dot + family ID + family type, family-colored,
+    // small uppercase tracking like .card-fam in the DOM.
+    ctx.save();
+    const dotY = 432;
+    ctx.fillStyle = famColor;
+    ctx.beginPath();
+    ctx.arc(PAD + 12, dotY, 12, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.font = '700 36px Inter, system-ui, sans-serif';
+    ctx.fillStyle = famColor;
+    ctx.textBaseline = 'middle';
+    const famId = lcVersion((card.familyDisplay || '').trim());
+    const famType = (card.familyType || '').toUpperCase();
+    const famChip = famId ? (famId + '  ·  ' + famType) : famType;
+    ctx.fillText(famChip, PAD + 36, dotY);
+    ctx.restore();
+
+    // --- ART BLOCK (glyph + optional GPU tag) ---
+    // Centered family glyph, small (≈ 280 px) tinted in family color.
+    const glyph = glyphCanvases[card.familyType];
+    const artMidY = 620;
+    if (glyph) {
+      const gSize = 280;
+      ctx.drawImage(glyph, (W - gSize) / 2, artMidY - gSize / 2, gSize, gSize);
+    }
+    // GPU tag underneath (if any) — small text in legendary-amber
+    if (card.tags && card.tags.gpu) {
+      ctx.save();
+      ctx.font = '800 40px ui-monospace, "SF Mono", Menlo, Consolas, monospace';
+      ctx.fillStyle = '#f0a93b';
+      ctx.textBaseline = 'middle';
+      ctx.textAlign = 'center';
+      ctx.fillText('GPU · ' + card.tags.gpu, W / 2, artMidY + 180);
+      ctx.restore();
+    }
+
+    // --- STATS LIST (6 rows on white card body) ---
+    const statsX0 = PAD;
+    const statsX1 = W - PAD;
+    const statsY0 = 870;
+    const statsY1 = 1630;
+    const s = card.stats || {};
+    const rows = [
+      { label: 'vCPU',       dir: 'higher', hint: 'compute capacity',
+        val: s.vcpus           != null ? String(s.vcpus) : '—', unit: '' },
+      { label: 'MEMORY',     dir: 'higher', hint: 'RAM capacity',
+        val: s.memoryGB        != null ? String(s.memoryGB) : '—',
+        unit: s.memoryGB != null ? 'GB' : '' },
+      { label: 'DATA DISKS', dir: 'higher', hint: 'storage scale-out',
+        val: s.maxDataDisks    != null ? String(s.maxDataDisks) : '—',
+        unit: s.maxDataDisks != null ? 'MAX' : '' },
+      { label: 'NICs',       dir: 'higher', hint: 'max network interfaces',
+        val: s.nics            != null ? String(s.nics) : '—',
+        unit: s.nics != null ? 'MAX' : '' },
+      { label: 'PRICE',      dir: 'lower',  hint: 'PAYG Linux · lower wins',
+        val: s.pricePerHourUSD != null ? '$' + s.pricePerHourUSD.toFixed(3) + '/hr' : '—',
+        unit: s.pricePerHourUSD != null ? 'USD' : '' },
+      { label: 'POWER',      dir: 'higher', hint: 'composite horsepower',
+        val: s.powerScore      != null ? s.powerScore + '/100' : '—', unit: '' },
+    ];
+    const rowH = (statsY1 - statsY0) / rows.length;
+    ctx.textBaseline = 'middle';
+    rows.forEach((r, i) => {
+      const rowTop = statsY0 + i * rowH;
+      const rowMid = rowTop + rowH / 2;
+      // Label (uppercase, tracked, dark gray-blue)
+      ctx.font = '800 44px Inter, system-ui, sans-serif';
+      ctx.fillStyle = '#4a5063';
+      ctx.textAlign = 'left';
+      ctx.fillText(r.label, statsX0 + 20, rowMid);
+      const labelW = ctx.measureText(r.label).width;
+      // Direction arrow (family-tinted for higher, muted red for lower)
+      const arrow = r.dir === 'higher' ? '▲' : '▼';
+      ctx.font = '900 32px Inter, system-ui, sans-serif';
+      ctx.fillStyle = r.dir === 'higher' ? famColor : '#c44545';
+      const arrowX = statsX0 + 20 + labelW + 18;
+      ctx.fillText(arrow, arrowX, rowMid);
+      const arrowW = ctx.measureText(arrow).width;
+      // Hint (italic light gray) after arrow, auto-shrink to fit
+      let hintFont = 32;
+      ctx.font = 'italic 500 ' + hintFont + 'px Inter, system-ui, sans-serif';
+      const hintX = arrowX + arrowW + 14;
+      const hintMaxW = statsX1 - 20 - hintX - 360;
+      while (ctx.measureText(r.hint).width > hintMaxW && hintFont > 22) {
+        hintFont -= 2;
+        ctx.font = 'italic 500 ' + hintFont + 'px Inter, system-ui, sans-serif';
+      }
+      ctx.fillStyle = '#9aa0ad';
+      ctx.fillText(r.hint, hintX, rowMid);
+      // Value — dark, mono-feel, right-aligned. Optional unit suffix
+      // rendered smaller and uppercased like .stat-value .unit in DOM.
+      let valFont = 64;
+      ctx.font = '900 ' + valFont + 'px Inter, system-ui, sans-serif';
+      while (ctx.measureText(r.val).width > 360 && valFont > 40) {
+        valFont -= 4;
+        ctx.font = '900 ' + valFont + 'px Inter, system-ui, sans-serif';
+      }
+      ctx.fillStyle = '#15171c';
+      ctx.textAlign = 'right';
+      const unitGap = r.unit ? 16 : 0;
+      const unitFont = Math.max(28, Math.floor(valFont * 0.45));
+      ctx.save();
+      ctx.font = '700 ' + unitFont + 'px Inter, system-ui, sans-serif';
+      const unitW = r.unit ? ctx.measureText(r.unit).width : 0;
+      ctx.restore();
+      ctx.font = '900 ' + valFont + 'px Inter, system-ui, sans-serif';
+      ctx.fillText(r.val, statsX1 - 20 - unitW - unitGap, rowMid);
+      if (r.unit) {
+        ctx.font = '700 ' + unitFont + 'px Inter, system-ui, sans-serif';
+        ctx.fillStyle = '#8a8f99';
+        ctx.fillText(r.unit, statsX1 - 20, rowMid);
+      }
+      // Row divider — faint hairline at bottom of every row
+      ctx.strokeStyle = 'rgba(0,0,0,0.06)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(statsX0 + 20, rowTop + rowH);
+      ctx.lineTo(statsX1 - 20, rowTop + rowH);
+      ctx.stroke();
+    });
+    ctx.textBaseline = 'alphabetic';
+
+    // --- ABILITY FOOTER (cream tinted box) ---
+    if (card.ability && (card.ability.title || card.ability.description)) {
+      const abX0 = 40;
+      const abX1 = W - 40;
+      const abY  = 1660;
+      const abH  = 300;
+      ctx.fillStyle = '#f5f1e3';
+      roundRect(ctx, abX0, abY, abX1 - abX0, abH, 28); ctx.fill();
+      const abTitle = (card.ability.title || '').toUpperCase();
+      const abDesc  = card.ability.description || '';
+      // Title — uppercase, family-colored
+      ctx.textBaseline = 'alphabetic';
+      ctx.textAlign = 'left';
+      ctx.font = '900 44px Inter, system-ui, sans-serif';
+      ctx.fillStyle = famColor;
+      ctx.fillText(abTitle, abX0 + 40, abY + 68);
+      // Description — wrap to up to 4 lines
+      ctx.font = '500 36px Inter, system-ui, sans-serif';
+      ctx.fillStyle = '#565b6d';
+      const dx = abX0 + 40;
+      const maxW = (abX1 - abX0) - 80;
+      const lineH = 46;
+      const maxLines = 4;
+      const words = abDesc.split(/\s+/);
+      const lines = [];
+      let line = '';
+      let consumed = 0;
+      for (let i = 0; i < words.length; i++) {
+        const test = line ? line + ' ' + words[i] : words[i];
+        if (ctx.measureText(test).width > maxW && line) {
+          lines.push(line);
+          line = words[i];
+          consumed = i;
+          if (lines.length === maxLines) break;
+        } else {
+          line = test;
+        }
+      }
+      if (line && lines.length < maxLines) { lines.push(line); consumed = words.length; }
+      if (lines.length === maxLines && consumed < words.length - 1) {
+        let last = lines[maxLines - 1];
+        while (ctx.measureText(last + ' …').width > maxW && last.includes(' ')) {
+          last = last.replace(/\s+\S*$/, '');
+        }
+        lines[maxLines - 1] = last + ' …';
+      }
+      lines.forEach((ln, i) => ctx.fillText(ln, dx, abY + 124 + i * lineH));
+    }
+
+    // Rarity-tinted outer border (last so it sits on top of every other
+    // layer). Matches the original .card.rarity-X box-shadow accent.
+    ctx.strokeStyle = rarityColor;
+    ctx.lineWidth = 8;
+    roundRect(ctx, 16, 16, W - 32, H - 32, 50); ctx.stroke();
+  }
+
+  function drawBack(ctx) {
+    const W = TEX_W, H = TEX_H;
+    const S = 4; // CSS→texture scale (1280=320*4, 2000=500*4)
+
+    // --- 1. Background field --------------------------------------------
+    // 135° linear gradient matching the original CSS3D card back
+    // (--azure → --azure-deep → #06335e). Then a soft top-left highlight,
+    // then the hex tessellation overlay at 6% white.
+    // Clip radius MUST match the CSS .card border-radius (14 CSS px) so
+    // the painted content fills the element edge-to-edge. If the clip
+    // is tighter than the element radius, the safety-net
+    // `background-color` underneath shows through as a darker ring at
+    // each corner — which reads as a second card peeking out from
+    // behind the jittered deck stack.
+    ctx.save();
+    roundRect(ctx, 0, 0, W, H, 14 * S); ctx.clip();
+
+    const grad = ctx.createLinearGradient(0, 0, W, H);
+    grad.addColorStop(0,    '#0f6cbd');
+    grad.addColorStop(0.60, '#0b4f8c');
+    grad.addColorStop(1,    '#073b6a');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+
+    // Radial highlight — CSS3D back uses `radial-gradient(circle at
+    // 30% 25%, rgba(255,255,255,.08), transparent 55%)`. With
+    // farthest-corner default, the gradient end is 55% of the
+    // distance from (0.3W, 0.25H) to (W,H), ≈ 0.55 × √(0.49W² + 0.5625H²).
+    // For our 1280×2000 tex this works out to ~960 tex px.
+    const hiCx = W * 0.30, hiCy = H * 0.25;
+    const hiR  = 0.55 * Math.sqrt((W - hiCx) * (W - hiCx) + (H - hiCy) * (H - hiCy));
+    const hi = ctx.createRadialGradient(hiCx, hiCy, 0, hiCx, hiCy, hiR);
+    hi.addColorStop(0, 'rgba(255,255,255,0.10)');
+    hi.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = hi;
+    ctx.fillRect(0, 0, W, H);
+
+    if (hexTilePattern) {
+      const pat = ctx.createPattern(hexTilePattern, 'repeat');
+      if (pat) { ctx.fillStyle = pat; ctx.fillRect(0, 0, W, H); }
+    }
+    ctx.restore();
+
+    // --- 2. Outer gold frame (inset 8 CSS px) ---------------------------
+    // Drawn as three concentric strokes to mimic the original's
+    // outer-gold + inner-white + dashed-very-faint sandwich.
+    const frameInset = 8 * S;
+    const frameR    = 11 * S;
+    ctx.lineWidth = 1 * S;
+    ctx.strokeStyle = 'rgba(255,214,130,0.55)';
+    roundRect(ctx, frameInset, frameInset,
+              W - frameInset * 2, H - frameInset * 2, frameR); ctx.stroke();
+
+    const innerInset = 13 * S;
+    const innerR     = 8 * S;
+    ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+    roundRect(ctx, innerInset, innerInset,
+              W - innerInset * 2, H - innerInset * 2, innerR); ctx.stroke();
+
+    // Inner gold tint hint inside the white border.
+    ctx.strokeStyle = 'rgba(255,214,130,0.18)';
+    roundRect(ctx, innerInset + S, innerInset + S,
+              W - (innerInset + S) * 2, H - (innerInset + S) * 2, innerR - S); ctx.stroke();
+
+    // Faint dashed line (inset 19 CSS).
+    const dashInset = 19 * S;
+    ctx.save();
+    ctx.setLineDash([3 * S, 4 * S]);
+    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+    ctx.lineWidth = 1 * S;
+    roundRect(ctx, dashInset, dashInset,
+              W - dashInset * 2, H - dashInset * 2, 5 * S); ctx.stroke();
+    ctx.restore();
+
+    // --- 3. Central hex medallion ---------------------------------------
+    // 200×200 viewBox in the SVG, scaled to 62% of card width (max 180 CSS).
+    // For our 320 CSS card: 320*0.62 = 198 → clamped to 180. So size = 180 CSS.
+    const medSize = 180 * S;
+    const medX = (W - medSize) / 2;
+    const medY = (H - medSize) / 2;
+    const medScale = medSize / 200; // viewBox is 200x200
+    drawMedallion(ctx, medX, medY, medScale);
+
+    // --- 4. Azure "A" logo (if loaded) ----------------------------------
+    if (azureLogoImg.complete && azureLogoImg.naturalWidth > 0) {
+      const logoSize = 96 * S; // 32% of 320 → 102 CSS, clamped to 96
+      const logoX = (W - logoSize) / 2;
+      const logoY = (H - logoSize) / 2;
+      // Soft drop shadow to match the CSS filter: drop-shadow(0 4px 10px ...)
+      ctx.save();
+      ctx.shadowColor = 'rgba(0,0,0,0.55)';
+      ctx.shadowBlur  = 10 * S;
+      ctx.shadowOffsetY = 4 * S;
+      ctx.drawImage(azureLogoImg, logoX, logoY, logoSize, logoSize);
+      ctx.restore();
+    }
+
+    // --- 5. Wordmarks ---------------------------------------------------
+    // "AZURE TOP TRUMPS" top + bottom, gold-cream, wide letter-spacing,
+    // flanked by short gold side rules. CSS: 9px font, .42em letter-spacing.
+    drawWordmark(ctx, 'AZURE TOP TRUMPS', W / 2, 26 * S + 14 * S);
+    drawWordmark(ctx, 'AZURE TOP TRUMPS', W / 2, H - 26 * S);
+
+    // --- 6. Corner ornaments --------------------------------------------
+    // 4-fold rotational symmetry. The SVG draws its L+arc+dot pattern
+    // in the top-left "quadrant" of its 24×24 viewBox; rotating by 90°
+    // increments matches the original CSS card.
+    const cs = 26 * S;            // corner box size
+    const co = 14 * S;            // offset from card edge
+    drawCornerOrnament(ctx, co,            co,            cs,   0);
+    drawCornerOrnament(ctx, W - co - cs,   co,            cs,  90);
+    drawCornerOrnament(ctx, W - co - cs,   H - co - cs,   cs, 180);
+    drawCornerOrnament(ctx, co,            H - co - cs,   cs, 270);
+  }
+
+  // Gold hex medallion (mirrors BACK_MEDALLION_SVG verbatim).
+  function drawMedallion(ctx, x, y, s) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(s, s);
+    // Outer hex ring — gold gradient.
+    const gold = ctx.createLinearGradient(0, 0, 0, 200);
+    gold.addColorStop(0, '#ffe6a8');
+    gold.addColorStop(1, '#d59b2a');
+    ctx.lineWidth = 1 / s * 4; // keep stroke ~constant in screen px
+    ctx.strokeStyle = gold;
+    ctx.globalAlpha = 0.35;
+    polyHex(ctx, [100,12, 170,52, 170,148, 100,188, 30,148, 30,52]);
+    ctx.globalAlpha = 1;
+
+    // Slightly inner hex — white-ish.
+    ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+    ctx.lineWidth = 0.6 / s * 4;
+    polyHex(ctx, [100,22, 162,57, 162,143, 100,178, 38,143, 38,57]);
+
+    // Inner ornamental circle.
+    ctx.strokeStyle = 'rgba(255,255,255,0.10)';
+    ctx.lineWidth = 0.5 / s * 4;
+    ctx.beginPath();
+    ctx.arc(100, 100, 62, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function polyHex(ctx, pts) {
+    ctx.beginPath();
+    for (let i = 0; i < pts.length; i += 2) {
+      const x = pts[i], y = pts[i + 1];
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.stroke();
+  }
+
+  // Gold side-ruled wordmark — "— text —" with letter-spacing.
+  function drawWordmark(ctx, text, cx, cy) {
+    const S = 4;
+    const size = 9 * S;
+    ctx.save();
+    ctx.font = '700 ' + size + 'px Inter, system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255,224,168,0.85)';
+    ctx.shadowColor = 'rgba(0,0,0,0.5)';
+    ctx.shadowBlur  = 2 * S;
+    ctx.shadowOffsetY = 1 * S;
+    // Manual letter-spacing (.42em ≈ 0.42 * fontSize).
+    const spacing = size * 0.42;
+    let total = 0;
+    for (const ch of text) total += ctx.measureText(ch).width + spacing;
+    total -= spacing; // no trailing space
+    let x = cx - total / 2;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    for (const ch of text) {
+      ctx.fillText(ch, x, cy);
+      x += ctx.measureText(ch).width + spacing;
+    }
+    // Side rules — short gold gradient lines flanking the wordmark.
+    const ruleW = 28 * S;
+    const ruleY = cy;
+    ctx.shadowColor = 'transparent';
+    const gL = ctx.createLinearGradient(cx - total / 2 - ruleW - 10 * S, ruleY,
+                                        cx - total / 2 - 10 * S,         ruleY);
+    gL.addColorStop(0,   'rgba(255,214,130,0)');
+    gL.addColorStop(0.5, 'rgba(255,214,130,0.55)');
+    gL.addColorStop(1,   'rgba(255,214,130,0)');
+    ctx.fillStyle = gL;
+    ctx.fillRect(cx - total / 2 - ruleW - 10 * S, ruleY - S / 2, ruleW, S);
+
+    const gR = ctx.createLinearGradient(cx + total / 2 + 10 * S, ruleY,
+                                        cx + total / 2 + 10 * S + ruleW, ruleY);
+    gR.addColorStop(0,   'rgba(255,214,130,0)');
+    gR.addColorStop(0.5, 'rgba(255,214,130,0.55)');
+    gR.addColorStop(1,   'rgba(255,214,130,0)');
+    ctx.fillStyle = gR;
+    ctx.fillRect(cx + total / 2 + 10 * S, ruleY - S / 2, ruleW, S);
+
+    ctx.restore();
+  }
+
+  // Corner ornament: L-stub + arc + dot, rotated to match position.
+  function drawCornerOrnament(ctx, x, y, size, rotDeg) {
+    ctx.save();
+    // Defensive state reset so a shadow / dash / alpha leak from
+    // anywhere upstream in drawBack cannot poison this routine.
+    ctx.setLineDash([]);
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+    ctx.globalAlpha = 1;
+    ctx.translate(x + size / 2, y + size / 2);
+    ctx.rotate(rotDeg * Math.PI / 180);
+    ctx.translate(-size / 2, -size / 2);
+    const s = size / 24; // SVG viewBox is 24×24
+    ctx.strokeStyle = 'rgba(255,214,130,0.72)';
+    // L-stub: SVG uses stroke-linecap="round" — keep that.
+    ctx.lineCap = 'round';
+    ctx.lineWidth = 1.4 * s;
+    ctx.beginPath();
+    ctx.moveTo(2 * s, 2 * s); ctx.lineTo(10 * s, 2 * s);
+    ctx.moveTo(2 * s, 2 * s); ctx.lineTo(2 * s, 10 * s);
+    ctx.stroke();
+
+    // Arc pair: original SVG path has no linecap attribute, so it
+    // uses the default "butt". Inheriting "round" from the L above
+    // adds semicircular caps to every arc endpoint, fattening the
+    // pair into a blurry blob after the 4× → 1× downsample.
+    ctx.lineCap = 'butt';
+    ctx.lineWidth = 1 * s;
+    ctx.globalAlpha = 0.7;
+    ctx.beginPath();
+    ctx.moveTo(5 * s, 5 * s); ctx.quadraticCurveTo(5 * s, 10 * s, 10 * s, 10 * s);
+    ctx.moveTo(5 * s, 5 * s); ctx.quadraticCurveTo(10 * s, 5 * s, 10 * s, 10 * s);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+
+    ctx.fillStyle = 'rgba(255,214,130,0.75)';
+    ctx.beginPath();
+    ctx.arc(3.5 * s, 3.5 * s, 1.2 * s, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawHex(ctx, cx, cy, r, color, width) {
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width;
+    ctx.beginPath();
+    for (let i = 0; i < 6; i++) {
+      const a = Math.PI / 3 * i - Math.PI / 2;
+      const x = cx + r * Math.cos(a);
+      const y = cy + r * Math.sin(a);
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.closePath(); ctx.stroke();
+  }
+
+  function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y); ctx.arcTo(x + w, y, x + w, y + r, r);
+    ctx.lineTo(x + w, y + h - r); ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+    ctx.lineTo(x + r, y + h); ctx.arcTo(x, y + h, x, y + h - r, r);
+    ctx.lineTo(x, y + r); ctx.arcTo(x, y, x + r, y, r);
+    ctx.closePath();
+  }
+  function roundRectTop(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y); ctx.arcTo(x + w, y, x + w, y + r, r);
+    ctx.lineTo(x + w, y + h); ctx.lineTo(x, y + h);
+    ctx.lineTo(x, y + r); ctx.arcTo(x, y, x + r, y, r);
+    ctx.closePath();
+  }
+  function wrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines) {
+    const words = String(text || '').split(/\s+/);
+    let line = '';
+    let lines = 0;
+    for (let n = 0; n < words.length; n++) {
+      const test = line ? line + ' ' + words[n] : words[n];
+      if (ctx.measureText(test).width > maxWidth && line) {
+        ctx.fillText(line, x, y);
+        line = words[n];
+        y += lineHeight;
+        lines++;
+        if (lines >= (maxLines - 1)) {
+          // last line — measure and ellipsize remaining
+          let rest = words.slice(n).join(' ');
+          while (rest && ctx.measureText(rest + '…').width > maxWidth) {
+            rest = rest.slice(0, -1);
+          }
+          ctx.fillText(rest + (rest === words.slice(n).join(' ') ? '' : '…'), x, y);
+          return;
+        }
+      } else {
+        line = test;
+      }
+    }
+    if (line) ctx.fillText(line, x, y);
+  }
+
+  window.__cardArt = {
+    W: TEX_W, H: TEX_H,
+    bakeFront, bakeBack,
+    // Subscribe to back-face texture invalidations (currently fires
+    // once when azure-logo.png finishes loading after a logo-less
+    // bake). Returns an unsubscribe fn.
+    onBackRefresh(cb) {
+      backRefreshListeners.push(cb);
+      return () => {
+        const i = backRefreshListeners.indexOf(cb);
+        if (i >= 0) backRefreshListeners.splice(i, 1);
+      };
+    },
+    clear() { frontCache.clear(); backCanvas = null; },
+  };
+
+  // Publish the baked back as a stylesheet so the CSS3D card back
+  // (deck-stack cards, deal-card hosts) paints from the same image as
+  // the mesh back. Without this the two layers show subtly different
+  // designs that read as a "swap" when one occludes the other.
+  // We inject the URL into a real <style> element rather than a CSS
+  // custom property because the data URL is far too large to route
+  // through `document.documentElement.style.setProperty(...)`
+  // reliably (some browsers silently invalidate huge inline-style
+  // values, which then drops the entire background shorthand and
+  // leaves cards transparent). Republish on every refresh
+  // (e.g. after azure-logo.png finishes loading post-bake).
+  let bakedBackStyleEl = null;
+  function publishBackImage() {
+    try {
+      const c = bakeBack();
+      const url = c.toDataURL('image/png');
+      if (!bakedBackStyleEl) {
+        bakedBackStyleEl = document.createElement('style');
+        bakedBackStyleEl.id = 'baked-back-style';
+        document.head.appendChild(bakedBackStyleEl);
+      }
+      bakedBackStyleEl.textContent =
+        'body.has-baked-back .card.is-back {' +
+          'background-image: url("' + url + '");' +
+          'background-size: 100% 100%;' +
+          'background-position: center;' +
+          'background-repeat: no-repeat;' +
+          'background-color: #0b4f8c;' +
+        '}';
+      if (document.body) document.body.classList.add('has-baked-back');
+    } catch (err) {
+      console.warn('[toptrumps-webgl] publishBackImage failed', err);
+    }
+  }
+  if (document.body) publishBackImage();
+  else document.addEventListener('DOMContentLoaded', publishBackImage, { once: true });
+  backRefreshListeners.push(publishBackImage);
+  console.info('[toptrumps-webgl] Card art baker ready (' + TEX_W + '×' + TEX_H + ')');
+})();
+
+
+  /* ---------- 5. CPU AI ----------
+   Difficulty scale (G.difficulty 1-5):
+     1 Cadet     — fully random
+     2 Rookie    — 75% random, 25% smart
+     3 Engineer  — 40% random, 60% smart
+     4 Architect — fully smart (rank-based)
+     5 Oracle    — sees opponent's top card; picks the stat where CPU wins by largest margin */
+const DIFFICULTY_META = [
+  null,
+  { name: 'Cadet',     hint: 'Picks a stat at random. Easiest match.' },
+  { name: 'Rookie',    hint: 'Mostly random — occasionally clever.' },
+  { name: 'Engineer',  hint: 'Balanced — sometimes smart, sometimes random.' },
+  { name: 'Architect', hint: 'Plays its strongest stat every round.' },
+  { name: 'Oracle',    hint: 'Peeks at your card. Brutal — good luck.' },
+];
+const DIFFICULTY_SMART_P = [0, 0.0, 0.25, 0.60, 1.0, 1.0];
+
+function pickStatForCPU(card, allHandCards, opponentCard) {
+  const diff = (G && G.difficulty) || 3;
+
+  // Level 5: oracle — knows opponent's card; pick stat where CPU wins by the largest margin.
+  if (diff >= 5 && opponentCard) {
+    let bestKey = null, bestScore = -Infinity;
+    for (const s of STATS) {
+      const cv = card.stats[s.key], pv = opponentCard.stats[s.key];
+      if (cv == null) continue;
+      // null on opponent = auto-win for CPU
+      if (pv == null) { return s.key; }
+      const margin = (s.dir === 'higher') ? (cv - pv) : (pv - cv);
+      // Normalize roughly by range of stat across in-play cards
+      const vals = allHandCards.map(c => c.stats[s.key]).filter(x => x != null);
+      const range = Math.max(1e-9, Math.max(...vals) - Math.min(...vals));
+      const score = margin / range;
+      if (score > bestScore) { bestScore = score; bestKey = s.key; }
+    }
+    if (bestKey && bestScore > 0) return bestKey;
+    // fallthrough: no winning stat — fall back to smart pick
+  }
+
+  // Random-vs-smart blend
+  const pSmart = DIFFICULTY_SMART_P[diff] ?? 1.0;
+  if (Math.random() >= pSmart) {
+    const eligible = STATS.filter(s => card.stats[s.key] != null);
+    return eligible[Math.floor(Math.random() * eligible.length)].key;
+  }
+
+  // Smart: pick the stat where THIS card ranks highest within current pool.
+  let best = null, bestRank = -1;
+  for (const s of STATS) {
+    const v = card.stats[s.key];
+    if (v == null) continue;
+    const values = allHandCards
+      .map(c => c.stats[s.key])
+      .filter(x => x != null);
+    if (values.length < 4) continue;
+    let worse = 0;
+    for (const x of values) {
+      if (s.dir === 'higher' && v > x) worse++;
+      if (s.dir === 'lower'  && v < x) worse++;
+    }
+    const rank = worse / (values.length - 1);
+    if (rank > bestRank) { bestRank = rank; best = s; }
+  }
+  return (best || STATS[0]).key;
+}
+
+/* ---------- 6. round resolution ---------- */
+
+/**
+ * Compare a single stat between two cards.
+ * Returns 'player' | 'cpu' | 'tie'.
+ */
+function resolveStat(stat, pCard, cCard) {
+  const meta = STATS.find(s => s.key === stat);
+  const pv = pCard.stats[stat];
+  const cv = cCard.stats[stat];
+
+  // Null handling: a card with null on this stat auto-loses (unless both null = tie).
+  if (pv == null && cv == null) return 'tie';
+  if (pv == null) return 'cpu';
+  if (cv == null) return 'player';
+
+  if (pv === cv) return 'tie';
+  if (meta.dir === 'higher') return pv > cv ? 'player' : 'cpu';
+  /* lower */                  return pv < cv ? 'player' : 'cpu';
+}
+
+
+  /* ===================================================================== *
+   *  NEW ARCHITECTURE — single owner per card (ground rules G1–G4)         *
+   *  One card = one THREE.Group. A flip = one rotation tween. The renderer  *
+   *  reads game state each frame; game logic never touches meshes.         *
+   * ===================================================================== */
+
+  const art = window.__cardArt;   // { W, H, bakeFront(card), bakeBack(), onBackRefresh, clear }
+
+  /* ---- renderer / scene / camera ------------------------------------- */
+  const canvas   = document.getElementById('stage');
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.05;
+
+  const scene  = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
+  camera.position.set(0, 0, 8.4);
+  camera.lookAt(0, 0, 0);
+
+  /* three-point-ish rig (used once materials go lit in a later phase) */
+  scene.add(new THREE.AmbientLight(0xffffff, 0.62));
+  const key = new THREE.DirectionalLight(0xffffff, 1.15); key.position.set(4, 6, 8); scene.add(key);
+  const rim = new THREE.DirectionalLight(0x66aaff, 0.55); rim.position.set(-6, 2, -4); scene.add(rim);
+
+  const clock = new THREE.Clock();
+
+  /* ---- card geometry (baked art aspect: W/H) -------------------------- */
+  const CARD_W = 2.6;
+  const CARD_H = CARD_W * (art.H / art.W);      // preserve baked aspect
+  const cardGeo = new THREE.PlaneGeometry(CARD_W, CARD_H);
+
+  function texFromCanvas(cv) {
+    const t = new THREE.CanvasTexture(cv);
+    t.colorSpace = THREE.SRGBColorSpace;
+    t.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    t.needsUpdate = true;
+    return t;
+  }
+
+  /* One card = one Group with a front plane (+Z) and a back plane (−Z).
+     Flipping the Group around Y swaps which face the camera sees. This is
+     the single owner: there is no DOM twin, no proxy, no separate context. */
+  function makeCard(card) {
+    const g = new THREE.Group();
+    g.userData.card = card;
+
+    const frontTex = texFromCanvas(art.bakeFront(card));
+    const backTex  = texFromCanvas(art.bakeBack());
+
+    // MeshBasicMaterial: baked art already carries its own shading, so the
+    // back can never render "darker" than its static state (kills the old I3
+    // dark-back regression by construction). Lit materials come in Phase 4.
+    const frontMat = new THREE.MeshBasicMaterial({ map: frontTex, toneMapped: false });
+    const backMat  = new THREE.MeshBasicMaterial({ map: backTex,  toneMapped: false });
+
+    const front = new THREE.Mesh(cardGeo, frontMat);
+    const back  = new THREE.Mesh(cardGeo, backMat);
+    back.rotation.y = Math.PI;               // face −Z
+    // nudge apart to avoid z-fighting between the two coplanar faces
+    front.position.z =  0.006;
+    back.position.z  = -0.006;
+
+    g.add(front, back);
+    g.userData.dispose = () => {
+      frontTex.dispose(); backTex.dispose();
+      frontMat.dispose(); backMat.dispose();
+    };
+    return g;
+  }
+
+  /* ---- tween manager: flips are pure functions of eased t (G4) --------
+     Because every animated property is written as f(ease(t)) with the same
+     value at t=0 and t=1 as its resting state, there is no settle-snap and
+     no seam between "animating" and "idle". */
+  const tweens = new Set();
+  const easeInOut = t => t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3)/2;
+
+  function tween({ dur = 600, ease = easeInOut, update, done }) {
+    const tw = { t0: performance.now(), dur, ease, update, done };
+    tweens.add(tw);
+    return tw;
+  }
+  function stepTweens(now) {
+    for (const tw of tweens) {
+      const t = Math.min(1, (now - tw.t0) / tw.dur);
+      tw.update(tw.ease(t), t);
+      if (t >= 1) { tweens.delete(tw); tw.done && tw.done(); }
+    }
+  }
+
+  /* A flip is ONE rotation tween on ONE object. Lift + scale bump both
+     return to zero at the endpoints, so the card lands exactly on its rest
+     transform with no pop. faceUp is the *target* state. */
+  function flipCard(g, faceUp, dur = 620) {
+    if (g.userData.flipping) return;
+    g.userData.flipping = true;
+    const from = g.userData.faceUp ? Math.PI : 0;
+    const to   = faceUp ? Math.PI : 0;
+    tween({
+      dur,
+      update: (e) => {
+        g.rotation.y = from + (to - from) * e;
+        const arc = Math.sin(e * Math.PI);        // 0→1→0 across the flip
+        g.position.z = arc * 0.9;                 // lift toward camera mid-flip
+        const s = 1 + arc * 0.06;                 // subtle scale bump
+        g.scale.set(s, s, s);
+      },
+      done: () => {
+        g.rotation.y = to;
+        g.position.z = 0;
+        g.scale.set(1, 1, 1);
+        g.userData.faceUp = faceUp;
+        g.userData.flipping = false;
+        announce(faceUp
+          ? `Revealed ${g.userData.card.displayName || 'card'}.`
+          : 'Card face down.');
+      }
+    });
+  }
+
+  /* ---- a11y one-way mirror (never an animation owner) ------------------ */
+  const a11y = document.getElementById('a11y');
+  function announce(msg) { if (a11y) a11y.textContent = msg; }
+
+  /* ---- game state (subset — full flow arrives in Phase 2) ------------- */
+  const G = { data: null, player: { hand: [] }, cpu: { hand: [] } };
+  let heroCard = null;   // the single demo card proving the single-owner flip
+
+  function layoutHero() {
+    if (!heroCard) return;
+    heroCard.position.x = 0;
+    heroCard.position.y = 0;
+  }
+
+  function buildDemo() {
+    // Fresh shuffled deck; deal alternately (mirrors startMatch).
+    const deck = shuffle(G.data.cards.slice()).slice(0, DECK_SIZE);
+    G.player.hand = []; G.cpu.hand = [];
+    for (let i = 0; i < deck.length; i++) {
+      (i % 2 === 0 ? G.player.hand : G.cpu.hand).push(deck[i]);
+    }
+    document.getElementById('you-count').textContent = G.player.hand.length;
+    document.getElementById('cpu-count').textContent = G.cpu.hand.length;
+
+    heroCard = makeCard(G.player.hand[0]);
+    heroCard.userData.faceUp = false;          // start face down
+    scene.add(heroCard);
+    layoutHero();
+  }
+
+  /* ---- interaction: click / space toggles the hero flip (Phase 1) ----- */
+  const raycaster = new THREE.Raycaster();
+  const pointer   = new THREE.Vector2();
+
+  function pointerHitsHero(clientX, clientY) {
+    if (!heroCard) return false;
+    const r = canvas.getBoundingClientRect();
+    pointer.x =  ((clientX - r.left) / r.width)  * 2 - 1;
+    pointer.y = -((clientY - r.top)  / r.height) * 2 + 1;
+    raycaster.setFromCamera(pointer, camera);
+    return raycaster.intersectObject(heroCard, true).length > 0;
+  }
+  canvas.addEventListener('pointerdown', (e) => {
+    if (pointerHitsHero(e.clientX, e.clientY)) toggleHero();
+  });
+  window.addEventListener('keydown', (e) => {
+    if (e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); toggleHero(); }
+  });
+  function toggleHero() {
+    if (!heroCard || heroCard.userData.flipping) return;
+    flipCard(heroCard, !heroCard.userData.faceUp);
+  }
+
+  /* ---- resize --------------------------------------------------------- */
+  function resize() {
+    const w = window.innerWidth, h = window.innerHeight;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  /* ---- single render loop (G3: one renderer, one loop, one context) --- */
+  function frame() {
+    const now = performance.now();
+    stepTweens(now);
+    // gentle idle float so a resting card never looks frozen
+    if (heroCard && !heroCard.userData.flipping) {
+      const t = clock.getElapsedTime();
+      heroCard.rotation.z = Math.sin(t * 0.6) * 0.015;
+      heroCard.position.y = Math.sin(t * 0.9) * 0.05;
+    }
+    renderer.render(scene, camera);
+    requestAnimationFrame(frame);
+  }
+
+  /* ---- boot ----------------------------------------------------------- */
+  async function boot() {
+    const loading = document.getElementById('loading');
+    const lmsg    = document.getElementById('loading-msg');
+    try {
+      const res = await fetch('data/cards.json', { cache: 'no-cache' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      G.data = await res.json();
+    } catch (err) {
+      loading.classList.add('err');
+      lmsg.innerHTML = `Failed to load deck.<br><code>${err.message}</code>`;
+      return;
+    }
+    buildDemo();
+    loading.classList.add('gone');
+    const hint = document.getElementById('hint');
+    hint.textContent = 'Click the card (or press Space) to flip';
+    requestAnimationFrame(frame);
+  }
+  boot();
+  </script>
+</body>
+</html>
