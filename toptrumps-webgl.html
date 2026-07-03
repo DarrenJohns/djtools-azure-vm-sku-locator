@@ -6938,7 +6938,13 @@ function flipMeshCard(entry, fromY, toY, duration, css3dEntry) {
     entry.pivot.scale.z = baseSZ;
     if (entry.flipProxy) {
       entry.flipProxy.position.copy(entry.pivot.position);
-      entry.flipProxy.position.z += FLIP_PROXY_Z_BIAS;
+      // Ramp the depth bias with the flip envelope so the proxy sits at the
+      // exact resting size (bias 0) at t=0 and t=1. A constant bias made the
+      // proxy render ~16% larger (perspective) for the whole flip, then snap
+      // back to 100% when the DOM card took over at settle — a visible "jump"
+      // at both the deal->flip and flip->post-turn seams. blend is 0 at the
+      // ends and 1 mid-flip, so the full depth is preserved through the turn.
+      entry.flipProxy.position.z += FLIP_PROXY_Z_BIAS * blend;
       entry.flipProxy.rotation.copy(entry.pivot.rotation);
       entry.flipProxy.scale.copy(entry.pivot.scale);
       entry.flipProxy.visible = true;
