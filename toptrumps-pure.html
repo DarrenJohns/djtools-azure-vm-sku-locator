@@ -73,6 +73,8 @@
 
   <!-- one-way accessibility mirror (populated by the renderer, never an animation owner) -->
   <div id="a11y" class="sr-only" aria-live="polite"></div>
+  <!-- focusable stat controls: keyboard / screen-reader picking (mirrors G, not an owner) -->
+  <div id="stat-controls" class="sr-only" role="group" aria-label="Choose a stat to play"></div>
 
   <script type="importmap">
   { "imports": { "three": "./vendor/three.module.min.js" } }
@@ -1125,7 +1127,8 @@ function resolveStat(stat, pCard, cCard) {
     g.userData.back  = back;
     g.userData.setOpacity = (o) => { frontMat.opacity = o; backMat.opacity = o; };
     g.userData.dispose = () => {
-      if (g.userData.hl) { g.userData.hl.material.dispose(); }
+      if (g.userData.hl)    { g.userData.hl.material.dispose(); }
+      if (g.userData.hover) { g.userData.hover.material.dispose(); }
       frontTex.dispose(); backTex.dispose();
       frontMat.dispose(); backMat.dispose();
     };
@@ -1138,6 +1141,13 @@ function resolveStat(stat, pCard, cCard) {
      no seam between "animating" and "idle". */
   const tweens = new Set();
   const easeInOut = t => t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3)/2;
+
+  /* honour prefers-reduced-motion: collapse animation durations to ~instant
+     (G5). md() floors at 1ms so tweens still complete cleanly next frame. */
+  const _rmq = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let REDUCED = _rmq.matches;
+  _rmq.addEventListener('change', (e) => { REDUCED = e.matches; });
+  const md = (ms) => REDUCED ? 1 : ms;
 
   function tween({ dur = 600, ease = easeInOut, update, done }) {
     const tw = { t0: performance.now(), dur, ease, update, done };
@@ -1159,6 +1169,7 @@ function resolveStat(stat, pCard, cCard) {
     if (g.userData.flipping) { onDone && onDone(); return; }
     if (g.userData.faceUp === faceUp) { onDone && onDone(); return; }
     g.userData.flipping = true;
+    dur = md(dur);
     // Front plane faces +Z, so rotation.y = 0 shows the front (face up) and
     // rotation.y = π shows the back (face down).
     const from = g.userData.faceUp ? 0 : Math.PI;
@@ -1218,11 +1229,41 @@ function resolveStat(stat, pCard, cCard) {
     m.material.color.setHex(colorHex);
     m.position.y = texYToLocal(rowMidPx(idx));
     // ease opacity in
-    tween({ dur: 220, update: (e) => { m.material.opacity = opacity * e; },
+    tween({ dur: md(220), update: (e) => { m.material.opacity = opacity * e; },
             done: () => { m.material.opacity = opacity; } });
   }
   function clearPick(cardG) {
     const m = cardG && cardG.userData.hl;
+    if (m) m.material.opacity = 0;
+  }
+
+  /* ---- Phase 3: UV → stat-row hit test + hover highlight ---------------
+     Picking reuses the SAME baker-derived bands as the reveal highlight, so
+     the hit target can never drift from what the player sees. A PlaneGeometry
+     UV runs u:0→1 left→right, v:0→1 bottom→top; texture Y is top-down. */
+  function rowFromUV(uv) {
+    const texY = (1 - uv.y) * TEX_H;
+    if (texY < STATS_Y0 || texY > STATS_Y1) return -1;
+    const idx = Math.floor((texY - STATS_Y0) / ROW_H_PX);
+    return (idx >= 0 && idx < STATS.length) ? idx : -1;
+  }
+  // soft, instant hover band on the player card (tracks the pointer 1:1)
+  function showHover(cardG, idx) {
+    let m = cardG.userData.hover;
+    if (!m) {
+      m = new THREE.Mesh(HL_GEO, new THREE.MeshBasicMaterial({
+        color: 0x9fd0ff, transparent: true, opacity: 0,
+        blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false
+      }));
+      m.position.z = 0.018;
+      cardG.add(m);
+      cardG.userData.hover = m;
+    }
+    m.position.y = texYToLocal(rowMidPx(idx));
+    m.material.opacity = 0.32;
+  }
+  function clearHover(cardG) {
+    const m = cardG && cardG.userData.hover;
     if (m) m.material.opacity = 0;
   }
 
@@ -1275,7 +1316,7 @@ function resolveStat(stat, pCard, cCard) {
   function sweep(cardG, dest, done) {
     const from = cardG.position.clone();
     tween({
-      dur: 460,
+      dur: md(460),
       update: (e) => {
         cardG.position.lerpVectors(from, dest, e);
         const s = 1 - 0.45 * e;
@@ -1351,11 +1392,13 @@ function resolveStat(stat, pCard, cCard) {
           if (G.matchToken !== token) return;
           setHint('Your pick — press 1–6 to choose a stat');
           announce(`Your card: ${G.player.hand[0].displayName}. Choose a stat, 1 to 6.`);
+          syncStatControls();
         });
       }, 420);
     } else {
       setHint('CPU is choosing…');
       announce(`Round ${G.round}. CPU's turn.`);
+      syncStatControls();
       setTimeout(() => {
         if (G.matchToken !== token) return;
         const inPlay = [...G.player.hand, ...G.cpu.hand, ...G.pot];
@@ -1368,11 +1411,13 @@ function resolveStat(stat, pCard, cCard) {
   function playerPicksStat(key) {
     if (G.phase !== 'picking' || G.turn !== 'player') return;
     G.pickedStat = key; G.phase = 'revealing';
+    syncStatControls();
     reveal(key);
   }
   function cpuPicksStat(key) {
     if (G.phase !== 'picking' || G.turn !== 'cpu') return;
     G.pickedStat = key; G.phase = 'revealing';
+    syncStatControls();
     reveal(key);
   }
 
@@ -1457,6 +1502,7 @@ function resolveStat(stat, pCard, cCard) {
 
   function endMatch() {
     G.phase = 'gameover';
+    syncStatControls();
     const youWon = G.player.hand.length > 0;
     setHint(youWon ? '🏆 You win the match!  Press R to play again'
                    : '💻 CPU wins the match.  Press R to play again');
@@ -1477,6 +1523,62 @@ function resolveStat(stat, pCard, cCard) {
     }
   });
 
+  /* ---- Phase 3: pointer picking via raycast --------------------------- */
+  const raycaster = new THREE.Raycaster();
+  const ndc = new THREE.Vector2();
+  const canPick = () => G.phase === 'picking' && G.turn === 'player'
+      && playerCard && playerCard.userData.faceUp && !playerCard.userData.flipping;
+
+  function rowFromEvent(e) {
+    if (!canPick()) return -1;
+    const r = canvas.getBoundingClientRect();
+    ndc.x = ((e.clientX - r.left) / r.width) * 2 - 1;
+    ndc.y = -((e.clientY - r.top) / r.height) * 2 + 1;
+    raycaster.setFromCamera(ndc, camera);
+    const hit = raycaster.intersectObject(playerCard.userData.front, false)[0];
+    return (hit && hit.uv) ? rowFromUV(hit.uv) : -1;
+  }
+
+  canvas.addEventListener('pointermove', (e) => {
+    if (!canPick()) { canvas.style.cursor = 'default'; return; }
+    const idx = rowFromEvent(e);
+    if (idx >= 0) { showHover(playerCard, idx); canvas.style.cursor = 'pointer'; }
+    else          { clearHover(playerCard);     canvas.style.cursor = 'default'; }
+  });
+  canvas.addEventListener('pointerleave', () => { if (playerCard) clearHover(playerCard); canvas.style.cursor = 'default'; });
+  canvas.addEventListener('pointerdown', (e) => {
+    const idx = rowFromEvent(e);
+    if (idx >= 0) { clearHover(playerCard); playerPicksStat(STATS[idx].key); }
+  });
+
+  /* ---- Phase 3: accessible stat controls (one-way mirror of G, G2/G5) --
+     Six always-present focusable buttons; labels track the player's current
+     card so a screen-reader user hears the values, and they enable only on
+     the player's picking turn. They never own or mutate any mesh. */
+  const statControls = document.getElementById('stat-controls');
+  const statButtons = STATS.map((s, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.dataset.key = s.key;
+    b.addEventListener('click', () => {
+      if (G.phase === 'picking' && G.turn === 'player') playerPicksStat(s.key);
+    });
+    statControls.appendChild(b);
+    return b;
+  });
+  function syncStatControls() {
+    const active = G.phase === 'picking' && G.turn === 'player' && G.player.hand[0];
+    const card = active ? G.player.hand[0] : null;
+    STATS.forEach((s, i) => {
+      const b = statButtons[i];
+      const val = card ? String(s.fmt(card.stats[s.key])).replace(/<[^>]*>/g, '') : '';
+      b.textContent = card
+        ? `Play ${s.label}: ${val} (press ${i + 1})`
+        : `${s.label} (unavailable)`;
+      b.disabled = !active;
+    });
+  }
+
   /* test-only observation hook (does not own or mutate meshes) */
   if (new URLSearchParams(location.search).get('debug') === '1') {
     window.__pure = {
@@ -1487,7 +1589,20 @@ function resolveStat(stat, pCard, cCard) {
         if (G.phase === 'picking' && G.turn === 'player') {
           const s = STATS[n - 1]; if (s) playerPicksStat(s.key);
         }
-      }
+      },
+      // project a stat row's world point to client px, so tests can dispatch a
+      // real pointer event there and exercise the full raycast pick pipeline.
+      screenForRow: (idx) => {
+        if (!playerCard) return null;
+        const local = new THREE.Vector3(0, texYToLocal(rowMidPx(idx)), 0.02);
+        const world = playerCard.localToWorld(local.clone());
+        const p = world.project(camera);
+        const r = canvas.getBoundingClientRect();
+        return { x: r.left + (p.x * 0.5 + 0.5) * r.width,
+                 y: r.top  + (-p.y * 0.5 + 0.5) * r.height };
+      },
+      // controls mirror snapshot (labels + disabled) for a11y verification
+      controls: () => statButtons.map(b => ({ text: b.textContent, disabled: b.disabled }))
     };
   }
 
@@ -1506,7 +1621,7 @@ function resolveStat(stat, pCard, cCard) {
   function frame() {
     stepTweens(performance.now());
     // subtle "breathing" on the pickable player card so it reads as active
-    if (playerCard && G.phase === 'picking' && G.turn === 'player'
+    if (!REDUCED && playerCard && G.phase === 'picking' && G.turn === 'player'
         && !playerCard.userData.flipping && playerCard.userData.faceUp) {
       const t = clock.getElapsedTime();
       const s = 1 + Math.sin(t * 2.2) * 0.012;
