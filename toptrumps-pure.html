@@ -1278,28 +1278,50 @@ function resolveStat(stat, pCard, cCard) {
   const PLAYER_PILE = new THREE.Vector3(0, -5.6, 0.5);
   const CPU_PILE    = new THREE.Vector3(0,  5.6, 0.5);
 
+  /* Layout is responsive to the viewport shape:
+       • landscape (wide) → cards SIDE BY SIDE (you left, CPU right) so their
+         stat rows line up for easy comparison and the wide space is used well.
+       • portrait / tall  → cards STACKED (you bottom, CPU top).
+     layoutTable() mutates the slot/pile vectors in place; fitCamera() reads the
+     live slot positions so framing always matches the current orientation. */
+  let sideBySide = true;
+  function layoutTable(aspect) {
+    sideBySide = aspect >= 1.05;
+    if (sideBySide) {
+      const dx = CARD_W / 2 + 0.30;                 // half-gap between the two cards
+      PLAYER_SLOT.set(-dx, 0, 0);
+      CPU_SLOT.set(   dx, 0, 0);
+      PLAYER_PILE.set(-(dx + CARD_W * 1.4), 0, 0.5);
+      CPU_PILE.set(    (dx + CARD_W * 1.4), 0, 0.5);
+    } else {
+      const dy = CARD_H / 2 - 0.21;                 // half-gap, slight overlap of margins
+      PLAYER_SLOT.set(0, -dy, 0);
+      CPU_SLOT.set(   0,  dy, 0);
+      PLAYER_PILE.set(0, -(dy + CARD_H * 1.2), 0.5);
+      CPU_PILE.set(   0,  (dy + CARD_H * 1.2), 0.5);
+    }
+  }
+
   /* Responsive framing: pull the camera back just far enough that the whole
-     two-card stack (plus margin) fits the viewport at ANY aspect ratio, so the
-     cards never clip or drift off-centre on tall, wide, or split windows.
+     two-card group (plus margin) fits the viewport at ANY aspect ratio and in
+     either orientation, so the cards never clip or drift off-centre.
 
      The table is reclined about X (see tableGroup.rotation.x). Under
-     perspective this makes the near (bottom) card project LARGER and reach
-     further toward the viewport edge than a flat measure predicts, so the
-     vertical fit needs extra headroom or short/wide windows clip the bottom
-     card's footer. We add a recline-aware fudge + generous vertical margin. */
+     perspective this makes the near card project LARGER and reach further
+     toward the viewport edge than a flat measure predicts, so the vertical fit
+     needs extra headroom. We add a recline-aware fudge + generous margins. */
   const FIT_MARGIN_H = 1.18;                        // vertical breathing room
   const FIT_MARGIN_W = 1.14;                        // horizontal breathing room
   function fitCamera() {
     const aspect = camera.aspect;
     const half = THREE.MathUtils.degToRad(camera.fov) / 2;
     const tan = Math.tan(half);
-    // world extents to cover; inflate height by the recline so the reclined
-    // stack's projected height (not just its flat height) fits the frame.
     const recline = Math.abs(tableGroup.rotation.x || 0);
-    const stackH = ((CPU_SLOT.y - PLAYER_SLOT.y) + CARD_H) * (1 + recline * 0.9);
-    const stackW = CARD_W;
-    const needH  = stackH * FIT_MARGIN_H;
-    const needW  = stackW * FIT_MARGIN_W;
+    // world extents to cover, derived from the LIVE slot positions
+    const spanX = Math.abs(CPU_SLOT.x - PLAYER_SLOT.x) + CARD_W;
+    const spanY = (Math.abs(CPU_SLOT.y - PLAYER_SLOT.y) + CARD_H) * (1 + recline * 0.9);
+    const needH = spanY * FIT_MARGIN_H;
+    const needW = spanX * FIT_MARGIN_W;
     // distance so the vertical extent fits, and so the horizontal extent fits
     const dForH = (needH / 2) / tan;
     const dForW = (needW / 2) / (tan * aspect);
@@ -1627,7 +1649,12 @@ function resolveStat(stat, pCard, cCard) {
     renderer.setSize(w, h, true);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
+    layoutTable(camera.aspect);
     fitCamera();
+    // if an orientation change happened between rounds, snap idle cards to the
+    // new slots so they don't sit at stale positions until the next spawn.
+    if (playerCard && !playerCard.userData.flipping) placeCard(playerCard, PLAYER_SLOT, playerCard.userData.faceUp);
+    if (cpuCard    && !cpuCard.userData.flipping)    placeCard(cpuCard,    CPU_SLOT,    cpuCard.userData.faceUp);
   }
   window.addEventListener('resize', resize);
   resize();
