@@ -15,7 +15,8 @@
   * { box-sizing: border-box; }
   html, body { margin: 0; height: 100%; background: var(--bg0); color: var(--ink);
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; overflow: hidden; }
-  #stage { position: fixed; inset: 0; display: block; touch-action: none; }
+  #stage { position: fixed; inset: 0; display: block; width: 100vw; height: 100vh;
+    touch-action: none; }
   /* radial ambience behind the canvas */
   body::before {
     content: ""; position: fixed; inset: 0; z-index: -1;
@@ -1619,7 +1620,11 @@ function resolveStat(stat, pCard, cCard) {
   /* ---- resize --------------------------------------------------------- */
   function resize() {
     const w = window.innerWidth, h = window.innerHeight;
-    renderer.setSize(w, h, false);
+    // updateStyle MUST be true: on high-DPR displays (Windows scaling > 100%)
+    // the drawing buffer is w·DPR px; without pinning the canvas CSS size back
+    // to w×h the oversized canvas anchors top-left and the scene shifts right +
+    // down, clipping. Passing true makes Three.js set canvas.style.width/height.
+    renderer.setSize(w, h, true);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
     fitCamera();
