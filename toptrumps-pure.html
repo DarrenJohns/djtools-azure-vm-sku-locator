@@ -1279,19 +1279,29 @@ function resolveStat(stat, pCard, cCard) {
 
   /* Responsive framing: pull the camera back just far enough that the whole
      two-card stack (plus margin) fits the viewport at ANY aspect ratio, so the
-     cards never clip or drift off-centre on tall, wide, or split windows. */
-  const FIT_MARGIN = 1.12;                          // 12% breathing room
+     cards never clip or drift off-centre on tall, wide, or split windows.
+
+     The table is reclined about X (see tableGroup.rotation.x). Under
+     perspective this makes the near (bottom) card project LARGER and reach
+     further toward the viewport edge than a flat measure predicts, so the
+     vertical fit needs extra headroom or short/wide windows clip the bottom
+     card's footer. We add a recline-aware fudge + generous vertical margin. */
+  const FIT_MARGIN_H = 1.18;                        // vertical breathing room
+  const FIT_MARGIN_W = 1.14;                        // horizontal breathing room
   function fitCamera() {
     const aspect = camera.aspect;
     const half = THREE.MathUtils.degToRad(camera.fov) / 2;
-    // total world extent the framing must cover
-    const stackH = (CPU_SLOT.y - PLAYER_SLOT.y) + CARD_H;   // top card top → bottom card bottom
+    const tan = Math.tan(half);
+    // world extents to cover; inflate height by the recline so the reclined
+    // stack's projected height (not just its flat height) fits the frame.
+    const recline = Math.abs(tableGroup.rotation.x || 0);
+    const stackH = ((CPU_SLOT.y - PLAYER_SLOT.y) + CARD_H) * (1 + recline * 0.9);
     const stackW = CARD_W;
-    const needH  = stackH * FIT_MARGIN;
-    const needW  = stackW * FIT_MARGIN;
+    const needH  = stackH * FIT_MARGIN_H;
+    const needW  = stackW * FIT_MARGIN_W;
     // distance so the vertical extent fits, and so the horizontal extent fits
-    const dForH = (needH / 2) / Math.tan(half);
-    const dForW = (needW / 2) / (Math.tan(half) * aspect);
+    const dForH = (needH / 2) / tan;
+    const dForW = (needW / 2) / (tan * aspect);
     const d = Math.max(dForH, dForW);
     camera.position.set(0, 0.15, d);
     camera.lookAt(0, 0, 0);
