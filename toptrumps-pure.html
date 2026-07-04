@@ -1080,10 +1080,15 @@ function resolveStat(stat, pCard, cCard) {
   camera.position.set(0, 0, 8.4);
   camera.lookAt(0, 0, 0);
 
-  /* three-point-ish rig (used once materials go lit in a later phase) */
-  scene.add(new THREE.AmbientLight(0xffffff, 0.62));
-  const key = new THREE.DirectionalLight(0xffffff, 1.15); key.position.set(4, 6, 8); scene.add(key);
-  const rim = new THREE.DirectionalLight(0x66aaff, 0.55); rim.position.set(-6, 2, -4); scene.add(rim);
+  /* three-point + hemisphere rig. Tuned so a front-facing card reaches ~full
+     brightness (white stays white, dark text stays readable) while tilt/flip
+     produces a gentle gradient that reads as real depth. Total front-facing
+     incidence is kept near 1.0 so ACES tone-mapping rolls off cleanly. */
+  scene.add(new THREE.AmbientLight(0xffffff, 0.42));
+  const hemi = new THREE.HemisphereLight(0xcfe4ff, 0x0a1120, 0.34); scene.add(hemi);
+  const key  = new THREE.DirectionalLight(0xffffff, 0.62); key.position.set(3.2, 5.0, 6.0); scene.add(key);
+  const fill = new THREE.DirectionalLight(0xdfeaff, 0.26); fill.position.set(-4.0, 1.0, 3.0); scene.add(fill);
+  const rim  = new THREE.DirectionalLight(0x66aaff, 0.42); rim.position.set(-5.0, 2.0, -5.0); scene.add(rim);
 
   const clock = new THREE.Clock();
 
@@ -1110,11 +1115,17 @@ function resolveStat(stat, pCard, cCard) {
     const frontTex = texFromCanvas(art.bakeFront(card));
     const backTex  = texFromCanvas(art.bakeBack());
 
-    // MeshBasicMaterial: baked art already carries its own shading, so the
-    // back can never render "darker" than its static state (kills the old I3
-    // dark-back regression by construction). Lit materials come in Phase 4.
-    const frontMat = new THREE.MeshBasicMaterial({ map: frontTex, toneMapped: false, transparent: true });
-    const backMat  = new THREE.MeshBasicMaterial({ map: backTex,  toneMapped: false, transparent: true });
+    // Lit materials (Phase 4). The baked art is the albedo AND an emissive map
+    // at a fixed floor, so the surface responds to the light rig (gradient on
+    // tilt/flip = depth) but can never render darker than emissiveIntensity ·
+    // texel — structurally preserving the "backs/faces never go dark" invariant
+    // that MeshBasic gave us for free. roughness high / metalness 0 = paper-like.
+    const mkMat = (map) => new THREE.MeshStandardMaterial({
+      map, emissive: 0xffffff, emissiveMap: map, emissiveIntensity: 0.34,
+      roughness: 0.86, metalness: 0.0, transparent: true
+    });
+    const frontMat = mkMat(frontTex);
+    const backMat  = mkMat(backTex);
 
     const front = new THREE.Mesh(cardGeo, frontMat);
     const back  = new THREE.Mesh(cardGeo, backMat);
@@ -1332,6 +1343,45 @@ function resolveStat(stat, pCard, cCard) {
 
   let playerCard = null, cpuCard = null;
 
+  /* ---- soft contact shadow (Phase 4) ---------------------------------
+     A blurred radial blob that sits on the table BEHIND each card (never a
+     child of the card group, so it doesn't flip with it). It tracks the card's
+     x/y each frame and grows + softens as the card lifts toward the camera,
+     grounding the lift. Cheap (one textured quad), no shadow-map pass. */
+  const shadowTex = (() => {
+    const s = 256, cv = document.createElement('canvas'); cv.width = cv.height = s;
+    const c = cv.getContext('2d');
+    const g = c.createRadialGradient(s/2, s/2, 6, s/2, s/2, s/2);
+    g.addColorStop(0.0, 'rgba(0,0,0,0.55)');
+    g.addColorStop(0.55, 'rgba(0,0,0,0.28)');
+    g.addColorStop(1.0, 'rgba(0,0,0,0.0)');
+    c.fillStyle = g; c.fillRect(0, 0, s, s);
+    const t = new THREE.CanvasTexture(cv);
+    t.colorSpace = THREE.SRGBColorSpace;
+    return t;
+  })();
+  const shadowGeo = new THREE.PlaneGeometry(CARD_W * 1.16, CARD_H * 1.16);
+  function makeShadow() {
+    const m = new THREE.Mesh(shadowGeo, new THREE.MeshBasicMaterial({
+      map: shadowTex, transparent: true, opacity: 0.4, depthWrite: false, toneMapped: false
+    }));
+    tableGroup.add(m);
+    return m;
+  }
+  function updateShadow(cardG) {
+    const sh = cardG && cardG.userData.shadow;
+    if (!sh) return;
+    const baseZ = cardG.userData.baseZ || 0;
+    const lift = Math.max(0, Math.min(1, (cardG.position.z - baseZ) / 0.9));
+    // sit slightly below-and-behind the card on the reclined table
+    sh.position.set(cardG.position.x, cardG.position.y - 0.06, baseZ - 0.06);
+    const cardScale = cardG.scale.x || 1;
+    const spread = (1 + lift * 0.34) * cardScale;
+    sh.scale.set(spread, spread, 1);
+    const faceOpacity = cardG.userData.front ? cardG.userData.front.material.opacity : 1;
+    sh.material.opacity = (0.42 - lift * 0.22) * faceOpacity;
+  }
+
   function placeCard(cardG, slot, faceUp) {
     cardG.position.copy(slot);
     cardG.userData.baseZ = slot.z;
@@ -1341,6 +1391,8 @@ function resolveStat(stat, pCard, cCard) {
   function disposeCard(cardG) {
     if (!cardG) return;
     tableGroup.remove(cardG);
+    const sh = cardG.userData.shadow;
+    if (sh) { tableGroup.remove(sh); sh.material.dispose(); cardG.userData.shadow = null; }
     cardG.userData.dispose && cardG.userData.dispose();
   }
 
@@ -1405,6 +1457,8 @@ function resolveStat(stat, pCard, cCard) {
     cpuCard    = makeCard(G.cpu.hand[0]);
     placeCard(playerCard, PLAYER_SLOT, false);
     placeCard(cpuCard,    CPU_SLOT,    false);
+    playerCard.userData.shadow = makeShadow();
+    cpuCard.userData.shadow    = makeShadow();
     tableGroup.add(playerCard, cpuCard);
   }
 
@@ -1669,6 +1723,8 @@ function resolveStat(stat, pCard, cCard) {
       const s = 1 + Math.sin(t * 2.2) * 0.012;
       playerCard.scale.set(s, s, s);
     }
+    updateShadow(playerCard);
+    updateShadow(cpuCard);
     renderer.render(scene, camera);
     requestAnimationFrame(frame);
   }
