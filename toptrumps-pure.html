@@ -1866,6 +1866,46 @@ function resolveStat(stat, pCard, cCard) {
     cardG.userData.faceUp = faceUp;
     cardG.rotation.y = faceUp ? 0 : Math.PI;
   }
+
+  /* ---- deck thickness (Phase 6): a decorative face-down stack behind each
+     top card whose height tracks the remaining hand. Purely visual — never
+     raycast (picking only targets playerCard.userData.front), never flipped.
+     A pool of slabs toggled by count; no per-update allocation. ---------- */
+  const MAX_DECK = 10;
+  const deckBackTex = texFromCanvas(art.bakeBack());
+  function makeDeckPool() {
+    const grp = new THREE.Group();
+    const slabs = [];
+    for (let i = 0; i < MAX_DECK; i++) {
+      const m = new THREE.Mesh(cardGeo, new THREE.MeshBasicMaterial({ map: deckBackTex, toneMapped: false }));
+      m.visible = false;
+      grp.add(m); slabs.push(m);
+    }
+    grp.userData.slabs = slabs;
+    tableGroup.add(grp);
+    return grp;
+  }
+  const playerDeck = makeDeckPool(), cpuDeck = makeDeckPool();
+  function updateDeckPool(grp, slot, count) {
+    const n = Math.max(0, Math.min(MAX_DECK, count));
+    const slabs = grp.userData.slabs;
+    for (let i = 0; i < MAX_DECK; i++) {
+      const m = slabs[i];
+      if (i < n) {
+        m.visible = true;
+        // i=0 sits just behind the top card; deeper slabs recede + drop so the
+        // bottom edges fan out into a readable stack under the reclined table.
+        m.position.set(slot.x + i * 0.006, slot.y - 0.026 - i * 0.015, slot.z - 0.03 - i * 0.02);
+      } else {
+        m.visible = false;
+      }
+    }
+  }
+  function updateDecks() {
+    updateDeckPool(playerDeck, PLAYER_SLOT, G.player.hand.length - 1);
+    updateDeckPool(cpuDeck,    CPU_SLOT,    G.cpu.hand.length - 1);
+  }
+
   function disposeCard(cardG) {
     if (!cardG) return;
     tableGroup.remove(cardG);
@@ -1897,6 +1937,7 @@ function resolveStat(stat, pCard, cCard) {
   function updateHUD() {
     elYou.textContent = G.player.hand.length;
     elCpu.textContent = G.cpu.hand.length;
+    updateDecks();
   }
   function setHint(msg) { if (elHint) elHint.textContent = msg; }
 
@@ -2202,6 +2243,7 @@ function resolveStat(stat, pCard, cCard) {
     // new slots so they don't sit at stale positions until the next spawn.
     if (playerCard && !playerCard.userData.flipping) placeCard(playerCard, PLAYER_SLOT, playerCard.userData.faceUp);
     if (cpuCard    && !cpuCard.userData.flipping)    placeCard(cpuCard,    CPU_SLOT,    cpuCard.userData.faceUp);
+    updateDecks();
   }
   window.addEventListener('resize', resize);
   resize();
