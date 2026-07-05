@@ -53,6 +53,12 @@
   /* ---- accessibility mirror (screen-reader only) ---- */
   .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
     overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+  /* ---- perf HUD (?fps=1) ---- */
+  #fps { position: fixed; left: 14px; bottom: 14px; z-index: 6; display: none;
+    font: 600 12px/1.3 ui-monospace, "Cascadia Code", Consolas, monospace;
+    color: #8fe3b0; background: rgba(6,12,24,.6); border: 1px solid rgba(120,160,220,.2);
+    padding: 6px 9px; border-radius: 7px; pointer-events: none; white-space: pre; }
 </style>
 </head>
 <body>
@@ -64,6 +70,8 @@
   </div>
 
   <div id="hint">Loading deck…</div>
+
+  <div id="fps"></div>
 
   <div id="loading">
     <div style="text-align:center">
@@ -1069,11 +1077,40 @@ function resolveStat(stat, pCard, cCard) {
 
   /* ---- renderer / scene / camera ------------------------------------- */
   const canvas   = document.getElementById('stage');
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  /* WebGL is required for this build — there is no Canvas2D fallback game (it is
+     a new experimental artifact). If context creation fails (no WebGL, disabled
+     hardware acceleration, blocklisted GPU), show a friendly message instead of
+     a blank screen and halt init. */
+  function showWebGLFallback(err) {
+    const loading = document.getElementById('loading');
+    const lmsg = document.getElementById('loading-msg');
+    if (loading) loading.classList.add('err');
+    if (lmsg) lmsg.innerHTML =
+      'This build needs <b>WebGL</b>, which isn\u2019t available in this browser.<br>' +
+      'Try a modern browser (Edge, Chrome, Firefox, Safari) and make sure ' +
+      '<b>hardware acceleration</b> is enabled.' +
+      (err && err.message ? `<br><code>${String(err.message).slice(0, 120)}</code>` : '');
+    if (canvas) canvas.style.display = 'none';
+  }
+  let renderer;
+  try {
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  } catch (err) {
+    showWebGLFallback(err);
+    throw err;   // fallback shown; stop module init
+  }
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.05;
+  // if the GL context is lost at runtime (GPU reset, tab throttling), show the
+  // fallback rather than freezing on the last frame.
+  canvas.addEventListener('webglcontextlost', (e) => {
+    e.preventDefault();
+    showWebGLFallback(new Error('WebGL context lost'));
+    const l = document.getElementById('loading');
+    if (l) l.classList.remove('gone');
+  }, false);
 
   const scene  = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
@@ -2169,7 +2206,14 @@ function resolveStat(stat, pCard, cCard) {
   window.addEventListener('resize', resize);
   resize();
 
-  /* ---- single render loop (G3: one renderer, one loop, one context) --- */
+  /* ---- single render loop (G3: one renderer, one loop, one context) ---
+     Includes a downgrade-only perf governor: if smoothed fps stays low it
+     first drops the pixel ratio to 1, then disables post-fx. It never upgrades
+     (avoids oscillation) and never touches flip/game logic. ?fps=1 shows a HUD. */
+  const _showFps = new URLSearchParams(location.search).get('fps') === '1';
+  const _fpsEl = document.getElementById('fps');
+  if (_showFps && _fpsEl) _fpsEl.style.display = 'block';
+  let _prevMs = performance.now(), _fpsAvg = 60, _slowFrames = 0, _fpsSince = _prevMs, _govStep = 0;
   function frame() {
     stepTweens(performance.now());
     const et = clock.getElapsedTime();
@@ -2197,6 +2241,25 @@ function resolveStat(stat, pCard, cCard) {
       renderer.render(postFx.scene, postFx.camera);
     } else {
       renderer.render(scene, camera);
+    }
+    // perf governor + fps HUD (downgrade only; never touches game logic)
+    const _nowMs = performance.now();
+    const _frameMs = _nowMs - _prevMs; _prevMs = _nowMs;
+    if (_frameMs > 0 && _frameMs < 500) {
+      _fpsAvg += ((1000 / _frameMs) - _fpsAvg) * 0.1;
+      if (_fpsAvg < 42) _slowFrames++; else _slowFrames = Math.max(0, _slowFrames - 2);
+      if (_slowFrames > 90) {
+        _slowFrames = 0;
+        if (_govStep === 0 && renderer.getPixelRatio() > 1.01) {
+          renderer.setPixelRatio(1); resizePostFx(); _govStep = 1;
+        } else if (postFx.enabled) {
+          postFx.enabled = false; _govStep = 2;
+        }
+      }
+    }
+    if (_showFps && _fpsEl && _nowMs - _fpsSince > 250) {
+      _fpsSince = _nowMs;
+      _fpsEl.textContent = `${_fpsAvg.toFixed(0)} fps\ndpr ${renderer.getPixelRatio().toFixed(2)}  fx ${postFx.enabled ? 'on' : 'off'}`;
     }
     requestAnimationFrame(frame);
   }
