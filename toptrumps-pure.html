@@ -1293,6 +1293,59 @@ function resolveStat(stat, pCard, cCard) {
   const CARD_H = CARD_W * (art.H / art.W);      // preserve baked aspect
   const cardGeo = new THREE.PlaneGeometry(CARD_W, CARD_H);
 
+  /* ---- rarity foil (Phase 5b) ----------------------------------------
+     A holographic sheen laid over the card FRONT as a thin additive mesh in
+     the same scene (no DOM overlay, no second context — the whole reason for
+     this rebuild). It's a CHILD of the card front, so it flips and tilts with
+     the face and is culled when the back is showing (FrontSide). A diagonal
+     rainbow band drifts across, its angle shifting with the card's real facing
+     so it reads as a view-dependent foil. Intensity scales with rarity; common
+     cards get none. Kept subtle + concentrated so stat text stays legible. */
+  const FOIL_INTENSITY = { uncommon: 0.30, rare: 0.55, epic: 0.78, legendary: 1.0 };
+  const foils = new Set();
+  function makeFoil(rarity) {
+    const intensity = FOIL_INTENSITY[rarity] || 0;
+    if (intensity <= 0) return null;
+    const mat = new THREE.ShaderMaterial({
+      transparent: true, depthWrite: false, toneMapped: false,
+      blending: THREE.AdditiveBlending, side: THREE.FrontSide,
+      uniforms: { uTime: { value: 0 }, uIntensity: { value: intensity }, uFacing: { value: 1 } },
+      vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
+      fragmentShader: `precision highp float; varying vec2 vUv;
+        uniform float uTime; uniform float uIntensity; uniform float uFacing;
+        vec3 hue(float h){ return clamp(abs(mod(h*6.0+vec3(0.0,4.0,2.0),6.0)-3.0)-1.0, 0.0, 1.0); }
+        void main(){
+          // diagonal coordinate; angle drifts with the card's facing so the
+          // foil "catches the light" differently as the card tilts/flips.
+          float ang = 0.9 + (1.0 - uFacing) * 0.7;
+          float g = vUv.x * cos(ang) + vUv.y * sin(ang);
+          // moving specular band
+          float band = sin(g * 7.0 - uTime * 1.6);
+          float spec = pow(max(band, 0.0), 3.0);
+          // rainbow shimmer keyed to position + time
+          vec3 col = hue(fract(g * 1.3 + uTime * 0.08));
+          // concentrate away from the very centre so stat text stays clean
+          float centreGuard = smoothstep(0.12, 0.42, abs(vUv.y - 0.52));
+          float a = (0.10 + spec * 0.9) * uIntensity * (0.45 + 0.55 * centreGuard) * 0.34;
+          gl_FragColor = vec4(col * (0.6 + spec), a);
+        }`
+    });
+    const m = new THREE.Mesh(cardGeo, mat);
+    m.position.z = 0.008;   // just in front of the front face plane
+    m.userData.isFoil = true;
+    foils.add(mat);
+    return m;
+  }
+  function updateFoils(t) {
+    foils.forEach(mat => { mat.uniforms.uTime.value = t; });
+  }
+  // shift each in-play card's foil angle by how square-on it faces the camera
+  function updateFoilFacing(cardG) {
+    const f = cardG && cardG.userData.foil;
+    if (!f) return;
+    f.material.uniforms.uFacing.value = Math.abs(Math.cos(cardG.rotation.y));
+  }
+
   function texFromCanvas(cv) {
     const t = new THREE.CanvasTexture(cv);
     t.colorSpace = THREE.SRGBColorSpace;
@@ -1333,10 +1386,20 @@ function resolveStat(stat, pCard, cCard) {
     g.add(front, back);
     g.userData.front = front;
     g.userData.back  = back;
-    g.userData.setOpacity = (o) => { frontMat.opacity = o; backMat.opacity = o; };
+
+    // rarity foil: child of the front face so it flips/tilts with it and is
+    // culled when the back shows. Its facing uniform is refreshed each frame.
+    const foil = makeFoil(card.rarity);
+    if (foil) { front.add(foil); g.userData.foil = foil; }
+
+    g.userData.setOpacity = (o) => {
+      frontMat.opacity = o; backMat.opacity = o;
+      if (foil) foil.material.uniforms.uIntensity.value = (FOIL_INTENSITY[card.rarity] || 0) * o;
+    };
     g.userData.dispose = () => {
       if (g.userData.hl)    { g.userData.hl.material.dispose(); }
       if (g.userData.hover) { g.userData.hover.material.dispose(); }
+      if (foil) { foils.delete(foil.material); foil.material.dispose(); }
       frontTex.dispose(); backTex.dispose();
       frontMat.dispose(); backMat.dispose();
     };
@@ -1915,6 +1978,9 @@ function resolveStat(stat, pCard, cCard) {
     const et = clock.getElapsedTime();
     const dt = Math.min(0.05, et - _lastEt); _lastEt = et;
     updateBackdrop(et, dt);
+    updateFoils(et);
+    updateFoilFacing(playerCard);
+    updateFoilFacing(cpuCard);
     // subtle "breathing" on the pickable player card so it reads as active
     if (!REDUCED && playerCard && G.phase === 'picking' && G.turn === 'player'
         && !playerCard.userData.flipping && playerCard.userData.faceUp) {
