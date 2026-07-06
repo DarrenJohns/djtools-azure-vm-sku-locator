@@ -1198,30 +1198,11 @@ function resolveStat(stat, pCard, cCard) {
   const stars = new THREE.Points(starGeo, starMat);
   space.add(stars);
 
-  // --- planets: sphere geometry, Azure palette + one warm ringed accent ---
-  // Each planet = a lit Standard sphere (day/night terminator from the card key
-  // light) + an additive Fresnel "atmosphere" shell so the limb glows against
-  // black. Kept behind the cards in the letterbox gaps so faces stay readable.
+  // --- planets: lit sphere geometry, Azure-tinted lunar photo. Bare moons —
+  // no atmosphere halo, no ring — kept behind the cards in the letterbox gaps
+  // so faces stay readable. They stream forward during the warp (see
+  // updateBackdrop) so they read as real, closer objects rushing past.
   const planets = [];
-  const _atmoVert = `varying vec3 vN; varying vec3 vView;
-    void main(){ vN = normalize(normalMatrix * normal);
-      vec4 mv = modelViewMatrix * vec4(position,1.0);
-      vView = normalize(-mv.xyz); gl_Position = projectionMatrix * mv; }`;
-  const _atmoFrag = `uniform vec3 uColor; uniform float uPower; uniform float uStrength;
-    varying vec3 vN; varying vec3 vView;
-    void main(){ float f = pow(1.0 - max(dot(vN, vView), 0.0), uPower);
-      gl_FragColor = vec4(uColor, f * uStrength); }`;
-  function makeAtmosphere(r, color, strength = 0.9, power = 2.6) {
-    return new THREE.Mesh(
-      new THREE.SphereGeometry(r * 1.18, 40, 28),
-      new THREE.ShaderMaterial({
-        uniforms: { uColor: { value: new THREE.Color(color) }, uPower: { value: power }, uStrength: { value: strength } },
-        vertexShader: _atmoVert, fragmentShader: _atmoFrag,
-        transparent: true, depthWrite: false, side: THREE.BackSide,
-        blending: THREE.AdditiveBlending, toneMapped: false
-      })
-    );
-  }
   // real lunar surface: an equirectangular photo texture (assets/moon.jpg,
   // committed to the repo — a local asset, NOT a runtime CDN fetch, so the
   // no-CDN rule still holds). One shared greyscale map used as colour + bump +
@@ -1231,7 +1212,7 @@ function resolveStat(stat, pCard, cCard) {
   _moonMap.wrapS = _moonMap.wrapT = THREE.RepeatWrapping;
   _moonMap.anisotropy = 8;
 
-  function makePlanet({ r, color, emissive, x, y, z, spin, ring, atmo }) {
+  function makePlanet({ r, color, emissive, x, y, z, spin }) {
     const mesh = new THREE.Mesh(
       new THREE.SphereGeometry(r, 64, 40),
       new THREE.MeshStandardMaterial({
@@ -1244,26 +1225,32 @@ function resolveStat(stat, pCard, cCard) {
     mesh.position.set(x, y, z);
     mesh.rotation.z = 0.32;                 // slight axial tilt so the spin reads
     mesh.rotation.y = Math.random() * 6.2832;  // vary the visible face (shared texture)
-    // thin rim atmosphere (subtle — a limb glow, NOT a big disc halo)
-    if (atmo) mesh.add(makeAtmosphere(r, atmo, 0.35, 4.0));
-    if (ring) {
-      const rg = new THREE.Mesh(
-        new THREE.RingGeometry(r * 1.45, r * 2.3, 72),
-        new THREE.MeshBasicMaterial({ map: _softTex, color: ring, transparent: true, opacity: 0.5,
-          side: THREE.DoubleSide, depthWrite: false, toneMapped: false, blending: THREE.AdditiveBlending })
-      );
-      rg.rotation.x = Math.PI * 0.5 - 0.42; rg.rotation.z = 0.2;
-      mesh.add(rg);
-    }
-    mesh.userData = { spin: spin || 0.02, baseZ: z };
+    // vz = how fast this moon streams forward during a warp. Kept modest so the
+    // moons read as NEAR objects sliding past while the far stars barely move —
+    // the depth gap between the two is what sells "travelling through space".
+    mesh.userData = { spin: spin || 0.02, baseZ: z, r, vz: 26 + Math.random() * 10 };
     space.add(mesh);
     planets.push(mesh);
     return mesh;
   }
-  makePlanet({ r: 6.0, color: 0x9fbfe6, emissive: 0x1a3358, atmo: 0x5f9be0, x: -22, y: 3.0,  z: -42, spin: 0.05 });
-  makePlanet({ r: 3.2, color: 0x8fd0ec, emissive: 0x17435c, atmo: 0x64c8f0, x:  22, y: -4.0, z: -38, spin: 0.09 });
-  makePlanet({ r: 1.8, color: 0xe0b988, emissive: 0x4a2e14, atmo: 0xf0c07a, x:   1, y: 12.0, z: -34, spin: 0.13, ring: 0xbcd8f4 });
-  makePlanet({ r: 1.1, color: 0xd2e0f2, emissive: 0x2a3f57, atmo: 0xbcd8f4, x:  17, y: -9.0, z: -30, spin: 0.16 });
+  makePlanet({ r: 6.0, color: 0x9fbfe6, emissive: 0x1a3358, x: -22, y: 3.0,  z: -42, spin: 0.05 });
+  makePlanet({ r: 3.2, color: 0x8fd0ec, emissive: 0x17435c, x:  22, y: -4.0, z: -38, spin: 0.09 });
+  makePlanet({ r: 1.8, color: 0xe0b988, emissive: 0x4a2e14, x:   1, y: 12.0, z: -34, spin: 0.13 });
+  makePlanet({ r: 1.1, color: 0xd2e0f2, emissive: 0x2a3f57, x:  17, y: -9.0, z: -30, spin: 0.16 });
+  // recycle a moon back to the far distance once it has streamed past the play
+  // plane during a warp. Bigger moons are pushed farther out on x so, when they
+  // come near, they stay in the letterbox gaps and never cover the cards.
+  const PLANET_NEAR = -3;   // just behind the card plane (z=0); moons never come in front
+  function seedPlanet(p) {
+    const r = p.userData.r;
+    const far = -46 - Math.random() * 22;                 // -46 .. -68
+    const side = Math.random() < 0.5 ? -1 : 1;
+    const xMag = 12 + r * 1.7 + Math.random() * 8;        // large moons kept out at the edges
+    p.position.set(side * xMag, (Math.random() * 2 - 1) * 13, far);
+    p.rotation.y = Math.random() * 6.2832;
+    p.userData.baseZ = far;
+    p.userData.vz = 26 + Math.random() * 10;
+  }
 
   // --- nebula wash: dim additive glows for colour depth ---
   function makeNebula(color, x, y, z, s, op) {
@@ -1286,10 +1273,17 @@ function resolveStat(stat, pCard, cCard) {
       if (starPos[i*3+2] > STAR_NEAR) { seedStar(i, false); }   // flew past → respawn at far end
     }
     starGeo.attributes.position.needsUpdate = true;
-    // planets just spin; the camera dolly (dollyIn) supplies their apparent
-    // forward motion, so no extra positional push is needed here.
+    // moons stream forward during the warp so they read as NEAR objects rushing
+    // past while the far stars barely move — that depth gap IS the parallax that
+    // sells "travelling through space". At idle (w≈0) they only spin, holding the
+    // composition; the speed grows as a moon nears the camera (perspective).
     for (const p of planets) {
       p.rotation.y += p.userData.spin * dt * (rm ? 0.3 : 1.0) * 6;
+      if (!rm && w > 0.002) {
+        const prox = Math.min(1, Math.max(0, (p.position.z + 66) / 74));  // 0 far → 1 near
+        p.position.z += p.userData.vz * w * (0.45 + prox * 1.7) * dt;
+        if (p.position.z > PLANET_NEAR) seedPlanet(p);                     // streamed past → recycle to far
+      }
     }
   }
 
@@ -2282,6 +2276,7 @@ function resolveStat(stat, pCard, cCard) {
         return +Math.abs(top.y - bot.y).toFixed(4);
       },
       pinWarp: (v) => { _warpPin = v; },   // freeze star warp strength for screenshots (test hook)
+      _planetZ: () => planets.map(p => +p.position.z.toFixed(2)),   // moon z positions (parallax warp verification)
       pick: (n) => {
         if (G.phase === 'picking' && G.turn === 'player') {
           const s = STATS[n - 1]; if (s) playerPicksStat(s.key);
