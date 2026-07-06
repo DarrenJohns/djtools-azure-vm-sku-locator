@@ -1133,14 +1133,144 @@ function resolveStat(stat, pCard, cCard) {
   const _reducedInit = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const _dpr = Math.min(window.devicePixelRatio || 1, 2);
 
-  /* ---- backdrop: (removed — ground-up redesign in progress) -------------
-     The previous Azure-globe backdrop was stripped out so a new background
-     can be built from scratch. The scene now renders over the transparent
-     canvas onto the page's CSS gradient. `updateBackdrop()` (per-frame) and
-     `globeBurst()` (win flourish) remain as no-op hooks so the render loop
-     and win moments keep their integration points for the new design. */
-  function updateBackdrop(_t, _dt) {}
-  function globeBurst(_n) {}
+  /* ---- backdrop: deep-space field (planets + streaking starfield) -------
+     A parallax star system far behind the reclined play table. Added straight
+     to `scene` (NOT tableGroup) so the table recline never tilts it. A
+     recyclable starfield streams toward the camera; `backdropWarp()` spikes
+     that speed so the field streaks past — the "flying forward through space"
+     feel used when the next round's cards zoom in. Sphere planets (one ringed)
+     + soft nebula give depth. Exposes updateBackdrop / globeBurst / backdropWarp. */
+  const space = new THREE.Group();
+  space.position.set(0, 0, -6);
+  scene.add(space);
+
+  let _warp = 0;                                   // 0..~1.2, decays each frame
+  function backdropWarp(s = 1) { _warp = Math.min(1.2, _warp + s); }
+  function globeBurst(_n) { backdropWarp(0.4); }   // win flourish → mild warp
+
+  // soft round sprite texture (stars glow + nebula wash)
+  const _softTex = (() => {
+    const s = 128, cv = document.createElement('canvas'); cv.width = cv.height = s;
+    const c = cv.getContext('2d');
+    const g = c.createRadialGradient(s/2, s/2, 0, s/2, s/2, s/2);
+    g.addColorStop(0, 'rgba(255,255,255,1)');
+    g.addColorStop(0.4, 'rgba(255,255,255,0.35)');
+    g.addColorStop(1, 'rgba(255,255,255,0)');
+    c.fillStyle = g; c.fillRect(0, 0, s, s);
+    const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; return t;
+  })();
+
+  // --- starfield: recyclable, streams toward camera, streaks on warp ---
+  const STAR_N = _reducedInit ? 220 : 640;
+  const STAR_NEAR = 10, STAR_FAR = -74, STAR_R = 48;
+  const starGeo = new THREE.BufferGeometry();
+  const starPos = new Float32Array(STAR_N * 3);
+  const starVel = new Float32Array(STAR_N);
+  const starSz  = new Float32Array(STAR_N);
+  for (let i = 0; i < STAR_N; i++) {
+    starPos[i*3]   = (Math.random()*2-1) * STAR_R;
+    starPos[i*3+1] = (Math.random()*2-1) * STAR_R;
+    starPos[i*3+2] = STAR_FAR + Math.random() * (STAR_NEAR - STAR_FAR);
+    starVel[i] = 1.6 + Math.random() * 2.4;
+    starSz[i]  = 0.7 + Math.random() * 1.9;
+  }
+  starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+  starGeo.setAttribute('aSize',    new THREE.BufferAttribute(starSz, 1));
+  const starMat = new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false, toneMapped: false, blending: THREE.AdditiveBlending,
+    uniforms: { uWarp: { value: 0 }, uDpr: { value: _dpr } },
+    vertexShader: `attribute float aSize; uniform float uWarp; uniform float uDpr; varying float vA;
+      void main(){ vec4 mv = modelViewMatrix * vec4(position,1.0);
+        float near = smoothstep(-74.0, 10.0, position.z);
+        vA = 0.22 + near*0.78;
+        gl_Position = projectionMatrix * mv;
+        gl_PointSize = aSize * uDpr * (1.0 + uWarp*3.2) * (0.55 + near*1.3); }`,
+    fragmentShader: `varying float vA; void main(){ vec2 uv=gl_PointCoord-0.5; float d=length(uv);
+      if(d>0.5) discard; float a=smoothstep(0.5,0.0,d)*vA; gl_FragColor=vec4(vec3(0.82,0.9,1.0), a); }`
+  });
+  const stars = new THREE.Points(starGeo, starMat);
+  space.add(stars);
+
+  // --- planets: sphere geometry, Azure palette + one warm ringed accent ---
+  // Each planet = a lit Standard sphere (day/night terminator from the card key
+  // light) + an additive Fresnel "atmosphere" shell so the limb glows against
+  // black. Kept behind the cards in the letterbox gaps so faces stay readable.
+  const planets = [];
+  const _atmoVert = `varying vec3 vN; varying vec3 vView;
+    void main(){ vN = normalize(normalMatrix * normal);
+      vec4 mv = modelViewMatrix * vec4(position,1.0);
+      vView = normalize(-mv.xyz); gl_Position = projectionMatrix * mv; }`;
+  const _atmoFrag = `uniform vec3 uColor; uniform float uPower; uniform float uStrength;
+    varying vec3 vN; varying vec3 vView;
+    void main(){ float f = pow(1.0 - max(dot(vN, vView), 0.0), uPower);
+      gl_FragColor = vec4(uColor, f * uStrength); }`;
+  function makeAtmosphere(r, color, strength = 0.9, power = 2.6) {
+    return new THREE.Mesh(
+      new THREE.SphereGeometry(r * 1.18, 40, 28),
+      new THREE.ShaderMaterial({
+        uniforms: { uColor: { value: new THREE.Color(color) }, uPower: { value: power }, uStrength: { value: strength } },
+        vertexShader: _atmoVert, fragmentShader: _atmoFrag,
+        transparent: true, depthWrite: false, side: THREE.BackSide,
+        blending: THREE.AdditiveBlending, toneMapped: false
+      })
+    );
+  }
+  function makePlanet({ r, color, emissive, x, y, z, spin, ring, atmo }) {
+    const mesh = new THREE.Mesh(
+      new THREE.SphereGeometry(r, 40, 28),
+      new THREE.MeshStandardMaterial({ color, emissive, emissiveIntensity: 0.85, roughness: 0.92, metalness: 0.05 })
+    );
+    mesh.position.set(x, y, z);
+    mesh.add(makeAtmosphere(r, atmo || color, 0.95));
+    if (ring) {
+      const rg = new THREE.Mesh(
+        new THREE.RingGeometry(r * 1.45, r * 2.3, 72),
+        new THREE.MeshBasicMaterial({ map: _softTex, color: ring, transparent: true, opacity: 0.55,
+          side: THREE.DoubleSide, depthWrite: false, toneMapped: false, blending: THREE.AdditiveBlending })
+      );
+      rg.rotation.x = Math.PI * 0.5 - 0.42; rg.rotation.z = 0.2;
+      mesh.add(rg);
+    }
+    mesh.userData = { spin: spin || 0.02, baseZ: z };
+    space.add(mesh);
+    planets.push(mesh);
+    return mesh;
+  }
+  makePlanet({ r: 6.0, color: 0x2f5aa0, emissive: 0x15305c, atmo: 0x5f9be0, x: -22, y: 3.0,  z: -42, spin: 0.012 });
+  makePlanet({ r: 3.2, color: 0x3f9ecb, emissive: 0x14415c, atmo: 0x64c8f0, x:  22, y: -4.0, z: -38, spin: 0.026 });
+  makePlanet({ r: 1.8, color: 0xd68f4a, emissive: 0x5a3416, atmo: 0xf0c07a, x:   1, y: 12.0, z: -34, spin: 0.045, ring: 0xbcd8f4 });
+  makePlanet({ r: 1.1, color: 0x9cc4ec, emissive: 0x2a3f57, atmo: 0xbcd8f4, x:  17, y: -9.0, z: -30, spin: 0.06 });
+
+  // --- nebula wash: dim additive glows for colour depth ---
+  function makeNebula(color, x, y, z, s, op) {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(s, s),
+      new THREE.MeshBasicMaterial({ map: _softTex, color, transparent: true, opacity: op,
+        blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false }));
+    m.position.set(x, y, z); space.add(m); return m;
+  }
+  makeNebula(0x2848a0, -14, -6, -50, 60, 0.18);
+  makeNebula(0x5b2f8a,  16,  9, -55, 66, 0.14);
+
+  function updateBackdrop(_t, dt) {
+    const rm = REDUCED;
+    _warp = Math.max(0, _warp - dt * 1.6);
+    starMat.uniforms.uWarp.value = rm ? 0 : _warp;
+    const spd = (rm ? 0.12 : 1.0) + (rm ? 0 : _warp * 22.0);
+    for (let i = 0; i < STAR_N; i++) {
+      starPos[i*3+2] += starVel[i] * spd * dt;
+      if (starPos[i*3+2] > STAR_NEAR) {
+        starPos[i*3+2] = STAR_FAR;
+        starPos[i*3]   = (Math.random()*2-1) * STAR_R;
+        starPos[i*3+1] = (Math.random()*2-1) * STAR_R;
+      }
+    }
+    starGeo.attributes.position.needsUpdate = true;
+    const push = rm ? 0 : _warp * 2.4;              // slight forward parallax on warp
+    for (const p of planets) {
+      p.rotation.y += p.userData.spin * dt * (rm ? 0.3 : 1.0) * 6;
+      p.position.z = p.userData.baseZ + push;
+    }
+  }
 
 
   /* ---- card geometry (baked art aspect: W/H) -------------------------- */
@@ -1450,6 +1580,7 @@ function resolveStat(stat, pCard, cCard) {
   const tweens = new Set();
   const easeInOut = t => t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3)/2;
   const easeIn    = t => t*t*t;                       // accelerate outward (fly-out)
+  const easeOut   = t => 1 - Math.pow(1 - t, 3);      // decelerate into rest (zoom-in)
 
   /* honour prefers-reduced-motion: collapse animation durations to ~instant
      (G5). md() floors at 1ms so tweens still complete cleanly next frame. */
@@ -1668,6 +1799,7 @@ function resolveStat(stat, pCard, cCard) {
   function updateShadow(cardG) {
     const sh = cardG && cardG.userData.shadow;
     if (!sh) return;
+    if (cardG.userData.entering) { sh.material.opacity = 0; return; }
     const baseZ = cardG.userData.baseZ || 0;
     const lift = Math.max(0, Math.min(1, (cardG.position.z - baseZ) / 0.9));
     // sit slightly below-and-behind the card on the reclined table
@@ -1686,7 +1818,7 @@ function resolveStat(stat, pCard, cCard) {
      absolute transform from the anchor each frame, so fly-out/sweep — which
      read the card's current position as their start — pick up seamlessly. */
   function floatCard(cardG, et) {
-    if (!cardG || cardG.userData.flipping || REDUCED) return;
+    if (!cardG || cardG.userData.flipping || cardG.userData.entering || REDUCED) return;
     const a = cardG.userData.baseSlot; if (!a) return;
     const ph = cardG.userData.floatPhase || 0;
     cardG.position.set(
@@ -1798,6 +1930,38 @@ function resolveStat(stat, pCard, cCard) {
     startRound();
   }
 
+  /* ---- Z-axis zoom-in entry: the next round's cards rush in from far ----
+     Cards start deep behind their rest slot (small + faint) and zoom forward
+     to their resting pose (easeOut → smooth landing). Fired together with a
+     `backdropWarp`, so the starfield streaks past as the cards arrive — the
+     player reads it as flying forward through space into the next hand.
+     `entering` guards float/shadow so they don't fight the tween. */
+  const ENTRY_MS = 560, ZOOM_DEPTH = 15;
+  function zoomInCard(cardG) {
+    const rest = cardG.userData.baseSlot.clone();
+    const restZ = cardG.userData.baseZ || 0;
+    cardG.userData.entering = true;
+    cardG.position.set(rest.x, rest.y, restZ - ZOOM_DEPTH);
+    cardG.scale.set(0.32, 0.32, 0.32);
+    cardG.userData.setOpacity(0.14);
+    tween({
+      dur: md(ENTRY_MS),
+      ease: easeOut,
+      update: (e) => {
+        cardG.position.z = (restZ - ZOOM_DEPTH) + ZOOM_DEPTH * e;
+        const s = 0.32 + 0.68 * e;
+        cardG.scale.set(s, s, s);
+        cardG.userData.setOpacity(0.14 + 0.86 * e);
+      },
+      done: () => {
+        cardG.position.set(rest.x, rest.y, restZ);
+        cardG.scale.set(1, 1, 1);
+        cardG.userData.setOpacity(1);
+        cardG.userData.entering = false;
+      }
+    });
+  }
+
   function spawnRoundCards() {
     disposeCard(playerCard); disposeCard(cpuCard);
     playerCard = makeCard(G.player.hand[0]);
@@ -1810,6 +1974,10 @@ function resolveStat(stat, pCard, cCard) {
     playerCard.userData.shadow = makeShadow();
     cpuCard.userData.shadow    = makeShadow();
     tableGroup.add(playerCard, cpuCard);
+    // zoom the pair in from deep space while the backdrop warps forward
+    backdropWarp(1.0);
+    zoomInCard(playerCard);
+    zoomInCard(cpuCard);
   }
 
   function startRound() {
@@ -1831,7 +1999,7 @@ function resolveStat(stat, pCard, cCard) {
           announce(`Your card: ${G.player.hand[0].displayName}. Choose a stat, 1 to 6.`);
           syncStatControls();
         });
-      }, 420);
+      }, md(ENTRY_MS) + 140);
     } else {
       setHint('CPU is choosing…');
       announce(`Round ${G.round}. CPU's turn.`);
@@ -1841,7 +2009,7 @@ function resolveStat(stat, pCard, cCard) {
         const inPlay = [...G.player.hand, ...G.cpu.hand, ...G.pot];
         const stat = pickStatForCPU(G.cpu.hand[0], inPlay, G.player.hand[0]);
         cpuPicksStat(stat);
-      }, 700);
+      }, md(ENTRY_MS) + 260);
     }
   }
 
