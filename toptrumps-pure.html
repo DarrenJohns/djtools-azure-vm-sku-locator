@@ -307,6 +307,9 @@ const GLYPHS = {
 (function initCardArt() {
   const TEX_W = 1280, TEX_H = 2000;  // 4× of CSS 320×500
   const PAD = 64;
+  // Card corner radius — shared by the baked art (front fill + back clip) and
+  // the 3D mesh silhouette so the geometry rounds to match the painted art.
+  const CORNER_CSS = 22, CORNER_TEX = CORNER_CSS * 4;   // 22 CSS px → 88 tex px
 
   const FAM_COLOR = {
     'General Purpose':   '#0f6cbd',
@@ -426,12 +429,13 @@ const GLYPHS = {
     // to maintain.
     // Card body — white with the same 14 CSS-px (= 56 texture-px)
     // corner radius the DOM .card uses.
+    // Card body — white with the rounded corner radius shared with the mesh.
     ctx.fillStyle = '#ffffff';
-    roundRect(ctx, 0, 0, W, H, 56); ctx.fill();
+    roundRect(ctx, 0, 0, W, H, CORNER_TEX); ctx.fill();
 
     // Thin family-colored top accent (matches .card-accent height 8px = 32 tex-px)
     ctx.fillStyle = famColor;
-    roundRectTop(ctx, 0, 0, W, 32, 56); ctx.fill();
+    roundRectTop(ctx, 0, 0, W, 32, CORNER_TEX); ctx.fill();
 
     // --- HEADER ROW (region pill left, rarity stars+word right) ---
     const HEAD_Y = 100; // vertical mid of the head row
@@ -678,7 +682,7 @@ const GLYPHS = {
     // each corner — which reads as a second card peeking out from
     // behind the jittered deck stack.
     ctx.save();
-    roundRect(ctx, 0, 0, W, H, 14 * S); ctx.clip();
+    roundRect(ctx, 0, 0, W, H, CORNER_TEX); ctx.clip();
 
     const grad = ctx.createLinearGradient(0, 0, W, H);
     grad.addColorStop(0,    '#0f6cbd');
@@ -964,7 +968,7 @@ const GLYPHS = {
   }
 
   window.__cardArt = {
-    W: TEX_W, H: TEX_H,
+    W: TEX_W, H: TEX_H, corner: CORNER_CSS,
     bakeFront, bakeBack,
     // Subscribe to back-face texture invalidations (currently fires
     // once when azure-logo.png finishes loading after a logo-less
@@ -1332,7 +1336,32 @@ function resolveStat(stat, pCard, cCard) {
   /* ---- card geometry (baked art aspect: W/H) -------------------------- */
   const CARD_W = 2.6;
   const CARD_H = CARD_W * (art.H / art.W);      // preserve baked aspect
-  const cardGeo = new THREE.PlaneGeometry(CARD_W, CARD_H);
+  // Rounded-rectangle card silhouette so the mesh edge matches the rounded
+  // corners painted into the baked art (a plain PlaneGeometry left square
+  // corners poking past the artwork). UVs are remapped to the 0..1 bounding
+  // box so the existing textures map identically to the old plane.
+  function roundedCardGeo(w, h, r) {
+    const x = -w / 2, y = -h / 2;
+    const s = new THREE.Shape();
+    s.moveTo(x, y + r);
+    s.lineTo(x, y + h - r);
+    s.quadraticCurveTo(x, y + h, x + r, y + h);
+    s.lineTo(x + w - r, y + h);
+    s.quadraticCurveTo(x + w, y + h, x + w, y + h - r);
+    s.lineTo(x + w, y + r);
+    s.quadraticCurveTo(x + w, y, x + w - r, y);
+    s.lineTo(x + r, y);
+    s.quadraticCurveTo(x, y, x, y + r);
+    const geo = new THREE.ShapeGeometry(s, 10);
+    const pos = geo.attributes.position, uv = geo.attributes.uv;
+    for (let i = 0; i < pos.count; i++) {
+      uv.setXY(i, (pos.getX(i) + w / 2) / w, (pos.getY(i) + h / 2) / h);
+    }
+    uv.needsUpdate = true;
+    return geo;
+  }
+  const CARD_R = (art.corner * 4 / art.W) * CARD_W;   // match baked corner radius
+  const cardGeo = roundedCardGeo(CARD_W, CARD_H, CARD_R);
 
   /* ---- rarity foil (Phase 5b) ----------------------------------------
      A holographic sheen laid over the card FRONT as a thin additive mesh in
