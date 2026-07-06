@@ -1113,7 +1113,7 @@ function resolveStat(stat, pCard, cCard) {
   }, false);
 
   const scene  = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
+  const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 200);
   camera.position.set(0, 0, 8.4);
   camera.lookAt(0, 0, 0);
 
@@ -1965,7 +1965,11 @@ function resolveStat(stat, pCard, cCard) {
      they lead the parallax) and fade up. The starfield streak speed is driven
      by the dolly velocity (see updateBackdrop), so the background streams past
      in sync. `entering` guards float/shadow so they don't fight the tweens. */
-  const ENTRY_MS = 1500, ZOOM_DEPTH = 7.0, DOLLY_BACK = 6.5, START_SCALE = 0.07;
+  // ZOOM_DEPTH is large so the card starts genuinely FAR back on z; the
+  // perspective camera (not a scale tween) shrinks it to a speck near the
+  // vanishing point, so it reads as real distance and grows with correct
+  // foreshortening as it flies forward to its slot.
+  const ENTRY_MS = 1500, ZOOM_DEPTH = 60.0, DOLLY_BACK = 6.5;
   function dollyIn() {
     if (REDUCED) { _camDolly = 0; _warpHold = 0; return; }
     _camDolly = DOLLY_BACK;
@@ -1987,17 +1991,19 @@ function resolveStat(stat, pCard, cCard) {
     const rest = cardG.userData.baseSlot.clone();
     const restZ = cardG.userData.baseZ || 0;
     cardG.userData.entering = true;
-    // start as a tiny speck deep in the distance, then warp forward to full size
+    // full scale, but pushed FAR back on z: perspective makes it a distant
+    // speck near the vanishing point. As z advances to rest the card grows
+    // naturally (1/distance) AND drifts out from centre to its slot — real
+    // depth, not an in-place scale-up.
+    cardG.scale.set(1, 1, 1);
     cardG.position.set(rest.x, rest.y, restZ - ZOOM_DEPTH);
-    cardG.scale.setScalar(START_SCALE);
     cardG.userData.setOpacity(0.0);
     tween({
       dur: md(ENTRY_MS),
-      ease: easeInOut,          // linger small → accelerate (warp) → settle at rest
+      ease: easeInOut,          // linger far/small → accelerate (warp) → settle at rest
       update: (e) => {
         cardG.position.z = (restZ - ZOOM_DEPTH) + ZOOM_DEPTH * e;
-        cardG.scale.setScalar(START_SCALE + (1 - START_SCALE) * e);
-        cardG.userData.setOpacity(Math.min(1, 0.25 + e * 1.6));   // faint speck → full
+        cardG.userData.setOpacity(Math.min(1, 0.2 + e * 1.7));   // faint distant speck → full
       },
       done: () => {
         cardG.position.set(rest.x, rest.y, restZ);
@@ -2266,7 +2272,15 @@ function resolveStat(stat, pCard, cCard) {
       cam: () => ({ z: +camera.position.z.toFixed(3), dolly: +_camDolly.toFixed(3), warp: +_warpHold.toFixed(3), base: +_camBaseZ.toFixed(3) }),
       dolly: () => dollyIn(),   // trigger the forward-flight dolly on the current cards (test hook)
       zoom: () => { if (playerCard) zoomInCard(playerCard); if (cpuCard) zoomInCard(cpuCard); dollyIn(); },   // re-run tiny→full card warp entry (test hook)
-      _scale: () => playerCard ? +playerCard.scale.x.toFixed(4) : -1,   // current player-card scale (entry verification)
+      _scale: () => playerCard ? +playerCard.scale.x.toFixed(4) : -1,   // current player-card scale (always 1 now)
+      _z: () => playerCard ? +playerCard.position.z.toFixed(3) : null,   // player-card z (entry depth verification)
+      _appSize: () => {   // apparent half-height in NDC (perspective size — grows as card approaches)
+        if (!playerCard) return null;
+        const c = playerCard.userData.baseSlot ? playerCard.position.clone() : null; if (!c) return null;
+        const top = playerCard.localToWorld(new THREE.Vector3(0, 0.9, 0)).project(camera);
+        const bot = playerCard.localToWorld(new THREE.Vector3(0, -0.9, 0)).project(camera);
+        return +Math.abs(top.y - bot.y).toFixed(4);
+      },
       pinWarp: (v) => { _warpPin = v; },   // freeze star warp strength for screenshots (test hook)
       pick: (n) => {
         if (G.phase === 'picking' && G.turn === 'player') {
