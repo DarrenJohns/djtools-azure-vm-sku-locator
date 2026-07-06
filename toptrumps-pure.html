@@ -1382,9 +1382,60 @@ function resolveStat(stat, pCard, cCard) {
   }
   // shift each in-play card's foil angle by how square-on it faces the camera
   function updateFoilFacing(cardG) {
-    const f = cardG && cardG.userData.foil;
-    if (!f) return;
-    f.material.uniforms.uFacing.value = Math.abs(Math.cos(cardG.rotation.y));
+    if (!cardG) return;
+    const facing = Math.abs(Math.cos(cardG.rotation.y));
+    const f = cardG.userData.foil;
+    if (f) f.material.uniforms.uFacing.value = facing;
+    const s = cardG.userData.backSheen;
+    if (s) s.material.uniforms.uFacing.value = facing;
+  }
+
+  /* ---- card-back gloss sheen -----------------------------------------
+     The card FRONT gets the rarity foil; without something equivalent the
+     deep-blue BACK reads flat/dull next to it (esp. the face-down CPU card).
+     This is a subtle single-tone azure gloss laid over the back as a thin
+     additive child mesh: a slow diagonal light sweep rolls across like light
+     catching a laminated card, a soft top-left lacquer highlight adds depth,
+     and a tighter glint peaks when the back faces square-on to the camera.
+     Every card has one (backs show regardless of rarity). Kept low-alpha so
+     the Azure "A" and hex pattern stay clean. */
+  const backSheens = new Set();
+  function makeBackSheen() {
+    const mat = new THREE.ShaderMaterial({
+      transparent: true, depthWrite: false, toneMapped: false,
+      blending: THREE.AdditiveBlending, side: THREE.FrontSide,
+      uniforms: { uTime: { value: 0 }, uIntensity: { value: 1 }, uFacing: { value: 1 } },
+      vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
+      fragmentShader: `precision highp float; varying vec2 vUv;
+        uniform float uTime; uniform float uIntensity; uniform float uFacing;
+        void main(){
+          // diagonal coordinate for the travelling sheen
+          float ang = 0.7;
+          float g = vUv.x * cos(ang) + vUv.y * sin(ang);
+          // broad slow light sweep rolling across the card
+          float sweep = sin(g * 3.0 - uTime * 0.85);
+          float band  = pow(max(sweep, 0.0), 2.4);
+          // tighter fast glint on top of the sweep
+          float glint = pow(max(sin(g * 9.0 - uTime * 1.7), 0.0), 8.0);
+          // soft lacquer highlight toward the upper-left
+          vec2 d = vUv - vec2(0.40, 0.72);
+          float gloss = smoothstep(0.72, 0.0, length(d));
+          // glint is strongest when the back is square-on to the viewer
+          float faceBoost = 0.45 + 0.55 * uFacing;
+          // cool azure sheen, brightening to near-white at the band crest
+          vec3 col = mix(vec3(0.32, 0.58, 1.0), vec3(0.80, 0.92, 1.0), band);
+          float a = (band * 0.24 + glint * 0.5 + gloss * 0.12) * uIntensity * faceBoost;
+          gl_FragColor = vec4(col, a);
+        }`
+    });
+    const m = new THREE.Mesh(cardGeo, mat);
+    m.position.z = 0.006;   // just in front of the back face (back-local +z faces the viewer)
+    m.userData.isBackSheen = true;
+    backSheens.add(mat);
+    return m;
+  }
+  function updateBackSheens(t) {
+    backSheens.forEach(mat => { mat.uniforms.uTime.value = t; });
   }
 
   /* ---- confetti (Phase 5c) — one pooled Points, GPU-cheap -------------- */
@@ -1615,14 +1666,21 @@ function resolveStat(stat, pCard, cCard) {
     const foil = makeFoil(card.rarity);
     if (foil) { front.add(foil); g.userData.foil = foil; }
 
+    // gloss sheen: child of the back face so it flips with it and is culled
+    // when the front shows. Gives the (otherwise flat) back a moving highlight.
+    const backSheen = makeBackSheen();
+    back.add(backSheen); g.userData.backSheen = backSheen;
+
     g.userData.setOpacity = (o) => {
       frontMat.opacity = o; backMat.opacity = o;
       if (foil) foil.material.uniforms.uIntensity.value = (FOIL_INTENSITY[card.rarity] || 0) * o;
+      backSheen.material.uniforms.uIntensity.value = o;
     };
     g.userData.dispose = () => {
       if (g.userData.hl)    { g.userData.hl.material.dispose(); }
       if (g.userData.hover) { g.userData.hover.material.dispose(); }
       if (foil) { foils.delete(foil.material); foil.material.dispose(); }
+      backSheens.delete(backSheen.material); backSheen.material.dispose();
       frontTex.dispose(); backTex.dispose();
       frontMat.dispose(); backMat.dispose();
     };
@@ -2441,6 +2499,7 @@ function resolveStat(stat, pCard, cCard) {
       camera.lookAt(0, 0, 0);
     }
     updateFoils(et);
+    updateBackSheens(et);
     updateFoilFacing(playerCard);
     updateFoilFacing(cpuCard);
     // gentle idle float so the cards read as suspended in space
