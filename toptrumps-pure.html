@@ -664,7 +664,7 @@ const GLYPHS = {
     // layer). Matches the original .card.rarity-X box-shadow accent.
     ctx.strokeStyle = rarityColor;
     ctx.lineWidth = 8;
-    roundRect(ctx, 16, 16, W - 32, H - 32, 50); ctx.stroke();
+    roundRect(ctx, 16, 16, W - 32, H - 32, CORNER_TEX - 16); ctx.stroke();
   }
 
   function drawBack(ctx) {
@@ -713,15 +713,16 @@ const GLYPHS = {
     // --- 2. Outer gold frame (inset 8 CSS px) ---------------------------
     // Drawn as three concentric strokes to mimic the original's
     // outer-gold + inner-white + dashed-very-faint sandwich.
+    // Concentric with the card corner: radius at inset d is CORNER_TEX - d.
     const frameInset = 8 * S;
-    const frameR    = 11 * S;
+    const frameR    = CORNER_TEX - frameInset;
     ctx.lineWidth = 1 * S;
     ctx.strokeStyle = 'rgba(255,214,130,0.55)';
     roundRect(ctx, frameInset, frameInset,
               W - frameInset * 2, H - frameInset * 2, frameR); ctx.stroke();
 
     const innerInset = 13 * S;
-    const innerR     = 8 * S;
+    const innerR     = CORNER_TEX - innerInset;
     ctx.strokeStyle = 'rgba(255,255,255,0.22)';
     roundRect(ctx, innerInset, innerInset,
               W - innerInset * 2, H - innerInset * 2, innerR); ctx.stroke();
@@ -738,7 +739,7 @@ const GLYPHS = {
     ctx.strokeStyle = 'rgba(255,255,255,0.08)';
     ctx.lineWidth = 1 * S;
     roundRect(ctx, dashInset, dashInset,
-              W - dashInset * 2, H - dashInset * 2, 5 * S); ctx.stroke();
+              W - dashInset * 2, H - dashInset * 2, CORNER_TEX - dashInset); ctx.stroke();
     ctx.restore();
 
     // --- 3. Central hex medallion ---------------------------------------
