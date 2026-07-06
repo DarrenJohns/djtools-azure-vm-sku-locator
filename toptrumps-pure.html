@@ -1160,20 +1160,26 @@ function resolveStat(stat, pCard, cCard) {
     const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; return t;
   })();
 
-  // --- starfield: recyclable, streams toward camera, streaks on warp ---
-  const STAR_N = _reducedInit ? 220 : 640;
-  const STAR_NEAR = 10, STAR_FAR = -74, STAR_R = 48;
+  // --- starfield: a forward "warp tunnel". Stars stream toward the camera and
+  //     fly PAST it (recycle behind the view) so they streak off the screen
+  //     edges as you dolly in — the classic hyperspace read. Point size + speed
+  //     spike on warp; perspective stretches near stars outward from centre. ---
+  const STAR_N = _reducedInit ? 260 : 900;
+  const STAR_NEAR = 20, STAR_FAR = -82, STAR_R = 34;   // NEAR is past the camera (world ≈ +14)
   const starGeo = new THREE.BufferGeometry();
   const starPos = new Float32Array(STAR_N * 3);
   const starVel = new Float32Array(STAR_N);
   const starSz  = new Float32Array(STAR_N);
-  for (let i = 0; i < STAR_N; i++) {
-    starPos[i*3]   = (Math.random()*2-1) * STAR_R;
-    starPos[i*3+1] = (Math.random()*2-1) * STAR_R;
-    starPos[i*3+2] = STAR_FAR + Math.random() * (STAR_NEAR - STAR_FAR);
-    starVel[i] = 1.6 + Math.random() * 2.4;
-    starSz[i]  = 0.7 + Math.random() * 1.9;
+  function seedStar(i, anyZ) {
+    // spread across a disc so the tunnel has an open centre + dense rim
+    const a = Math.random() * 6.2832, r = STAR_R * (0.12 + 0.88 * Math.sqrt(Math.random()));
+    starPos[i*3]   = Math.cos(a) * r;
+    starPos[i*3+1] = Math.sin(a) * r * 0.82;
+    starPos[i*3+2] = anyZ ? STAR_FAR + Math.random() * (STAR_NEAR - STAR_FAR) : STAR_FAR;
+    starVel[i] = 2.2 + Math.random() * 3.0;
+    starSz[i]  = 0.8 + Math.random() * 2.0;
   }
+  for (let i = 0; i < STAR_N; i++) seedStar(i, true);
   starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
   starGeo.setAttribute('aSize',    new THREE.BufferAttribute(starSz, 1));
   const starMat = new THREE.ShaderMaterial({
@@ -1181,12 +1187,13 @@ function resolveStat(stat, pCard, cCard) {
     uniforms: { uWarp: { value: 0 }, uDpr: { value: _dpr } },
     vertexShader: `attribute float aSize; uniform float uWarp; uniform float uDpr; varying float vA;
       void main(){ vec4 mv = modelViewMatrix * vec4(position,1.0);
-        float near = smoothstep(-74.0, 10.0, position.z);
-        vA = 0.22 + near*0.78;
+        float near = smoothstep(-82.0, 20.0, position.z);
+        vA = (0.20 + near*0.80) * (1.0 + uWarp*0.9);
         gl_Position = projectionMatrix * mv;
-        gl_PointSize = aSize * uDpr * (1.0 + uWarp*3.2) * (0.55 + near*1.3); }`,
+        // grow with warp AND proximity so stars read as fast streaks (not blobs)
+        gl_PointSize = aSize * uDpr * (1.0 + uWarp*4.2) * (0.45 + near*1.7); }`,
     fragmentShader: `varying float vA; void main(){ vec2 uv=gl_PointCoord-0.5; float d=length(uv);
-      if(d>0.5) discard; float a=smoothstep(0.5,0.0,d)*vA; gl_FragColor=vec4(vec3(0.82,0.9,1.0), a); }`
+      if(d>0.5) discard; float a=smoothstep(0.5,0.0,d)*vA; gl_FragColor=vec4(vec3(0.82,0.9,1.0), min(1.0,a)); }`
   });
   const stars = new THREE.Points(starGeo, starMat);
   space.add(stars);
@@ -1254,16 +1261,12 @@ function resolveStat(stat, pCard, cCard) {
   function updateBackdrop(_t, dt) {
     const rm = REDUCED;
     _warp = Math.max(0, _warp - dt * 1.6);
-    const w = rm ? 0 : Math.max(_warp, _warpHold);   // dolly velocity sustains the streak
+    const w = rm ? 0 : (_warpPin != null ? _warpPin : Math.max(_warp, _warpHold));
     starMat.uniforms.uWarp.value = w;
-    const spd = (rm ? 0.12 : 1.0) + (rm ? 0 : w * 22.0);
+    const spd = (rm ? 0.12 : 1.0) + (rm ? 0 : w * 34.0);
     for (let i = 0; i < STAR_N; i++) {
       starPos[i*3+2] += starVel[i] * spd * dt;
-      if (starPos[i*3+2] > STAR_NEAR) {
-        starPos[i*3+2] = STAR_FAR;
-        starPos[i*3]   = (Math.random()*2-1) * STAR_R;
-        starPos[i*3+1] = (Math.random()*2-1) * STAR_R;
-      }
+      if (starPos[i*3+2] > STAR_NEAR) { seedStar(i, false); }   // flew past → respawn at far end
     }
     starGeo.attributes.position.needsUpdate = true;
     // planets just spin; the camera dolly (dollyIn) supplies their apparent
@@ -1771,7 +1774,7 @@ function resolveStat(stat, pCard, cCard) {
     _camBaseY = 0.15; _camBaseZ = d;      // dolly-in offsets from this rest pose
   }
   // camera dolly ("forward flight") state — see dollyIn()
-  let _camDolly = 0, _warpHold = 0, _camBaseY = 0.15, _camBaseZ = 8.4;
+  let _camDolly = 0, _warpHold = 0, _camBaseY = 0.15, _camBaseZ = 8.4, _warpPin = null;
 
   let playerCard = null, cpuCard = null;
 
@@ -1945,16 +1948,20 @@ function resolveStat(stat, pCard, cCard) {
      they lead the parallax) and fade up. The starfield streak speed is driven
      by the dolly velocity (see updateBackdrop), so the background streams past
      in sync. `entering` guards float/shadow so they don't fight the tweens. */
-  const ENTRY_MS = 1500, ZOOM_DEPTH = 3.6, DOLLY_BACK = 3.6;
+  const ENTRY_MS = 1500, ZOOM_DEPTH = 3.6, DOLLY_BACK = 6.5;
   function dollyIn() {
     if (REDUCED) { _camDolly = 0; _warpHold = 0; return; }
     _camDolly = DOLLY_BACK;
+    _warpHold = 1.0;
     tween({
       dur: md(ENTRY_MS),
       ease: easeOut,
-      update: (e) => {
+      update: (e, t) => {
         _camDolly = DOLLY_BACK * (1 - e);
-        _warpHold = 0.55 * (1 - e);          // stars streak fastest as flight begins
+        // warp envelope on the LINEAR timeline: near-full for the first ~65% of
+        // the flight (stars streaking hard while cards are small + far), then a
+        // smooth ramp-down so it settles exactly as the cards land at rest.
+        _warpHold = t < 0.65 ? 1.0 : Math.max(0, 1 - (t - 0.65) / 0.35);
       },
       done: () => { _camDolly = 0; _warpHold = 0; }
     });
@@ -2241,6 +2248,7 @@ function resolveStat(stat, pCard, cCard) {
       // camera dolly telemetry (forward-flight entry verification)
       cam: () => ({ z: +camera.position.z.toFixed(3), dolly: +_camDolly.toFixed(3), warp: +_warpHold.toFixed(3), base: +_camBaseZ.toFixed(3) }),
       dolly: () => dollyIn(),   // trigger the forward-flight dolly on the current cards (test hook)
+      pinWarp: (v) => { _warpPin = v; },   // freeze star warp strength for screenshots (test hook)
       pick: (n) => {
         if (G.phase === 'picking' && G.turn === 'player') {
           const s = STATS[n - 1]; if (s) playerPicksStat(s.key);
