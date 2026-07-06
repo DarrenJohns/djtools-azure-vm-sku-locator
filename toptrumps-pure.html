@@ -1476,7 +1476,7 @@ function resolveStat(stat, pCard, cCard) {
      halo bleeding outward into space — the interior stays transparent so the
      card art shows through. One owner per card (userData.winGlow), freed with
      the card in its dispose(). The rim is bright enough to feed the bloom pass. */
-  const WIN_GLOW_M   = 0.34;                 // halo margin beyond the card edge (world units)
+  const WIN_GLOW_M   = 1.05;                 // halo margin beyond the card edge (world units) — large so the aura fully fades before the plane edge
   const winGlowGeo   = new THREE.PlaneGeometry(CARD_W + WIN_GLOW_M * 2, CARD_H + WIN_GLOW_M * 2);
   const _winGlows    = new Set();            // active materials → shimmer animated each frame
   function makeWinGlow() {
@@ -1508,12 +1508,16 @@ function resolveStat(stat, pCard, cCard) {
           if (uAmt <= 0.001) discard;
           vec2  p = (vUv - 0.5) * uPlane;               // card-space, centred
           float d = sdRoundRect(p, uHalf, uRadius);      // 0 at the card edge
-          float edge  = exp(-abs(d) * 20.0);             // bright thin rim on the edge
-          float outer = d > 0.0 ? exp(-d * 6.0) * 0.55 : 0.0;  // halo, outside the edge only
+          float edge  = exp(-abs(d) * 18.0);             // bright thin rim on the edge
+          float outer = d > 0.0 ? exp(-d * 4.2) * 0.6 : 0.0;   // soft halo, outside the edge only
           float inner = exp(-max(-d, 0.0) * 26.0) * 0.30;// faint inward feather
           float shimmer = 0.82 + 0.18 * sin(uTime * 3.0 + d * 8.0);
-          float a = clamp((edge + outer + inner) * uAmt * shimmer, 0.0, 1.0);
-          if (a <= 0.003) discard;
+          // border feather: fade smoothly to zero at the plane rectangle boundary so
+          // the aura never terminates on a hard edge, whatever residual remains
+          float m = min(min(vUv.x, 1.0 - vUv.x), min(vUv.y, 1.0 - vUv.y));
+          float win = smoothstep(0.0, 0.14, m);
+          float a = clamp((edge + outer + inner) * uAmt * shimmer * win, 0.0, 1.0);
+          if (a <= 0.002) discard;
           vec3 col = uColor * (1.0 + edge * 0.6);         // near-white hot rim core
           gl_FragColor = vec4(col, a);
         }`
