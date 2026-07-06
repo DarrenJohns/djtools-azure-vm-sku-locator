@@ -1449,6 +1449,7 @@ function resolveStat(stat, pCard, cCard) {
      no seam between "animating" and "idle". */
   const tweens = new Set();
   const easeInOut = t => t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3)/2;
+  const easeIn    = t => t*t*t;                       // accelerate outward (fly-out)
 
   /* honour prefers-reduced-motion: collapse animation durations to ~instant
      (G5). md() floors at 1ms so tweens still complete cleanly next frame. */
@@ -1678,9 +1679,29 @@ function resolveStat(stat, pCard, cCard) {
     sh.material.opacity = (0.42 - lift * 0.22) * faceOpacity;
   }
 
+  /* ---- idle float: cards gently hang in space ------------------------
+     A soft, slow drift + tilt applied around each card's slot anchor so the
+     pair reads as suspended, not pinned. Runs only while a card is the live
+     top card and NOT mid-flip (flip owns z-lift/scale/rot.y). Written as an
+     absolute transform from the anchor each frame, so fly-out/sweep — which
+     read the card's current position as their start — pick up seamlessly. */
+  function floatCard(cardG, et) {
+    if (!cardG || cardG.userData.flipping || REDUCED) return;
+    const a = cardG.userData.baseSlot; if (!a) return;
+    const ph = cardG.userData.floatPhase || 0;
+    cardG.position.set(
+      a.x + Math.sin(et * 0.62 + ph) * 0.055,
+      a.y + Math.sin(et * 0.85 + ph * 1.3) * 0.075,
+      (cardG.userData.baseZ || 0) + Math.sin(et * 0.50 + ph * 0.7) * 0.05
+    );
+    cardG.rotation.x = Math.sin(et * 0.72 + ph) * 0.030;
+    cardG.rotation.z = Math.cos(et * 0.66 + ph * 1.1) * 0.026;
+  }
+
   function placeCard(cardG, slot, faceUp) {
     cardG.position.copy(slot);
     cardG.userData.baseZ = slot.z;
+    cardG.userData.baseSlot = slot.clone();   // float anchor (re-set on resize)
     cardG.userData.faceUp = faceUp;
     cardG.rotation.y = faceUp ? 0 : Math.PI;
   }
@@ -1707,6 +1728,35 @@ function resolveStat(stat, pCard, cCard) {
       },
       done: () => { disposeCard(cardG); done && done(); }
     });
+  }
+
+  /* fly a WON card dramatically off the winner's side of the screen: it
+     accelerates outward (easeIn), whooshes toward the camera, spins about Z,
+     then fades and disposes. `dir` is a unit exit direction; `spin`/`delay`
+     let the pair read as two distinct cards. Start pose = the card's CURRENT
+     (floated) transform, so there's no snap when the float hands off. */
+  function flyOut(cardG, dir, { spin = 0, delay = 0, dist = 9 } = {}, done) {
+    const launch = () => {
+      const from = cardG.position.clone();
+      const fromZ = cardG.rotation.z, fromX = cardG.rotation.x;
+      const dest = from.clone().addScaledVector(dir, dist);
+      tween({
+        dur: md(600),
+        ease: easeIn,
+        update: (e) => {
+          cardG.position.x = from.x + (dest.x - from.x) * e;
+          cardG.position.y = from.y + (dest.y - from.y) * e;
+          cardG.position.z = from.z + Math.sin(e * Math.PI) * 0.9 + e * 0.6;  // whoosh toward camera
+          cardG.rotation.z = fromZ + spin * e;
+          cardG.rotation.x = fromX * (1 - e);
+          const s = 1 + 0.14 * Math.sin(e * Math.PI) - 0.10 * e;
+          cardG.scale.set(s, s, s);
+          cardG.userData.setOpacity(e < 0.62 ? 1 : Math.max(0, 1 - (e - 0.62) / 0.38));
+        },
+        done: () => { disposeCard(cardG); done && done(); }
+      });
+    };
+    if (delay > 0 && !REDUCED) setTimeout(launch, delay); else launch();
   }
 
   /* ---- HUD ------------------------------------------------------------- */
@@ -1752,6 +1802,9 @@ function resolveStat(stat, pCard, cCard) {
     disposeCard(playerCard); disposeCard(cpuCard);
     playerCard = makeCard(G.player.hand[0]);
     cpuCard    = makeCard(G.cpu.hand[0]);
+    // independent drift phases so the two cards never bob in lockstep
+    playerCard.userData.floatPhase = Math.random() * 6.283;
+    cpuCard.userData.floatPhase    = Math.random() * 6.283;
     placeCard(playerCard, PLAYER_SLOT, false);
     placeCard(cpuCard,    CPU_SLOT,    false);
     playerCard.userData.shadow = makeShadow();
@@ -1886,8 +1939,20 @@ function resolveStat(stat, pCard, cCard) {
       if (G.player.hand.length === 0 || G.cpu.hand.length === 0) return endMatch();
       setTimeout(() => { if (G.matchToken === token) startRound(); }, 260);
     };
-    sweep(localP, pDest, after);
-    sweep(localC, cDest, after);
+    if (winner === 'tie') {
+      sweep(localP, pDest, after);
+      sweep(localC, cDest, after);
+    } else {
+      // both cards fly out to the WINNER's side of the screen; mirrored spin +
+      // a slight stagger keep them readable as two distinct cards.
+      const sign = winner === 'player' ? -1 : 1;
+      const dir = sideBySide ? new THREE.Vector3(sign, 0, 0)
+                             : new THREE.Vector3(0, sign, 0);
+      const winCard  = winner === 'player' ? localP : localC;
+      const loseCard = winner === 'player' ? localC : localP;
+      flyOut(winCard,  dir, { spin:  0.9, delay: 0 },   after);
+      flyOut(loseCard, dir, { spin: -1.2, delay: 70 },  after);
+    }
   }
 
   function endMatch() {
@@ -2041,6 +2106,9 @@ function resolveStat(stat, pCard, cCard) {
     updateFoils(et);
     updateFoilFacing(playerCard);
     updateFoilFacing(cpuCard);
+    // gentle idle float so the cards read as suspended in space
+    floatCard(playerCard, et);
+    floatCard(cpuCard, et);
     // subtle "breathing" on the pickable player card so it reads as active
     if (!REDUCED && playerCard && G.phase === 'picking' && G.turn === 'player'
         && !playerCard.userData.flipping && playerCard.userData.faceUp) {
