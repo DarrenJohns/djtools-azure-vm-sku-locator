@@ -1421,10 +1421,10 @@ function resolveStat(stat, pCard, cCard) {
           vec2 d = vUv - vec2(0.40, 0.72);
           float gloss = smoothstep(0.72, 0.0, length(d));
           // glint is strongest when the back is square-on to the viewer
-          float faceBoost = 0.45 + 0.55 * uFacing;
-          // cool azure sheen, brightening to near-white at the band crest
-          vec3 col = mix(vec3(0.32, 0.58, 1.0), vec3(0.80, 0.92, 1.0), band);
-          float a = (band * 0.24 + glint * 0.5 + gloss * 0.12) * uIntensity * faceBoost;
+          float faceBoost = 0.52 + 0.38 * uFacing;
+          // cool azure sheen, but stop short of a full near-white flare
+          vec3 col = mix(vec3(0.30, 0.55, 0.96), vec3(0.66, 0.84, 1.0), band);
+          float a = (band * 0.15 + glint * 0.22 + gloss * 0.06) * uIntensity * faceBoost;
           gl_FragColor = vec4(col, a);
         }`
     });
