@@ -39,6 +39,41 @@
     padding: 8px 16px; border-radius: 999px; backdrop-filter: blur(6px);
     transition: opacity .4s ease; }
 
+  /* ---- Continue pause button — hands round pacing to the player. Sits above
+     the hint pill; a thin progress bar shows the safety auto-advance. ---- */
+  #continue-btn { position: fixed; left: 50%; bottom: 70px;
+    transform: translateX(-50%) translateY(8px); z-index: 7;
+    display: inline-flex; align-items: center; gap: 12px;
+    padding: 12px 18px 12px 20px; border-radius: 999px; cursor: pointer;
+    font: 700 14px/1 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    letter-spacing: .02em; color: var(--ink); white-space: nowrap; overflow: hidden;
+    background: linear-gradient(135deg, rgba(20,44,78,.92), rgba(10,21,38,.92));
+    border: 1px solid rgba(120,170,235,.35);
+    box-shadow: 0 18px 44px rgba(0,0,0,.6), 0 0 0 0 rgba(55,182,255,0);
+    backdrop-filter: blur(7px);
+    opacity: 0; pointer-events: none;
+    transition: opacity .25s ease, transform .25s cubic-bezier(.2,.7,.3,1.4), box-shadow .3s ease;
+    --progress: 100%; }
+  #continue-btn::before { content: ''; position: absolute; left: 0; bottom: 0; height: 3px;
+    width: var(--progress, 100%);
+    background: linear-gradient(90deg, rgba(120,220,255,.9), rgba(55,182,255,.5));
+    box-shadow: 0 0 8px rgba(90,200,255,.55); transition: width .15s linear; pointer-events: none; }
+  #continue-btn[hidden] { display: none; }
+  #continue-btn.show { opacity: 1; pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
+    animation: continuePulse 1.9s ease-in-out infinite; }
+  #continue-btn:hover { border-color: rgba(140,195,255,.6);
+    background: linear-gradient(135deg, rgba(26,58,98,.95), rgba(14,28,50,.95)); }
+  #continue-btn:active { transform: translateX(-50%) translateY(1px) scale(.98); }
+  #continue-btn .c-arrow { font-size: 12px; color: var(--accent); }
+  #continue-btn .c-key { font-size: 10.5px; font-weight: 600; letter-spacing: .04em;
+    background: rgba(120,170,235,.2); padding: 4px 8px; border-radius: 6px; color: #cfe4ff; }
+  @keyframes continuePulse {
+    0%,100% { box-shadow: 0 18px 44px rgba(0,0,0,.6), 0 0 0 0 rgba(55,182,255,0); }
+    50%     { box-shadow: 0 18px 44px rgba(0,0,0,.6), 0 0 22px 4px rgba(55,182,255,.5); }
+  }
+  @media (prefers-reduced-motion: reduce) { #continue-btn.show { animation: none; } }
+
   /* ---- loading / error ---- */
   #loading { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center;
     background: var(--bg0); transition: opacity .5s ease; }
@@ -70,6 +105,12 @@
   </div>
 
   <div id="hint">Loading deck…</div>
+
+  <button id="continue-btn" class="continue-btn" type="button" hidden aria-label="Continue to next round">
+    <span class="c-label">Continue</span>
+    <span class="c-arrow" aria-hidden="true">▶</span>
+    <span class="c-key" aria-hidden="true">Space</span>
+  </button>
 
   <div id="fps"></div>
 
@@ -1919,6 +1960,56 @@ function resolveStat(stat, pCard, cCard) {
   }
   function setHint(msg) { if (elHint) elHint.textContent = msg; }
 
+  /* ---- Continue pause: hand round pacing to the player ------------------
+     After a round resolves we pause with a Continue button (Space/Enter/click)
+     so the player can read both cards before the next hand warps in — mirrors
+     the original game's pacing. A safety countdown auto-advances if ignored,
+     drawn as the thin progress bar inside the pill. `hideContinue` force-clears
+     it (and resolves any pending wait) if the match restarts mid-pause. */
+  const elContinue = document.getElementById('continue-btn');
+  let _continueCleanup = null;
+  function hideContinue() {
+    if (_continueCleanup) { _continueCleanup(); return; }
+    if (elContinue) { elContinue.classList.remove('show', 'is-paused'); elContinue.hidden = true; }
+  }
+  function waitForContinue(autoMs) {
+    return new Promise((resolve) => {
+      const btn = elContinue;
+      if (!btn) { setTimeout(resolve, autoMs); return; }
+      let done = false, remaining = autoMs, last = performance.now(), raf = 0;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        cancelAnimationFrame(raf);
+        document.removeEventListener('keydown', onKey, true);
+        btn.removeEventListener('click', finish);
+        btn.classList.remove('show', 'is-paused');
+        btn.hidden = true;
+        _continueCleanup = null;
+        resolve();
+      };
+      const tick = () => {
+        if (done) return;
+        const now = performance.now();
+        remaining -= (now - last); last = now;
+        if (remaining <= 0) { finish(); return; }
+        btn.style.setProperty('--progress', Math.max(0, remaining / autoMs * 100) + '%');
+        raf = requestAnimationFrame(tick);
+      };
+      const onKey = (e) => {
+        if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); finish(); }
+      };
+      _continueCleanup = finish;
+      btn.hidden = false;
+      btn.style.setProperty('--progress', '100%');
+      requestAnimationFrame(() => { if (!done) btn.classList.add('show'); });
+      btn.addEventListener('click', finish);
+      document.addEventListener('keydown', onKey, true);
+      last = performance.now();
+      raf = requestAnimationFrame(tick);
+    });
+  }
+
   /* ---- game state (G2: this state drives everything; it never touches a
      mesh directly — the table functions above are the only mesh owner) --- */
   const _diffParam = parseInt(new URLSearchParams(location.search).get('diff'), 10);
@@ -1933,6 +2024,7 @@ function resolveStat(stat, pCard, cCard) {
   const beat = (ms) => new Promise(r => setTimeout(r, ms));
 
   function startMatch() {
+    hideContinue();
     const deck = shuffle(G.data.cards.slice()).slice(0, DECK_SIZE);
     G.player.hand = []; G.cpu.hand = [];
     for (let i = 0; i < deck.length; i++) {
@@ -2122,6 +2214,14 @@ function resolveStat(stat, pCard, cCard) {
 
     await beat(winner === 'tie' ? 900 : 1050);
     if (G.matchToken !== token) return;
+
+    // Hand the pace to the player: pause on the lit verdict until they hit
+    // Continue / Space (safety auto-advance keeps the game from stalling).
+    if (!REDUCED) {
+      announce('Press Space to continue.');
+      await waitForContinue(winner === 'player' ? 5200 : 6500);
+      if (G.matchToken !== token) return;
+    }
     resolveRound(winner, key);
   }
 
@@ -2277,6 +2377,8 @@ function resolveStat(stat, pCard, cCard) {
       },
       pinWarp: (v) => { _warpPin = v; },   // freeze star warp strength for screenshots (test hook)
       _planetZ: () => planets.map(p => +p.position.z.toFixed(2)),   // moon z positions (parallax warp verification)
+      paused: () => !!_continueCleanup,    // true while the Continue pause is waiting (test hook)
+      cont: () => { hideContinue(); },     // advance past the Continue pause (test hook)
       pick: (n) => {
         if (G.phase === 'picking' && G.turn === 'player') {
           const s = STATS[n - 1]; if (s) playerPicksStat(s.key);
