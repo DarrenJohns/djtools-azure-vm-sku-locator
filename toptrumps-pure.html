@@ -1234,10 +1234,12 @@ function resolveStat(stat, pCard, cCard) {
     vertexShader: `attribute float aSize; uniform float uWarp; uniform float uDpr; varying float vA;
       void main(){ vec4 mv = modelViewMatrix * vec4(position,1.0);
         float near = smoothstep(-82.0, 20.0, position.z);
-        vA = (0.20 + near*0.80) * (1.0 + uWarp*0.9);
+        // brightness is warp-independent so the field stays steady (no bloom-then-dim
+        // pulse) — the dedicated streak layer carries the hyperspace motion instead
+        vA = (0.20 + near*0.80);
         gl_Position = projectionMatrix * mv;
-        // grow with warp AND proximity so stars read as fast streaks (not blobs)
-        gl_PointSize = aSize * uDpr * (1.0 + uWarp*4.2) * (0.45 + near*1.7); }`,
+        // stars stay crisp points: only a tiny warp size cue, no ballooning into blobs
+        gl_PointSize = aSize * uDpr * (1.0 + uWarp*0.4) * (0.45 + near*1.7); }`,
     fragmentShader: `varying float vA; void main(){ vec2 uv=gl_PointCoord-0.5; float d=length(uv);
       if(d>0.5) discard; float a=smoothstep(0.5,0.0,d)*vA; gl_FragColor=vec4(vec3(0.82,0.9,1.0), min(1.0,a)); }`
   });
@@ -1245,6 +1247,48 @@ function resolveStat(stat, pCard, cCard) {
   stars.frustumCulled = false;
   stars.renderOrder = -10;               // pure background layer: draws first, writes no depth,
   space.add(stars);                      // so the opaque moons always paint in front of the stars
+
+  // --- hyperspace streaks: a LineSegments layer that stretches each star into a
+  //     thin radial line during a warp. Two verts per star (tail + head); the head
+  //     is pushed BACKWARD along -z (trailing the forward-moving star) by an amount
+  //     that scales with warp AND proximity, so the lines project as streaks
+  //     converging on the vanishing point — the classic "zooming through space"
+  //     read. Alpha ∝ warp, so the streaks only exist during a warp and vanish at
+  //     idle; the round stars (above) stay steady and carry the still composition. ---
+  const streakGeo = new THREE.BufferGeometry();
+  const streakPos = new Float32Array(STAR_N * 2 * 3);   // tail + head per star
+  const streakEnd = new Float32Array(STAR_N * 2);       // 0 = tail, 1 = head
+  const streakSz  = new Float32Array(STAR_N * 2);
+  for (let i = 0; i < STAR_N; i++) {
+    streakEnd[i*2]   = 0; streakEnd[i*2+1] = 1;
+    streakSz[i*2]    = starSz[i]; streakSz[i*2+1] = starSz[i];
+  }
+  streakGeo.setAttribute('position', new THREE.BufferAttribute(streakPos, 3));
+  streakGeo.setAttribute('aEnd',     new THREE.BufferAttribute(streakEnd, 1));
+  streakGeo.setAttribute('aSize',    new THREE.BufferAttribute(streakSz, 1));
+  const streakMat = new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false, depthTest: false, toneMapped: false, blending: THREE.AdditiveBlending,
+    uniforms: { uWarp: { value: 0 }, uLen: { value: 15.0 } },
+    vertexShader: `attribute float aEnd; attribute float aSize; uniform float uWarp; uniform float uLen;
+      varying float vA; varying float vEnd;
+      void main(){
+        float near = smoothstep(-82.0, 20.0, position.z);
+        // head trails backward (-z) toward the vanishing point; length grows with
+        // warp, proximity and star size so near/bigger stars streak longest
+        float len = uLen * uWarp * (0.15 + near*1.35) * (0.6 + aSize*0.35);
+        vec3 p = position - vec3(0.0, 0.0, aEnd * len);
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
+        // bright at the head (star), fading down the trailing tail; overall ∝ warp
+        vEnd = aEnd;
+        vA = (0.20 + near*0.80) * uWarp;
+      }`,
+    fragmentShader: `varying float vA; varying float vEnd;
+      void main(){ float taper = mix(1.0, 0.15, vEnd); gl_FragColor = vec4(vec3(0.82,0.9,1.0), min(1.0, vA*taper)); }`
+  });
+  const streaks = new THREE.LineSegments(streakGeo, streakMat);
+  streaks.frustumCulled = false;
+  streaks.renderOrder = -9;              // in front of the star points (-10), behind the moons
+  space.add(streaks);
 
   // --- planets: lit sphere geometry, Azure-tinted lunar photo. Bare moons —
   // no atmosphere halo, no ring — kept behind the cards in the letterbox gaps
@@ -1370,6 +1414,19 @@ function resolveStat(stat, pCard, cCard) {
       if (starPos[i*3+2] > STAR_NEAR) { seedStar(i, false); }   // flew past → respawn at far end
     }
     starGeo.attributes.position.needsUpdate = true;
+    // hyperspace streaks track the stars: copy each star's position into BOTH the
+    // tail and head slots (the shader extends the head backward by warp × proximity).
+    // Skip the buffer churn entirely when there's no warp — streaks are invisible then.
+    streakMat.uniforms.uWarp.value = w;
+    if (w > 0.001) {
+      for (let i = 0; i < STAR_N; i++) {
+        const sx = starPos[i*3], sy = starPos[i*3+1], sz = starPos[i*3+2];
+        const b = i*6;
+        streakPos[b]   = sx; streakPos[b+1] = sy; streakPos[b+2] = sz;   // tail
+        streakPos[b+3] = sx; streakPos[b+4] = sy; streakPos[b+5] = sz;   // head (offset in shader)
+      }
+      streakGeo.attributes.position.needsUpdate = true;
+    }
     // moons stream forward during the warp so they read as NEAR objects rushing
     // past while the far stars barely move — that depth gap IS the parallax that
     // sells "travelling through space". At idle (w≈0) they only spin, holding the
