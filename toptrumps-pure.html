@@ -94,6 +94,31 @@
     font: 600 12px/1.3 ui-monospace, "Cascadia Code", Consolas, monospace;
     color: #8fe3b0; background: rgba(6,12,24,.6); border: 1px solid rgba(120,160,220,.2);
     padding: 6px 9px; border-radius: 7px; pointer-events: none; white-space: pre; }
+  #toast { position: fixed; left: 50%; top: 18px; transform: translateX(-50%) translateY(-8px);
+    z-index: 8; opacity: 0; transition: opacity .18s ease, transform .18s ease;
+    font: 600 13px/1.35 system-ui, "Segoe UI", sans-serif; color: #dce8ff;
+    background: rgba(6,12,24,.72); border: 1px solid rgba(120,160,220,.28);
+    padding: 8px 14px; border-radius: 9px; pointer-events: none; white-space: nowrap;
+    box-shadow: 0 6px 20px rgba(0,0,0,.35); }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  #help { position: fixed; left: 50%; top: 50%; transform: translate(-50%,-50%) scale(.98);
+    z-index: 9; opacity: 0; visibility: hidden; transition: opacity .16s ease, transform .16s ease;
+    font: 500 13px/1.5 system-ui, "Segoe UI", sans-serif; color: #dce8ff;
+    background: rgba(8,14,26,.9); border: 1px solid rgba(120,160,220,.3);
+    padding: 16px 20px; border-radius: 12px; pointer-events: none; min-width: 230px;
+    box-shadow: 0 12px 40px rgba(0,0,0,.5); }
+  #help.show { opacity: 1; visibility: visible; transform: translate(-50%,-50%) scale(1); }
+  #help h3 { margin: 0 0 10px; font-size: 12px; letter-spacing: .04em; text-transform: uppercase;
+    color: #8fb4e8; font-weight: 700; }
+  #help .row { display: flex; justify-content: space-between; gap: 24px; padding: 3px 0; }
+  #help kbd { display: inline-block; min-width: 16px; text-align: center;
+    font: 600 12px/1.4 ui-monospace, Consolas, monospace; color: #cfe0ff;
+    background: rgba(120,160,220,.14); border: 1px solid rgba(120,160,220,.3);
+    border-radius: 5px; padding: 1px 6px; }
+  #help .state { font-weight: 700; }
+  #help .on  { color: #6fe0a0; }
+  #help .off { color: #e88; }
+  #help .hint { margin-top: 10px; font-size: 11px; color: #7f92b5; }
 </style>
 </head>
 <body>
@@ -113,6 +138,10 @@
   </button>
 
   <div id="fps"></div>
+
+  <div id="toast" aria-hidden="true"></div>
+
+  <div id="help" role="dialog" aria-label="Toggle key list" aria-hidden="true"></div>
 
   <div id="loading">
     <div style="text-align:center">
@@ -1121,6 +1150,55 @@ function resolveStat(stat, pCard, cCard) {
 
   const art = window.__cardArt;   // { W, H, bakeFront(card), bakeBack(), onBackRefresh, clear }
 
+  /* ---- feature toggles (dev/testing) ---------------------------------
+     A small runtime flag registry so visual systems can be flipped on/off
+     live for A/B testing, without a reload. Each entry in FEAT_KEYS binds a
+     keyboard key to a flag; toggling shows a brief toast + a11y announce.
+     Add a new toggle by: (a) adding a FEAT flag, (b) a FEAT_KEYS binding,
+     (c) gating the system on FEAT.<flag>. Also exposed via __pure.feature(). */
+  const FEAT = { smoke: true, streaks: true, moons: true, xwings: true };
+  const FEAT_KEYS = {
+    s: { flag: 'smoke',   label: 'Smoke trail' },
+    h: { flag: 'streaks', label: 'Hyperspace streaks' },
+    m: { flag: 'moons',   label: 'Moons' },
+  };
+  const _toastEl = document.getElementById('toast');
+  let _toastTimer = 0;
+  function showToast(msg) {
+    if (!_toastEl) return;
+    _toastEl.textContent = msg;
+    _toastEl.classList.add('show');
+    clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(() => _toastEl.classList.remove('show'), 1500);
+  }
+  function setFeature(flag, on) {
+    if (!(flag in FEAT)) return;
+    FEAT[flag] = on == null ? !FEAT[flag] : !!on;
+    const label = (Object.values(FEAT_KEYS).find(k => k.flag === flag) || {}).label || flag;
+    showToast(label + ': ' + (FEAT[flag] ? 'ON' : 'OFF'));
+    announce(label + ' ' + (FEAT[flag] ? 'on' : 'off'));
+    if (_helpEl && _helpEl.classList.contains('show')) renderHelp();   // keep the open help panel live
+    return FEAT[flag];
+  }
+  // '?' help overlay: lists every toggle key + its current ON/OFF state.
+  const _helpEl = document.getElementById('help');
+  function renderHelp() {
+    if (!_helpEl) return;
+    const rows = Object.entries(FEAT_KEYS).map(([key, b]) => {
+      const on = FEAT[b.flag];
+      return '<div class="row"><span><kbd>' + key.toUpperCase() + '</kbd> ' + b.label +
+        '</span><span class="state ' + (on ? 'on' : 'off') + '">' + (on ? 'ON' : 'OFF') + '</span></div>';
+    }).join('');
+    _helpEl.innerHTML = '<h3>Toggle keys</h3>' + rows +
+      '<div class="hint">Press the key to toggle · <kbd>?</kbd> or <kbd>Esc</kbd> to close</div>';
+  }
+  function toggleHelp(force) {
+    if (!_helpEl) return;
+    const show = force == null ? !_helpEl.classList.contains('show') : !!force;
+    if (show) { renderHelp(); _helpEl.classList.add('show'); _helpEl.setAttribute('aria-hidden', 'false'); announce('Toggle key list open.'); }
+    else { _helpEl.classList.remove('show'); _helpEl.setAttribute('aria-hidden', 'true'); }
+  }
+
   /* ---- renderer / scene / camera ------------------------------------- */
   const canvas   = document.getElementById('stage');
   /* WebGL is required for this build — there is no Canvas2D fallback game (it is
@@ -1191,6 +1269,7 @@ function resolveStat(stat, pCard, cCard) {
   scene.add(space);
 
   let _warp = 0;                                   // 0..~1.2, decays each frame
+  let _bgWarpNow = 0;                              // latest effective warp (shared with dust handoff)
   function backdropWarp(s = 1) { _warp = Math.min(1.2, _warp + s); }
   function globeBurst(_n) { backdropWarp(0.4); }   // win flourish → mild warp
 
@@ -1478,6 +1557,7 @@ function resolveStat(stat, pCard, cCard) {
     const rm = REDUCED;
     _warp = Math.max(0, _warp - dt * 1.6);
     const w = rm ? 0 : (_warpPin != null ? _warpPin : Math.max(_warp, _warpHold));
+    _bgWarpNow = w;
     starMat.uniforms.uWarp.value = w;
     const spd = (rm ? 0.12 : 1.0) + (rm ? 0 : w * 34.0);
     for (let i = 0; i < STAR_N; i++) {
@@ -1487,9 +1567,10 @@ function resolveStat(stat, pCard, cCard) {
     starGeo.attributes.position.needsUpdate = true;
     // hyperspace streaks track the stars: copy each star's position into BOTH the
     // tail and head slots (the shader extends the head backward by warp × proximity).
-    // Skip the buffer churn entirely when there's no warp — streaks are invisible then.
-    streakMat.uniforms.uWarp.value = w;
-    if (w > 0.001) {
+    // Keep this write path warm every frame so warp start has no one-frame workload spike.
+    streaks.visible = FEAT.streaks;
+    streakMat.uniforms.uWarp.value = FEAT.streaks ? w : 0;
+    if (FEAT.streaks) {
       for (let i = 0; i < STAR_N; i++) {
         const sx = starPos[i*3], sy = starPos[i*3+1], sz = starPos[i*3+2];
         const b = i*6;
@@ -1503,6 +1584,8 @@ function resolveStat(stat, pCard, cCard) {
     // sells "travelling through space". At idle (w≈0) they only spin, holding the
     // composition; the speed grows as a moon nears the camera (perspective).
     for (const p of planets) {
+      p.visible = FEAT.moons;
+      if (!FEAT.moons) continue;                  // hidden → skip spin + parallax churn
       p.rotation.y += p.userData.spin * dt * (rm ? 0.3 : 1.0) * 6;
       if (!rm && w > 0.002) {
         const prox = Math.min(1, Math.max(0, (p.position.z + 66) / 74));  // 0 far → 1 near
@@ -1513,8 +1596,115 @@ function resolveStat(stat, pCard, cCard) {
     updateMeteors(dt, w, rm);   // occasional shooting stars while the scene is idle
   }
 
+  /* ---- X-wing 3D model flyby ----------------------------------------- */
+  let _xwings = [];  // active flybys
+  function makeXWing() {
+   // Procedural X-wing using simple geometries: fuselage (box) + wings (2 boxes) + canopy (cone)
+   const group = new THREE.Group();
+   // Central fuselage (silver)
+   const fuseGeom = new THREE.BoxGeometry(0.15, 0.08, 0.6);
+   const fuseMat = new THREE.MeshStandardMaterial({
+     color: 0xcccccc, roughness: 0.3, metalness: 0.7, emissive: 0x0000ff, emissiveIntensity: 0.15
+   });
+   const fuse = new THREE.Mesh(fuseGeom, fuseMat);
+   group.add(fuse);
+   // Two wings (left/right pairs, blue tint)
+   const wingGeom = new THREE.BoxGeometry(0.05, 0.06, 0.4);
+   const wingMat = new THREE.MeshStandardMaterial({
+     color: 0x4488ff, roughness: 0.4, metalness: 0.6, emissive: 0x0000aa, emissiveIntensity: 0.2
+   });
+   const wingL = new THREE.Mesh(wingGeom, wingMat);
+   wingL.position.set(-0.18, 0, 0);
+   group.add(wingL);
+   const wingR = new THREE.Mesh(wingGeom, wingMat);
+   wingR.position.set(0.18, 0, 0);
+   group.add(wingR);
+   // Canopy (cone, translucent blue)
+   const canopyGeom = new THREE.ConeGeometry(0.08, 0.25, 8);
+   const canopyMat = new THREE.MeshStandardMaterial({
+     color: 0x88ccff, roughness: 0.2, metalness: 0.3, transparent: true, opacity: 0.6,
+     emissive: 0x0066ff, emissiveIntensity: 0.4
+   });
+   const canopy = new THREE.Mesh(canopyGeom, canopyMat);
+   canopy.position.z = 0.15;
+   canopy.rotation.x = Math.PI / 2;
+   group.add(canopy);
+   // Engine glow (subtle aura behind fuselage)
+   const glowGeom = new THREE.SphereGeometry(0.15, 8, 8);
+   const glowMat = new THREE.MeshStandardMaterial({
+     color: 0x0088ff, roughness: 1, emissive: 0x00aaff, emissiveIntensity: 0.8,
+     transparent: true, opacity: 0.5
+   });
+   const glow = new THREE.Mesh(glowGeom, glowMat);
+   glow.position.z = -0.25;
+   glow.scale.set(1.2, 0.8, 0.6);
+   group.add(glow);
+   group.scale.set(1.5, 1.5, 1.5);  // scale up for visibility
+   group.renderOrder = 5;  // in front of background, behind cards
+   return group;
+  }
 
-  /* ---- card geometry (baked art aspect: W/H) -------------------------- */
+  function spawnXWingFlyby() {
+   if (!FEAT.xwings || REDUCED) return;
+   if (_xwings.length > 1) return;  // max 2 concurrent flybys
+   const xwing = makeXWing();
+   scene.add(xwing);
+   _xwings.push(xwing);
+   // Orbital trajectory: camera-relative so it stays in the background
+   const duration = 4000;  // 4 second flight
+   tween({
+     dur: md(duration),
+     ease: (x) => x,
+     tag: 'xwing',
+     update: (e, t) => {
+       // Parametric elliptical orbit around camera: sine wave left/right, cosine up
+       const angle = t * Math.PI * 1.5;  // 270° arc
+       const orbitRadius = 25;
+       const orbitHeight = 8;
+       // Camera-relative position (always behind the camera, far away)
+       xwing.position.set(
+         Math.sin(angle) * orbitRadius,
+         Math.cos(angle * 0.5) * orbitHeight - 2,
+         camera.position.z - 50 - Math.cos(angle) * 15  // oscillate forward/back
+       );
+       // Rotation: pitch toward direction of travel, slight roll
+       const nextAngle = Math.min(1, t + 0.02) * Math.PI * 1.5;
+       const nextX = Math.sin(nextAngle) * orbitRadius;
+       const nextZ = -50 - Math.cos(nextAngle) * 15;
+       const dir = new THREE.Vector3(nextX - xwing.position.x, 0, nextZ - xwing.position.z).normalize();
+       xwing.rotation.z = Math.sin(t * Math.PI * 3) * 0.2;  // subtle roll
+       if (dir.length() > 0) {
+         xwing.rotation.y = Math.atan2(dir.x, -dir.z);
+         xwing.rotation.x = -Math.asin(dir.y) * 0.3;
+       }
+       // Fade in/out at edges
+       const alpha = Math.sin(t * Math.PI) * 0.7 + 0.3;
+       xwing.traverse(child => {
+         if (child.material && child.material.opacity !== undefined) {
+           child.material.opacity = alpha;
+         }
+       });
+     },
+     done: () => {
+       scene.remove(xwing);
+       xwing.traverse(child => {
+         if (child.geometry) child.geometry.dispose();
+         if (child.material) child.material.dispose();
+       });
+       _xwings = _xwings.filter(x => x !== xwing);
+     }
+   });
+  }
+
+  function updateXWings(dt) {
+   // Random spawn during gameplay: ~5% chance per frame during picking/revealing
+   if (!FEAT.xwings || REDUCED) return;
+   if ((G.phase === 'picking' || G.phase === 'revealing') && Math.random() < 0.05 && _xwings.length === 0) {
+     spawnXWingFlyby();
+   }
+  }
+
+
   const CARD_W = 2.08;                          // 20% smaller than the original 2.6 — cards read at a more life-like size and reveal more of the space backdrop
   const CARD_H = CARD_W * (art.H / art.W);      // preserve baked aspect
   // Rounded-rectangle card silhouette so the mesh edge matches the rounded
@@ -1742,31 +1932,58 @@ function resolveStat(stat, pCard, cCard) {
   const _dstLife  = new Float32Array(DUST_MAX);   // seconds remaining; 0 = dead
   const _dstMax   = new Float32Array(DUST_MAX);   // original life (for grow/fade curve)
   const _dstSeed  = new Float32Array(DUST_MAX);   // per-puff base size
+  const _dstNz    = new Float32Array(DUST_MAX);   // per-puff noise/rotation seed (0..1)
   const dustGeo = new THREE.BufferGeometry();
   dustGeo.setAttribute('position', new THREE.BufferAttribute(_dstPos,   3).setUsage(THREE.DynamicDrawUsage));
   dustGeo.setAttribute('aColor',   new THREE.BufferAttribute(_dstCol,   3).setUsage(THREE.DynamicDrawUsage));
   dustGeo.setAttribute('aSize',    new THREE.BufferAttribute(_dstSize,  1).setUsage(THREE.DynamicDrawUsage));
   dustGeo.setAttribute('aAlpha',   new THREE.BufferAttribute(_dstAlpha, 1).setUsage(THREE.DynamicDrawUsage));
+  dustGeo.setAttribute('aSeed',    new THREE.BufferAttribute(_dstNz,    1).setUsage(THREE.DynamicDrawUsage));
   const dustMat = new THREE.ShaderMaterial({
     transparent: true, depthTest: false, depthWrite: false, toneMapped: false,
     blending: THREE.NormalBlending,
-    uniforms: { uDpr: { value: _dpr } },
+    uniforms: { uDpr: { value: _dpr }, uTime: { value: 0 } },
     vertexShader: `
-      attribute vec3 aColor; attribute float aSize; attribute float aAlpha;
-      varying vec3 vCol; varying float vA; uniform float uDpr;
+      attribute vec3 aColor; attribute float aSize; attribute float aAlpha; attribute float aSeed;
+      varying vec3 vCol; varying float vA; varying float vSeed; uniform float uDpr;
       void main(){
-        vCol = aColor; vA = aAlpha;
+        vCol = aColor; vA = aAlpha; vSeed = aSeed;
         vec4 mv = modelViewMatrix * vec4(position, 1.0);
         gl_Position = projectionMatrix * mv;
         gl_PointSize = aSize * uDpr;
       }`,
     fragmentShader: `
-      varying vec3 vCol; varying float vA;
+      precision highp float;
+      varying vec3 vCol; varying float vA; varying float vSeed;
+      uniform float uTime;
+      // value-noise fbm → wispy, torn smoke instead of a clean round puff
+      float hash(vec2 p){ p = fract(p * vec2(123.34, 345.45)); p += dot(p, p + 34.345); return fract(p.x * p.y); }
+      float vnoise(vec2 p){
+        vec2 i = floor(p), f = fract(p);
+        vec2 u = f * f * (3.0 - 2.0 * f);
+        float a = hash(i), b = hash(i + vec2(1.0, 0.0));
+        float c = hash(i + vec2(0.0, 1.0)), d = hash(i + vec2(1.0, 1.0));
+        return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
+      }
+      float fbm(vec2 p){
+        float v = 0.0, a = 0.5;
+        for (int k = 0; k < 4; k++){ v += a * vnoise(p); p = p * 2.02 + 11.7; a *= 0.5; }
+        return v;
+      }
       void main(){
-        // soft, feathered round puff — fuzzy edge, denser core
-        float d = length(gl_PointCoord - 0.5);
-        float m = smoothstep(0.5, 0.06, d);
-        if (m <= 0.001) discard;
+        vec2 pc = gl_PointCoord - 0.5;
+        // slow per-puff swirl so no two read alike and the smoke curls over its life
+        float ang = vSeed * 6.2831 + uTime * 0.35;
+        float ca = cos(ang), sa = sin(ang);
+        pc = mat2(ca, -sa, sa, ca) * pc;
+        float d = length(pc);
+        float env = smoothstep(0.5, 0.0, d);                 // soft round envelope
+        env = pow(env, 1.5);                                  // soften the core so it isn't a solid disc
+        vec2  np  = pc * 4.6 + vec2(vSeed * 23.0, vSeed * 11.0) + uTime * 0.15;
+        float n   = fbm(np);                                  // turbulent density
+        float dens = env * (0.04 + 1.35 * n);                // hard erosion → torn wisps + holes
+        float m = smoothstep(0.16, 0.62, dens);
+        if (m <= 0.002) discard;
         gl_FragColor = vec4(vCol, vA * m);
       }`
   });
@@ -1777,37 +1994,50 @@ function resolveStat(stat, pCard, cCard) {
   // desaturated pale grey / dusty blue-white smoke tones
   const DUST_PALETTE = [0xb9c2cc, 0xa7b4c4, 0xd6dde6, 0x9fb0c6, 0xc7cdd4];
   let _dstNext = 0, _dstAlive = false;
+  let _dstWarpBlend = 0;                          // eased warp handoff for dust fade/drain
   const _dCol = new THREE.Color();
   function dustEmit(pos, backDir, n = 3) {
-    if (_reducedInit) return;
+    if (_reducedInit || !FEAT.smoke || _bgWarpNow > 0.55) return;   // off when toggled off, or once warp is up
     for (let k = 0; k < n; k++) {
       const i = _dstNext; _dstNext = (_dstNext + 1) % DUST_MAX;
-      _dstPos[i*3]   = pos.x + (Math.random() - 0.5) * 0.72;
-      _dstPos[i*3+1] = pos.y + (Math.random() - 0.5) * 0.92;
-      _dstPos[i*3+2] = pos.z + (Math.random() - 0.5) * 0.50;
-      // drift backward (opposite the card's exit) + gentle random spread
-      const sp = 0.5 + Math.random() * 1.1;
-      _dstVel[i*3]   = backDir.x * sp + (Math.random() - 0.5) * 1.45;
-      _dstVel[i*3+1] = backDir.y * sp + (Math.random() - 0.5) * 1.45 + 0.15;
-      _dstVel[i*3+2] = backDir.z * sp + (Math.random() - 0.5) * 0.85 - 0.25;  // trail slightly away from camera
-      const life = 0.7 + Math.random() * 0.5;
+      // tight around the card so the puffs read as one smoke ribbon, not a broadside cloud
+      _dstPos[i*3]   = pos.x + (Math.random() - 0.5) * 0.34;
+      _dstPos[i*3+1] = pos.y + (Math.random() - 0.5) * 0.42;
+      _dstPos[i*3+2] = pos.z + (Math.random() - 0.5) * 0.26;
+      // stream backward (opposite the card's exit) with only gentle broadside curl → a trailing wisp
+      const sp = 0.7 + Math.random() * 1.2;
+      _dstVel[i*3]   = backDir.x * sp + (Math.random() - 0.5) * 0.70;
+      _dstVel[i*3+1] = backDir.y * sp + (Math.random() - 0.5) * 0.70 + 0.12;
+      _dstVel[i*3+2] = backDir.z * sp + (Math.random() - 0.5) * 0.45 - 0.22;  // trail slightly away from camera
+      const life = 0.85 + Math.random() * 0.65;
       _dstLife[i] = life; _dstMax[i] = life;
-      _dstSeed[i] = 24 + Math.random() * 26;
+      _dstSeed[i] = 40 + Math.random() * 42;
+      _dstNz[i]   = Math.random();
       _dCol.setHex(DUST_PALETTE[(Math.random() * DUST_PALETTE.length) | 0]);
       _dstCol[i*3] = _dCol.r; _dstCol[i*3+1] = _dCol.g; _dstCol[i*3+2] = _dCol.b;
       _dstSize[i]  = _dstSeed[i] * 0.55;
       _dstAlpha[i] = 0;
     }
+    dustGeo.attributes.aColor.needsUpdate = true;
+    dustGeo.attributes.aSeed.needsUpdate = true;
     _dstAlive = true;
   }
+  let _dstT = 0;
   function updateDust(dt) {
     if (!_dstAlive) return;
     dt = Math.min(dt, 0.05);
+    _dstT += dt; dustMat.uniforms.uTime.value = _dstT;
+    // Smoothly hand off from smoke trail to warp: as warp rises, smoke fades and
+    // dissipates faster instead of snapping against the warp onset.
+    const warpNow = Math.min(1, Math.max(0, _bgWarpNow));
+    _dstWarpBlend += (warpNow - _dstWarpBlend) * Math.min(1, dt * 10);
+    const warpFade = _dstWarpBlend <= 0.35 ? 1 : Math.max(0, 1 - (_dstWarpBlend - 0.35) / 0.65);
+    const lifeDrain = 1 + _dstWarpBlend * 2.6;
     let any = false;
     for (let i = 0; i < DUST_MAX; i++) {
       if (_dstLife[i] <= 0) { if (_dstAlpha[i] !== 0) _dstAlpha[i] = 0; continue; }
       any = true;
-      _dstLife[i] -= dt;
+      _dstLife[i] -= dt * lifeDrain;
       // air drag so puffs slow and settle (no gravity — space)
       _dstVel[i*3]   *= (1 - 0.95 * dt);
       _dstVel[i*3+1] *= (1 - 0.95 * dt);
@@ -1817,11 +2047,10 @@ function resolveStat(stat, pCard, cCard) {
       _dstPos[i*3+2] += _dstVel[i*3+2] * dt;
       // p: 0→1 over the puff's life; billow (grow) while fading in-then-out
       const p = 1 - Math.max(0, _dstLife[i]) / _dstMax[i];
-      _dstSize[i]  = _dstSeed[i] * (0.5 + p * 1.6);
-      _dstAlpha[i] = Math.sin(Math.min(1, p) * Math.PI) * 0.55;
+      _dstSize[i]  = _dstSeed[i] * (0.55 + p * 1.9);
+      _dstAlpha[i] = Math.sin(Math.min(1, p) * Math.PI) * 0.42 * warpFade;
     }
     dustGeo.attributes.position.needsUpdate = true;
-    dustGeo.attributes.aColor.needsUpdate   = true;
     dustGeo.attributes.aSize.needsUpdate    = true;
     dustGeo.attributes.aAlpha.needsUpdate   = true;
     if (!any) _dstAlive = false;              // all spent → skip work next frame
@@ -2006,10 +2235,19 @@ function resolveStat(stat, pCard, cCard) {
   _rmq.addEventListener('change', (e) => { REDUCED = e.matches; });
   const md = (ms) => REDUCED ? 1 : ms;
 
-  function tween({ dur = 600, ease = easeInOut, update, done }) {
-    const tw = { t0: performance.now(), dur, ease, update, done };
+  function tween({ dur = 600, ease = easeInOut, update, done, tag = null }) {
+    const tw = { t0: performance.now(), dur, ease, update, done, tag };
     tweens.add(tw);
     return tw;
+  }
+  function cancelTweensWithTag(tag) {
+    for (const tw of tweens) {
+      if (tw.tag === tag) {
+        tweens.delete(tw);
+        // fire the done callback so cleanup runs
+        if (tw.done) tw.done();
+      }
+    }
   }
   function stepTweens(now) {
     for (const tw of tweens) {
@@ -2433,19 +2671,62 @@ function resolveStat(stat, pCard, cCard) {
   // vanishing point, so it reads as real distance and grows with correct
   // foreshortening as it flies forward to its slot.
   const ENTRY_MS = 1500, ZOOM_DEPTH = 60.0, DOLLY_BACK = 6.5;
+
+  // --- warp "ship speed" envelope ------------------------------------------
+  // The whole transition is modelled as a spaceship that accelerates from a
+  // standstill up to top speed, cruises there briefly, then decelerates to a
+  // full stop. warpSpeed(t) is that speed profile (0 → 1 → 1 → 0 with eased
+  // shoulders); warpDist(t) is its integral, i.e. the normalized distance the
+  // ship has travelled by time t. The SAME speed value drives the hyperspace
+  // streaks, star drift and moon parallax (all keyed off `w` = _warpHold), and
+  // the distance drives the camera dolly + card approach — so the streaks and
+  // the forward motion accelerate and decelerate together, selling the "inside
+  // a ship" illusion. Because speed starts at exactly 0, the one heavy build
+  // frame (baking + uploading the new card textures) lands while nothing is
+  // moving yet, hiding the hitch that used to read as a blip at warp start.
+  const WARP_AC = 0.28;                 // fraction of the flight spent accelerating
+  const WARP_DC = 0.58;                 // deceleration begins here (cruise between AC..DC)
+  const _smooth01 = (x) => x * x * (3 - 2 * x);          // smoothstep ease 0→1
+  function warpSpeed(t) {
+    if (t <= 0 || t >= 1) return 0;
+    if (t < WARP_AC) return _smooth01(t / WARP_AC);       // accelerate
+    if (t < WARP_DC) return 1;                            // cruise at top speed
+    return _smooth01((1 - t) / (1 - WARP_DC));            // decelerate to a stop
+  }
+  const _WARP_AREA = 0.5 * WARP_AC + (WARP_DC - WARP_AC) + 0.5 * (1 - WARP_DC);
+  function warpDist(t) {                 // normalized distance travelled (∫ speed)
+    if (t <= 0) return 0;
+    if (t >= 1) return 1;
+    let a;
+    if (t < WARP_AC) {
+      const X = t / WARP_AC;
+      a = WARP_AC * (X * X * X - X * X * X * X / 2);
+    } else if (t < WARP_DC) {
+      a = 0.5 * WARP_AC + (t - WARP_AC);
+    } else {
+      const rem = (1 - t) / (1 - WARP_DC);
+      a = 0.5 * WARP_AC + (WARP_DC - WARP_AC)
+        + (1 - WARP_DC) * (0.5 - (rem * rem * rem - rem * rem * rem * rem / 2));
+    }
+    return a / _WARP_AREA;
+  }
+
   function dollyIn() {
     if (REDUCED) { _camDolly = 0; _warpHold = 0; return; }
+    // Cancel any previous dolly tween (from the prior round)
+    cancelTweensWithTag('dolly');
     _camDolly = DOLLY_BACK;
-    _warpHold = 1.0;
+    _warpHold = 0.0;
     tween({
       dur: md(ENTRY_MS),
-      ease: easeOut,
-      update: (e, t) => {
-        _camDolly = DOLLY_BACK * (1 - e);
-        // warp envelope on the LINEAR timeline: near-full for the first ~65% of
-        // the flight (stars streaking hard while cards are small + far), then a
-        // smooth ramp-down so it settles exactly as the cards land at rest.
-        _warpHold = t < 0.65 ? 1.0 : Math.max(0, 1 - (t - 0.65) / 0.35);
+      ease: (x) => x,                    // linear timeline; shape comes from warpDist/warpSpeed
+      tag: 'dolly',
+      update: (_e, t) => {
+        // camera position follows the travelled DISTANCE (accelerate → cruise →
+        // decelerate) so the dolly eases in and out like a real ship.
+        _camDolly = DOLLY_BACK * (1 - warpDist(t));
+        // warp intensity follows SPEED: streaks/stars/moons ramp up then down.
+        _warpHold = warpSpeed(t);
       },
       done: () => { _camDolly = 0; _warpHold = 0; }
     });
@@ -2463,10 +2744,12 @@ function resolveStat(stat, pCard, cCard) {
     cardG.userData.setOpacity(0.0);
     tween({
       dur: md(ENTRY_MS),
-      ease: easeInOut,          // linger far/small → accelerate (warp) → settle at rest
-      update: (e) => {
-        cardG.position.z = (restZ - ZOOM_DEPTH) + ZOOM_DEPTH * e;
-        cardG.userData.setOpacity(Math.min(1, 0.2 + e * 1.7));   // faint distant speck → full
+      ease: (x) => x,           // shape comes from warpDist (same profile as the dolly)
+      tag: 'dolly',
+      update: (_e, t) => {
+        const d = warpDist(t);   // travelled distance: accelerate → cruise → decelerate
+        cardG.position.z = (restZ - ZOOM_DEPTH) + ZOOM_DEPTH * d;
+        cardG.userData.setOpacity(Math.min(1, 0.2 + d * 1.7));   // faint distant speck → full
       },
       done: () => {
         cardG.position.set(rest.x, rest.y, restZ);
@@ -2477,7 +2760,19 @@ function resolveStat(stat, pCard, cCard) {
     });
   }
 
+  // Force the GPU upload for a card's freshly baked textures ahead of time, while
+  // the scene is static (pre-warp). Otherwise the first warp frame pays the upload
+  // cost mid-motion, which reads as a stutter right as the warp kicks in.
+  function warmCardTextures(cardG) {
+    if (!cardG || !renderer.initTexture) return;
+    const f = cardG.userData.front && cardG.userData.front.material.map;
+    const b = cardG.userData.back  && cardG.userData.back.material.map;
+    try { if (f) renderer.initTexture(f); if (b) renderer.initTexture(b); } catch (e) {}
+  }
+
   function spawnRoundCards() {
+    // Cancel any leftover dolly/zoom tweens from the previous round
+    cancelTweensWithTag('dolly');
     disposeCard(playerCard); disposeCard(cpuCard);
     playerCard = makeCard(G.player.hand[0]);
     cpuCard    = makeCard(G.cpu.hand[0]);
@@ -2489,10 +2784,20 @@ function resolveStat(stat, pCard, cCard) {
     playerCard.userData.shadow = makeShadow();
     cpuCard.userData.shadow    = makeShadow();
     tableGroup.add(playerCard, cpuCard);
+    // upload the new card textures to the GPU NOW (scene still static) so the
+    // first warp frame doesn't stall on the upload — smooths the dust→warp handoff
+    warmCardTextures(playerCard);
+    warmCardTextures(cpuCard);
     // fly the camera forward into the pair; cards glide in and the stars streak
     dollyIn();
     zoomInCard(playerCard);
     zoomInCard(cpuCard);
+    // The dispose+bake+upload above is one heavy synchronous frame. Rebase the
+    // frame-loop clock so the stall it introduced isn't billed as a big dt on the
+    // next frame (which would snap the star drift / card float forward). Combined
+    // with the warp speed starting at 0, the transition now begins from a clean,
+    // motionless baseline — no blip.
+    _lastEt = clock.getElapsedTime();
   }
 
   function startRound() {
@@ -2671,6 +2976,15 @@ function resolveStat(stat, pCard, cCard) {
       }
     } else if (e.key === 'r' || e.key === 'R') {
       if (G.phase === 'gameover' || G.phase === 'picking') startMatch();
+    } else if (e.key === 'x' || e.key === 'X') {
+      spawnXWingFlyby();  // manual trigger (ignores random chance)
+    } else if (e.key === '?') {
+      toggleHelp();                                  // show/hide the toggle key list
+    } else if (e.key === 'Escape') {
+      toggleHelp(false);
+    } else {
+      const bind = FEAT_KEYS[e.key.toLowerCase()];   // dev/test feature toggles
+      if (bind) { setFeature(bind.flag); }
     }
   });
 
@@ -2771,6 +3085,13 @@ function resolveStat(stat, pCard, cCard) {
       },
       pinWarp: (v) => { _warpPin = v; },   // freeze star warp strength for screenshots (test hook)
       meteor: () => { spawnMeteor(); },     // force-spawn a shooting star (test hook)
+      feature: (flag, on) => setFeature(flag, on),   // toggle/set a dev feature flag (test hook)
+      features: () => ({ ...FEAT }),                  // read current feature flags (test hook)
+      puff: () => {                          // force a smoke burst in open sky (test hook)
+        const c = new THREE.Vector3(0, 2.6, 1);
+        const back = new THREE.Vector3(0.25, 0.35, 0).normalize();
+        for (let k = 0; k < 8; k++) dustEmit(c, back, 4);
+      },
       orbit: (y, p) => { _orbYawT = y || 0; _orbPitchT = p || 0; },   // drive camera peek deterministically (test hook)
       _cam: () => ({ x: +camera.position.x.toFixed(3), y: +camera.position.y.toFixed(3), z: +camera.position.z.toFixed(3) }),
       _planetZ: () => planets.map(p => +p.position.z.toFixed(2)),   // moon z positions (parallax warp verification)
@@ -2845,6 +3166,16 @@ function resolveStat(stat, pCard, cCard) {
       camera.position.copy(_camTmp);
       camera.lookAt(0, 0, 0);
     }
+    // Lock the galaxy band a constant distance behind the camera so it reads as
+    // an infinitely-far skybox: the warp dolly (camera pulls back ~6.5u) no longer
+    // parallaxes it, which is what made the background "jump" at warp start. At the
+    // rest pose this resolves to its original world position (0, 0, -101), so the
+    // look is unchanged; it simply stops sliding when the camera moves.
+    galaxy.position.set(
+      camera.position.x,
+      camera.position.y - _camBaseY,
+      camera.position.z - _camBaseZ - 95
+    );
     updateFoils(et);
     updateBackSheens(et);
     updateFoilFacing(playerCard);
@@ -2862,6 +3193,7 @@ function resolveStat(stat, pCard, cCard) {
     updateShadow(cpuCard);
     updateWinGlows(et);
     updateDust(dt);
+    updateXWings(dt);
     if (postFx.enabled) {
       _fxPulse = Math.max(0, _fxPulse - dt * 1.1);
       postFx.material.uniforms.uTime.value = et;
