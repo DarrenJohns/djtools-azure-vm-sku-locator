@@ -1527,7 +1527,7 @@ function resolveStat(stat, pCard, cCard) {
      halo bleeding outward into space — the interior stays transparent so the
      card art shows through. One owner per card (userData.winGlow), freed with
      the card in its dispose(). The rim is bright enough to feed the bloom pass. */
-  const WIN_GLOW_M   = 1.05;                 // halo margin beyond the card edge (world units) — large so the aura fully fades before the plane edge
+  const WIN_GLOW_M   = 0.7;                  // halo margin beyond the card edge (world units) — snug: the rim now forms within ~0.2u so this caps the aura without clipping
   const winGlowGeo   = new THREE.PlaneGeometry(CARD_W + WIN_GLOW_M * 2, CARD_H + WIN_GLOW_M * 2);
   const _winGlows    = new Set();            // active materials → shimmer animated each frame
   function makeWinGlow() {
@@ -1559,8 +1559,11 @@ function resolveStat(stat, pCard, cCard) {
           if (uAmt <= 0.001) discard;
           vec2  p = (vUv - 0.5) * uPlane;               // card-space, centred
           float d = sdRoundRect(p, uHalf, uRadius);      // 0 at the card edge
-          float edge  = exp(-abs(d) * 20.0);             // bright thin rim on the edge
-          float outer = d > 0.0 ? exp(-d * 13.2) * 0.38 : 0.0;   // soft halo, outside the edge only — reaches ~half the distance so it hugs the card
+          // Rim is asymmetric: normal falloff toward the card interior, but ~2x
+          // steeper OUTWARD so the bright edge stays crisp while its faint halo
+          // dies quickly instead of bleeding a wide aura into space.
+          float edge  = (d <= 0.0) ? exp(d * 20.0) : exp(-d * 44.0);
+          float outer = d > 0.0 ? exp(-d * 30.0) * 0.12 : 0.0;   // whisper of outer softness, kept very tight
           float inner = exp(-max(-d, 0.0) * 26.0) * 0.22;// faint inward feather
           float shimmer = 0.82 + 0.18 * sin(uTime * 3.0 + d * 8.0);
           // border feather: fade smoothly to zero at the plane rectangle boundary so
@@ -1568,7 +1571,7 @@ function resolveStat(stat, pCard, cCard) {
           float m = min(min(vUv.x, 1.0 - vUv.x), min(vUv.y, 1.0 - vUv.y));
           float win = smoothstep(0.0, 0.14, m);
           float a = clamp((edge + outer + inner) * uAmt * shimmer * win, 0.0, 1.0);
-          if (a <= 0.002) discard;
+          if (a <= 0.004) discard;
           vec3 col = uColor * (1.0 + edge * 0.4);         // warm rim core, not a near-white blowout
           gl_FragColor = vec4(col, a);
         }`
@@ -1763,7 +1766,7 @@ function resolveStat(stat, pCard, cCard) {
                         + texture2D(uTex, uv - o2).rgb
                         + texture2D(uTex, uv + vec2( o2.x, -o2.y)).rgb
                         + texture2D(uTex, uv + vec2(-o2.x,  o2.y)).rgb) * 0.25;
-            float bright = smoothstep(0.62, 0.95, luma);
+            float bright = smoothstep(0.70, 0.98, luma);
             col += mix(inner, outer, 0.55) * bright * amt * 1.2;
           }
           // win flash — a gentle mid-radius wash of the accent colour
