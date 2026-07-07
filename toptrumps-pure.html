@@ -2622,7 +2622,7 @@ function resolveStat(stat, pCard, cCard) {
     if (_orbDrag) {
       const dx = e.clientX - _orbPX, dy = e.clientY - _orbPY;
       _orbPX = e.clientX; _orbPY = e.clientY;
-      _orbYawT   = THREE.MathUtils.clamp(_orbYawT   + dx * ORB_SENS, -ORB_MAX_YAW,   ORB_MAX_YAW);
+      _orbYawT   = THREE.MathUtils.clamp(_orbYawT   - dx * ORB_SENS, -ORB_MAX_YAW,   ORB_MAX_YAW);
       _orbPitchT = THREE.MathUtils.clamp(_orbPitchT - dy * ORB_SENS, -ORB_MAX_PITCH, ORB_MAX_PITCH);
       return;
     }
