@@ -1289,12 +1289,41 @@ function resolveStat(stat, pCard, cCard) {
   // plane during a warp. Bigger moons are pushed farther out on x so, when they
   // come near, they stay in the letterbox gaps and never cover the cards.
   const PLANET_NEAR = -3;   // just behind the card plane (z=0); moons never come in front
+  // Approximate on-screen footprint of a moon: the camera looks down -Z, so a
+  // moon at (x,y,z) projects to ~(x/|z|, y/|z|) with an angular radius ~r/|z|.
+  // Used to keep recycled moons from landing on top of one another (the "merge").
+  function planetFootprint(x, y, z, r) {
+    const az = Math.max(6, Math.abs(z));
+    return { sx: x / az, sy: y / az, sr: r / az };
+  }
   function seedPlanet(p) {
     const r = p.userData.r;
-    const far = -46 - Math.random() * 22;                 // -46 .. -68
-    const side = Math.random() < 0.5 ? -1 : 1;
-    const xMag = 12 + r * 1.7 + Math.random() * 8;        // large moons kept out at the edges
-    p.position.set(side * xMag, (Math.random() * 2 - 1) * 13, far);
+    let px = 0, py = 0, far = -46;
+    // try several random placements; take the first that clears every other moon
+    // on screen so recycled moons never fuse into a single blob. If none of the
+    // tries is fully clear, fall back to the BEST-separated candidate seen (not a
+    // random one) so seeding always terminates without an overlap.
+    let best = null, bestGap = -Infinity;
+    for (let attempt = 0; attempt < 20; attempt++) {
+      const f = -46 - Math.random() * 22;                 // -46 .. -68
+      const side = Math.random() < 0.5 ? -1 : 1;
+      const xMag = 12 + r * 1.7 + Math.random() * 8;      // large moons kept out at the edges
+      const cx = side * xMag, cy = (Math.random() * 2 - 1) * 13;
+      const fp = planetFootprint(cx, cy, f, r);
+      let clearAll = true, minGap = Infinity;
+      for (const q of planets) {
+        if (q === p) continue;
+        const qf = planetFootprint(q.position.x, q.position.y, q.position.z, q.userData.r);
+        const dx = fp.sx - qf.sx, dy = fp.sy - qf.sy;
+        const gap = Math.sqrt(dx * dx + dy * dy) - (fp.sr + qf.sr) * 1.4;
+        minGap = Math.min(minGap, gap);
+        if (gap < 0) clearAll = false;
+      }
+      if (minGap > bestGap) { bestGap = minGap; best = { px: cx, py: cy, far: f }; }
+      if (clearAll) { px = cx; py = cy; far = f; best = null; break; }
+    }
+    if (best) { px = best.px; py = best.py; far = best.far; }
+    p.position.set(px, py, far);
     p.rotation.y = Math.random() * 6.2832;
     p.userData.baseZ = far;
     p.userData.vz = 26 + Math.random() * 10;
