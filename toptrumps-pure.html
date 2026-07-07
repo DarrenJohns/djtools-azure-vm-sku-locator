@@ -156,11 +156,12 @@
   <div id="stat-controls" class="sr-only" role="group" aria-label="Choose a stat to play"></div>
 
   <script type="importmap">
-  { "imports": { "three": "./vendor/three.module.min.js" } }
+  { "imports": { "three": "./vendor/three.module.min.js", "three/addons/loaders/GLTFLoader.js": "./vendor/GLTFLoader.js" } }
   </script>
 
   <script type="module">
   import * as THREE from 'three';
+  import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
   /* ===================================================================== *
    *  HARVESTED — verbatim reusable blocks from toptrumps-webgl.html        *
@@ -1597,57 +1598,56 @@ function resolveStat(stat, pCard, cCard) {
   }
 
   /* ---- X-wing 3D model flyby ----------------------------------------- */
-  let _xwings = [];  // active flybys
+  let _xwings = [];        // active flybys
+  let _xwingProto = null;  // cached loaded GLB scene (cloned per spawn)
+  let _xwingLoading = false;
+  // Preload the vendored X-wing GLB once; clones are cheap thereafter.
+  function preloadXWing() {
+    if (_xwingProto || _xwingLoading) return;
+    _xwingLoading = true;
+    const loader = new GLTFLoader();
+    loader.load('./vendor/models/x-wing.glb', (gltf) => {
+      const model = gltf.scene;
+      // Normalise: centre on origin and scale to a consistent size so the
+      // flyby math (below) is model-independent.
+      const box = new THREE.Box3().setFromObject(model);
+      const size = new THREE.Vector3(); box.getSize(size);
+      const centre = new THREE.Vector3(); box.getCenter(centre);
+      model.position.sub(centre);                 // recentre on origin
+      const maxDim = Math.max(size.x, size.y, size.z) || 1;
+      const norm = 6 / maxDim;                    // target ~6 world units long
+      const wrap = new THREE.Group();             // wrapper carries scale + centring
+      wrap.add(model);
+      wrap.scale.setScalar(norm);
+      _xwingProto = wrap;
+      _xwingLoading = false;
+    }, undefined, (err) => {
+      console.warn('X-wing GLB failed to load:', err);
+      _xwingLoading = false;
+    });
+  }
+  preloadXWing();
+  // Clone the cached prototype into a fresh flyby instance. Materials are
+  // cloned so per-flyby opacity fades don't mutate the shared prototype.
   function makeXWing() {
-   // Procedural X-wing using simple geometries: fuselage (box) + wings (2 boxes) + canopy (cone)
-   const group = new THREE.Group();
-   // Central fuselage (silver)
-   const fuseGeom = new THREE.BoxGeometry(0.15, 0.08, 0.6);
-   const fuseMat = new THREE.MeshStandardMaterial({
-     color: 0xcccccc, roughness: 0.3, metalness: 0.7, emissive: 0x0000ff, emissiveIntensity: 0.15
-   });
-   const fuse = new THREE.Mesh(fuseGeom, fuseMat);
-   group.add(fuse);
-   // Two wings (left/right pairs, blue tint)
-   const wingGeom = new THREE.BoxGeometry(0.05, 0.06, 0.4);
-   const wingMat = new THREE.MeshStandardMaterial({
-     color: 0x4488ff, roughness: 0.4, metalness: 0.6, emissive: 0x0000aa, emissiveIntensity: 0.2
-   });
-   const wingL = new THREE.Mesh(wingGeom, wingMat);
-   wingL.position.set(-0.18, 0, 0);
-   group.add(wingL);
-   const wingR = new THREE.Mesh(wingGeom, wingMat);
-   wingR.position.set(0.18, 0, 0);
-   group.add(wingR);
-   // Canopy (cone, translucent blue)
-   const canopyGeom = new THREE.ConeGeometry(0.08, 0.25, 8);
-   const canopyMat = new THREE.MeshStandardMaterial({
-     color: 0x88ccff, roughness: 0.2, metalness: 0.3, transparent: true, opacity: 0.6,
-     emissive: 0x0066ff, emissiveIntensity: 0.4
-   });
-   const canopy = new THREE.Mesh(canopyGeom, canopyMat);
-   canopy.position.z = 0.15;
-   canopy.rotation.x = Math.PI / 2;
-   group.add(canopy);
-   // Engine glow (subtle aura behind fuselage)
-   const glowGeom = new THREE.SphereGeometry(0.15, 8, 8);
-   const glowMat = new THREE.MeshStandardMaterial({
-     color: 0x0088ff, roughness: 1, emissive: 0x00aaff, emissiveIntensity: 0.8,
-     transparent: true, opacity: 0.5
-   });
-   const glow = new THREE.Mesh(glowGeom, glowMat);
-   glow.position.z = -0.25;
-   glow.scale.set(1.2, 0.8, 0.6);
-   group.add(glow);
-   group.scale.set(1.5, 1.5, 1.5);  // scale up for visibility
-   group.renderOrder = 5;  // in front of background, behind cards
-   return group;
+    if (!_xwingProto) return null;               // not loaded yet — skip this spawn
+    const inst = _xwingProto.clone(true);
+    inst.traverse(child => {
+      if (child.isMesh && child.material) {
+        child.material = Array.isArray(child.material)
+          ? child.material.map(m => { const c = m.clone(); c.transparent = true; return c; })
+          : (() => { const c = child.material.clone(); c.transparent = true; return c; })();
+      }
+    });
+    inst.renderOrder = 5;                         // in front of background, behind cards
+    return inst;
   }
 
   function spawnXWingFlyby() {
    if (!FEAT.xwings || REDUCED) return;
    if (_xwings.length > 1) return;  // max 2 concurrent flybys
    const xwing = makeXWing();
+   if (!xwing) return;              // model not loaded yet
    scene.add(xwing);
    _xwings.push(xwing);
    // Orbital trajectory: camera-relative so it stays in the background
@@ -1687,9 +1687,13 @@ function resolveStat(stat, pCard, cCard) {
      },
      done: () => {
        scene.remove(xwing);
+       // Only dispose the per-instance CLONED materials; geometry is shared
+       // with the cached prototype (clone() reuses geometry) — never dispose it.
        xwing.traverse(child => {
-         if (child.geometry) child.geometry.dispose();
-         if (child.material) child.material.dispose();
+         if (child.material) {
+           if (Array.isArray(child.material)) child.material.forEach(m => m.dispose());
+           else child.material.dispose();
+         }
        });
        _xwings = _xwings.filter(x => x !== xwing);
      }
@@ -3085,6 +3089,15 @@ function resolveStat(stat, pCard, cCard) {
       },
       pinWarp: (v) => { _warpPin = v; },   // freeze star warp strength for screenshots (test hook)
       meteor: () => { spawnMeteor(); },     // force-spawn a shooting star (test hook)
+      xwing: () => { spawnXWingFlyby(); },  // force-spawn an X-wing flyby (test hook)
+      xwingStatic: (x, y, z, ry) => {       // place a static X-wing for inspection
+        const m = makeXWing(); if (!m) return false;
+        m.position.set(x || 0, y || 0, (z == null ? -18 : z));
+        m.rotation.set(0, (ry == null ? Math.PI : ry), 0);
+        m.scale.multiplyScalar(2);          // enlarge for clear inspection
+        scene.add(m); return true;
+      },
+      xwingReady: () => !!_xwingProto,      // is the GLB loaded yet?
       feature: (flag, on) => setFeature(flag, on),   // toggle/set a dev feature flag (test hook)
       features: () => ({ ...FEAT }),                  // read current feature flags (test hook)
       puff: () => {                          // force a smoke burst in open sky (test hook)
