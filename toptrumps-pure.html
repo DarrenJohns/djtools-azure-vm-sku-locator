@@ -2121,6 +2121,15 @@ function resolveStat(stat, pCard, cCard) {
   // camera dolly ("forward flight") state — see dollyIn()
   let _camDolly = 0, _warpHold = 0, _camBaseY = 0.15, _camBaseZ = 8.4, _warpPin = null;
 
+  // user camera peek: drag the background to orbit slightly around the scene
+  // centre; release springs back to the centred rest pose. `*T` are the drag
+  // targets, the bare vars are the eased values applied each frame.
+  let _orbYaw = 0, _orbPitch = 0, _orbYawT = 0, _orbPitchT = 0;
+  let _orbDrag = false, _orbPX = 0, _orbPY = 0, _orbId = null;
+  const ORB_MAX_YAW = 0.26, ORB_MAX_PITCH = 0.16, ORB_SENS = 0.0024;   // ~15°/~9°, rad per px
+  const _AXIS_Y = new THREE.Vector3(0, 1, 0), _AXIS_X = new THREE.Vector3(1, 0, 0);
+  const _camTmp = new THREE.Vector3();                                  // reused — no per-frame alloc
+
   let playerCard = null, cpuCard = null;
 
   /* ---- soft contact shadow (Phase 4) ---------------------------------
@@ -2610,16 +2619,36 @@ function resolveStat(stat, pCard, cCard) {
   }
 
   canvas.addEventListener('pointermove', (e) => {
+    if (_orbDrag) {
+      const dx = e.clientX - _orbPX, dy = e.clientY - _orbPY;
+      _orbPX = e.clientX; _orbPY = e.clientY;
+      _orbYawT   = THREE.MathUtils.clamp(_orbYawT   + dx * ORB_SENS, -ORB_MAX_YAW,   ORB_MAX_YAW);
+      _orbPitchT = THREE.MathUtils.clamp(_orbPitchT - dy * ORB_SENS, -ORB_MAX_PITCH, ORB_MAX_PITCH);
+      return;
+    }
     if (!canPick()) { canvas.style.cursor = 'default'; return; }
     const idx = rowFromEvent(e);
     if (idx >= 0) { showHover(playerCard, idx); canvas.style.cursor = 'pointer'; }
     else          { clearHover(playerCard);     canvas.style.cursor = 'default'; }
   });
-  canvas.addEventListener('pointerleave', () => { if (playerCard) clearHover(playerCard); canvas.style.cursor = 'default'; });
+  canvas.addEventListener('pointerleave', () => { if (playerCard) clearHover(playerCard); if (!_orbDrag) canvas.style.cursor = 'default'; });
   canvas.addEventListener('pointerdown', (e) => {
     const idx = rowFromEvent(e);
-    if (idx >= 0) { clearHover(playerCard); playerPicksStat(STATS[idx].key); }
+    if (idx >= 0) { clearHover(playerCard); playerPicksStat(STATS[idx].key); return; }
+    // background press → start a camera peek drag (disabled under reduced motion)
+    if (REDUCED) return;
+    _orbDrag = true; _orbPX = e.clientX; _orbPY = e.clientY; _orbId = e.pointerId;
+    try { canvas.setPointerCapture(e.pointerId); } catch {}
+    canvas.style.cursor = 'grabbing';
   });
+  function _endOrbit() {
+    if (!_orbDrag) return;
+    _orbDrag = false; _orbYawT = 0; _orbPitchT = 0;   // spring back to centre
+    try { if (_orbId != null) canvas.releasePointerCapture(_orbId); } catch {}
+    _orbId = null; canvas.style.cursor = 'default';
+  }
+  canvas.addEventListener('pointerup', _endOrbit);
+  canvas.addEventListener('pointercancel', _endOrbit);
 
   /* ---- Phase 3: accessible stat controls (one-way mirror of G, G2/G5) --
      Six always-present focusable buttons; labels track the player's current
@@ -2669,6 +2698,8 @@ function resolveStat(stat, pCard, cCard) {
         return +Math.abs(top.y - bot.y).toFixed(4);
       },
       pinWarp: (v) => { _warpPin = v; },   // freeze star warp strength for screenshots (test hook)
+      orbit: (y, p) => { _orbYawT = y || 0; _orbPitchT = p || 0; },   // drive camera peek deterministically (test hook)
+      _cam: () => ({ x: +camera.position.x.toFixed(3), y: +camera.position.y.toFixed(3), z: +camera.position.z.toFixed(3) }),
       _planetZ: () => planets.map(p => +p.position.z.toFixed(2)),   // moon z positions (parallax warp verification)
       paused: () => !!_continueCleanup,    // true while the Continue pause is waiting (test hook)
       cont: () => { hideContinue(); },     // advance past the Continue pause (test hook)
@@ -2727,10 +2758,18 @@ function resolveStat(stat, pCard, cCard) {
     const et = clock.getElapsedTime();
     const dt = Math.min(0.05, et - _lastEt); _lastEt = et;
     updateBackdrop(et, dt);
-    // forward-flight dolly: offset the camera back along z and ease to rest so
-    // the whole scene (cards + planets + stars) appears to rush toward the view
-    if (_camDolly > 0.0005) {
-      camera.position.set(0, _camBaseY, _camBaseZ + _camDolly);
+    // forward-flight dolly + user camera peek: offset the camera back along z
+    // (warp) and/or orbit it slightly around the scene centre, then re-aim at the
+    // centre. Orbit angles ease toward their drag target, or back to 0 on release.
+    const _ok = 1 - Math.exp(-dt * 8);
+    _orbYaw   += (_orbYawT   - _orbYaw)   * _ok;
+    _orbPitch += (_orbPitchT - _orbPitch) * _ok;
+    const _orbiting = Math.abs(_orbYaw) > 1e-4 || Math.abs(_orbPitch) > 1e-4;
+    if (_camDolly > 0.0005 || _orbiting) {
+      _camTmp.set(0, _camBaseY, _camBaseZ + _camDolly)   // straight-on rest pose (dolly-aware)
+             .applyAxisAngle(_AXIS_Y, _orbYaw)           // yaw around the centre
+             .applyAxisAngle(_AXIS_X, _orbPitch);        // pitch around the centre
+      camera.position.copy(_camTmp);
       camera.lookAt(0, 0, 0);
     }
     updateFoils(et);
