@@ -1530,9 +1530,9 @@ function resolveStat(stat, pCard, cCard) {
           if (uAmt <= 0.001) discard;
           vec2  p = (vUv - 0.5) * uPlane;               // card-space, centred
           float d = sdRoundRect(p, uHalf, uRadius);      // 0 at the card edge
-          float edge  = exp(-abs(d) * 18.0);             // bright thin rim on the edge
-          float outer = d > 0.0 ? exp(-d * 4.2) * 0.6 : 0.0;   // soft halo, outside the edge only
-          float inner = exp(-max(-d, 0.0) * 26.0) * 0.30;// faint inward feather
+          float edge  = exp(-abs(d) * 20.0);             // bright thin rim on the edge
+          float outer = d > 0.0 ? exp(-d * 6.6) * 0.38 : 0.0;   // soft halo, outside the edge only — tighter + dimmer so it hugs the card
+          float inner = exp(-max(-d, 0.0) * 26.0) * 0.22;// faint inward feather
           float shimmer = 0.82 + 0.18 * sin(uTime * 3.0 + d * 8.0);
           // border feather: fade smoothly to zero at the plane rectangle boundary so
           // the aura never terminates on a hard edge, whatever residual remains
@@ -1540,7 +1540,7 @@ function resolveStat(stat, pCard, cCard) {
           float win = smoothstep(0.0, 0.14, m);
           float a = clamp((edge + outer + inner) * uAmt * shimmer * win, 0.0, 1.0);
           if (a <= 0.002) discard;
-          vec3 col = uColor * (1.0 + edge * 0.6);         // near-white hot rim core
+          vec3 col = uColor * (1.0 + edge * 0.4);         // warm rim core, not a near-white blowout
           gl_FragColor = vec4(col, a);
         }`
     });
@@ -2413,7 +2413,7 @@ function resolveStat(stat, pCard, cCard) {
       announce(`${meta.label}: you ${fmt(pv)}, CPU ${fmt(cv)}. ${youWord}.`);
       // showcase the winning card: light its edge up with a glowing rim halo
       const winG = winner === 'player' ? playerCard : cpuCard;
-      showWinGlow(winG, HL.win, winner === 'player' ? 1.0 : 0.85);
+      showWinGlow(winG, HL.win, winner === 'player' ? 0.66 : 0.56);
       globeBurst(winner === 'player' ? 5 : 3);
       fxKick(winner === 'player' ? 0.7 : 0.45);
     }
@@ -2486,7 +2486,7 @@ function resolveStat(stat, pCard, cCard) {
       : `CPU wins the match. Press R to play again.`);
     if (youWon) {
       // hold a strong victory glow on the surviving player card + globe warp flourish
-      showWinGlow(playerCard, HL.win, 1.25);
+      showWinGlow(playerCard, HL.win, 0.82);
       globeBurst(16);
       fxKick(1.3);
     }
