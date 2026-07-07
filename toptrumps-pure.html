@@ -1266,7 +1266,7 @@ function resolveStat(stat, pCard, cCard) {
       new THREE.MeshStandardMaterial({
         map: _moonMap, color,                       // greyscale photo × palette tint
         bumpMap: _moonMap, bumpScale: r * 0.14,      // real crater relief from the photo
-        emissive, emissiveMap: _moonMap, emissiveIntensity: 0.3,  // self-glow lifts the dark limb so moons read clearly
+        emissive, emissiveMap: _moonMap, emissiveIntensity: 0.45,  // self-glow lifts the dark limb so moons read clearly
         roughness: 1.0, metalness: 0.0
       })
     );
@@ -1351,7 +1351,7 @@ function resolveStat(stat, pCard, cCard) {
   const galaxy = new THREE.Mesh(
     new THREE.PlaneGeometry(220, 148),
     new THREE.MeshBasicMaterial({
-      map: _galaxyMap, color: 0x555566,       // colour multiplier dims the photo → "very dim"
+      map: _galaxyMap, color: 0x8a8aa0,       // colour multiplier dims the photo → brighter far-distance galaxy band
       transparent: false, depthTest: false, depthWrite: false, toneMapped: false
     })
   );
