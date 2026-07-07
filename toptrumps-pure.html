@@ -1357,7 +1357,7 @@ function resolveStat(stat, pCard, cCard) {
 
 
   /* ---- card geometry (baked art aspect: W/H) -------------------------- */
-  const CARD_W = 2.6;
+  const CARD_W = 2.08;                          // 20% smaller than the original 2.6 — cards read at a more life-like size and reveal more of the space backdrop
   const CARD_H = CARD_W * (art.H / art.W);      // preserve baked aspect
   // Rounded-rectangle card silhouette so the mesh edge matches the rounded
   // corners painted into the baked art (a plain PlaneGeometry left square
@@ -2005,8 +2005,12 @@ function resolveStat(stat, pCard, cCard) {
      perspective this makes the near card project LARGER and reach further
      toward the viewport edge than a flat measure predicts, so the vertical fit
      needs extra headroom. We add a recline-aware fudge + generous margins. */
-  const FIT_MARGIN_H = 1.18;                        // vertical breathing room
-  const FIT_MARGIN_W = 1.14;                        // horizontal breathing room
+  // Margins are widened (×1.25) to offset the 20%-smaller cards: fitCamera frames
+  // to the card span, so without this the camera would just dolly closer and cancel
+  // the size reduction. Holding the distance keeps the cards genuinely smaller in
+  // frame, showing off more of the background.
+  const FIT_MARGIN_H = 1.48;                        // vertical breathing room
+  const FIT_MARGIN_W = 1.43;                        // horizontal breathing room
   function fitCamera() {
     const aspect = camera.aspect;
     const half = THREE.MathUtils.degToRad(camera.fov) / 2;
