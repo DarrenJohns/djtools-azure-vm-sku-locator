@@ -1639,7 +1639,10 @@ function resolveStat(stat, pCard, cCard) {
           : (() => { const c = child.material.clone(); c.transparent = true; return c; })();
       }
     });
-    inst.renderOrder = 5;                         // in front of background, behind cards
+    inst.renderOrder = 0;                         // let the depth buffer decide vs the cards
+                                                  // (renderOrder 0 == cards; both write depth,
+                                                  // so it passes BEHIND cards when farther and
+                                                  // in FRONT when nearer, instead of always on top)
     return inst;
   }
 
@@ -1648,37 +1651,75 @@ function resolveStat(stat, pCard, cCard) {
    if (_xwings.length > 1) return;  // max 2 concurrent flybys
    const xwing = makeXWing();
    if (!xwing) return;              // model not loaded yet
+   xwing.scale.multiplyScalar(0.85 + Math.random() * 0.5);  // size variety
    scene.add(xwing);
    _xwings.push(xwing);
-   // Orbital trajectory: camera-relative so it stays in the background
-   const duration = 4000;  // 4 second flight
+
+   // "Approach run": start far in front of the camera (deep -Z, appears tiny)
+   // and fly toward the viewer, sweeping past on one side so each pass crosses
+   // the frame on its own diagonal. A quadratic Bezier gives a gentle curve.
+   const camZ = camera.position.z;                 // ~8.4 at rest, further back during warp
+   const startZ = -68 - Math.random() * 22;        // distant, well in front of the viewer
+   const endZ   = camZ + 7 + Math.random() * 6;    // flies past the camera (fully faded by then — see alpha)
+
+   // Random approach quadrant. The exit offset differs from the entry so the
+   // craft slides diagonally across the view as it nears and passes.
+   const ang    = Math.random() * Math.PI * 2;
+   const startR = 5 + Math.random() * 9;
+   const sx = Math.cos(ang) * startR;
+   const sy = Math.sin(ang) * startR * 0.5 + (Math.random() * 4 - 2);
+   const endAng = ang + (Math.random() * 1.6 - 0.8);
+   const endR   = 11 + Math.random() * 12;         // pushed wider so it sails off-frame
+   const ex = Math.cos(endAng) * endR;
+   const ey = Math.sin(endAng) * endR * 0.5 + (Math.random() * 5 - 1.5);
+   const arcY = Math.random() * 4 - 2;             // vertical bow on the path
+
+   const p0 = new THREE.Vector3(sx, sy, startZ);
+   const p2 = new THREE.Vector3(ex, ey, endZ);
+   const p1 = new THREE.Vector3((sx + ex) / 2, (sy + ey) / 2 + arcY, (startZ + endZ) / 2);
+   const _pos = new THREE.Vector3(), _nextPos = new THREE.Vector3(), _dir = new THREE.Vector3();
+   // reusable basis temporaries so the nose stays locked to the flight path
+   const _zA = new THREE.Vector3(), _xA = new THREE.Vector3(), _yA = new THREE.Vector3();
+   const _up = new THREE.Vector3(0, 1, 0), _basis = new THREE.Matrix4();
+   const _qRoll = new THREE.Quaternion(), _ZAXIS = new THREE.Vector3(0, 0, 1);
+   const bezier = (out, t) => {                    // quadratic Bezier p0→p1→p2
+     const u = 1 - t;
+     return out.set(0, 0, 0)
+       .addScaledVector(p0, u * u)
+       .addScaledVector(p1, 2 * u * t)
+       .addScaledVector(p2, t * t);
+   };
+
+   const duration = 3400 + Math.random() * 1400;   // ~3.4–4.8s run
+   const bankPhase = Math.random() * Math.PI * 2;
+   const rollDir = Math.random() < 0.5 ? 1 : -1;   // vary which way it rolls
    tween({
      dur: md(duration),
      ease: (x) => x,
      tag: 'xwing',
      update: (e, t) => {
-       // Parametric elliptical orbit around camera: sine wave left/right, cosine up
-       const angle = t * Math.PI * 1.5;  // 270° arc
-       const orbitRadius = 25;
-       const orbitHeight = 8;
-       // Camera-relative position (always behind the camera, far away)
-       xwing.position.set(
-         Math.sin(angle) * orbitRadius,
-         Math.cos(angle * 0.5) * orbitHeight - 2,
-         camera.position.z - 50 - Math.cos(angle) * 15  // oscillate forward/back
-       );
-       // Rotation: pitch toward direction of travel, slight roll
-       const nextAngle = Math.min(1, t + 0.02) * Math.PI * 1.5;
-       const nextX = Math.sin(nextAngle) * orbitRadius;
-       const nextZ = -50 - Math.cos(nextAngle) * 15;
-       const dir = new THREE.Vector3(nextX - xwing.position.x, 0, nextZ - xwing.position.z).normalize();
-       xwing.rotation.z = Math.sin(t * Math.PI * 3) * 0.2;  // subtle roll
-       if (dir.length() > 0) {
-         xwing.rotation.y = Math.atan2(dir.x, -dir.z);
-         xwing.rotation.x = -Math.asin(dir.y) * 0.3;
+       bezier(_pos, t);
+       xwing.position.copy(_pos);
+       // Heading: build an orientation whose forward (nose, local -Z) points
+       // EXACTLY along the curve's velocity vector, so the craft never crabs
+       // sideways. Bank is then applied purely as a roll about the fuselage
+       // axis, which by construction can't introduce any sideslip.
+       bezier(_nextPos, Math.min(1, t + 0.02));
+       _dir.subVectors(_nextPos, _pos);
+       if (_dir.lengthSq() > 1e-6) {
+         _dir.normalize();
+         _zA.copy(_dir).multiplyScalar(-1);            // local +Z opposes the nose
+         _xA.crossVectors(_up, _zA);
+         if (_xA.lengthSq() < 1e-6) _xA.set(1, 0, 0);  // guard: near-vertical travel
+         _xA.normalize();
+         _yA.crossVectors(_zA, _xA).normalize();
+         _basis.makeBasis(_xA, _yA, _zA);
+         xwing.quaternion.setFromRotationMatrix(_basis);
+         _qRoll.setFromAxisAngle(_ZAXIS, Math.sin(t * Math.PI * 2 + bankPhase) * 0.2);
+         xwing.quaternion.multiply(_qRoll);            // bank about the fuselage axis only
        }
-       // Fade in/out at edges
-       const alpha = Math.sin(t * Math.PI) * 0.7 + 0.3;
+       // Fade in from the distance, hold, fade out as it slips past the camera.
+       const alpha = Math.min(1, t / 0.14, (1 - t) / 0.18);
        xwing.traverse(child => {
          if (child.material && child.material.opacity !== undefined) {
            child.material.opacity = alpha;
