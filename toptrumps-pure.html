@@ -1652,31 +1652,45 @@ function resolveStat(stat, pCard, cCard) {
    const xwing = makeXWing();
    if (!xwing) return;              // model not loaded yet
    xwing.scale.multiplyScalar(0.85 + Math.random() * 0.5);  // size variety
-   scene.add(xwing);
-   _xwings.push(xwing);
 
    // "Approach run": start far in front of the camera (deep -Z, appears tiny)
-   // and fly toward the viewer, sweeping past on one side so each pass crosses
-   // the frame on its own diagonal. A quadratic Bezier gives a gentle curve.
+   // and fly toward the viewer, mostly along the depth axis so the nose stays
+   // pointed at the lens (reads as flying straight at you, not across-frame).
+   // A quadratic Bezier gives a gentle curve. Lateral spread is deliberately
+   // small vs the depth travelled so velocity stays dominated by the toward-
+   // camera Z component — the nose then points ~at the viewer the whole run.
    const camZ = camera.position.z;                 // ~8.4 at rest, further back during warp
    const startZ = -68 - Math.random() * 22;        // distant, well in front of the viewer
    const endZ   = camZ + 7 + Math.random() * 6;    // flies past the camera (fully faded by then — see alpha)
 
-   // Random approach quadrant. The exit offset differs from the entry so the
-   // craft slides diagonally across the view as it nears and passes.
+   // Gentle approach quadrant. Keep the entry offset modest and the exit only
+   // slightly wider so it drifts a touch to one side as it passes, without ever
+   // swinging broadside to the camera.
    const ang    = Math.random() * Math.PI * 2;
-   const startR = 5 + Math.random() * 9;
+   const startR = 2 + Math.random() * 3;           // small entry offset (was 5–14)
    const sx = Math.cos(ang) * startR;
-   const sy = Math.sin(ang) * startR * 0.5 + (Math.random() * 4 - 2);
-   const endAng = ang + (Math.random() * 1.6 - 0.8);
-   const endR   = 11 + Math.random() * 12;         // pushed wider so it sails off-frame
+   const sy = Math.sin(ang) * startR * 0.5 + (Math.random() * 1.5 - 0.75);
+   const endAng = ang + (Math.random() * 0.7 - 0.35);
+   const endR   = 4 + Math.random() * 4;           // modest exit offset (was 11–23)
    const ex = Math.cos(endAng) * endR;
-   const ey = Math.sin(endAng) * endR * 0.5 + (Math.random() * 5 - 1.5);
-   const arcY = Math.random() * 4 - 2;             // vertical bow on the path
+   const ey = Math.sin(endAng) * endR * 0.5 + (Math.random() * 2 - 0.75);
+   const arcY = Math.random() * 1.6 - 0.8;         // subtle vertical bow on the path
 
    const p0 = new THREE.Vector3(sx, sy, startZ);
    const p2 = new THREE.Vector3(ex, ey, endZ);
    const p1 = new THREE.Vector3((sx + ex) / 2, (sy + ey) / 2 + arcY, (startZ + endZ) / 2);
+
+   // Seat the craft at its true start pose with opacity 0 BEFORE it enters the
+   // scene, so the first render can never flash it at the origin (which sits on
+   // the card plane) — that origin flash was the 1–2 ms blip in front of cards.
+   xwing.position.copy(p0);
+   xwing.traverse(child => {
+     if (child.material && child.material.opacity !== undefined) {
+       child.material.opacity = 0;
+     }
+   });
+   scene.add(xwing);
+   _xwings.push(xwing);
    const _pos = new THREE.Vector3(), _nextPos = new THREE.Vector3(), _dir = new THREE.Vector3();
    // reusable basis temporaries so the nose stays locked to the flight path
    const _zA = new THREE.Vector3(), _xA = new THREE.Vector3(), _yA = new THREE.Vector3();
