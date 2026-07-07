@@ -1229,7 +1229,7 @@ function resolveStat(stat, pCard, cCard) {
   starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
   starGeo.setAttribute('aSize',    new THREE.BufferAttribute(starSz, 1));
   const starMat = new THREE.ShaderMaterial({
-    transparent: true, depthWrite: false, toneMapped: false, blending: THREE.AdditiveBlending,
+    transparent: false, depthWrite: false, depthTest: false, toneMapped: false, blending: THREE.AdditiveBlending,
     uniforms: { uWarp: { value: 0 }, uDpr: { value: _dpr } },
     vertexShader: `attribute float aSize; uniform float uWarp; uniform float uDpr; varying float vA;
       void main(){ vec4 mv = modelViewMatrix * vec4(position,1.0);
@@ -1242,7 +1242,9 @@ function resolveStat(stat, pCard, cCard) {
       if(d>0.5) discard; float a=smoothstep(0.5,0.0,d)*vA; gl_FragColor=vec4(vec3(0.82,0.9,1.0), min(1.0,a)); }`
   });
   const stars = new THREE.Points(starGeo, starMat);
-  space.add(stars);
+  stars.frustumCulled = false;
+  stars.renderOrder = -10;               // pure background layer: draws first, writes no depth,
+  space.add(stars);                      // so the opaque moons always paint in front of the stars
 
   // --- planets: lit sphere geometry, Azure-tinted lunar photo. Bare moons —
   // no atmosphere halo, no ring — kept behind the cards in the letterbox gaps
@@ -1264,7 +1266,7 @@ function resolveStat(stat, pCard, cCard) {
       new THREE.MeshStandardMaterial({
         map: _moonMap, color,                       // greyscale photo × palette tint
         bumpMap: _moonMap, bumpScale: r * 0.14,      // real crater relief from the photo
-        emissive, emissiveMap: _moonMap, emissiveIntensity: 0.08,  // faint self-glow so dark limb isn't pure black
+        emissive, emissiveMap: _moonMap, emissiveIntensity: 0.3,  // self-glow lifts the dark limb so moons read clearly
         roughness: 1.0, metalness: 0.0
       })
     );
@@ -1279,10 +1281,10 @@ function resolveStat(stat, pCard, cCard) {
     planets.push(mesh);
     return mesh;
   }
-  makePlanet({ r: 6.0, color: 0x9fbfe6, emissive: 0x1a3358, x: -22, y: 3.0,  z: -42, spin: 0.05 });
-  makePlanet({ r: 3.2, color: 0x8fd0ec, emissive: 0x17435c, x:  22, y: -4.0, z: -38, spin: 0.09 });
-  makePlanet({ r: 1.8, color: 0xe0b988, emissive: 0x4a2e14, x:   1, y: 12.0, z: -34, spin: 0.13 });
-  makePlanet({ r: 1.1, color: 0xd2e0f2, emissive: 0x2a3f57, x:  17, y: -9.0, z: -30, spin: 0.16 });
+  makePlanet({ r: 6.0, color: 0xc4d8f4, emissive: 0x2c4f80, x: -22, y: 3.0,  z: -42, spin: 0.05 });
+  makePlanet({ r: 3.2, color: 0xbfe4f5, emissive: 0x286a8c, x:  22, y: -4.0, z: -38, spin: 0.09 });
+  makePlanet({ r: 1.8, color: 0xf1d3a6, emissive: 0x6e4a24, x:   1, y: 12.0, z: -34, spin: 0.13 });
+  makePlanet({ r: 1.1, color: 0xe6eefb, emissive: 0x44607f, x:  17, y: -9.0, z: -30, spin: 0.16 });
   // recycle a moon back to the far distance once it has streamed past the play
   // plane during a warp. Bigger moons are pushed farther out on x so, when they
   // come near, they stay in the letterbox gaps and never cover the cards.
@@ -1307,6 +1309,26 @@ function resolveStat(stat, pCard, cCard) {
   }
   makeNebula(0x2848a0, -14, -6, -50, 60, 0.18);
   makeNebula(0x5b2f8a,  16,  9, -55, 66, 0.14);
+
+  // --- Milky Way: a single large unlit plane at the VERY back of the space
+  // group (behind the streaming starfield), dimmed via a colour multiplier so it
+  // reads as a faint far-distance galaxy band. transparent:false + renderOrder
+  // -20 puts it first in the draw list (a pure background paint), and depth
+  // test/write are off so it never occludes the stars/moons in front of it. The
+  // image is a committed local asset (no CDN). */
+  const _galaxyMap = new THREE.TextureLoader().load('./assets/milky-way-galaxy.jpg');
+  _galaxyMap.colorSpace = THREE.SRGBColorSpace;
+  _galaxyMap.anisotropy = 8;
+  const galaxy = new THREE.Mesh(
+    new THREE.PlaneGeometry(220, 148),
+    new THREE.MeshBasicMaterial({
+      map: _galaxyMap, color: 0x555566,       // colour multiplier dims the photo → "very dim"
+      transparent: false, depthTest: false, depthWrite: false, toneMapped: false
+    })
+  );
+  galaxy.position.set(0, 0, -95);             // behind STAR_FAR (-82); world ≈ -101, inside camera.far
+  galaxy.renderOrder = -20;                   // drawn before the stars (-10) — the farthest layer
+  space.add(galaxy);
 
   function updateBackdrop(_t, dt) {
     const rm = REDUCED;
