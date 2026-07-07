@@ -1290,6 +1290,77 @@ function resolveStat(stat, pCard, cCard) {
   streaks.renderOrder = -9;              // in front of the star points (-10), behind the moons
   space.add(streaks);
 
+  // --- shooting stars: a few meteors that occasionally streak across the idle
+  //     background while the game waits for input. A pooled LineSegments layer
+  //     (head + tail per meteor); each is spawned on a random timer, flies a
+  //     short arc, and fades via a life envelope. Spawns pause during a warp so
+  //     the hyperspace streaks own that moment, and under reduced motion. ---
+  const MET_MAX = 3;
+  const metGeo = new THREE.BufferGeometry();
+  const metPos = new Float32Array(MET_MAX * 2 * 3);   // tail + head per meteor
+  const metAlpha = new Float32Array(MET_MAX * 2);     // per-vertex brightness
+  metGeo.setAttribute('position', new THREE.BufferAttribute(metPos, 3));
+  metGeo.setAttribute('aAlpha',   new THREE.BufferAttribute(metAlpha, 1));
+  const metMat = new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false, depthTest: false, toneMapped: false, blending: THREE.AdditiveBlending,
+    uniforms: {},
+    vertexShader: `attribute float aAlpha; varying float vA;
+      void main(){ vA = aAlpha; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
+    fragmentShader: `varying float vA; void main(){ gl_FragColor = vec4(vec3(0.95,0.97,1.0), vA); }`
+  });
+  const meteors = new THREE.LineSegments(metGeo, metMat);
+  meteors.frustumCulled = false;
+  meteors.renderOrder = -9;             // background layer, behind the moons + cards
+  meteors.visible = false;              // flips on only while a meteor is alive
+  space.add(meteors);
+  // per-meteor state (head position, unit direction, kinematics, life)
+  const _met = Array.from({ length: MET_MAX }, () => ({
+    on: false, hx: 0, hy: 0, hz: 0, dx: 0, dy: 0, dz: 0, spd: 0, len: 0, life: 0, max: 0
+  }));
+  let _metTimer = 2 + Math.random() * 4;   // seconds until the next spawn attempt
+  function spawnMeteor() {
+    const m = _met.find(x => !x.on);
+    if (!m) return;
+    m.on = true;
+    // start high in the sky, off toward one side; z sits in the mid-background
+    const side = Math.random() < 0.5 ? -1 : 1;
+    m.hx = side * (10 + Math.random() * 30);
+    m.hy = 10 + Math.random() * 16;
+    m.hz = -30 + Math.random() * 12;
+    // fly diagonally down-and-across (toward the opposite side), mostly in-plane
+    const dirx = -side * (0.45 + Math.random() * 0.6);
+    const diry = -(0.35 + Math.random() * 0.5);
+    const dirz = (Math.random() - 0.5) * 0.2;
+    const inv = 1 / Math.hypot(dirx, diry, dirz);
+    m.dx = dirx * inv; m.dy = diry * inv; m.dz = dirz * inv;
+    m.spd = 24 + Math.random() * 18;
+    m.len = 3.5 + Math.random() * 4.5;
+    m.max = m.life = 0.55 + Math.random() * 0.4;
+  }
+  function updateMeteors(dt, w, rm) {
+    // spawn cadence — only while idle (no warp) and motion is allowed
+    if (!rm && w < 0.02) {
+      _metTimer -= dt;
+      if (_metTimer <= 0) { spawnMeteor(); _metTimer = 2.5 + Math.random() * 4.5; }
+    }
+    let any = false;
+    for (let i = 0; i < MET_MAX; i++) {
+      const m = _met[i], b = i * 6;
+      if (!m.on) { metAlpha[i*2] = 0; metAlpha[i*2+1] = 0; continue; }
+      any = true;
+      m.life -= dt;
+      if (m.life <= 0) { m.on = false; metAlpha[i*2] = 0; metAlpha[i*2+1] = 0; continue; }
+      m.hx += m.dx * m.spd * dt; m.hy += m.dy * m.spd * dt; m.hz += m.dz * m.spd * dt;
+      const env = Math.sin((1 - m.life / m.max) * Math.PI);   // fade in → out
+      metPos[b+3] = m.hx; metPos[b+4] = m.hy; metPos[b+5] = m.hz;                 // head (bright)
+      metPos[b]   = m.hx - m.dx * m.len; metPos[b+1] = m.hy - m.dy * m.len; metPos[b+2] = m.hz - m.dz * m.len;  // tail
+      metAlpha[i*2]   = 0;                    // tail transparent
+      metAlpha[i*2+1] = env * 0.9;            // head bright
+    }
+    meteors.visible = any;
+    if (any) { metGeo.attributes.position.needsUpdate = true; metGeo.attributes.aAlpha.needsUpdate = true; }
+  }
+
   // --- planets: lit sphere geometry, Azure-tinted lunar photo. Bare moons —
   // no atmosphere halo, no ring — kept behind the cards in the letterbox gaps
   // so faces stay readable. They stream forward during the warp (see
@@ -1439,6 +1510,7 @@ function resolveStat(stat, pCard, cCard) {
         if (p.position.z > PLANET_NEAR) seedPlanet(p);                     // streamed past → recycle to far
       }
     }
+    updateMeteors(dt, w, rm);   // occasional shooting stars while the scene is idle
   }
 
 
@@ -2698,6 +2770,7 @@ function resolveStat(stat, pCard, cCard) {
         return +Math.abs(top.y - bot.y).toFixed(4);
       },
       pinWarp: (v) => { _warpPin = v; },   // freeze star warp strength for screenshots (test hook)
+      meteor: () => { spawnMeteor(); },     // force-spawn a shooting star (test hook)
       orbit: (y, p) => { _orbYawT = y || 0; _orbPitchT = p || 0; },   // drive camera peek deterministically (test hook)
       _cam: () => ({ x: +camera.position.x.toFixed(3), y: +camera.position.y.toFixed(3), z: +camera.position.z.toFixed(3) }),
       _planetZ: () => planets.map(p => +p.position.z.toFixed(2)),   // moon z positions (parallax warp verification)
