@@ -1560,7 +1560,7 @@ function resolveStat(stat, pCard, cCard) {
           vec2  p = (vUv - 0.5) * uPlane;               // card-space, centred
           float d = sdRoundRect(p, uHalf, uRadius);      // 0 at the card edge
           float edge  = exp(-abs(d) * 20.0);             // bright thin rim on the edge
-          float outer = d > 0.0 ? exp(-d * 6.6) * 0.38 : 0.0;   // soft halo, outside the edge only — tighter + dimmer so it hugs the card
+          float outer = d > 0.0 ? exp(-d * 13.2) * 0.38 : 0.0;   // soft halo, outside the edge only — reaches ~half the distance so it hugs the card
           float inner = exp(-max(-d, 0.0) * 26.0) * 0.22;// faint inward feather
           float shimmer = 0.82 + 0.18 * sin(uTime * 3.0 + d * 8.0);
           // border feather: fade smoothly to zero at the plane rectangle boundary so
