@@ -1215,19 +1215,23 @@ function resolveStat(stat, pCard, cCard) {
     });
   }
 
-  // Show/hide a single held X-wing parked in front of the camera for inspection.
-  // Unlike the flyby, this one stays put and slowly rotates (see updateXWings)
-  // so the model can be studied from all sides. Toggled with the 'x' key.
+  // Show/hide a single held X-wing parked in front of the camera. It faces
+  // NOSE-ON toward the viewer — the exact orientation the flyby ends in — so
+  // this toggle doubles as a way to verify the "charging at you" look. It rocks
+  // gently (see updateXWings) rather than spinning, to keep that nose-on read.
+  // Toggled with the 'x' key.
   let _heldXwing = null;
   function applyHeldXWing() {
     if (FEAT.heldXwing) {
       if (_heldXwing) return;
       const m = makeXWing();
       if (!m) { showToast('X-wing: loading…'); FEAT.heldXwing = false; return; }
-      // Park it just in front of the cards, nose toward the viewer, ¾ view.
-      m.position.set(0, camera.position.y + 0.15, camera.position.z - 6);
-      m.rotation.set(0, Math.PI * 0.82, 0);
-      m.scale.multiplyScalar(1.4);
+      // Park it dead ahead, nose pointing straight at the camera. Nose = local
+      // -Z; a 180° yaw turns local -Z to face +Z (toward the camera eye), so we
+      // see the fully-foreshortened nose-on silhouette (4 cannon tips at you).
+      m.position.set(camera.position.x, camera.position.y + 0.1, camera.position.z - 9);
+      m.rotation.set(-0.06, Math.PI, 0);   // tiny down-pitch so the dorsal reads a touch
+      m.scale.multiplyScalar(1.25);
       m.traverse(child => {
         if (child.material && child.material.opacity !== undefined) child.material.opacity = 1;
       });
@@ -1661,8 +1665,33 @@ function resolveStat(stat, pCard, cCard) {
       model.position.sub(centre);                 // recentre on origin
       const maxDim = Math.max(size.x, size.y, size.z) || 1;
       const norm = 6 / maxDim;                    // target ~6 world units long
-      const wrap = new THREE.Group();             // wrapper carries scale + centring
-      wrap.add(model);
+
+      // --- Orientation correction -------------------------------------
+      // This GLB's fuselage is NOT axis-aligned: its true NOSE points along
+      // local [-0.437, 0.007, -0.9] and its DORSAL "up" along [-0.126, 0.99,
+      // 0.069] (both measured by PCA of the mesh vertex cloud). Because the
+      // nose sits ~26° off local -Z, every downstream heading calc (which
+      // assumes nose = local -Z, up = +Y) rendered the craft crabbing ~26°
+      // sideways. Bake a one-time correction so the prototype's nose becomes
+      // local -Z and up becomes +Y; then all flyby / held-pose math is exact.
+      const noseLocal = new THREE.Vector3(-0.437, 0.007, -0.9).normalize();
+      const upLocal   = new THREE.Vector3(-0.126, 0.99, 0.069).normalize();
+      const buildBasis = (fwd, up) => {           // orthonormal basis: columns = right, up, forward
+        const f = fwd.clone().normalize();
+        const r = new THREE.Vector3().crossVectors(up, f).normalize();
+        const u = new THREE.Vector3().crossVectors(f, r).normalize();
+        return new THREE.Matrix4().makeBasis(r, u, f);
+      };
+      const mSrc = buildBasis(noseLocal, upLocal);                       // model's own frame
+      const mDst = buildBasis(new THREE.Vector3(0, 0, -1),               // desired: nose = -Z
+                              new THREE.Vector3(0, 1, 0));               //          up   = +Y
+      const correction = mDst.multiply(mSrc.invert());                  // Qc = Dst · Src⁻¹
+      const inner = new THREE.Group();            // carries the baked rotation ABOUT the centre
+      inner.quaternion.setFromRotationMatrix(correction);
+      inner.add(model);
+
+      const wrap = new THREE.Group();             // wrapper carries scale
+      wrap.add(inner);
       wrap.scale.setScalar(norm);
       _xwingProto = wrap;
       _xwingLoading = false;
@@ -1814,8 +1843,14 @@ function resolveStat(stat, pCard, cCard) {
    });
   }
 
+  let _heldT = 0;
   function updateXWings(dt) {
-   if (_heldXwing) _heldXwing.rotation.y += dt * 0.5;   // gentle idle spin for inspection
+   if (_heldXwing) {                                  // gentle nose-on hover (keeps the "charging at you" read)
+     _heldT += dt;
+     _heldXwing.rotation.y = Math.PI + Math.sin(_heldT * 0.7) * 0.10;   // yaw drift ±6°
+     _heldXwing.rotation.z = Math.sin(_heldT * 0.9 + 1.0) * 0.07;       // slight bank
+     _heldXwing.rotation.x = -0.05 + Math.sin(_heldT * 0.5) * 0.04;     // subtle pitch bob
+   }
    // Random spawn during gameplay: ~5% chance per frame during picking/revealing
    if (!FEAT.xwings || REDUCED) return;
    if ((G.phase === 'picking' || G.phase === 'revealing') && Math.random() < 0.05 && _xwings.length === 0) {
