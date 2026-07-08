@@ -1157,11 +1157,13 @@ function resolveStat(stat, pCard, cCard) {
      keyboard key to a flag; toggling shows a brief toast + a11y announce.
      Add a new toggle by: (a) adding a FEAT flag, (b) a FEAT_KEYS binding,
      (c) gating the system on FEAT.<flag>. Also exposed via __pure.feature(). */
-  const FEAT = { smoke: true, streaks: true, moons: true, xwings: true };
+  const FEAT = { smoke: true, streaks: true, moons: true, xwings: true, cards: true, heldXwing: false };
   const FEAT_KEYS = {
-    s: { flag: 'smoke',   label: 'Smoke trail' },
-    h: { flag: 'streaks', label: 'Hyperspace streaks' },
-    m: { flag: 'moons',   label: 'Moons' },
+    s: { flag: 'smoke',     label: 'Smoke trail' },
+    h: { flag: 'streaks',   label: 'Hyperspace streaks' },
+    m: { flag: 'moons',     label: 'Moons' },
+    c: { flag: 'cards',     label: 'Cards' },
+    x: { flag: 'heldXwing', label: 'X-wing' },
   };
   const _toastEl = document.getElementById('toast');
   let _toastTimer = 0;
@@ -1176,6 +1178,8 @@ function resolveStat(stat, pCard, cCard) {
     if (!(flag in FEAT)) return;
     FEAT[flag] = on == null ? !FEAT[flag] : !!on;
     const label = (Object.values(FEAT_KEYS).find(k => k.flag === flag) || {}).label || flag;
+    if (flag === 'cards')     applyCardVisibility();   // show/hide the two play cards
+    if (flag === 'heldXwing') applyHeldXWing();         // show/hide a held X-wing for inspection
     showToast(label + ': ' + (FEAT[flag] ? 'ON' : 'OFF'));
     announce(label + ' ' + (FEAT[flag] ? 'on' : 'off'));
     if (_helpEl && _helpEl.classList.contains('show')) renderHelp();   // keep the open help panel live
@@ -1198,6 +1202,47 @@ function resolveStat(stat, pCard, cCard) {
     const show = force == null ? !_helpEl.classList.contains('show') : !!force;
     if (show) { renderHelp(); _helpEl.classList.add('show'); _helpEl.setAttribute('aria-hidden', 'false'); announce('Toggle key list open.'); }
     else { _helpEl.classList.remove('show'); _helpEl.setAttribute('aria-hidden', 'true'); }
+  }
+
+  // Show/hide the two play cards (and their drop shadows) without disturbing
+  // game state — a testing aid so the backdrop / X-wing can be seen unobstructed.
+  function applyCardVisibility() {
+    const vis = !!FEAT.cards;
+    [playerCard, cpuCard].forEach(c => {
+      if (!c) return;
+      c.visible = vis;
+      if (c.userData && c.userData.shadow) c.userData.shadow.visible = vis;
+    });
+  }
+
+  // Show/hide a single held X-wing parked in front of the camera for inspection.
+  // Unlike the flyby, this one stays put and slowly rotates (see updateXWings)
+  // so the model can be studied from all sides. Toggled with the 'x' key.
+  let _heldXwing = null;
+  function applyHeldXWing() {
+    if (FEAT.heldXwing) {
+      if (_heldXwing) return;
+      const m = makeXWing();
+      if (!m) { showToast('X-wing: loading…'); FEAT.heldXwing = false; return; }
+      // Park it just in front of the cards, nose toward the viewer, ¾ view.
+      m.position.set(0, camera.position.y + 0.15, camera.position.z - 6);
+      m.rotation.set(0, Math.PI * 0.82, 0);
+      m.scale.multiplyScalar(1.4);
+      m.traverse(child => {
+        if (child.material && child.material.opacity !== undefined) child.material.opacity = 1;
+      });
+      scene.add(m);
+      _heldXwing = m;
+    } else if (_heldXwing) {
+      scene.remove(_heldXwing);
+      _heldXwing.traverse(child => {
+        if (child.material) {
+          if (Array.isArray(child.material)) child.material.forEach(mm => mm.dispose());
+          else child.material.dispose();
+        }
+      });
+      _heldXwing = null;
+    }
   }
 
   /* ---- renderer / scene / camera ------------------------------------- */
@@ -1771,6 +1816,7 @@ function resolveStat(stat, pCard, cCard) {
   }
 
   function updateXWings(dt) {
+   if (_heldXwing) _heldXwing.rotation.y += dt * 0.5;   // gentle idle spin for inspection
    // Random spawn during gameplay: ~5% chance per frame during picking/revealing
    if (!FEAT.xwings || REDUCED) return;
    if ((G.phase === 'picking' || G.phase === 'revealing') && Math.random() < 0.05 && _xwings.length === 0) {
@@ -2858,6 +2904,7 @@ function resolveStat(stat, pCard, cCard) {
     playerCard.userData.shadow = makeShadow();
     cpuCard.userData.shadow    = makeShadow();
     tableGroup.add(playerCard, cpuCard);
+    applyCardVisibility();   // honour the Cards toggle across new rounds
     // upload the new card textures to the GPU NOW (scene still static) so the
     // first warp frame doesn't stall on the upload — smooths the dust→warp handoff
     warmCardTextures(playerCard);
@@ -3050,8 +3097,6 @@ function resolveStat(stat, pCard, cCard) {
       }
     } else if (e.key === 'r' || e.key === 'R') {
       if (G.phase === 'gameover' || G.phase === 'picking') startMatch();
-    } else if (e.key === 'x' || e.key === 'X') {
-      spawnXWingFlyby();  // manual trigger (ignores random chance)
     } else if (e.key === '?') {
       toggleHelp();                                  // show/hide the toggle key list
     } else if (e.key === 'Escape') {
