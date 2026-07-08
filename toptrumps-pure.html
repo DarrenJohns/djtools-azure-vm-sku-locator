@@ -2221,7 +2221,13 @@ function resolveStat(stat, pCard, cCard) {
     if (off) return { enabled: false };
     const target = new THREE.WebGLRenderTarget(16, 16, {
       format: THREE.RGBAFormat, type: THREE.UnsignedByteType,
-      depthBuffer: true, stencilBuffer: false
+      depthBuffer: true, stencilBuffer: false,
+      // MSAA on the offscreen buffer: the renderer's antialias:true only smooths
+      // the default canvas framebuffer, which the post-fx path bypasses by
+      // rendering the scene into this target first. Without samples the card
+      // edges alias badly against the dark backdrop. WebGL2 multisamples the
+      // target and resolves on read, restoring smooth edges through the post-fx.
+      samples: 4
     });
     target.texture.colorSpace = THREE.SRGBColorSpace;
     target.texture.generateMipmaps = false;
