@@ -1630,6 +1630,59 @@ function resolveStat(stat, pCard, cCard) {
   galaxy.renderOrder = -20;                   // drawn before the stars (-10) — the farthest layer
   space.add(galaxy);
 
+  /* ---- aurora wash: a large far additive curtain behind the starfield ------
+     A single big plane sitting between the galaxy band and the stars, painting
+     slow-drifting Azure-blue "aurora" curtains with a procedural fbm shader. It
+     lifts the flat black of deep space with gentle colour without competing with
+     the cards. Additive + toneMapped:false + depthWrite/Test off so it's a pure
+     background paint; the drift freezes under prefers-reduced-motion. */
+  const auroraMat = new THREE.ShaderMaterial({
+    uniforms: {
+      uTime:      { value: 0 },
+      uIntensity: { value: 0.34 },                    // low — a wash, not a spotlight
+      uColA:      { value: new THREE.Color(0x1f5bd6) },  // Azure blue
+      uColB:      { value: new THREE.Color(0x27b6c9) }   // teal-cyan
+    },
+    vertexShader: `
+      varying vec2 vUv;
+      void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }
+    `,
+    fragmentShader: `
+      precision highp float;
+      uniform float uTime, uIntensity;
+      uniform vec3 uColA, uColB;
+      varying vec2 vUv;
+      float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+      float noise(vec2 p){
+        vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
+        float a = hash(i), b = hash(i + vec2(1.0, 0.0));
+        float c = hash(i + vec2(0.0, 1.0)), d = hash(i + vec2(1.0, 1.0));
+        return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+      }
+      float fbm(vec2 p){ float v = 0.0, a = 0.5; for(int i = 0; i < 4; i++){ v += a * noise(p); p *= 2.02; a *= 0.5; } return v; }
+      void main(){
+        vec2 uv = vUv;
+        float t = uTime * 0.06;
+        float n  = fbm(vec2(uv.x * 3.0 + t,        uv.y * 1.6 - t * 0.5));
+        float n2 = fbm(vec2(uv.x * 1.5 - t * 0.7,  uv.y * 2.4 + t * 0.3));
+        float curtain = smoothstep(0.34, 0.92, n * 0.6 + n2 * 0.5);
+        // soft feather at all four edges so the plane's bounds never show
+        float edge = smoothstep(0.0, 0.26, uv.x) * smoothstep(1.0, 0.74, uv.x)
+                   * smoothstep(0.0, 0.30, uv.y) * smoothstep(1.0, 0.58, uv.y);
+        float amt = curtain * edge;
+        vec3 col = mix(uColA, uColB, clamp(n2, 0.0, 1.0));
+        gl_FragColor = vec4(col * amt * uIntensity, 1.0);
+      }
+    `,
+    transparent: true, blending: THREE.AdditiveBlending,
+    depthTest: false, depthWrite: false, toneMapped: false
+  });
+  const aurora = new THREE.Mesh(new THREE.PlaneGeometry(210, 140), auroraMat);
+  aurora.position.set(0, 4, -72);             // between the galaxy (-95) and stars; world ≈ -78
+  aurora.renderOrder = -18;                   // after the galaxy (-20), before the stars (-10)
+  aurora.frustumCulled = false;
+  space.add(aurora);
+
   /* ---- data arcs: glowing great-circle "links" in the deep backdrop --------
      Subtle azure arcs sweep between random nodes on an unseen sphere behind the
      cards, each with a bright "data pulse" travelling along it — evoking traffic
@@ -1773,6 +1826,7 @@ function resolveStat(stat, pCard, cCard) {
 
   function updateBackdrop(_t, dt) {
     const rm = REDUCED;
+    auroraMat.uniforms.uTime.value += rm ? 0 : dt;   // drift frozen under reduced-motion
     _warp = Math.max(0, _warp - dt * 1.6);
     const w = rm ? 0 : (_warpPin != null ? _warpPin : Math.max(_warp, _warpHold));
     _bgWarpNow = w;
