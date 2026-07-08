@@ -2816,22 +2816,20 @@ function resolveStat(stat, pCard, cCard) {
     startRound();
   }
 
-  /* ---- forward-flight entry: camera dolly + card glide -----------------
-     The player should feel the CAMERA fly forward into the next hand, not see
-     the cards pop in. So on each new round we DOLLY the camera: it starts
-     pulled back (`_camDolly` world units behind its rest z) and eases forward
-     to rest. Moving the camera scales the WHOLE scene together — planets, stars
-     and cards — with true parallax (near cards grow faster than distant
-     planets), reading as forward motion through space. On top of that the cards
-     glide a short way toward their slots (a touch more than the background, so
-     they lead the parallax) and fade up. The starfield streak speed is driven
-     by the dolly velocity (see updateBackdrop), so the background streams past
-     in sync. `entering` guards float/shadow so they don't fight the tweens. */
+  /* ---- forward-flight entry: warp streaming + card glide --------------
+     The player should feel the scene fly forward into the next hand, not see
+     the cards pop in. The camera holds at its rest pose (no pull-back, so the
+     moons never lurch backward at round start); instead the sense of forward
+     motion comes from the WARP streaming — stars, hyperspace streaks and the
+     near moons all flow toward the viewer (driven by _warpHold, see
+     updateBackdrop) on an accelerate→cruise→decelerate envelope. On top of
+     that the cards glide in from far on z and fade up, leading the parallax.
+     `entering` guards float/shadow so they don't fight the tweens. */
   // ZOOM_DEPTH is large so the card starts genuinely FAR back on z; the
   // perspective camera (not a scale tween) shrinks it to a speck near the
   // vanishing point, so it reads as real distance and grows with correct
   // foreshortening as it flies forward to its slot.
-  const ENTRY_MS = 1500, ZOOM_DEPTH = 60.0, DOLLY_BACK = 6.5;
+  const ENTRY_MS = 1500, ZOOM_DEPTH = 60.0;
 
   // --- warp "ship speed" envelope ------------------------------------------
   // The whole transition is modelled as a spaceship that accelerates from a
@@ -2876,16 +2874,19 @@ function resolveStat(stat, pCard, cCard) {
     if (REDUCED) { _camDolly = 0; _warpHold = 0; return; }
     // Cancel any previous dolly tween (from the prior round)
     cancelTweensWithTag('dolly');
-    _camDolly = DOLLY_BACK;
+    // No camera pull-back: the camera holds at its rest pose so the moons never
+    // lurch backward at round start. The forward-flight feel comes purely from
+    // the warp streaming (stars/streaks/moons flow toward the viewer, keyed off
+    // _warpHold) plus the cards zooming in from far (zoomInCard). We still ramp
+    // _warpHold on the same accelerate→cruise→decelerate envelope so the space
+    // streams past smoothly and then settles.
+    _camDolly = 0;
     _warpHold = 0.0;
     tween({
       dur: md(ENTRY_MS),
-      ease: (x) => x,                    // linear timeline; shape comes from warpDist/warpSpeed
+      ease: (x) => x,                    // linear timeline; shape comes from warpSpeed
       tag: 'dolly',
       update: (_e, t) => {
-        // camera position follows the travelled DISTANCE (accelerate → cruise →
-        // decelerate) so the dolly eases in and out like a real ship.
-        _camDolly = DOLLY_BACK * (1 - warpDist(t));
         // warp intensity follows SPEED: streaks/stars/moons ramp up then down.
         _warpHold = warpSpeed(t);
       },
