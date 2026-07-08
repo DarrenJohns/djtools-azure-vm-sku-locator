@@ -1651,39 +1651,38 @@ function resolveStat(stat, pCard, cCard) {
    if (_xwings.length > 1) return;  // max 2 concurrent flybys
    const xwing = makeXWing();
    if (!xwing) return;              // model not loaded yet
-   xwing.scale.multiplyScalar(0.85 + Math.random() * 0.5);  // size variety
+   xwing.scale.multiplyScalar(1.0 + Math.random() * 0.5);   // size variety (bumped so the near swoop looms large)
 
-   // "Approach run": start far in front of the camera (deep -Z, appears tiny)
-   // and fly toward the viewer, mostly along the depth axis so the nose stays
-   // pointed at the lens (reads as flying straight at you, not across-frame).
-   // A quadratic Bezier gives a gentle curve. Lateral spread is deliberately
-   // small vs the depth travelled so velocity stays dominated by the toward-
-   // camera Z component — the nose then points ~at the viewer the whole run.
+   // FORWARD CHARGE: the craft flies a nearly STRAIGHT line straight at the
+   // viewer, held at a small CONSTANT side + height offset so you see a nice ¾
+   // view (not a boring dead-centre dot). Two reasons this reads as "forward"
+   // where the old curved swoop read as "sideways":
+   //   (1) The path is straight, so the ship's long axis never has to pivot —
+   //       the TAIL retraces the NOSE's exact track (no off-tracking / flank /
+   //       crab). On a curved path the tail cuts the corner and you see the
+   //       broadside, which looks like sideways flight.
+   //   (2) start and end share almost the same x/y, so the travel vector points
+   //       essentially straight INTO the screen (nose toward you). The dominant
+   //       motion is pure looming approach, which is the strongest "coming at
+   //       you" cue; residual sideways screen drift is tiny and happens only in
+   //       the last unit or two, by which point the craft has faded.
    const camZ = camera.position.z;                 // ~8.4 at rest, further back during warp
    const camX = camera.position.x, camY = camera.position.y;
 
-   // FORWARD APPROACH: the craft flies almost straight DOWN THE CAMERA AXIS
-   // toward the viewer, so it grows head-on ("flying at you") instead of
-   // sliding across the frame. We pick a distant start just off the view axis,
-   // and aim the exit at a point that skims PAST the lens on the same side —
-   // that keeps the flight vector pointed ~at the camera the whole run, so the
-   // nose reads as coming toward the viewer with only a gentle ¾ reveal.
-   const side   = Math.random() < 0.5 ? 1 : -1;    // which shoulder it passes
-   const startZ = -70 - Math.random() * 24;        // distant, well in front of the viewer
-   // Distant entry: small offset from the view axis so it starts near centre-
-   // frame as a growing dot rather than off to one edge.
-   const sx = camX + side * (0.6 + Math.random() * 1.4);
-   const sy = camY + 0.4 + Math.random() * 1.2;
-   // Exit skims just past the lens on the same shoulder. Kept modest so the
-   // craft only drifts gently toward the edge as it dissolves at the lens.
-   const endZ = camZ + 6;                           // just past the camera (fully faded by then)
-   const ex   = camX + side * (2.4 + Math.random() * 1.8);
-   const ey   = camY + 0.8 + Math.random() * 1.4;
-   const arcY = Math.random() * 1.0 - 0.5;          // subtle vertical bow on the path
-
+   const side    = Math.random() < 0.5 ? 1 : -1;   // which side it sits on
+   const lateral = 0.6 + Math.random() * 0.4;      // small, roughly-constant side offset (subtle ¾ view)
+   const height  = 0.5 + Math.random() * 0.6;      // slightly above eye-line
+   const startZ  = -60 - Math.random() * 20;        // a distant dot, dead ahead
+   const endZ    = camZ + 2;                         // charges right up to the lens (faded by then)
+   const sx = camX + side * lateral;
+   const ex = camX + side * lateral * 0.9;          // converges only a hair — near-zero lateral drift
+   const sy = camY + height;
+   const ey = camY + height * 0.45;                 // settles a touch lower toward the end
+   // Control point kept almost on the chord: a whisper of bow for grace without
+   // introducing real curvature (curvature = pivot = flank = the sideways look).
    const p0 = new THREE.Vector3(sx, sy, startZ);
    const p2 = new THREE.Vector3(ex, ey, endZ);
-   const p1 = new THREE.Vector3((sx + ex) / 2, (sy + ey) / 2 + arcY, (startZ + endZ) / 2);
+   const p1 = new THREE.Vector3((sx + ex) / 2, (sy + ey) / 2 + 0.35, (startZ + endZ) / 2);
 
    // Seat the craft at its true start pose with opacity 0 BEFORE it enters the
    // scene, so the first render can never flash it at the origin (which sits on
@@ -1709,12 +1708,14 @@ function resolveStat(stat, pCard, cCard) {
        .addScaledVector(p2, t * t);
    };
 
-   const duration = 3400 + Math.random() * 1400;   // ~3.4–4.8s run
+   const duration = 3200 + Math.random() * 1200;   // ~3.2–4.4s run
    const bankPhase = Math.random() * Math.PI * 2;
    const rollDir = Math.random() < 0.5 ? 1 : -1;   // vary which way it rolls
    tween({
      dur: md(duration),
-     ease: (x) => x,
+     // Ease-in (accelerate toward the viewer): starts as a slow distant dot,
+     // then RUSHES at you and grows fast — the strong looming sells "forward".
+     ease: (x) => x * x * (2 - x * 0.6),
      tag: 'xwing',
      update: (e, t) => {
        bezier(_pos, t);
@@ -1737,18 +1738,17 @@ function resolveStat(stat, pCard, cCard) {
          _qRoll.setFromAxisAngle(_ZAXIS, rollDir * Math.sin(t * Math.PI * 2 + bankPhase) * 0.16);
          xwing.quaternion.multiply(_qRoll);            // bank about the fuselage axis only
        }
-       // Fade in from the distance, then dissolve by DISTANCE TO THE LENS (not
-       // time): the craft fades out as its z approaches the camera, so it
-       // vanishes right as it reaches you. This removes both the sideways whip
-       // as a near-plane offset magnifies in projection, and the behind-camera
-       // projection garbage once it passes the lens.
+       // Fade in from the distance, then dissolve right AT the lens. We keep
+       // the craft fully visible through the dramatic near-swoop (so the big
+       // forward loom is what the eye sees), then fade quickly in the last
+       // couple of units so it never clips the near-plane or flashes behind.
        const zNow = _pos.z;
-       const zFadeStart = camZ - 9;                    // begin dissolving ~9 units in front of the lens
-       const zFadeEnd   = camZ - 2.5;                  // fully gone just before the lens
+       const zFadeStart = camZ - 7.5;                  // stay solid through the big loom
+       const zFadeEnd   = camZ - 2.2;                  // dissolve BEFORE the violent near-lens swing
        const zFade = zNow <= zFadeStart ? 1
                    : zNow >= zFadeEnd   ? 0
                    : 1 - (zNow - zFadeStart) / (zFadeEnd - zFadeStart);
-       const alpha = Math.min(1, t / 0.12) * zFade;
+       const alpha = Math.min(1, t / 0.10) * zFade;
        xwing.traverse(child => {
          if (child.material && child.material.opacity !== undefined) {
            child.material.opacity = alpha;
