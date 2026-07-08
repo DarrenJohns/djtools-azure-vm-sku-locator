@@ -162,6 +162,7 @@
   <script type="module">
   import * as THREE from 'three';
   import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+  import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
   /* ===================================================================== *
    *  HARVESTED — verbatim reusable blocks from toptrumps-webgl.html        *
@@ -1301,6 +1302,23 @@ function resolveStat(stat, pCard, cCard) {
   const fill = new THREE.DirectionalLight(0xdfeaff, 0.26); fill.position.set(-4.0, 1.0, 3.0); scene.add(fill);
   const rim  = new THREE.DirectionalLight(0x66aaff, 0.42); rim.position.set(-5.0, 2.0, -5.0); scene.add(rim);
 
+  /* Image-based lighting: a PMREM-prefiltered RoomEnvironment supplies a soft,
+     neutral irradiance/reflection probe as scene.environment. This gives the
+     card faces a faint sheen and the X-wing real metallic reflections. It is
+     applied scene-wide, but each MeshStandardMaterial's envMapIntensity is kept
+     low (cards ~0.18, ship ~0.4) so it never lifts dark text or blows out the
+     white card body — the anti-dark-back + legibility invariants are preserved
+     (the emissive floor is untouched). Generated once, then the throwaway
+     RoomEnvironment scene + PMREM generator are disposed. */
+  {
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    pmrem.compileEquirectangularShader();
+    const roomEnv = new RoomEnvironment();
+    scene.environment = pmrem.fromScene(roomEnv, 0.04).texture;
+    roomEnv.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); });
+    pmrem.dispose();
+  }
+
   const clock = new THREE.Clock();
   let _lastEt = 0;
 
@@ -1665,6 +1683,16 @@ function resolveStat(stat, pCard, cCard) {
       model.position.sub(centre);                 // recentre on origin
       const maxDim = Math.max(size.x, size.y, size.z) || 1;
       const norm = 6 / maxDim;                    // target ~6 world units long
+
+      // Tone the scene.environment reflections on the ship: without this the
+      // GLB's MeshStandardMaterials pick up the IBL probe at full intensity and
+      // read as chrome. A moderate value gives a believable metallic sheen.
+      model.traverse(o => {
+        if (o.isMesh && o.material) {
+          const mats = Array.isArray(o.material) ? o.material : [o.material];
+          mats.forEach(m => { if ('envMapIntensity' in m) { m.envMapIntensity = 0.4; m.needsUpdate = true; } });
+        }
+      });
 
       // --- Orientation correction -------------------------------------
       // This GLB's fuselage is NOT axis-aligned: its true NOSE points along
@@ -2330,7 +2358,7 @@ function resolveStat(stat, pCard, cCard) {
     // that MeshBasic gave us for free. roughness high / metalness 0 = paper-like.
     const mkMat = (map) => new THREE.MeshStandardMaterial({
       map, emissive: 0xffffff, emissiveMap: map, emissiveIntensity: 0.34,
-      roughness: 0.86, metalness: 0.0, transparent: true
+      roughness: 0.86, metalness: 0.0, envMapIntensity: 0.18, transparent: true
     });
     const frontMat = mkMat(frontTex);
     const backMat  = mkMat(backTex);
