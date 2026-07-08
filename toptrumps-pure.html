@@ -163,6 +163,11 @@
   import * as THREE from 'three';
   import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
   import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+  import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+  import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+  import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+  import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+  import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
   /* ===================================================================== *
    *  HARVESTED — verbatim reusable blocks from toptrumps-webgl.html        *
@@ -2238,90 +2243,86 @@ function resolveStat(stat, pCard, cCard) {
     if (!any) _dstAlive = false;              // all spent → skip work next frame
   }
 
-  /* ---- post-fx composite (Phase 5d) — vignette, grain, low chromatic
-     aberration, selective (luma-gated) bloom + a win-flash pulse. Cards are
-     mid-tone so the high bloom threshold leaves their text crisp; only the
-     luminous globe / foil / win-glow rim bloom. Off under reduced-motion or
-     ?nofx=1, and self-disables on any GL error. ------------------------- */
+  /* ---- post-fx pipeline (Phase 6) — an EffectComposer chain replaces the old
+     hand-rolled single-pass composite:
+        RenderPass  → scene into a linear-HDR (HalfFloat) buffer
+        UnrealBloomPass → physically-plausible bloom; a high threshold keeps the
+                          card whites/text crisp so only the luminous globe,
+                          foil sparkle, win-glow rim and star points bloom
+        gradePass   → vignette + film grain + low chromatic aberration +
+                      win-flash pulse (operates in linear HDR)
+        OutputPass  → ACES tone-map + sRGB encode to screen
+     A win pulse (fxKick) momentarily lifts bloom strength + CA. Off under
+     reduced-motion or ?nofx=1 (the loop falls back to a direct render), and the
+     perf governor can drop it live. --------------------------------------- */
+  const _gradeShader = {
+    uniforms: {
+      tDiffuse:    { value: null },
+      uTime:       { value: 0 },
+      uResolution: { value: new THREE.Vector2(1, 1) },
+      uVignette:   { value: 0.20 },
+      uGrain:      { value: 0.014 },
+      uAberration: { value: 0.0006 },
+      uPulse:      { value: 0 },
+      uFlashColor: { value: new THREE.Vector3(0.62, 0.84, 1.0) }
+    },
+    vertexShader: `
+      varying vec2 vUv;
+      void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+    fragmentShader: `
+      precision highp float;
+      varying vec2 vUv;
+      uniform sampler2D tDiffuse;
+      uniform float uTime, uVignette, uGrain, uAberration, uPulse;
+      uniform vec2 uResolution;
+      uniform vec3 uFlashColor;
+      float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+      void main(){
+        vec2 uv = vUv;
+        vec2 c = uv - 0.5;
+        float r = length(c);
+        // low chromatic aberration, stronger toward the edges + on win pulse
+        float ca = uAberration * (1.0 + uPulse * 1.4) * smoothstep(0.0, 0.85, r);
+        vec2 dir = r > 1e-4 ? c / r : vec2(0.0);
+        vec3 col;
+        col.r = texture2D(tDiffuse, uv + dir * ca).r;
+        col.g = texture2D(tDiffuse, uv).g;
+        col.b = texture2D(tDiffuse, uv - dir * ca).b;
+        // win flash — a gentle mid-radius wash of the accent colour
+        float band = smoothstep(0.10, 0.80, r) * (1.0 - smoothstep(0.60, 1.0, r));
+        col += uFlashColor * (uPulse * band * 0.16);
+        // vignette
+        col *= 1.0 - smoothstep(0.28, 0.98, r) * uVignette;
+        // fine film grain
+        float n = hash(uv * uResolution + vec2(fract(uTime * 0.37), fract(uTime * 0.61))) - 0.5;
+        col += n * uGrain;
+        gl_FragColor = vec4(col, 1.0);
+      }`
+  };
+
   const postFx = (() => {
     const off = _reducedInit || new URLSearchParams(location.search).get('nofx') === '1';
     if (off) return { enabled: false };
-    const target = new THREE.WebGLRenderTarget(16, 16, {
-      format: THREE.RGBAFormat, type: THREE.UnsignedByteType,
-      depthBuffer: true, stencilBuffer: false
-    });
-    target.texture.colorSpace = THREE.SRGBColorSpace;
-    target.texture.generateMipmaps = false;
-    target.texture.minFilter = THREE.LinearFilter;
-    target.texture.magFilter = THREE.LinearFilter;
-    const fxScene = new THREE.Scene();
-    const fxCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-    const mat = new THREE.ShaderMaterial({
-      depthWrite: false, depthTest: false, toneMapped: false,
-      uniforms: {
-        uTex:        { value: target.texture },
-        uTime:       { value: 0 },
-        uResolution: { value: new THREE.Vector2(1, 1) },
-        uVignette:   { value: 0.20 },
-        uGrain:      { value: 0.014 },
-        uAberration: { value: 0.0006 },
-        uBloomBase:  { value: 0.06 },
-        uPulse:      { value: 0 },
-        uFlashColor: { value: new THREE.Vector3(0.62, 0.84, 1.0) }
-      },
-      vertexShader: `
-        varying vec2 vUv;
-        void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }`,
-      fragmentShader: `
-        precision highp float;
-        varying vec2 vUv;
-        uniform sampler2D uTex;
-        uniform float uTime, uVignette, uGrain, uAberration, uBloomBase, uPulse;
-        uniform vec2 uResolution;
-        uniform vec3 uFlashColor;
-        float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
-        void main(){
-          vec2 uv = vUv;
-          vec2 c = uv - 0.5;
-          float r = length(c);
-          // low chromatic aberration, stronger toward the edges + on win pulse
-          float ca = uAberration * (1.0 + uPulse * 1.4) * smoothstep(0.0, 0.85, r);
-          vec2 dir = r > 1e-4 ? c / r : vec2(0.0);
-          vec3 col;
-          col.r = texture2D(uTex, uv + dir * ca).r;
-          col.g = texture2D(uTex, uv).g;
-          col.b = texture2D(uTex, uv - dir * ca).b;
-          // selective bloom: only high-luma pixels contribute, so card text stays sharp
-          float luma = dot(col, vec3(0.2126, 0.7152, 0.0722));
-          float amt = uBloomBase + uPulse * 0.10;
-          if (amt > 1e-4) {
-            vec2 px = 1.0 / uResolution;
-            vec2 o1 = px * (2.0 + 6.0 * amt);
-            vec2 o2 = px * (5.0 + 15.0 * amt);
-            vec3 inner = (texture2D(uTex, uv + vec2( o1.x, 0.0)).rgb
-                        + texture2D(uTex, uv + vec2(-o1.x, 0.0)).rgb
-                        + texture2D(uTex, uv + vec2(0.0,  o1.y)).rgb
-                        + texture2D(uTex, uv + vec2(0.0, -o1.y)).rgb) * 0.25;
-            vec3 outer = (texture2D(uTex, uv + o2).rgb
-                        + texture2D(uTex, uv - o2).rgb
-                        + texture2D(uTex, uv + vec2( o2.x, -o2.y)).rgb
-                        + texture2D(uTex, uv + vec2(-o2.x,  o2.y)).rgb) * 0.25;
-            float bright = smoothstep(0.70, 0.98, luma);
-            col += mix(inner, outer, 0.55) * bright * amt * 1.2;
-          }
-          // win flash — a gentle mid-radius wash of the accent colour
-          float band = smoothstep(0.10, 0.80, r) * (1.0 - smoothstep(0.60, 1.0, r));
-          col += uFlashColor * (uPulse * band * 0.16);
-          // vignette
-          col *= 1.0 - smoothstep(0.28, 0.98, r) * uVignette;
-          // fine film grain
-          float n = hash(uv * uResolution + vec2(fract(uTime * 0.37), fract(uTime * 0.61))) - 0.5;
-          col += n * uGrain;
-          gl_FragColor = vec4(col, 1.0);
-        }`
-    });
-    fxScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat));
-    return { enabled: true, target, scene: fxScene, camera: fxCam, material: mat };
+    try {
+      const composer = new EffectComposer(renderer);
+      const renderPass = new RenderPass(scene, camera);
+      // (resolution, strength, radius, threshold). A high threshold (3.2) sits
+      // well above the lit card-white luminance in the linear-HDR buffer, so the
+      // flat card body + dark text stay crisp; only genuinely bright, additive
+      // elements — the win-glow rim, rarity foil sparkle and bright star cores —
+      // exceed it and bloom. The win pulse (below) lifts strength for a flash.
+      const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.45, 0.5, 3.2);
+      const grade = new ShaderPass(_gradeShader);
+      const output = new OutputPass();
+      composer.addPass(renderPass);
+      composer.addPass(bloom);
+      composer.addPass(grade);
+      composer.addPass(output);
+      return { enabled: true, composer, bloom, grade, bloomBase: 0.45 };
+    } catch (err) {
+      console.warn('post-fx composer init failed; rendering direct', err);
+      return { enabled: false };
+    }
   })();
   let _fxPulse = 0;                                  // decays each frame
   function fxKick(amount = 1) { if (postFx.enabled) _fxPulse = Math.min(1.3, _fxPulse + amount); }
@@ -2329,8 +2330,10 @@ function resolveStat(stat, pCard, cCard) {
     if (!postFx.enabled) return;
     const w = Math.max(1, Math.floor(renderer.domElement.width));
     const h = Math.max(1, Math.floor(renderer.domElement.height));
-    postFx.target.setSize(w, h);
-    postFx.material.uniforms.uResolution.value.set(w, h);
+    postFx.composer.setPixelRatio(1);               // domElement size already includes DPR
+    postFx.composer.setSize(w, h);
+    postFx.bloom.setSize(w, h);
+    postFx.grade.uniforms.uResolution.value.set(w, h);
   }
 
   function texFromCanvas(cv) {
@@ -3386,12 +3389,11 @@ function resolveStat(stat, pCard, cCard) {
     updateXWings(dt);
     if (postFx.enabled) {
       _fxPulse = Math.max(0, _fxPulse - dt * 1.1);
-      postFx.material.uniforms.uTime.value = et;
-      postFx.material.uniforms.uPulse.value = _fxPulse;
-      renderer.setRenderTarget(postFx.target);
-      renderer.render(scene, camera);
-      renderer.setRenderTarget(null);
-      renderer.render(postFx.scene, postFx.camera);
+      postFx.grade.uniforms.uTime.value = et;
+      postFx.grade.uniforms.uPulse.value = _fxPulse;
+      // win pulse briefly lifts bloom energy for a punchier flash
+      postFx.bloom.strength = postFx.bloomBase + _fxPulse * 0.35;
+      postFx.composer.render();
     } else {
       renderer.render(scene, camera);
     }
