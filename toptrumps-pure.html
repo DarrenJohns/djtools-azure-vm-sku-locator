@@ -168,6 +168,9 @@
   import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
   import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
   import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+  import { Line2 } from 'three/addons/lines/Line2.js';
+  import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
+  import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 
   /* ===================================================================== *
    *  HARVESTED — verbatim reusable blocks from toptrumps-webgl.html        *
@@ -1163,12 +1166,13 @@ function resolveStat(stat, pCard, cCard) {
      keyboard key to a flag; toggling shows a brief toast + a11y announce.
      Add a new toggle by: (a) adding a FEAT flag, (b) a FEAT_KEYS binding,
      (c) gating the system on FEAT.<flag>. Also exposed via __pure.feature(). */
-  const FEAT = { smoke: true, streaks: true, moons: true, xwings: true, cards: true, heldXwing: false };
+  const FEAT = { smoke: true, streaks: true, moons: true, xwings: true, cards: true, heldXwing: false, arcs: true };
   const FEAT_KEYS = {
     s: { flag: 'smoke',     label: 'Smoke trail' },
     h: { flag: 'streaks',   label: 'Hyperspace streaks' },
     m: { flag: 'moons',     label: 'Moons' },
     c: { flag: 'cards',     label: 'Cards' },
+    a: { flag: 'arcs',      label: 'Data arcs' },
     x: { flag: 'heldXwing', label: 'X-wing' },
   };
   const _toastEl = document.getElementById('toast');
@@ -1625,6 +1629,147 @@ function resolveStat(stat, pCard, cCard) {
   galaxy.position.set(0, 0, -95);             // behind STAR_FAR (-82); world ≈ -101, inside camera.far
   galaxy.renderOrder = -20;                   // drawn before the stars (-10) — the farthest layer
   space.add(galaxy);
+
+  /* ---- data arcs: glowing great-circle "links" in the deep backdrop --------
+     Subtle azure arcs sweep between random nodes on an unseen sphere behind the
+     cards, each with a bright "data pulse" travelling along it — evoking traffic
+     between Azure regions. Built with the vendored fat-line addon (Line2 +
+     LineGeometry + LineMaterial) so the arcs have real screen-space width and
+     bloom pleasantly. Two Line2 per arc share one geometry: a faint solid WIRE
+     (azure gradient) shows the path; a bright DASHED PULSE rides it via an
+     animated dashOffset. A small pool respawns on a timer; frozen off during warp
+     and under prefers-reduced-motion. renderOrder keeps them behind the cards. */
+  const ARC_MAX = 3;                          // concurrent arcs
+  const ARC_N = 56;                           // samples per great-circle
+  const ARC_C = new THREE.Vector3(0, 0.5, -30);   // sphere centre (space-local; world z ≈ -36)
+  const ARC_R = 15.0;                         // sphere radius
+  const _arcRes = new THREE.Vector2(1, 1);    // drawing-buffer px (fat lines need this)
+  const _arcMats = [];                        // every live LineMaterial (resolution sync)
+  const _arcPool = [];                        // active arc records
+  let _arcTimer = 1.2;                         // seconds until next spawn attempt
+  const _arcColHead = new THREE.Color(0x9fd4ff);  // bright azure-white (pulse)
+  const _arcColWire = new THREE.Color(0x2f6fb0);  // dim azure (wire base)
+  function _arcDrawBuf() {
+    const sz = new THREE.Vector2();
+    renderer.getDrawingBufferSize(sz);
+    _arcRes.set(sz.x || window.innerWidth, sz.y || window.innerHeight);
+  }
+  function _arcRandDir() {
+    // uniform point on the unit sphere
+    const u = Math.random() * 2 - 1, t = Math.random() * Math.PI * 2;
+    const s = Math.sqrt(1 - u * u);
+    return new THREE.Vector3(s * Math.cos(t), u, s * Math.sin(t));
+  }
+  function spawnArc() {
+    const a = _arcRandDir();
+    let b = _arcRandDir();
+    // ensure a decent separation so the arc reads as a sweep, not a spot
+    let guard = 0;
+    while (a.dot(b) > 0.35 && guard++ < 8) b = _arcRandDir();
+    const bow = 0.10 + Math.random() * 0.10;     // mid-arc outward lift
+    const pos = new Float32Array(ARC_N * 3);
+    const col = new Float32Array(ARC_N * 3);
+    const _v = new THREE.Vector3();
+    for (let i = 0; i < ARC_N; i++) {
+      const f = i / (ARC_N - 1);
+      // slerp a→b on the unit sphere, then push outward at mid-arc for a bow
+      const dot = THREE.MathUtils.clamp(a.dot(b), -1, 1);
+      const om = Math.acos(dot) || 1e-4, so = Math.sin(om);
+      const wa = Math.sin((1 - f) * om) / so, wb = Math.sin(f * om) / so;
+      _v.set(a.x * wa + b.x * wb, a.y * wa + b.y * wb, a.z * wa + b.z * wb).normalize();
+      const rad = ARC_R * (1 + bow * Math.sin(Math.PI * f));
+      pos[i*3]   = ARC_C.x + _v.x * rad;
+      pos[i*3+1] = ARC_C.y + _v.y * rad;
+      pos[i*3+2] = ARC_C.z + _v.z * rad;
+      // faint azure gradient along the wire (a touch brighter toward the far end)
+      const g = 0.5 + 0.5 * f;
+      col[i*3]   = _arcColWire.r * g;
+      col[i*3+1] = _arcColWire.g * g;
+      col[i*3+2] = _arcColWire.b * g;
+    }
+    const geo = new LineGeometry();
+    geo.setPositions(pos);
+    geo.setColors(col);
+    const wireMat = new LineMaterial({
+      linewidth: 1.4, vertexColors: true, transparent: true, opacity: 0,
+      blending: THREE.AdditiveBlending, depthTest: true, depthWrite: false, toneMapped: false
+    });
+    wireMat.resolution.copy(_arcRes);
+    const pulseMat = new LineMaterial({
+      color: _arcColHead, linewidth: 3.0, transparent: true, opacity: 0,
+      blending: THREE.AdditiveBlending, depthTest: true, depthWrite: false, toneMapped: false,
+      dashed: true, dashScale: 1, dashSize: 0.10, gapSize: 1000   // single travelling dash
+    });
+    pulseMat.resolution.copy(_arcRes);
+    const wire = new Line2(geo, wireMat);
+    const pulse = new Line2(geo, pulseMat);
+    wire.computeLineDistances(); pulse.computeLineDistances();   // needed for the dash
+    wire.renderOrder = -8; pulse.renderOrder = -8;               // behind the cards
+    wire.frustumCulled = false; pulse.frustumCulled = false;
+    // dashSize/gap in the SAME units as computeLineDistances (world length). Scale
+    // the dash to the arc's length so the pulse is a short packet, gap huge so only
+    // one shows; dashOffset then slides it end-to-end.
+    const len = _arcLength(pos);
+    pulseMat.dashSize = len * 0.16;
+    pulseMat.gapSize = len * 2.2;
+    space.add(wire); space.add(pulse);
+    _arcMats.push(wireMat, pulseMat);
+    _arcPool.push({
+      wire, pulse, geo, wireMat, pulseMat, len,
+      t: 0,
+      life: 3.4 + Math.random() * 1.6,        // total seconds before despawn
+      dir: Math.random() < 0.5 ? 1 : -1        // pulse travel direction
+    });
+  }
+  function _arcLength(pos) {
+    let L = 0;
+    for (let i = 1; i < ARC_N; i++) {
+      const dx = pos[i*3] - pos[(i-1)*3];
+      const dy = pos[i*3+1] - pos[(i-1)*3+1];
+      const dz = pos[i*3+2] - pos[(i-1)*3+2];
+      L += Math.sqrt(dx*dx + dy*dy + dz*dz);
+    }
+    return L;
+  }
+  function _disposeArc(rec) {
+    space.remove(rec.wire); space.remove(rec.pulse);
+    rec.geo.dispose(); rec.wireMat.dispose(); rec.pulseMat.dispose();
+    let k = _arcMats.indexOf(rec.wireMat); if (k >= 0) _arcMats.splice(k, 1);
+    k = _arcMats.indexOf(rec.pulseMat); if (k >= 0) _arcMats.splice(k, 1);
+  }
+  function _resizeArcs() {
+    _arcDrawBuf();
+    for (const m of _arcMats) m.resolution.copy(_arcRes);
+  }
+  function updateDataArcs(dt) {
+    const on = FEAT.arcs && !REDUCED;
+    // clear the pool immediately when toggled off / reduced-motion
+    if (!on) {
+      if (_arcPool.length) { for (const r of _arcPool) _disposeArc(r); _arcPool.length = 0; }
+      return;
+    }
+    // spawn on a timer, but not during a warp (keeps the tunnel clean)
+    _arcTimer -= dt;
+    if (_arcTimer <= 0) {
+      _arcTimer = 2.6 + Math.random() * 2.4;
+      if (_arcPool.length < ARC_MAX && _bgWarpNow < 0.2) spawnArc();
+    }
+    for (let i = _arcPool.length - 1; i >= 0; i--) {
+      const r = _arcPool[i];
+      r.t += dt;
+      const f = r.t / r.life;                    // 0..1 lifecycle
+      if (f >= 1) { _disposeArc(r); _arcPool.splice(i, 1); continue; }
+      // envelope: fade in over first 18%, hold, fade out over last 22%
+      const fin = Math.min(1, r.t / (r.life * 0.18));
+      const fout = Math.min(1, (r.life - r.t) / (r.life * 0.22));
+      const env = Math.min(fin, fout);
+      r.wireMat.opacity = 0.30 * env;
+      r.pulseMat.opacity = 0.95 * env;
+      // travel the pulse along the arc: dashOffset shifts the single dash end-to-end
+      const prog = THREE.MathUtils.smoothstep(f, 0.05, 0.95);
+      r.pulseMat.dashOffset = -r.dir * prog * r.len;
+    }
+  }
 
   function updateBackdrop(_t, dt) {
     const rm = REDUCED;
@@ -3269,6 +3414,8 @@ function resolveStat(stat, pCard, cCard) {
       },
       pinWarp: (v) => { _warpPin = v; },   // freeze star warp strength for screenshots (test hook)
       meteor: () => { spawnMeteor(); },     // force-spawn a shooting star (test hook)
+      arc: () => { spawnArc(); return _arcPool.length; },   // force-spawn a data arc (test hook)
+      arcCount: () => _arcPool.length,
       xwing: () => { spawnXWingFlyby(); },  // force-spawn an X-wing flyby (test hook)
       xwingStatic: (x, y, z, ry) => {       // place a static X-wing for inspection
         const m = makeXWing(); if (!m) return false;
@@ -3322,6 +3469,7 @@ function resolveStat(stat, pCard, cCard) {
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
     resizePostFx();
+    _resizeArcs();
     layoutTable(camera.aspect);
     fitCamera();
     // if an orientation change happened between rounds, snap idle cards to the
@@ -3345,6 +3493,7 @@ function resolveStat(stat, pCard, cCard) {
     const et = clock.getElapsedTime();
     const dt = Math.min(0.05, et - _lastEt); _lastEt = et;
     updateBackdrop(et, dt);
+    updateDataArcs(dt);
     // forward-flight dolly + user camera peek: offset the camera back along z
     // (warp) and/or orbit it slightly around the scene centre, then re-aim at the
     // centre. Orbit angles ease toward their drag target, or back to 0 on release.
