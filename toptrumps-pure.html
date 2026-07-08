@@ -156,21 +156,12 @@
   <div id="stat-controls" class="sr-only" role="group" aria-label="Choose a stat to play"></div>
 
   <script type="importmap">
-  { "imports": { "three": "./vendor/three.module.min.js", "three/addons/": "./vendor/jsm/", "three/addons/loaders/GLTFLoader.js": "./vendor/GLTFLoader.js" } }
+  { "imports": { "three": "./vendor/three.module.min.js", "three/addons/loaders/GLTFLoader.js": "./vendor/GLTFLoader.js" } }
   </script>
 
   <script type="module">
   import * as THREE from 'three';
   import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-  import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-  import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-  import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
-  import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
-  import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
-  import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-  import { Line2 } from 'three/addons/lines/Line2.js';
-  import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
-  import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 
   /* ===================================================================== *
    *  HARVESTED — verbatim reusable blocks from toptrumps-webgl.html        *
@@ -1166,13 +1157,12 @@ function resolveStat(stat, pCard, cCard) {
      keyboard key to a flag; toggling shows a brief toast + a11y announce.
      Add a new toggle by: (a) adding a FEAT flag, (b) a FEAT_KEYS binding,
      (c) gating the system on FEAT.<flag>. Also exposed via __pure.feature(). */
-  const FEAT = { smoke: true, streaks: true, moons: true, xwings: true, cards: true, heldXwing: false, arcs: true };
+  const FEAT = { smoke: true, streaks: true, moons: true, xwings: true, cards: true, heldXwing: false };
   const FEAT_KEYS = {
     s: { flag: 'smoke',     label: 'Smoke trail' },
     h: { flag: 'streaks',   label: 'Hyperspace streaks' },
     m: { flag: 'moons',     label: 'Moons' },
     c: { flag: 'cards',     label: 'Cards' },
-    a: { flag: 'arcs',      label: 'Data arcs' },
     x: { flag: 'xwings',    label: 'X-wing flyby' },
   };
   const _toastEl = document.getElementById('toast');
@@ -1311,23 +1301,6 @@ function resolveStat(stat, pCard, cCard) {
   const key  = new THREE.DirectionalLight(0xffffff, 0.62); key.position.set(3.2, 5.0, 6.0); scene.add(key);
   const fill = new THREE.DirectionalLight(0xdfeaff, 0.26); fill.position.set(-4.0, 1.0, 3.0); scene.add(fill);
   const rim  = new THREE.DirectionalLight(0x66aaff, 0.42); rim.position.set(-5.0, 2.0, -5.0); scene.add(rim);
-
-  /* Image-based lighting: a PMREM-prefiltered RoomEnvironment supplies a soft,
-     neutral irradiance/reflection probe as scene.environment. This gives the
-     card faces a faint sheen and the X-wing real metallic reflections. It is
-     applied scene-wide, but each MeshStandardMaterial's envMapIntensity is kept
-     low (cards ~0.18, ship ~0.4) so it never lifts dark text or blows out the
-     white card body — the anti-dark-back + legibility invariants are preserved
-     (the emissive floor is untouched). Generated once, then the throwaway
-     RoomEnvironment scene + PMREM generator are disposed. */
-  {
-    const pmrem = new THREE.PMREMGenerator(renderer);
-    pmrem.compileEquirectangularShader();
-    const roomEnv = new RoomEnvironment();
-    scene.environment = pmrem.fromScene(roomEnv, 0.04).texture;
-    roomEnv.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); });
-    pmrem.dispose();
-  }
 
   const clock = new THREE.Clock();
   let _lastEt = 0;
@@ -1631,203 +1604,8 @@ function resolveStat(stat, pCard, cCard) {
   galaxy.renderOrder = -20;                   // drawn before the stars (-10) — the farthest layer
   space.add(galaxy);
 
-  /* ---- aurora wash: a large far additive curtain behind the starfield ------
-     A single big plane sitting between the galaxy band and the stars, painting
-     slow-drifting Azure-blue "aurora" curtains with a procedural fbm shader. It
-     lifts the flat black of deep space with gentle colour without competing with
-     the cards. Additive + toneMapped:false + depthWrite/Test off so it's a pure
-     background paint; the drift freezes under prefers-reduced-motion. */
-  const auroraMat = new THREE.ShaderMaterial({
-    uniforms: {
-      uTime:      { value: 0 },
-      uIntensity: { value: 0.34 },                    // low — a wash, not a spotlight
-      uColA:      { value: new THREE.Color(0x1f5bd6) },  // Azure blue
-      uColB:      { value: new THREE.Color(0x27b6c9) }   // teal-cyan
-    },
-    vertexShader: `
-      varying vec2 vUv;
-      void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }
-    `,
-    fragmentShader: `
-      precision highp float;
-      uniform float uTime, uIntensity;
-      uniform vec3 uColA, uColB;
-      varying vec2 vUv;
-      float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
-      float noise(vec2 p){
-        vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
-        float a = hash(i), b = hash(i + vec2(1.0, 0.0));
-        float c = hash(i + vec2(0.0, 1.0)), d = hash(i + vec2(1.0, 1.0));
-        return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
-      }
-      float fbm(vec2 p){ float v = 0.0, a = 0.5; for(int i = 0; i < 4; i++){ v += a * noise(p); p *= 2.02; a *= 0.5; } return v; }
-      void main(){
-        vec2 uv = vUv;
-        float t = uTime * 0.06;
-        float n  = fbm(vec2(uv.x * 3.0 + t,        uv.y * 1.6 - t * 0.5));
-        float n2 = fbm(vec2(uv.x * 1.5 - t * 0.7,  uv.y * 2.4 + t * 0.3));
-        float curtain = smoothstep(0.34, 0.92, n * 0.6 + n2 * 0.5);
-        // soft feather at all four edges so the plane's bounds never show
-        float edge = smoothstep(0.0, 0.26, uv.x) * smoothstep(1.0, 0.74, uv.x)
-                   * smoothstep(0.0, 0.30, uv.y) * smoothstep(1.0, 0.58, uv.y);
-        float amt = curtain * edge;
-        vec3 col = mix(uColA, uColB, clamp(n2, 0.0, 1.0));
-        gl_FragColor = vec4(col * amt * uIntensity, 1.0);
-      }
-    `,
-    transparent: true, blending: THREE.AdditiveBlending,
-    depthTest: false, depthWrite: false, toneMapped: false
-  });
-  const aurora = new THREE.Mesh(new THREE.PlaneGeometry(210, 140), auroraMat);
-  aurora.position.set(0, 4, -72);             // between the galaxy (-95) and stars; world ≈ -78
-  aurora.renderOrder = -18;                   // after the galaxy (-20), before the stars (-10)
-  aurora.frustumCulled = false;
-  space.add(aurora);
-
-  /* ---- data arcs: glowing great-circle "links" in the deep backdrop --------
-     Subtle azure arcs sweep between random nodes on an unseen sphere behind the
-     cards, each with a bright "data pulse" travelling along it — evoking traffic
-     between Azure regions. Built with the vendored fat-line addon (Line2 +
-     LineGeometry + LineMaterial) so the arcs have real screen-space width and
-     bloom pleasantly. Two Line2 per arc share one geometry: a faint solid WIRE
-     (azure gradient) shows the path; a bright DASHED PULSE rides it via an
-     animated dashOffset. A small pool respawns on a timer; frozen off during warp
-     and under prefers-reduced-motion. renderOrder keeps them behind the cards. */
-  const ARC_MAX = 3;                          // concurrent arcs
-  const ARC_N = 56;                           // samples per great-circle
-  const ARC_C = new THREE.Vector3(0, 0.5, -30);   // sphere centre (space-local; world z ≈ -36)
-  const ARC_R = 15.0;                         // sphere radius
-  const _arcRes = new THREE.Vector2(1, 1);    // drawing-buffer px (fat lines need this)
-  const _arcMats = [];                        // every live LineMaterial (resolution sync)
-  const _arcPool = [];                        // active arc records
-  let _arcTimer = 1.2;                         // seconds until next spawn attempt
-  const _arcColHead = new THREE.Color(0x9fd4ff);  // bright azure-white (pulse)
-  const _arcColWire = new THREE.Color(0x2f6fb0);  // dim azure (wire base)
-  function _arcDrawBuf() {
-    const sz = new THREE.Vector2();
-    renderer.getDrawingBufferSize(sz);
-    _arcRes.set(sz.x || window.innerWidth, sz.y || window.innerHeight);
-  }
-  function _arcRandDir() {
-    // uniform point on the unit sphere
-    const u = Math.random() * 2 - 1, t = Math.random() * Math.PI * 2;
-    const s = Math.sqrt(1 - u * u);
-    return new THREE.Vector3(s * Math.cos(t), u, s * Math.sin(t));
-  }
-  function spawnArc() {
-    const a = _arcRandDir();
-    let b = _arcRandDir();
-    // ensure a decent separation so the arc reads as a sweep, not a spot
-    let guard = 0;
-    while (a.dot(b) > 0.35 && guard++ < 8) b = _arcRandDir();
-    const bow = 0.10 + Math.random() * 0.10;     // mid-arc outward lift
-    const pos = new Float32Array(ARC_N * 3);
-    const col = new Float32Array(ARC_N * 3);
-    const _v = new THREE.Vector3();
-    for (let i = 0; i < ARC_N; i++) {
-      const f = i / (ARC_N - 1);
-      // slerp a→b on the unit sphere, then push outward at mid-arc for a bow
-      const dot = THREE.MathUtils.clamp(a.dot(b), -1, 1);
-      const om = Math.acos(dot) || 1e-4, so = Math.sin(om);
-      const wa = Math.sin((1 - f) * om) / so, wb = Math.sin(f * om) / so;
-      _v.set(a.x * wa + b.x * wb, a.y * wa + b.y * wb, a.z * wa + b.z * wb).normalize();
-      const rad = ARC_R * (1 + bow * Math.sin(Math.PI * f));
-      pos[i*3]   = ARC_C.x + _v.x * rad;
-      pos[i*3+1] = ARC_C.y + _v.y * rad;
-      pos[i*3+2] = ARC_C.z + _v.z * rad;
-      // faint azure gradient along the wire (a touch brighter toward the far end)
-      const g = 0.5 + 0.5 * f;
-      col[i*3]   = _arcColWire.r * g;
-      col[i*3+1] = _arcColWire.g * g;
-      col[i*3+2] = _arcColWire.b * g;
-    }
-    const geo = new LineGeometry();
-    geo.setPositions(pos);
-    geo.setColors(col);
-    const wireMat = new LineMaterial({
-      linewidth: 1.4, vertexColors: true, transparent: true, opacity: 0,
-      blending: THREE.AdditiveBlending, depthTest: true, depthWrite: false, toneMapped: false
-    });
-    wireMat.resolution.copy(_arcRes);
-    const pulseMat = new LineMaterial({
-      color: _arcColHead, linewidth: 3.0, transparent: true, opacity: 0,
-      blending: THREE.AdditiveBlending, depthTest: true, depthWrite: false, toneMapped: false,
-      dashed: true, dashScale: 1, dashSize: 0.10, gapSize: 1000   // single travelling dash
-    });
-    pulseMat.resolution.copy(_arcRes);
-    const wire = new Line2(geo, wireMat);
-    const pulse = new Line2(geo, pulseMat);
-    wire.computeLineDistances(); pulse.computeLineDistances();   // needed for the dash
-    wire.renderOrder = -8; pulse.renderOrder = -8;               // behind the cards
-    wire.frustumCulled = false; pulse.frustumCulled = false;
-    // dashSize/gap in the SAME units as computeLineDistances (world length). Scale
-    // the dash to the arc's length so the pulse is a short packet, gap huge so only
-    // one shows; dashOffset then slides it end-to-end.
-    const len = _arcLength(pos);
-    pulseMat.dashSize = len * 0.16;
-    pulseMat.gapSize = len * 2.2;
-    space.add(wire); space.add(pulse);
-    _arcMats.push(wireMat, pulseMat);
-    _arcPool.push({
-      wire, pulse, geo, wireMat, pulseMat, len,
-      t: 0,
-      life: 3.4 + Math.random() * 1.6,        // total seconds before despawn
-      dir: Math.random() < 0.5 ? 1 : -1        // pulse travel direction
-    });
-  }
-  function _arcLength(pos) {
-    let L = 0;
-    for (let i = 1; i < ARC_N; i++) {
-      const dx = pos[i*3] - pos[(i-1)*3];
-      const dy = pos[i*3+1] - pos[(i-1)*3+1];
-      const dz = pos[i*3+2] - pos[(i-1)*3+2];
-      L += Math.sqrt(dx*dx + dy*dy + dz*dz);
-    }
-    return L;
-  }
-  function _disposeArc(rec) {
-    space.remove(rec.wire); space.remove(rec.pulse);
-    rec.geo.dispose(); rec.wireMat.dispose(); rec.pulseMat.dispose();
-    let k = _arcMats.indexOf(rec.wireMat); if (k >= 0) _arcMats.splice(k, 1);
-    k = _arcMats.indexOf(rec.pulseMat); if (k >= 0) _arcMats.splice(k, 1);
-  }
-  function _resizeArcs() {
-    _arcDrawBuf();
-    for (const m of _arcMats) m.resolution.copy(_arcRes);
-  }
-  function updateDataArcs(dt) {
-    const on = FEAT.arcs && !REDUCED;
-    // clear the pool immediately when toggled off / reduced-motion
-    if (!on) {
-      if (_arcPool.length) { for (const r of _arcPool) _disposeArc(r); _arcPool.length = 0; }
-      return;
-    }
-    // spawn on a timer, but not during a warp (keeps the tunnel clean)
-    _arcTimer -= dt;
-    if (_arcTimer <= 0) {
-      _arcTimer = 2.6 + Math.random() * 2.4;
-      if (_arcPool.length < ARC_MAX && _bgWarpNow < 0.2) spawnArc();
-    }
-    for (let i = _arcPool.length - 1; i >= 0; i--) {
-      const r = _arcPool[i];
-      r.t += dt;
-      const f = r.t / r.life;                    // 0..1 lifecycle
-      if (f >= 1) { _disposeArc(r); _arcPool.splice(i, 1); continue; }
-      // envelope: fade in over first 18%, hold, fade out over last 22%
-      const fin = Math.min(1, r.t / (r.life * 0.18));
-      const fout = Math.min(1, (r.life - r.t) / (r.life * 0.22));
-      const env = Math.min(fin, fout);
-      r.wireMat.opacity = 0.30 * env;
-      r.pulseMat.opacity = 0.95 * env;
-      // travel the pulse along the arc: dashOffset shifts the single dash end-to-end
-      const prog = THREE.MathUtils.smoothstep(f, 0.05, 0.95);
-      r.pulseMat.dashOffset = -r.dir * prog * r.len;
-    }
-  }
-
   function updateBackdrop(_t, dt) {
     const rm = REDUCED;
-    auroraMat.uniforms.uTime.value += rm ? 0 : dt;   // drift frozen under reduced-motion
     _warp = Math.max(0, _warp - dt * 1.6);
     const w = rm ? 0 : (_warpPin != null ? _warpPin : Math.max(_warp, _warpHold));
     _bgWarpNow = w;
@@ -1888,16 +1666,6 @@ function resolveStat(stat, pCard, cCard) {
       model.position.sub(centre);                 // recentre on origin
       const maxDim = Math.max(size.x, size.y, size.z) || 1;
       const norm = 6 / maxDim;                    // target ~6 world units long
-
-      // Tone the scene.environment reflections on the ship: without this the
-      // GLB's MeshStandardMaterials pick up the IBL probe at full intensity and
-      // read as chrome. A moderate value gives a believable metallic sheen.
-      model.traverse(o => {
-        if (o.isMesh && o.material) {
-          const mats = Array.isArray(o.material) ? o.material : [o.material];
-          mats.forEach(m => { if ('envMapIntensity' in m) { m.envMapIntensity = 0.4; m.needsUpdate = true; } });
-        }
-      });
 
       // --- Orientation correction -------------------------------------
       // This GLB's fuselage is NOT axis-aligned: its true NOSE points along
@@ -2443,86 +2211,90 @@ function resolveStat(stat, pCard, cCard) {
     if (!any) _dstAlive = false;              // all spent → skip work next frame
   }
 
-  /* ---- post-fx pipeline (Phase 6) — an EffectComposer chain replaces the old
-     hand-rolled single-pass composite:
-        RenderPass  → scene into a linear-HDR (HalfFloat) buffer
-        UnrealBloomPass → physically-plausible bloom; a high threshold keeps the
-                          card whites/text crisp so only the luminous globe,
-                          foil sparkle, win-glow rim and star points bloom
-        gradePass   → vignette + film grain + low chromatic aberration +
-                      win-flash pulse (operates in linear HDR)
-        OutputPass  → ACES tone-map + sRGB encode to screen
-     A win pulse (fxKick) momentarily lifts bloom strength + CA. Off under
-     reduced-motion or ?nofx=1 (the loop falls back to a direct render), and the
-     perf governor can drop it live. --------------------------------------- */
-  const _gradeShader = {
-    uniforms: {
-      tDiffuse:    { value: null },
-      uTime:       { value: 0 },
-      uResolution: { value: new THREE.Vector2(1, 1) },
-      uVignette:   { value: 0.20 },
-      uGrain:      { value: 0.014 },
-      uAberration: { value: 0.0006 },
-      uPulse:      { value: 0 },
-      uFlashColor: { value: new THREE.Vector3(0.62, 0.84, 1.0) }
-    },
-    vertexShader: `
-      varying vec2 vUv;
-      void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
-    fragmentShader: `
-      precision highp float;
-      varying vec2 vUv;
-      uniform sampler2D tDiffuse;
-      uniform float uTime, uVignette, uGrain, uAberration, uPulse;
-      uniform vec2 uResolution;
-      uniform vec3 uFlashColor;
-      float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
-      void main(){
-        vec2 uv = vUv;
-        vec2 c = uv - 0.5;
-        float r = length(c);
-        // low chromatic aberration, stronger toward the edges + on win pulse
-        float ca = uAberration * (1.0 + uPulse * 1.4) * smoothstep(0.0, 0.85, r);
-        vec2 dir = r > 1e-4 ? c / r : vec2(0.0);
-        vec3 col;
-        col.r = texture2D(tDiffuse, uv + dir * ca).r;
-        col.g = texture2D(tDiffuse, uv).g;
-        col.b = texture2D(tDiffuse, uv - dir * ca).b;
-        // win flash — a gentle mid-radius wash of the accent colour
-        float band = smoothstep(0.10, 0.80, r) * (1.0 - smoothstep(0.60, 1.0, r));
-        col += uFlashColor * (uPulse * band * 0.16);
-        // vignette
-        col *= 1.0 - smoothstep(0.28, 0.98, r) * uVignette;
-        // fine film grain
-        float n = hash(uv * uResolution + vec2(fract(uTime * 0.37), fract(uTime * 0.61))) - 0.5;
-        col += n * uGrain;
-        gl_FragColor = vec4(col, 1.0);
-      }`
-  };
-
+  /* ---- post-fx composite (Phase 5d) — vignette, grain, low chromatic
+     aberration, selective (luma-gated) bloom + a win-flash pulse. Cards are
+     mid-tone so the high bloom threshold leaves their text crisp; only the
+     luminous globe / foil / win-glow rim bloom. Off under reduced-motion or
+     ?nofx=1, and self-disables on any GL error. ------------------------- */
   const postFx = (() => {
     const off = _reducedInit || new URLSearchParams(location.search).get('nofx') === '1';
     if (off) return { enabled: false };
-    try {
-      const composer = new EffectComposer(renderer);
-      const renderPass = new RenderPass(scene, camera);
-      // (resolution, strength, radius, threshold). A high threshold (3.2) sits
-      // well above the lit card-white luminance in the linear-HDR buffer, so the
-      // flat card body + dark text stay crisp; only genuinely bright, additive
-      // elements — the win-glow rim, rarity foil sparkle and bright star cores —
-      // exceed it and bloom. The win pulse (below) lifts strength for a flash.
-      const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.45, 0.5, 3.2);
-      const grade = new ShaderPass(_gradeShader);
-      const output = new OutputPass();
-      composer.addPass(renderPass);
-      composer.addPass(bloom);
-      composer.addPass(grade);
-      composer.addPass(output);
-      return { enabled: true, composer, bloom, grade, bloomBase: 0.45 };
-    } catch (err) {
-      console.warn('post-fx composer init failed; rendering direct', err);
-      return { enabled: false };
-    }
+    const target = new THREE.WebGLRenderTarget(16, 16, {
+      format: THREE.RGBAFormat, type: THREE.UnsignedByteType,
+      depthBuffer: true, stencilBuffer: false
+    });
+    target.texture.colorSpace = THREE.SRGBColorSpace;
+    target.texture.generateMipmaps = false;
+    target.texture.minFilter = THREE.LinearFilter;
+    target.texture.magFilter = THREE.LinearFilter;
+    const fxScene = new THREE.Scene();
+    const fxCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+    const mat = new THREE.ShaderMaterial({
+      depthWrite: false, depthTest: false, toneMapped: false,
+      uniforms: {
+        uTex:        { value: target.texture },
+        uTime:       { value: 0 },
+        uResolution: { value: new THREE.Vector2(1, 1) },
+        uVignette:   { value: 0.20 },
+        uGrain:      { value: 0.014 },
+        uAberration: { value: 0.0006 },
+        uBloomBase:  { value: 0.06 },
+        uPulse:      { value: 0 },
+        uFlashColor: { value: new THREE.Vector3(0.62, 0.84, 1.0) }
+      },
+      vertexShader: `
+        varying vec2 vUv;
+        void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }`,
+      fragmentShader: `
+        precision highp float;
+        varying vec2 vUv;
+        uniform sampler2D uTex;
+        uniform float uTime, uVignette, uGrain, uAberration, uBloomBase, uPulse;
+        uniform vec2 uResolution;
+        uniform vec3 uFlashColor;
+        float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+        void main(){
+          vec2 uv = vUv;
+          vec2 c = uv - 0.5;
+          float r = length(c);
+          // low chromatic aberration, stronger toward the edges + on win pulse
+          float ca = uAberration * (1.0 + uPulse * 1.4) * smoothstep(0.0, 0.85, r);
+          vec2 dir = r > 1e-4 ? c / r : vec2(0.0);
+          vec3 col;
+          col.r = texture2D(uTex, uv + dir * ca).r;
+          col.g = texture2D(uTex, uv).g;
+          col.b = texture2D(uTex, uv - dir * ca).b;
+          // selective bloom: only high-luma pixels contribute, so card text stays sharp
+          float luma = dot(col, vec3(0.2126, 0.7152, 0.0722));
+          float amt = uBloomBase + uPulse * 0.10;
+          if (amt > 1e-4) {
+            vec2 px = 1.0 / uResolution;
+            vec2 o1 = px * (2.0 + 6.0 * amt);
+            vec2 o2 = px * (5.0 + 15.0 * amt);
+            vec3 inner = (texture2D(uTex, uv + vec2( o1.x, 0.0)).rgb
+                        + texture2D(uTex, uv + vec2(-o1.x, 0.0)).rgb
+                        + texture2D(uTex, uv + vec2(0.0,  o1.y)).rgb
+                        + texture2D(uTex, uv + vec2(0.0, -o1.y)).rgb) * 0.25;
+            vec3 outer = (texture2D(uTex, uv + o2).rgb
+                        + texture2D(uTex, uv - o2).rgb
+                        + texture2D(uTex, uv + vec2( o2.x, -o2.y)).rgb
+                        + texture2D(uTex, uv + vec2(-o2.x,  o2.y)).rgb) * 0.25;
+            float bright = smoothstep(0.70, 0.98, luma);
+            col += mix(inner, outer, 0.55) * bright * amt * 1.2;
+          }
+          // win flash — a gentle mid-radius wash of the accent colour
+          float band = smoothstep(0.10, 0.80, r) * (1.0 - smoothstep(0.60, 1.0, r));
+          col += uFlashColor * (uPulse * band * 0.16);
+          // vignette
+          col *= 1.0 - smoothstep(0.28, 0.98, r) * uVignette;
+          // fine film grain
+          float n = hash(uv * uResolution + vec2(fract(uTime * 0.37), fract(uTime * 0.61))) - 0.5;
+          col += n * uGrain;
+          gl_FragColor = vec4(col, 1.0);
+        }`
+    });
+    fxScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat));
+    return { enabled: true, target, scene: fxScene, camera: fxCam, material: mat };
   })();
   let _fxPulse = 0;                                  // decays each frame
   function fxKick(amount = 1) { if (postFx.enabled) _fxPulse = Math.min(1.3, _fxPulse + amount); }
@@ -2530,10 +2302,8 @@ function resolveStat(stat, pCard, cCard) {
     if (!postFx.enabled) return;
     const w = Math.max(1, Math.floor(renderer.domElement.width));
     const h = Math.max(1, Math.floor(renderer.domElement.height));
-    postFx.composer.setPixelRatio(1);               // domElement size already includes DPR
-    postFx.composer.setSize(w, h);
-    postFx.bloom.setSize(w, h);
-    postFx.grade.uniforms.uResolution.value.set(w, h);
+    postFx.target.setSize(w, h);
+    postFx.material.uniforms.uResolution.value.set(w, h);
   }
 
   function texFromCanvas(cv) {
@@ -2561,7 +2331,7 @@ function resolveStat(stat, pCard, cCard) {
     // that MeshBasic gave us for free. roughness high / metalness 0 = paper-like.
     const mkMat = (map) => new THREE.MeshStandardMaterial({
       map, emissive: 0xffffff, emissiveMap: map, emissiveIntensity: 0.34,
-      roughness: 0.86, metalness: 0.0, envMapIntensity: 0.18, transparent: true
+      roughness: 0.86, metalness: 0.0, transparent: true
     });
     const frontMat = mkMat(frontTex);
     const backMat  = mkMat(backTex);
@@ -3469,8 +3239,6 @@ function resolveStat(stat, pCard, cCard) {
       },
       pinWarp: (v) => { _warpPin = v; },   // freeze star warp strength for screenshots (test hook)
       meteor: () => { spawnMeteor(); },     // force-spawn a shooting star (test hook)
-      arc: () => { spawnArc(); return _arcPool.length; },   // force-spawn a data arc (test hook)
-      arcCount: () => _arcPool.length,
       xwing: () => { spawnXWingFlyby(); },  // force-spawn an X-wing flyby (test hook)
       xwingStatic: (x, y, z, ry) => {       // place a static X-wing for inspection
         const m = makeXWing(); if (!m) return false;
@@ -3524,7 +3292,6 @@ function resolveStat(stat, pCard, cCard) {
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
     resizePostFx();
-    _resizeArcs();
     layoutTable(camera.aspect);
     fitCamera();
     // if an orientation change happened between rounds, snap idle cards to the
@@ -3548,7 +3315,6 @@ function resolveStat(stat, pCard, cCard) {
     const et = clock.getElapsedTime();
     const dt = Math.min(0.05, et - _lastEt); _lastEt = et;
     updateBackdrop(et, dt);
-    updateDataArcs(dt);
     // forward-flight dolly + user camera peek: offset the camera back along z
     // (warp) and/or orbit it slightly around the scene centre, then re-aim at the
     // centre. Orbit angles ease toward their drag target, or back to 0 on release.
@@ -3593,11 +3359,12 @@ function resolveStat(stat, pCard, cCard) {
     updateXWings(dt);
     if (postFx.enabled) {
       _fxPulse = Math.max(0, _fxPulse - dt * 1.1);
-      postFx.grade.uniforms.uTime.value = et;
-      postFx.grade.uniforms.uPulse.value = _fxPulse;
-      // win pulse briefly lifts bloom energy for a punchier flash
-      postFx.bloom.strength = postFx.bloomBase + _fxPulse * 0.35;
-      postFx.composer.render();
+      postFx.material.uniforms.uTime.value = et;
+      postFx.material.uniforms.uPulse.value = _fxPulse;
+      renderer.setRenderTarget(postFx.target);
+      renderer.render(scene, camera);
+      renderer.setRenderTarget(null);
+      renderer.render(postFx.scene, postFx.camera);
     } else {
       renderer.render(scene, camera);
     }
