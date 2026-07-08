@@ -1173,7 +1173,7 @@ function resolveStat(stat, pCard, cCard) {
     m: { flag: 'moons',     label: 'Moons' },
     c: { flag: 'cards',     label: 'Cards' },
     a: { flag: 'arcs',      label: 'Data arcs' },
-    x: { flag: 'heldXwing', label: 'X-wing' },
+    x: { flag: 'xwings',    label: 'X-wing flyby' },
   };
   const _toastEl = document.getElementById('toast');
   let _toastTimer = 0;
@@ -1190,6 +1190,7 @@ function resolveStat(stat, pCard, cCard) {
     const label = (Object.values(FEAT_KEYS).find(k => k.flag === flag) || {}).label || flag;
     if (flag === 'cards')     applyCardVisibility();   // show/hide the two play cards
     if (flag === 'heldXwing') applyHeldXWing();         // show/hide a held X-wing for inspection
+    if (flag === 'xwings' && !FEAT.xwings) cancelTweensWithTag('xwing');   // toggling off clears any in-flight flyby
     showToast(label + ': ' + (FEAT[flag] ? 'ON' : 'OFF'));
     announce(label + ' ' + (FEAT[flag] ? 'on' : 'off'));
     if (_helpEl && _helpEl.classList.contains('show')) renderHelp();   // keep the open help panel live
