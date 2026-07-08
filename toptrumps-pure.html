@@ -3051,8 +3051,6 @@ function resolveStat(stat, pCard, cCard) {
       // showcase the winning card: light its edge up with a glowing rim halo
       const winG = winner === 'player' ? playerCard : cpuCard;
       showWinGlow(winG, HL.win, winner === 'player' ? 0.66 : 0.56);
-      globeBurst(winner === 'player' ? 5 : 3);
-      fxKick(winner === 'player' ? 0.7 : 0.45);
     }
 
     await beat(winner === 'tie' ? 900 : 1050);
