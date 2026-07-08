@@ -1698,36 +1698,35 @@ function resolveStat(stat, pCard, cCard) {
    if (!xwing) return;              // model not loaded yet
    xwing.scale.multiplyScalar(1.0 + Math.random() * 0.5);   // size variety (bumped so the near swoop looms large)
 
-   // FORWARD CHARGE: the craft flies a nearly STRAIGHT line straight at the
-   // viewer, held at a small CONSTANT side + height offset so you see a nice ¾
-   // view (not a boring dead-centre dot). Two reasons this reads as "forward"
-   // where the old curved swoop read as "sideways":
-   //   (1) The path is straight, so the ship's long axis never has to pivot —
-   //       the TAIL retraces the NOSE's exact track (no off-tracking / flank /
-   //       crab). On a curved path the tail cuts the corner and you see the
-   //       broadside, which looks like sideways flight.
-   //   (2) start and end share almost the same x/y, so the travel vector points
-   //       essentially straight INTO the screen (nose toward you). The dominant
-   //       motion is pure looming approach, which is the strongest "coming at
-   //       you" cue; residual sideways screen drift is tiny and happens only in
-   //       the last unit or two, by which point the craft has faded.
+   // FORWARD CHARGE — aimed AT THE CAMERA EYE. The single thing that makes a
+   // craft read as "coming straight at you" is that its VELOCITY points at your
+   // eye, not merely along the view axis. A ship flying parallel to the optical
+   // axis but sitting off-centre genuinely presents its flank to your eye — so
+   // correct perspective draws it angled/sideways no matter how perfectly the
+   // nose is locked to the path (measured: nose-vs-velocity error is ~0°, yet it
+   // still looked 45° off). The fix is geometric, not orientational: make the
+   // flight path a straight line that terminates at the camera eye. Then:
+   //   • velocity = toward the eye every frame, so the nose (locked to velocity)
+   //     points straight at you — fully foreshortened, nose-ON, no flank.
+   //   • a line through the eye projects to a single screen point, so the ship
+   //     holds a near-constant screen position and simply LOOMS larger — the
+   //     unambiguous "charging at you" cue, with zero sideways drift.
+   // A modest lateral+height start offset (small angle, since the start is far)
+   // keeps it just off dead-centre for composition while staying ~head-on.
    const camZ = camera.position.z;                 // ~8.4 at rest, further back during warp
    const camX = camera.position.x, camY = camera.position.y;
 
-   const side    = Math.random() < 0.5 ? 1 : -1;   // which side it sits on
-   const lateral = 0.6 + Math.random() * 0.4;      // small, roughly-constant side offset (subtle ¾ view)
-   const height  = 0.5 + Math.random() * 0.6;      // slightly above eye-line
-   const startZ  = -60 - Math.random() * 20;        // a distant dot, dead ahead
-   const endZ    = camZ + 2;                         // charges right up to the lens (faded by then)
-   const sx = camX + side * lateral;
-   const ex = camX + side * lateral * 0.9;          // converges only a hair — near-zero lateral drift
-   const sy = camY + height;
-   const ey = camY + height * 0.45;                 // settles a touch lower toward the end
-   // Control point kept almost on the chord: a whisper of bow for grace without
-   // introducing real curvature (curvature = pivot = flank = the sideways look).
+   const side    = Math.random() < 0.5 ? 1 : -1;   // which side of centre it enters from
+   const startZ  = -60 - Math.random() * 20;        // a distant dot, roughly dead ahead
+   const sx = camX + side * (2.5 + Math.random() * 2);   // a few units aside, far away => small screen angle
+   const sy = camY + 2.2 + Math.random() * 1.4;          // a little above the eye-line
+   // End EXACTLY at the camera eye so the path is a ray through the eye (the
+   // craft is faded out ~2 units before it actually arrives — see zFade below).
    const p0 = new THREE.Vector3(sx, sy, startZ);
-   const p2 = new THREE.Vector3(ex, ey, endZ);
-   const p1 = new THREE.Vector3((sx + ex) / 2, (sy + ey) / 2 + 0.35, (startZ + endZ) / 2);
+   const p2 = new THREE.Vector3(camX, camY, camZ);
+   // Straight line: control point on the chord — no curvature => no pivot =>
+   // the tail retraces the nose exactly (no off-tracking, no broadside/flank).
+   const p1 = new THREE.Vector3((sx + camX) / 2, (sy + camY) / 2, (startZ + camZ) / 2);
 
    // Seat the craft at its true start pose with opacity 0 BEFORE it enters the
    // scene, so the first render can never flash it at the origin (which sits on
