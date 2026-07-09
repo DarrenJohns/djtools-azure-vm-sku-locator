@@ -1662,8 +1662,8 @@ function resolveStat(stat, pCard, cCard) {
   // (the TIE's symmetric silhouette reads oddly with a big roll, so it banks
   // less). `emissiveI` lifts a dark hull out of the black background.
   const CRAFT = {
-    xwing: { url: './vendor/models/x-wing.glb',      norm: 6.0,
-             nose: [-0.437, 0.007, -0.9], up: [-0.126, 0.99, 0.069],
+    xwing: { url: './vendor/models/x-wing-v2.glb',   norm: 6.0,
+             nose: [0, 0, -1], up: [0, 1, 0],
              roll: 1.0,  emissive: 0x000000, emissiveI: 0 },
     tie:   { url: './vendor/models/tie-fighter.glb', norm: 5.6,
              nose: [0.0246, 0.5266, 0.8498], up: [-0.0219, 0.8501, -0.5261],
@@ -3417,10 +3417,10 @@ function resolveStat(stat, pCard, cCard) {
         m.scale.multiplyScalar(2);          // enlarge for clear inspection
         scene.add(m); return true;
       },
-      craftStatic: (type, x, y, z, ry, sc) => { // place any static craft for axis calibration
+      craftStatic: (type, x, y, z, ry, sc, rx) => { // place any static craft for axis calibration
         const m = makeCraft(type || 'xwing'); if (!m) return false;
         m.position.set(x || 0, y || 0, (z == null ? -18 : z));
-        m.rotation.set(0, (ry == null ? Math.PI : ry), 0);
+        m.rotation.set(rx || 0, (ry == null ? Math.PI : ry), 0);
         m.scale.multiplyScalar(sc == null ? 2 : sc);
         scene.add(m); return true;
       },
