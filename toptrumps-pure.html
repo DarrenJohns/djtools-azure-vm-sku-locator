@@ -1713,10 +1713,10 @@ function resolveStat(stat, pCard, cCard) {
         child.material = Array.isArray(child.material)
           ? child.material.map(prepMat)
           : prepMat(child.material);
-        child.renderOrder = 6;   // draw on top of moons/stars so a moon never occludes the craft
+        child.renderOrder = -1;  // over the moons/stars but UNDER the cards (renderOrder 0) — cards stay the top layer
       }
     });
-    inst.renderOrder = 6;   // craft always reads in front of the moons/stars (depthTest:false above)
+    inst.renderOrder = -1;  // transparent + depthTest:false keeps it above the opaque moons; below the cards so they always occlude it
     return inst;
   }
 
@@ -1749,11 +1749,11 @@ function resolveStat(stat, pCard, cCard) {
         .addScaledVector(b, 2 * u * t)
         .addScaledVector(c, t * t);
     };
-    // The X-wing draws in front of everything (see makeXWing), so we keep its
-    // projected path off the two CARD FACES at all depths. The centre GAP between
-    // the cards and the open SKY above / below them are fair game — so the craft
-    // still roams the scene and recedes toward the vanishing point, but never rakes
-    // across a card.
+    // The X-wing draws BEHIND the cards (see makeXWing: renderOrder -1) but in
+    // front of the moons. The cards are the top layer and always occlude it, so a
+    // path may pass behind a card harmlessly. We still route off the two CARD
+    // FACES so the craft is never bisected by a card edge — it reads as a whole
+    // craft roaming the scene and receding toward the vanishing point.
     const hitsCard = (a, b, c) => {
       const tmp = new THREE.Vector3();
       for (let i = 0; i <= 24; i++) {
@@ -1787,7 +1787,7 @@ function resolveStat(stat, pCard, cCard) {
       return { edge: { x: side * r(1.06, 1.32), y: r(-0.6, 0.6) }, free: { x: side * r(0.66, 0.9), y: r(-0.5, 0.5) } };
     };
     const nearZ = () => camZ - r(5, 16);    // just in front of the viewer at the edge
-    const farZ  = () => r(-114, -96);        // deep distance (leaves room to melt away)
+    const farZ  = () => r(-175, -152);       // very deep: craft shrinks to a distant dot before it melts (camera far=200)
     const buildProfile = (kind) => {
       if (kind === 'enter_recede') {
         // Enters from a screen EDGE near the viewer, then glides off into the far
@@ -1800,7 +1800,7 @@ function resolveStat(stat, pCard, cCard) {
           p0: ndcToWorldAtZ(s.x, s.y, z0),
           p1: ndcToWorldAtZ(m.x, m.y, z0 + (z2 - z0) * 0.55 + r(-4, 4)),
           p2: ndcToWorldAtZ(e.x, e.y, z2),
-          duration: r(3800, 5400),
+          duration: r(4400, 6200),
           ease: (x) => x * (2 - x)                 // ease-out: quick entry, long glide
         };
       }
@@ -1906,7 +1906,7 @@ function resolveStat(stat, pCard, cCard) {
         const fadeIn = Math.min(1, t / 0.05);
         let distFade = 1;
         if (path.farEnd) {
-          const zNow = _pos.z, zKeep = -82, zGone = -116;   // hold, then gentle melt
+          const zNow = _pos.z, zKeep = -116, zGone = -150;  // hold opaque while it shrinks to a dot, then melt at the far end
           distFade = zNow >= zKeep ? 1
                    : zNow <= zGone ? 0
                    : (zNow - zGone) / (zKeep - zGone);
