@@ -2320,6 +2320,18 @@ function resolveStat(stat, pCard, cCard) {
     return t;
   }
 
+  function refreshCardBackTexture(cardG, backCv) {
+    if (!cardG || !cardG.userData.back) return;
+    const backMat = cardG.userData.back.material;
+    const oldBackTex = cardG.userData.backTex;
+    const newBackTex = texFromCanvas(backCv || art.bakeBack());
+    cardG.userData.backTex = newBackTex;
+    backMat.map = newBackTex;
+    backMat.emissiveMap = newBackTex;
+    backMat.needsUpdate = true;
+    if (oldBackTex) oldBackTex.dispose();
+  }
+
   /* One card = one Group with a front plane (+Z) and a back plane (−Z).
      Flipping the Group around Y swaps which face the camera sees. This is
      the single owner: there is no DOM twin, no proxy, no separate context. */
@@ -2329,6 +2341,8 @@ function resolveStat(stat, pCard, cCard) {
 
     const frontTex = texFromCanvas(art.bakeFront(card));
     const backTex  = texFromCanvas(art.bakeBack());
+    g.userData.frontTex = frontTex;
+    g.userData.backTex  = backTex;
 
     // Lit materials (Phase 4). The baked art is the albedo AND an emissive map
     // at a fixed floor, so the surface responds to the light rig (gradient on
@@ -2374,7 +2388,8 @@ function resolveStat(stat, pCard, cCard) {
       if (g.userData.winGlow) { _winGlows.delete(g.userData.winGlow.material); g.userData.winGlow.material.dispose(); }
       if (foil) { foils.delete(foil.material); foil.material.dispose(); }
       backSheens.delete(backSheen.material); backSheen.material.dispose();
-      frontTex.dispose(); backTex.dispose();
+      if (g.userData.frontTex) g.userData.frontTex.dispose();
+      if (g.userData.backTex)  g.userData.backTex.dispose();
       frontMat.dispose(); backMat.dispose();
     };
     return g;
@@ -2602,6 +2617,13 @@ function resolveStat(stat, pCard, cCard) {
   const _camTmp = new THREE.Vector3();                                  // reused — no per-frame alloc
 
   let playerCard = null, cpuCard = null;
+  // If the Azure logo finishes loading after a back texture was baked, re-bake and
+  // swap the live card-back textures so the center "A" appears deterministically.
+  art.onBackRefresh(() => {
+    const backCv = art.bakeBack();
+    refreshCardBackTexture(playerCard, backCv);
+    refreshCardBackTexture(cpuCard, backCv);
+  });
 
   /* ---- soft contact shadow (Phase 4) ---------------------------------
      A blurred radial blob that sits on the table BEHIND each card (never a
