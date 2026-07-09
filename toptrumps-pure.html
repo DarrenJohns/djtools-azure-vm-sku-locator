@@ -1734,14 +1734,21 @@ function resolveStat(stat, pCard, cCard) {
     const inst = proto.clone(true);
     inst.traverse(child => {
       if (child.isMesh && child.material) {
-        const prepMat = (m) => { const c = m.clone(); c.transparent = true; c.depthTest = false; c.depthWrite = false; return c; };
+        // transparent (for the flyby opacity fades) but WITH depth test+write so the
+        // craft self-occludes correctly. depthTest:false used to be set here to force
+        // "always over the moons" layering, but that also disabled intra-model sorting,
+        // so a far TIE solar panel could paint over a near one and read as see-through.
+        // On-screen the craft always sits behind the card plane, so cards (transparent,
+        // higher renderOrder) still occlude it; moons are opaque and already in the depth
+        // buffer, giving correct craft-vs-moon occlusion.
+        const prepMat = (m) => { const c = m.clone(); c.transparent = true; c.depthTest = true; c.depthWrite = true; return c; };
         child.material = Array.isArray(child.material)
           ? child.material.map(prepMat)
           : prepMat(child.material);
         child.renderOrder = -1;  // over the moons/stars but UNDER the cards (renderOrder 0) — cards stay the top layer
       }
     });
-    inst.renderOrder = -1;  // transparent + depthTest:false keeps it above the opaque moons; below the cards so they always occlude it
+    inst.renderOrder = -1;  // draws before the cards in the transparent sort so the cards always occlude it; self-occludes via depth
     inst.userData.craftType = type;
     return inst;
   }
