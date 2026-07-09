@@ -1728,6 +1728,17 @@ function resolveStat(stat, pCard, cCard) {
 
   // Clone a cached prototype into a fresh flyby instance. Materials are cloned
   // so per-flyby opacity fades don't mutate the shared prototype.
+  //
+  // Layering goal: craft draws IN FRONT OF every moon but BEHIND the cards, and
+  // its own panels/hull must self-occlude (no see-through wings). Those two goals
+  // conflict under a shared depth buffer — the moons are opaque and write depth in
+  // the opaque pass, so honouring that depth would hide the craft behind a nearer
+  // moon; ignoring depth entirely (the old depthTest:false) breaks intra-model
+  // sorting so a far TIE panel paints over a near one. We resolve it by clearing
+  // the depth buffer once, right before the craft draws (see the sentinel below):
+  // the craft then self-occludes in a fresh depth buffer and floats above every
+  // moon, while the cards — drawn later with depthTest:false and a higher
+  // renderOrder — still paint over it.
   function makeCraft(type) {
     const proto = _craftProtos[type];
     if (!proto) return null;                      // not loaded yet — skip this spawn
@@ -1735,12 +1746,7 @@ function resolveStat(stat, pCard, cCard) {
     inst.traverse(child => {
       if (child.isMesh && child.material) {
         // transparent (for the flyby opacity fades) but WITH depth test+write so the
-        // craft self-occludes correctly. depthTest:false used to be set here to force
-        // "always over the moons" layering, but that also disabled intra-model sorting,
-        // so a far TIE solar panel could paint over a near one and read as see-through.
-        // On-screen the craft always sits behind the card plane, so cards (transparent,
-        // higher renderOrder) still occlude it; moons are opaque and already in the depth
-        // buffer, giving correct craft-vs-moon occlusion.
+        // craft self-occludes correctly against the freshly-cleared depth buffer.
         const prepMat = (m) => { const c = m.clone(); c.transparent = true; c.depthTest = true; c.depthWrite = true; return c; };
         child.material = Array.isArray(child.material)
           ? child.material.map(prepMat)
@@ -1748,6 +1754,20 @@ function resolveStat(stat, pCard, cCard) {
         child.renderOrder = -1;  // over the moons/stars but UNDER the cards (renderOrder 0) — cards stay the top layer
       }
     });
+    // Depth-isolation sentinel: an invisible object that clears the depth buffer
+    // just before the craft's meshes render. It sits in the TRANSPARENT queue at
+    // renderOrder -2 (after the opaque moons have written depth, before the craft
+    // meshes at -1), so clearing here drops the moon depth and lets the craft draw
+    // in front of every moon while still self-occluding. colorWrite:false keeps it
+    // invisible; it writes/tests no depth of its own.
+    const clearer = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.001, 0.001),
+      new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: false, depthTest: false, transparent: true })
+    );
+    clearer.frustumCulled = false;
+    clearer.renderOrder = -2;
+    clearer.onBeforeRender = (r) => r.clearDepth();
+    inst.add(clearer);
     inst.renderOrder = -1;  // draws before the cards in the transparent sort so the cards always occlude it; self-occludes via depth
     inst.userData.craftType = type;
     return inst;
