@@ -1288,7 +1288,7 @@ function resolveStat(stat, pCard, cCard) {
   }, false);
 
   const scene  = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 200);
+  const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 320);
   camera.position.set(0, 0, 8.4);
   camera.lookAt(0, 0, 0);
 
@@ -1787,7 +1787,7 @@ function resolveStat(stat, pCard, cCard) {
       return { edge: { x: side * r(1.06, 1.32), y: r(-0.6, 0.6) }, free: { x: side * r(0.66, 0.9), y: r(-0.5, 0.5) } };
     };
     const nearZ = () => camZ - r(5, 16);    // just in front of the viewer at the edge
-    const farZ  = () => r(-175, -152);       // very deep: craft shrinks to a distant dot before it melts (camera far=200)
+    const farZ  = () => r(-262, -228);       // +50% deeper: craft shrinks to a far dot before it melts (camera far=320)
     const buildProfile = (kind) => {
       if (kind === 'enter_recede') {
         // Enters from a screen EDGE near the viewer, then glides off into the far
@@ -1906,7 +1906,7 @@ function resolveStat(stat, pCard, cCard) {
         const fadeIn = Math.min(1, t / 0.05);
         let distFade = 1;
         if (path.farEnd) {
-          const zNow = _pos.z, zKeep = -116, zGone = -150;  // hold opaque while it shrinks to a dot, then melt at the far end
+          const zNow = _pos.z, zKeep = -174, zGone = -225;  // +50% deeper: stay opaque much further out, then melt only at the far end
           distFade = zNow >= zKeep ? 1
                    : zNow <= zGone ? 0
                    : (zNow - zGone) / (zKeep - zGone);
