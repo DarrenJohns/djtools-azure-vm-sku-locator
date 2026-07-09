@@ -1722,126 +1722,211 @@ function resolveStat(stat, pCard, cCard) {
   }
 
   function spawnXWingFlyby() {
-   if (!FEAT.xwings || REDUCED) return;
-   if (_xwings.length > 1) return;  // max 2 concurrent flybys
-   const xwing = makeXWing();
-   if (!xwing) return;              // model not loaded yet
-   xwing.scale.multiplyScalar(1.0 + Math.random() * 0.5);   // size variety (bumped so the near swoop looms large)
+    if (!FEAT.xwings || REDUCED) return;
+    if (_xwings.length > 1) return;  // max 2 concurrent flybys
+    const xwing = makeXWing();
+    if (!xwing) return;              // model not loaded yet
+    xwing.scale.multiplyScalar(1.0 + Math.random() * 0.5);   // size variety
 
-   // FORWARD CHARGE — aimed AT THE CAMERA EYE. The single thing that makes a
-   // craft read as "coming straight at you" is that its VELOCITY points at your
-   // eye, not merely along the view axis. A ship flying parallel to the optical
-   // axis but sitting off-centre genuinely presents its flank to your eye — so
-   // correct perspective draws it angled/sideways no matter how perfectly the
-   // nose is locked to the path (measured: nose-vs-velocity error is ~0°, yet it
-   // still looked 45° off). The fix is geometric, not orientational: make the
-   // flight path a straight line that terminates at the camera eye. Then:
-   //   • velocity = toward the eye every frame, so the nose (locked to velocity)
-   //     points straight at you — fully foreshortened, nose-ON, no flank.
-   //   • a line through the eye projects to a single screen point, so the ship
-   //     holds a near-constant screen position and simply LOOMS larger — the
-   //     unambiguous "charging at you" cue, with zero sideways drift.
-   // A modest lateral+height start offset (small angle, since the start is far)
-   // keeps it just off dead-centre for composition while staying ~head-on.
-   const camZ = camera.position.z;                 // ~8.4 at rest, further back during warp
-   const camX = camera.position.x, camY = camera.position.y;
+    // Flight-path policy:
+    // 1) Keep X-wings out of card space by routing through perimeter lanes and
+    //    rejecting any candidate that enters the center screen window.
+    // 2) Keep the established axis logic untouched: orientation continues to come
+    //    from curve tangent + roll around fuselage axis (see update block below).
+    const cam = camera.position.clone();
+    const camZ = cam.z;
+    const r = (a, b) => a + Math.random() * (b - a);
+    const pickSign = () => (Math.random() < 0.5 ? -1 : 1);
+    const ndcToWorldAtZ = (nx, ny, zWorld) => {
+      const nd = new THREE.Vector3(nx, ny, 0.2).unproject(camera);
+      const dir = nd.sub(cam);
+      if (Math.abs(dir.z) < 1e-5) return new THREE.Vector3(nx * 14, ny * 10, zWorld);
+      return cam.clone().addScaledVector(dir, (zWorld - cam.z) / dir.z);
+    };
+    const bezierPoint = (out, t, a, b, c) => {
+      const u = 1 - t;
+      return out.set(0, 0, 0)
+        .addScaledVector(a, u * u)
+        .addScaledVector(b, 2 * u * t)
+        .addScaledVector(c, t * t);
+    };
+    const crossesCardZone = (a, b, c) => {
+      const tmp = new THREE.Vector3();
+      const zoneX = 0.50, zoneY = 0.42;   // center "no-fly" window in NDC
+      for (let i = 0; i <= 16; i++) {
+        bezierPoint(tmp, i / 16, a, b, c);
+        const nd = tmp.clone().project(camera);
+        if (!Number.isFinite(nd.x) || !Number.isFinite(nd.y)) return true;
+        if (Math.abs(nd.x) < zoneX && Math.abs(nd.y) < zoneY) return true;
+      }
+      return false;
+    };
+    const edgeLaneNdc = (allowOffscreen = false) => {
+      const off = allowOffscreen;
+      if (Math.random() < 0.5) {
+        return {
+          x: pickSign() * r(off ? 1.04 : 0.58, off ? 1.30 : 0.96),
+          y: pickSign() * r(0.46, 0.90)
+        };
+      }
+      return {
+        x: pickSign() * r(0.50, 0.90),
+        y: pickSign() * r(off ? 1.02 : 0.56, off ? 1.24 : 0.94)
+      };
+    };
+    const buildProfile = (kind) => {
+      if (kind === 'edge_charge_in') {
+        const side = pickSign();
+        const startZ = r(-84, -64);
+        const endZ = camZ - r(1.8, 3.3);
+        const s = { x: side * r(0.60, 0.96), y: pickSign() * r(0.46, 0.92) };
+        const e = { x: side * r(0.62, 0.94), y: pickSign() * r(0.34, 0.84) };
+        const m = {
+          x: (s.x + e.x) * 0.5 + side * r(0.04, 0.18),
+          y: (s.y + e.y) * 0.5 + pickSign() * r(0.06, 0.20)
+        };
+        return {
+          kind,
+          p0: ndcToWorldAtZ(s.x, s.y, startZ),
+          p1: ndcToWorldAtZ(m.x, m.y, (startZ + endZ) * 0.5 + r(-4, 3)),
+          p2: ndcToWorldAtZ(e.x, e.y, endZ),
+          duration: r(3200, 4400),
+          ease: (x) => x * x * (2 - x * 0.6)
+        };
+      }
+      if (kind === 'edge_escape_out') {
+        const s = edgeLaneNdc(true);   // can begin just off-screen edge
+        const e = edgeLaneNdc(false);
+        const startZ = camZ - r(2.0, 5.2);
+        const endZ = r(-84, -64);
+        const m = {
+          x: (s.x + e.x) * 0.5 + pickSign() * r(0.04, 0.16),
+          y: (s.y + e.y) * 0.5 + pickSign() * r(0.04, 0.16)
+        };
+        return {
+          kind,
+          p0: ndcToWorldAtZ(s.x, s.y, startZ),
+          p1: ndcToWorldAtZ(m.x, m.y, (startZ + endZ) * 0.5 + r(-3, 3)),
+          p2: ndcToWorldAtZ(e.x, e.y, endZ),
+          duration: r(2800, 3900),
+          ease: (x) => x * (2 - x)
+        };
+      }
+      // edge_lateral: side-to-side sweep across top/bottom lanes, with depth drift.
+      const dir = pickSign();
+      const y0 = pickSign() * r(0.50, 0.90);
+      const y1 = y0 + pickSign() * r(0.02, 0.16);
+      const z0 = r(-60, -40);
+      const z2 = z0 + r(-8, 8);
+      return {
+        kind: 'edge_lateral',
+        p0: ndcToWorldAtZ(-dir * r(1.05, 1.32), y0, z0),
+        p1: ndcToWorldAtZ(r(-0.24, 0.24), (y0 + y1) * 0.5 + pickSign() * r(0.04, 0.12), (z0 + z2) * 0.5 + r(-2, 2)),
+        p2: ndcToWorldAtZ(dir * r(1.05, 1.32), y1, z2),
+        duration: r(2600, 3600),
+        ease: (x) => x
+      };
+    };
+    const pickProfileKind = () => {
+      const x = Math.random();
+      if (x < 0.36) return 'edge_charge_in';
+      if (x < 0.70) return 'edge_escape_out';
+      return 'edge_lateral';
+    };
 
-   const side    = Math.random() < 0.5 ? 1 : -1;   // which side of centre it enters from
-   const startZ  = -60 - Math.random() * 20;        // a distant dot, roughly dead ahead
-   const sx = camX + side * (2.5 + Math.random() * 2);   // a few units aside, far away => small screen angle
-   const sy = camY + 2.2 + Math.random() * 1.4;          // a little above the eye-line
-   // End EXACTLY at the camera eye so the path is a ray through the eye (the
-   // craft is faded out ~2 units before it actually arrives — see zFade below).
-   const p0 = new THREE.Vector3(sx, sy, startZ);
-   const p2 = new THREE.Vector3(camX, camY, camZ);
-   // Straight line: control point on the chord — no curvature => no pivot =>
-   // the tail retraces the nose exactly (no off-tracking, no broadside/flank).
-   const p1 = new THREE.Vector3((sx + camX) / 2, (sy + camY) / 2, (startZ + camZ) / 2);
+    let path = null;
+    for (let i = 0; i < 14; i++) {
+      const cand = buildProfile(pickProfileKind());
+      if (!crossesCardZone(cand.p0, cand.p1, cand.p2)) { path = cand; break; }
+    }
+    if (!path) {
+      // deterministic edge fallback: stays in upper-right perimeter lane
+      path = {
+        kind: 'edge_lateral',
+        p0: ndcToWorldAtZ(-1.18, 0.80, -52),
+        p1: ndcToWorldAtZ(0.06, 0.86, -50),
+        p2: ndcToWorldAtZ(1.18, 0.82, -48),
+        duration: 3200,
+        ease: (x) => x
+      };
+    }
+    const { p0, p1, p2 } = path;
+    const duration = path.duration;
+    xwing.userData.pathKind = path.kind;
 
-   // Seat the craft at its true start pose with opacity 0 BEFORE it enters the
-   // scene, so the first render can never flash it at the origin (which sits on
-   // the card plane) — that origin flash was the 1–2 ms blip in front of cards.
-   xwing.position.copy(p0);
-   xwing.traverse(child => {
-     if (child.material && child.material.opacity !== undefined) {
-       child.material.opacity = 0;
-     }
-   });
-   scene.add(xwing);
-   _xwings.push(xwing);
-   const _pos = new THREE.Vector3(), _nextPos = new THREE.Vector3(), _dir = new THREE.Vector3();
-   // reusable basis temporaries so the nose stays locked to the flight path
-   const _zA = new THREE.Vector3(), _xA = new THREE.Vector3(), _yA = new THREE.Vector3();
-   const _up = new THREE.Vector3(0, 1, 0), _basis = new THREE.Matrix4();
-   const _qRoll = new THREE.Quaternion(), _ZAXIS = new THREE.Vector3(0, 0, 1);
-   const bezier = (out, t) => {                    // quadratic Bezier p0→p1→p2
-     const u = 1 - t;
-     return out.set(0, 0, 0)
-       .addScaledVector(p0, u * u)
-       .addScaledVector(p1, 2 * u * t)
-       .addScaledVector(p2, t * t);
-   };
-
-   const duration = 3200 + Math.random() * 1200;   // ~3.2–4.4s run
-   const bankPhase = Math.random() * Math.PI * 2;
-   const rollDir = Math.random() < 0.5 ? 1 : -1;   // vary which way it rolls
-   tween({
-     dur: md(duration),
-     // Ease-in (accelerate toward the viewer): starts as a slow distant dot,
-     // then RUSHES at you and grows fast — the strong looming sells "forward".
-     ease: (x) => x * x * (2 - x * 0.6),
-     tag: 'xwing',
-     update: (e, t) => {
-       bezier(_pos, t);
-       xwing.position.copy(_pos);
-       // Heading: build an orientation whose forward (nose, local -Z) points
-       // EXACTLY along the curve's velocity vector, so the craft never crabs
-       // sideways. Bank is then applied purely as a roll about the fuselage
-       // axis, which by construction can't introduce any sideslip.
-       bezier(_nextPos, Math.min(1, t + 0.02));
-       _dir.subVectors(_nextPos, _pos);
-       if (_dir.lengthSq() > 1e-6) {
-         _dir.normalize();
-         _zA.copy(_dir).multiplyScalar(-1);            // local +Z opposes the nose
-         _xA.crossVectors(_up, _zA);
-         if (_xA.lengthSq() < 1e-6) _xA.set(1, 0, 0);  // guard: near-vertical travel
-         _xA.normalize();
-         _yA.crossVectors(_zA, _xA).normalize();
-         _basis.makeBasis(_xA, _yA, _zA);
-         xwing.quaternion.setFromRotationMatrix(_basis);
-         _qRoll.setFromAxisAngle(_ZAXIS, rollDir * Math.sin(t * Math.PI * 2 + bankPhase) * 0.16);
-         xwing.quaternion.multiply(_qRoll);            // bank about the fuselage axis only
-       }
-       // Fade in from the distance, then dissolve right AT the lens. We keep
-       // the craft fully visible through the dramatic near-swoop (so the big
-       // forward loom is what the eye sees), then fade quickly in the last
-       // couple of units so it never clips the near-plane or flashes behind.
-       const zNow = _pos.z;
-       const zFadeStart = camZ - 7.5;                  // stay solid through the big loom
-       const zFadeEnd   = camZ - 2.2;                  // dissolve BEFORE the violent near-lens swing
-       const zFade = zNow <= zFadeStart ? 1
-                   : zNow >= zFadeEnd   ? 0
-                   : 1 - (zNow - zFadeStart) / (zFadeEnd - zFadeStart);
-       const alpha = Math.min(1, t / 0.10) * zFade;
-       xwing.traverse(child => {
-         if (child.material && child.material.opacity !== undefined) {
-           child.material.opacity = alpha;
-         }
-       });
-     },
-     done: () => {
-       scene.remove(xwing);
-       // Only dispose the per-instance CLONED materials; geometry is shared
-       // with the cached prototype (clone() reuses geometry) — never dispose it.
-       xwing.traverse(child => {
-         if (child.material) {
-           if (Array.isArray(child.material)) child.material.forEach(m => m.dispose());
-           else child.material.dispose();
-         }
-       });
-       _xwings = _xwings.filter(x => x !== xwing);
-     }
-   });
+    // Seat the craft at its true start pose with opacity 0 BEFORE adding.
+    xwing.position.copy(p0);
+    xwing.traverse(child => {
+      if (child.material && child.material.opacity !== undefined) {
+        child.material.opacity = 0;
+      }
+    });
+    scene.add(xwing);
+    _xwings.push(xwing);
+    const _pos = new THREE.Vector3(), _nextPos = new THREE.Vector3(), _dir = new THREE.Vector3();
+    const _zA = new THREE.Vector3(), _xA = new THREE.Vector3(), _yA = new THREE.Vector3();
+    const _up = new THREE.Vector3(0, 1, 0), _basis = new THREE.Matrix4();
+    const _qRoll = new THREE.Quaternion(), _ZAXIS = new THREE.Vector3(0, 0, 1);
+    const bankPhase = Math.random() * Math.PI * 2;
+    const rollDir = Math.random() < 0.5 ? 1 : -1;
+    tween({
+      dur: md(duration),
+      ease: path.ease,
+      tag: 'xwing',
+      update: (_e, t) => {
+        bezierPoint(_pos, t, p0, p1, p2);
+        xwing.position.copy(_pos);
+        // Established axis behavior: keep tangent-based heading + roll-only bank.
+        bezierPoint(_nextPos, Math.min(1, t + 0.02), p0, p1, p2);
+        _dir.subVectors(_nextPos, _pos);
+        if (_dir.lengthSq() > 1e-6) {
+          _dir.normalize();
+          _zA.copy(_dir).multiplyScalar(-1);            // local +Z opposes the nose
+          _xA.crossVectors(_up, _zA);
+          if (_xA.lengthSq() < 1e-6) _xA.set(1, 0, 0);  // guard: near-vertical travel
+          _xA.normalize();
+          _yA.crossVectors(_zA, _xA).normalize();
+          _basis.makeBasis(_xA, _yA, _zA);
+          xwing.quaternion.setFromRotationMatrix(_basis);
+          _qRoll.setFromAxisAngle(_ZAXIS, rollDir * Math.sin(t * Math.PI * 2 + bankPhase) * 0.16);
+          xwing.quaternion.multiply(_qRoll);
+        }
+        // Generic envelope (fade in/out) plus profile-specific near-lens guard.
+        let profileFade = 1;
+        if (path.kind === 'edge_charge_in') {
+          const zNow = _pos.z;
+          const zFadeStart = camZ - 7.2;
+          const zFadeEnd   = camZ - 2.0;
+          profileFade = zNow <= zFadeStart ? 1
+                      : zNow >= zFadeEnd   ? 0
+                      : 1 - (zNow - zFadeStart) / (zFadeEnd - zFadeStart);
+        } else if (path.kind === 'edge_escape_out') {
+          const zNow = _pos.z;
+          const nearA = camZ - 4.6;
+          const nearB = camZ - 1.2;
+          profileFade = zNow <= nearA ? 1
+                      : zNow >= nearB ? 0
+                      : 1 - (zNow - nearA) / (nearB - nearA);
+        }
+        const alpha = Math.max(0, Math.min(1, Math.min(1, t / 0.10) * Math.min(1, (1 - t) / 0.12) * profileFade));
+        xwing.traverse(child => {
+          if (child.material && child.material.opacity !== undefined) {
+            child.material.opacity = alpha;
+          }
+        });
+      },
+      done: () => {
+        scene.remove(xwing);
+        // Only dispose per-instance cloned materials; geometry is shared by proto.
+        xwing.traverse(child => {
+          if (child.material) {
+            if (Array.isArray(child.material)) child.material.forEach(m => m.dispose());
+            else child.material.dispose();
+          }
+        });
+        _xwings = _xwings.filter(x => x !== xwing);
+      }
+    });
   }
 
   let _heldT = 0;
