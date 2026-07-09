@@ -1747,13 +1747,17 @@ function resolveStat(stat, pCard, cCard) {
   }
   const makeXWing = () => makeCraft('xwing');     // back-compat alias (held-craft + static hooks)
 
-  // Quadratic bezier sampler (shared by buildFlybyPath + launchCraft).
-  const bezierPoint = (out, t, a, b, c) => {
+  // Cubic bezier sampler (shared by buildFlybyPath + launchCraft). Cubic (rather
+  // than quadratic) lets a path hold a straight entry heading and then hook away
+  // late — the "escape" read (see buildProfile / cubicFromEnds).
+  const bezierPoint = (out, t, a, b, c, d) => {
     const u = 1 - t;
+    const uu = u * u, tt = t * t;
     return out.set(0, 0, 0)
-      .addScaledVector(a, u * u)
-      .addScaledVector(b, 2 * u * t)
-      .addScaledVector(c, t * t);
+      .addScaledVector(a, uu * u)
+      .addScaledVector(b, 3 * uu * t)
+      .addScaledVector(c, 3 * u * tt)
+      .addScaledVector(d, tt * t);
   };
 
   // Build ONE procedurally-generated flyby path (edge-anchored, card-safe,
@@ -1780,10 +1784,10 @@ function resolveStat(stat, pCard, cCard) {
     // path may pass behind a card harmlessly. We still route off the two CARD
     // FACES so the craft is never bisected by a card edge — it reads as a whole
     // craft roaming the scene and receding toward the vanishing point.
-    const hitsCard = (a, b, c) => {
+    const hitsCard = (a, b, c, d) => {
       const tmp = new THREE.Vector3();
       for (let i = 0; i <= 24; i++) {
-        bezierPoint(tmp, i / 24, a, b, c);
+        bezierPoint(tmp, i / 24, a, b, c, d);
         const nd = tmp.clone().project(camera);
         if (!Number.isFinite(nd.x) || !Number.isFinite(nd.y)) return true;
         const ax = Math.abs(nd.x), ay = Math.abs(nd.y);
@@ -1814,51 +1818,55 @@ function resolveStat(stat, pCard, cCard) {
     };
     const nearZ = () => camZ - r(5, 16);    // just in front of the viewer at the edge
     const farZ  = () => r(-262, -228);       // +50% deeper: craft shrinks to a far dot before it melts (camera far=320)
+    // Build a cubic that flies STRAIGHT in, then hooks off to one side late. The
+    // first control point stays on the s->e line (so the run-in holds the entry
+    // heading) and the second is kicked laterally (so the back half breaks away
+    // in a new direction) — the escape read the chase is going for. The leader
+    // and follower share this curve, so the chaser hooks through the same line.
+    const cubicFromEnds = (kind, s, e, z0, z2, extra) => {
+      const dx = e.x - s.x, dy = e.y - s.y;
+      const len = Math.hypot(dx, dy) || 1;
+      const px = -dy / len, py = dx / len;                       // unit perpendicular (NDC)
+      const swerve = (extra.swerveSign || pickSign()) * r(0.62, 1.05);  // stronger lateral break (escape read)
+      const z1 = z0 + (z2 - z0) * 0.33, z2c = z0 + (z2 - z0) * 0.66;
+      return {
+        kind, farEnd: extra.farEnd,
+        p0: ndcToWorldAtZ(s.x, s.y, z0),
+        p1: ndcToWorldAtZ(s.x + dx * 0.42, s.y + dy * 0.42, z1),                                  // longer straight run-in
+        p2: ndcToWorldAtZ(s.x + dx * 0.66 + px * swerve, s.y + dy * 0.66 + py * swerve, z2c),      // then a hard late hook (escape)
+        p3: ndcToWorldAtZ(e.x, e.y, z2),
+        duration: extra.duration,
+        ease: extra.ease
+      };
+    };
     const buildProfile = (kind) => {
       if (kind === 'enter_recede') {
         // Enters from a screen EDGE near the viewer, then glides off into the far
         // distance and melts away (one edge endpoint, one free far endpoint).
         const { edge: s, free: e } = matchedPair();
-        const z0 = nearZ(), z2 = farZ();
-        const m = { x: (s.x + e.x) * 0.5, y: (s.y + e.y) * 0.5 };
-        return {
-          kind, farEnd: true,
-          p0: ndcToWorldAtZ(s.x, s.y, z0),
-          p1: ndcToWorldAtZ(m.x, m.y, z0 + (z2 - z0) * 0.55 + r(-4, 4)),
-          p2: ndcToWorldAtZ(e.x, e.y, z2),
-          duration: r(4400, 6200),
-          ease: (x) => x * (2 - x)                 // ease-out: quick entry, long glide
-        };
+        return cubicFromEnds(kind, s, e, nearZ(), farZ(), {
+          farEnd: true, duration: r(4400, 6200), ease: (x) => x * (2 - x)   // ease-out: quick entry, long glide
+        });
       }
       if (kind === 'emerge_exit') {
         // Emerges from the far distance, flies toward the viewer and exits at a
         // screen EDGE (one free far endpoint, one edge endpoint).
         const { edge: e, free: s } = matchedPair();
-        const z0 = farZ(), z2 = nearZ();
-        const m = { x: (s.x + e.x) * 0.5, y: (s.y + e.y) * 0.5 };
-        return {
-          kind, farEnd: false,
-          p0: ndcToWorldAtZ(s.x, s.y, z0),
-          p1: ndcToWorldAtZ(m.x, m.y, z2 + (z0 - z2) * 0.55 + r(-4, 4)),
-          p2: ndcToWorldAtZ(e.x, e.y, z2),
-          duration: r(3200, 4600),
-          ease: (x) => x * x * (3 - 2 * x)          // smoothstep
-        };
+        return cubicFromEnds(kind, s, e, farZ(), nearZ(), {
+          farEnd: false, duration: r(3200, 4600), ease: (x) => x * x * (3 - 2 * x)   // smoothstep
+        });
       }
       // cross_pass: full edge-to-edge sweep for variety, routed through a TOP or
-      // BOTTOM lane so it never rakes across the card faces.
+      // BOTTOM lane so it never rakes across the card faces. Force the hook to
+      // break OUTWARD (same side as the lane) so it stays clear of the cards.
       const dir = pickSign();
       const lane = pickSign();
-      const y0 = lane * r(0.60, 0.88), y1 = lane * r(0.60, 0.88);
-      const z0 = r(-58, -36), z2 = z0 + r(-10, 10);
-      return {
-        kind: 'cross_pass', farEnd: false,
-        p0: ndcToWorldAtZ(-dir * r(1.08, 1.34), y0, z0),
-        p1: ndcToWorldAtZ(r(-0.28, 0.28), lane * r(0.62, 0.90), (z0 + z2) * 0.5 + r(-3, 3)),
-        p2: ndcToWorldAtZ(dir * r(1.08, 1.34), y1, z2),
-        duration: r(2800, 3800),
-        ease: (x) => x
-      };
+      const s = { x: -dir * r(1.08, 1.34), y: lane * r(0.60, 0.88) };
+      const e = { x:  dir * r(1.08, 1.34), y: lane * r(0.60, 0.88) };
+      const z0 = r(-58, -36);
+      return cubicFromEnds('cross_pass', s, e, z0, z0 + r(-10, 10), {
+        farEnd: false, duration: r(2800, 3800), ease: (x) => x, swerveSign: lane * dir
+      });
     };
     const pickProfileKind = () => {
       const x = Math.random();
@@ -1870,7 +1878,7 @@ function resolveStat(stat, pCard, cCard) {
     let path = null;
     for (let i = 0; i < 24; i++) {
       const cand = buildProfile(pickProfileKind());
-      if (!hitsCard(cand.p0, cand.p1, cand.p2)) { path = cand; break; }
+      if (!hitsCard(cand.p0, cand.p1, cand.p2, cand.p3)) { path = cand; break; }
     }
     if (!path) {
       // deterministic clean fallback: high sweep across the open sky above the cards.
@@ -1879,6 +1887,7 @@ function resolveStat(stat, pCard, cCard) {
         p0: ndcToWorldAtZ(-1.22, 0.86, -48),
         p1: ndcToWorldAtZ(0.0, 0.92, -46),
         p2: ndcToWorldAtZ(1.22, 0.86, -44),
+        p3: ndcToWorldAtZ(1.30, 0.84, -42),
         duration: 3200,
         ease: (x) => x
       };
@@ -1893,7 +1902,7 @@ function resolveStat(stat, pCard, cCard) {
     if (!xwing) return;                       // that model not loaded yet
     const rollScale = CRAFT[type] ? CRAFT[type].roll : 1.0;
     xwing.scale.multiplyScalar(opts.scaleMul != null ? opts.scaleMul : (1.0 + Math.random() * 0.5));  // size variety
-    const { p0, p1, p2 } = path;
+    const { p0, p1, p2, p3 } = path;
     const duration = path.duration;
     xwing.userData.pathKind = path.kind;
 
@@ -1917,10 +1926,10 @@ function resolveStat(stat, pCard, cCard) {
       ease: path.ease,
       tag: 'xwing',
       update: (_e, t) => {
-        bezierPoint(_pos, t, p0, p1, p2);
+        bezierPoint(_pos, t, p0, p1, p2, p3);
         xwing.position.copy(_pos);
         // Established axis behavior: keep tangent-based heading + roll-only bank.
-        bezierPoint(_nextPos, Math.min(1, t + 0.02), p0, p1, p2);
+        bezierPoint(_nextPos, Math.min(1, t + 0.02), p0, p1, p2, p3);
         _dir.subVectors(_nextPos, _pos);
         if (_dir.lengthSq() > 1e-6) {
           _dir.normalize();
@@ -1979,7 +1988,7 @@ function resolveStat(stat, pCard, cCard) {
     if (!_craftProtos.xwing && !_craftProtos.tie) return;   // nothing loaded yet
     const path = buildFlybyPath();
     const order = Math.random() < 0.5 ? ['xwing', 'tie'] : ['tie', 'xwing'];
-    const lag = md(520 + Math.random() * 260);      // ms the follower trails the leader
+    const lag = md((520 + Math.random() * 260) * 4);  // 4x trailing gap so it reads as a chase, not a formation
     launchCraft(order[0], path);                    // leader now
     setTimeout(() => {                              // follower a beat later, same path
       if (FEAT.xwings && !REDUCED) launchCraft(order[1], path);
