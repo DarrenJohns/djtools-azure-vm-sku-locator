@@ -1647,66 +1647,91 @@ function resolveStat(stat, pCard, cCard) {
     updateMeteors(dt, w, rm);   // occasional shooting stars while the scene is idle
   }
 
-  /* ---- X-wing 3D model flyby ----------------------------------------- */
-  let _xwings = [];        // active flybys
-  let _xwingProto = null;  // cached loaded GLB scene (cloned per spawn)
-  let _xwingLoading = false;
-  // Preload the vendored X-wing GLB once; clones are cheap thereafter.
-  function preloadXWing() {
-    if (_xwingProto || _xwingLoading) return;
-    _xwingLoading = true;
+  /* ---- Craft 3D model flybys (X-wing + TIE fighter) ------------------- */
+  // Two craft models fly the SAME procedurally-generated path in a chase
+  // formation (see spawnFlyby): a leader, then a follower a beat later on the
+  // identical curve. The lead/trail order alternates each pass.
+  let _xwings = [];         // active flyby craft (any type), pooled together
+  const _craftProtos = {};  // type -> cached, axis-corrected, normalised prototype
+  const _craftLoading = {}; // type -> in-flight load guard
+
+  // Per-craft config. `nose`/`up` are the model's own local NOSE and dorsal-UP
+  // axes (measured by PCA of the mesh vertex cloud); we bake a one-time
+  // correction so nose -> local -Z and up -> local +Y, making all downstream
+  // heading math exact and model-independent. `roll` scales the in-flight bank
+  // (the TIE's symmetric silhouette reads oddly with a big roll, so it banks
+  // less). `emissiveI` lifts a dark hull out of the black background.
+  const CRAFT = {
+    xwing: { url: './vendor/models/x-wing.glb',      norm: 6.0,
+             nose: [-0.437, 0.007, -0.9], up: [-0.126, 0.99, 0.069],
+             roll: 1.0,  emissive: 0x000000, emissiveI: 0 },
+    tie:   { url: './vendor/models/tie-fighter.glb', norm: 5.6,
+             nose: [0.0246, 0.5266, 0.8498], up: [-0.0219, 0.8501, -0.5261],
+             roll: 0.35, emissive: 0x3a5474, emissiveI: 0.5 },
+  };
+
+  const _buildBasis = (fwd, up) => {              // orthonormal basis: cols = right, up, forward
+    const f = fwd.clone().normalize();
+    const r = new THREE.Vector3().crossVectors(up, f).normalize();
+    const u = new THREE.Vector3().crossVectors(f, r).normalize();
+    return new THREE.Matrix4().makeBasis(r, u, f);
+  };
+
+  // Preload one craft GLB once; clones are cheap thereafter.
+  function preloadCraft(type) {
+    if (_craftProtos[type] || _craftLoading[type]) return;
+    const cfg = CRAFT[type]; if (!cfg) return;
+    _craftLoading[type] = true;
     const loader = new GLTFLoader();
-    loader.load('./vendor/models/x-wing.glb', (gltf) => {
+    loader.load(cfg.url, (gltf) => {
       const model = gltf.scene;
-      // Normalise: centre on origin and scale to a consistent size so the
-      // flyby math (below) is model-independent.
+      // Normalise: centre on origin + scale to a consistent size so the flyby
+      // math is model-independent.
       const box = new THREE.Box3().setFromObject(model);
       const size = new THREE.Vector3(); box.getSize(size);
       const centre = new THREE.Vector3(); box.getCenter(centre);
       model.position.sub(centre);                 // recentre on origin
       const maxDim = Math.max(size.x, size.y, size.z) || 1;
-      const norm = 6 / maxDim;                    // target ~6 world units long
+      const norm = cfg.norm / maxDim;             // consistent on-screen size
 
-      // --- Orientation correction -------------------------------------
-      // This GLB's fuselage is NOT axis-aligned: its true NOSE points along
-      // local [-0.437, 0.007, -0.9] and its DORSAL "up" along [-0.126, 0.99,
-      // 0.069] (both measured by PCA of the mesh vertex cloud). Because the
-      // nose sits ~26° off local -Z, every downstream heading calc (which
-      // assumes nose = local -Z, up = +Y) rendered the craft crabbing ~26°
-      // sideways. Bake a one-time correction so the prototype's nose becomes
-      // local -Z and up becomes +Y; then all flyby / held-pose math is exact.
-      const noseLocal = new THREE.Vector3(-0.437, 0.007, -0.9).normalize();
-      const upLocal   = new THREE.Vector3(-0.126, 0.99, 0.069).normalize();
-      const buildBasis = (fwd, up) => {           // orthonormal basis: columns = right, up, forward
-        const f = fwd.clone().normalize();
-        const r = new THREE.Vector3().crossVectors(up, f).normalize();
-        const u = new THREE.Vector3().crossVectors(f, r).normalize();
-        return new THREE.Matrix4().makeBasis(r, u, f);
-      };
-      const mSrc = buildBasis(noseLocal, upLocal);                       // model's own frame
-      const mDst = buildBasis(new THREE.Vector3(0, 0, -1),               // desired: nose = -Z
-                              new THREE.Vector3(0, 1, 0));               //          up   = +Y
-      const correction = mDst.multiply(mSrc.invert());                  // Qc = Dst · Src⁻¹
+      // one-time nose/up correction: model frame -> desired (nose -Z, up +Y)
+      const mSrc = _buildBasis(new THREE.Vector3(...cfg.nose).normalize(),
+                               new THREE.Vector3(...cfg.up).normalize());
+      const mDst = _buildBasis(new THREE.Vector3(0, 0, -1), new THREE.Vector3(0, 1, 0));
+      const correction = mDst.multiply(mSrc.invert());   // Qc = Dst · Src⁻¹
+
+      // optional emissive floor so a dark hull stays visible against space
+      if (cfg.emissiveI > 0) {
+        model.traverse(ch => {
+          if (ch.isMesh && ch.material) {
+            const lift = (m) => { if (m.emissive) { m.emissive.setHex(cfg.emissive); m.emissiveIntensity = cfg.emissiveI; } };
+            Array.isArray(ch.material) ? ch.material.forEach(lift) : lift(ch.material);
+          }
+        });
+      }
+
       const inner = new THREE.Group();            // carries the baked rotation ABOUT the centre
       inner.quaternion.setFromRotationMatrix(correction);
       inner.add(model);
-
       const wrap = new THREE.Group();             // wrapper carries scale
       wrap.add(inner);
       wrap.scale.setScalar(norm);
-      _xwingProto = wrap;
-      _xwingLoading = false;
+      _craftProtos[type] = wrap;
+      _craftLoading[type] = false;
     }, undefined, (err) => {
-      console.warn('X-wing GLB failed to load:', err);
-      _xwingLoading = false;
+      console.warn(type + ' GLB failed to load:', err);
+      _craftLoading[type] = false;
     });
   }
-  preloadXWing();
-  // Clone the cached prototype into a fresh flyby instance. Materials are
-  // cloned so per-flyby opacity fades don't mutate the shared prototype.
-  function makeXWing() {
-    if (!_xwingProto) return null;               // not loaded yet — skip this spawn
-    const inst = _xwingProto.clone(true);
+  preloadCraft('xwing');
+  preloadCraft('tie');
+
+  // Clone a cached prototype into a fresh flyby instance. Materials are cloned
+  // so per-flyby opacity fades don't mutate the shared prototype.
+  function makeCraft(type) {
+    const proto = _craftProtos[type];
+    if (!proto) return null;                      // not loaded yet — skip this spawn
+    const inst = proto.clone(true);
     inst.traverse(child => {
       if (child.isMesh && child.material) {
         const prepMat = (m) => { const c = m.clone(); c.transparent = true; c.depthTest = false; c.depthWrite = false; return c; };
@@ -1717,16 +1742,24 @@ function resolveStat(stat, pCard, cCard) {
       }
     });
     inst.renderOrder = -1;  // transparent + depthTest:false keeps it above the opaque moons; below the cards so they always occlude it
+    inst.userData.craftType = type;
     return inst;
   }
+  const makeXWing = () => makeCraft('xwing');     // back-compat alias (held-craft + static hooks)
 
-  function spawnXWingFlyby() {
-    if (!FEAT.xwings || REDUCED) return;
-    if (_xwings.length > 1) return;  // max 2 concurrent flybys
-    const xwing = makeXWing();
-    if (!xwing) return;              // model not loaded yet
-    xwing.scale.multiplyScalar(1.0 + Math.random() * 0.5);   // size variety
+  // Quadratic bezier sampler (shared by buildFlybyPath + launchCraft).
+  const bezierPoint = (out, t, a, b, c) => {
+    const u = 1 - t;
+    return out.set(0, 0, 0)
+      .addScaledVector(a, u * u)
+      .addScaledVector(b, 2 * u * t)
+      .addScaledVector(c, t * t);
+  };
 
+  // Build ONE procedurally-generated flyby path (edge-anchored, card-safe,
+  // extended-distance fade). Craft-agnostic: the returned path is shared by the
+  // leader and the follower so they read as a chase (see spawnFlyby).
+  function buildFlybyPath() {
     // Flight-path policy:
     // 1) Keep X-wings out of card space by routing through perimeter lanes and
     //    rejecting any candidate that enters the center screen window.
@@ -1741,13 +1774,6 @@ function resolveStat(stat, pCard, cCard) {
       const dir = nd.sub(cam);
       if (Math.abs(dir.z) < 1e-5) return new THREE.Vector3(nx * 14, ny * 10, zWorld);
       return cam.clone().addScaledVector(dir, (zWorld - cam.z) / dir.z);
-    };
-    const bezierPoint = (out, t, a, b, c) => {
-      const u = 1 - t;
-      return out.set(0, 0, 0)
-        .addScaledVector(a, u * u)
-        .addScaledVector(b, 2 * u * t)
-        .addScaledVector(c, t * t);
     };
     // The X-wing draws BEHIND the cards (see makeXWing: renderOrder -1) but in
     // front of the moons. The cards are the top layer and always occlude it, so a
@@ -1857,6 +1883,16 @@ function resolveStat(stat, pCard, cCard) {
         ease: (x) => x
       };
     }
+    return path;
+  }
+
+  // Launch ONE craft of `type` down an already-built path. Extracted from the
+  // old spawn so a leader + follower can share the identical curve.
+  function launchCraft(type, path, opts = {}) {
+    const xwing = makeCraft(type);
+    if (!xwing) return;                       // that model not loaded yet
+    const rollScale = CRAFT[type] ? CRAFT[type].roll : 1.0;
+    xwing.scale.multiplyScalar(opts.scaleMul != null ? opts.scaleMul : (1.0 + Math.random() * 0.5));  // size variety
     const { p0, p1, p2 } = path;
     const duration = path.duration;
     xwing.userData.pathKind = path.kind;
@@ -1895,7 +1931,7 @@ function resolveStat(stat, pCard, cCard) {
           _yA.crossVectors(_zA, _xA).normalize();
           _basis.makeBasis(_xA, _yA, _zA);
           xwing.quaternion.setFromRotationMatrix(_basis);
-          _qRoll.setFromAxisAngle(_ZAXIS, rollDir * Math.sin(t * Math.PI * 2 + bankPhase) * 0.16);
+          _qRoll.setFromAxisAngle(_ZAXIS, rollDir * Math.sin(t * Math.PI * 2 + bankPhase) * 0.16 * rollScale);
           xwing.quaternion.multiply(_qRoll);
         }
         // Fade policy: a short spawn fade-in, then HOLD full opacity through the
@@ -1932,6 +1968,24 @@ function resolveStat(stat, pCard, cCard) {
       }
     });
   }
+
+  // Build one path and send BOTH craft down it in a chase: the leader now, the
+  // follower a beat later, on the identical curve. The lead/trail order
+  // alternates each pass so sometimes the TIE chases the X-wing and sometimes
+  // the reverse. One formation on screen at a time.
+  function spawnFlyby() {
+    if (!FEAT.xwings || REDUCED) return;
+    if (_xwings.length > 0) return;                 // one formation on screen at a time
+    if (!_craftProtos.xwing && !_craftProtos.tie) return;   // nothing loaded yet
+    const path = buildFlybyPath();
+    const order = Math.random() < 0.5 ? ['xwing', 'tie'] : ['tie', 'xwing'];
+    const lag = md(520 + Math.random() * 260);      // ms the follower trails the leader
+    launchCraft(order[0], path);                    // leader now
+    setTimeout(() => {                              // follower a beat later, same path
+      if (FEAT.xwings && !REDUCED) launchCraft(order[1], path);
+    }, lag);
+  }
+  const spawnXWingFlyby = spawnFlyby;               // back-compat alias (spawner + debug hook)
 
   let _heldT = 0;
   function updateXWings(dt) {
@@ -3355,7 +3409,7 @@ function resolveStat(stat, pCard, cCard) {
       },
       pinWarp: (v) => { _warpPin = v; },   // freeze star warp strength for screenshots (test hook)
       meteor: () => { spawnMeteor(); },     // force-spawn a shooting star (test hook)
-      xwing: () => { spawnXWingFlyby(); },  // force-spawn an X-wing flyby (test hook)
+      xwing: () => { spawnFlyby(); },       // force-spawn a craft chase pass (test hook)
       xwingStatic: (x, y, z, ry) => {       // place a static X-wing for inspection
         const m = makeXWing(); if (!m) return false;
         m.position.set(x || 0, y || 0, (z == null ? -18 : z));
@@ -3363,7 +3417,17 @@ function resolveStat(stat, pCard, cCard) {
         m.scale.multiplyScalar(2);          // enlarge for clear inspection
         scene.add(m); return true;
       },
-      xwingReady: () => !!_xwingProto,      // is the GLB loaded yet?
+      craftStatic: (type, x, y, z, ry, sc) => { // place any static craft for axis calibration
+        const m = makeCraft(type || 'xwing'); if (!m) return false;
+        m.position.set(x || 0, y || 0, (z == null ? -18 : z));
+        m.rotation.set(0, (ry == null ? Math.PI : ry), 0);
+        m.scale.multiplyScalar(sc == null ? 2 : sc);
+        scene.add(m); return true;
+      },
+      craftReady: (type) => !!_craftProtos[type || 'xwing'],  // is a given GLB loaded yet?
+      craftInfo: () => _xwings.map(x => ({ t: x.userData.craftType || '?',
+        x: +x.position.x.toFixed(1), y: +x.position.y.toFixed(1), z: +x.position.z.toFixed(1) })),  // live flyby craft (type + pos)
+      xwingReady: () => !!_craftProtos.xwing,      // is the GLB loaded yet?
       feature: (flag, on) => setFeature(flag, on),   // toggle/set a dev feature flag (test hook)
       features: () => ({ ...FEAT }),                  // read current feature flags (test hook)
       puff: () => {                          // force a smoke burst in open sky (test hook)
