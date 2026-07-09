@@ -1749,98 +1749,110 @@ function resolveStat(stat, pCard, cCard) {
         .addScaledVector(b, 2 * u * t)
         .addScaledVector(c, t * t);
     };
-    const crossesCardZone = (a, b, c) => {
+    // The X-wing draws in front of everything (see makeXWing), so we keep its
+    // projected path off the two CARD FACES at all depths. The centre GAP between
+    // the cards and the open SKY above / below them are fair game — so the craft
+    // still roams the scene and recedes toward the vanishing point, but never rakes
+    // across a card.
+    const hitsCard = (a, b, c) => {
       const tmp = new THREE.Vector3();
-      const zoneX = 0.66, zoneY = 0.74;   // central card no-fly window in NDC
-      for (let i = 0; i <= 16; i++) {
-        bezierPoint(tmp, i / 16, a, b, c);
+      for (let i = 0; i <= 24; i++) {
+        bezierPoint(tmp, i / 24, a, b, c);
         const nd = tmp.clone().project(camera);
         if (!Number.isFinite(nd.x) || !Number.isFinite(nd.y)) return true;
-        if (Math.abs(nd.x) < zoneX && Math.abs(nd.y) < zoneY) return true;
+        const ax = Math.abs(nd.x), ay = Math.abs(nd.y);
+        if (ax > 0.04 && ax < 0.63 && ay < 0.70) return true;   // over a card face
       }
       return false;
     };
-    // (edge-lane helper removed - profiles now build edge anchors inline)
+    // One endpoint is pinned to a screen EDGE (off-frame); its partner is a free
+    // point in a MATCHING safe corridor so the whole path stays clear of the cards:
+    //   * the centre gap  -> a vertical recede straight up/down between the cards
+    //   * the open sky     -> a side edge paired with a point high above / below
+    //   * just off a card  -> a side edge paired with a point just outside that card
+    const edgeNdc = () => (Math.random() < 0.5
+      ? { x: pickSign() * r(1.06, 1.34), y: r(-0.85, 0.85) }
+      : { x: r(-0.85, 0.85), y: pickSign() * r(1.06, 1.28) });
+    const matchedPair = () => {
+      const p = Math.random();
+      if (p < 0.5) {
+        const gx = r(-0.03, 0.03);                                   // centre gap column
+        return { edge: { x: gx, y: pickSign() * r(1.06, 1.24) }, free: { x: gx * 0.5, y: r(-0.42, 0.42) } };
+      }
+      if (p < 0.8) {
+        const lane = pickSign();                                     // open sky above / below
+        return { edge: edgeNdc(), free: { x: r(-0.6, 0.6), y: lane * r(0.76, 0.96) } };
+      }
+      const side = pickSign();                                       // just outside one card
+      return { edge: { x: side * r(1.06, 1.32), y: r(-0.6, 0.6) }, free: { x: side * r(0.66, 0.9), y: r(-0.5, 0.5) } };
+    };
+    const nearZ = () => camZ - r(5, 16);    // just in front of the viewer at the edge
+    const farZ  = () => r(-114, -96);        // deep distance (leaves room to melt away)
     const buildProfile = (kind) => {
-      if (kind === 'edge_charge_in') {
-        // Comes in from the far distance toward the viewer, but stays on ONE side
-        // (|x| large) so it never crosses the central cards, and exits the frame
-        // edge (|x| > 1) near the user instead of looming over the cards.
-        const side = pickSign();
-        const startZ = r(-85, -65);
-        const endZ = camZ - r(7, 12);
-        const s = { x: side * r(0.70, 0.98), y: pickSign() * r(0.42, 0.90) };
-        const e = { x: side * r(1.04, 1.30), y: pickSign() * r(0.40, 0.95) };
-        const m = {
-          x: (s.x + e.x) * 0.5,
-          y: (s.y + e.y) * 0.5
-        };
+      if (kind === 'enter_recede') {
+        // Enters from a screen EDGE near the viewer, then glides off into the far
+        // distance and melts away (one edge endpoint, one free far endpoint).
+        const { edge: s, free: e } = matchedPair();
+        const z0 = nearZ(), z2 = farZ();
+        const m = { x: (s.x + e.x) * 0.5, y: (s.y + e.y) * 0.5 };
         return {
-          kind,
-          p0: ndcToWorldAtZ(s.x, s.y, startZ),
-          p1: ndcToWorldAtZ(m.x, m.y, (startZ + endZ) * 0.5 + r(-4, 3)),
-          p2: ndcToWorldAtZ(e.x, e.y, endZ),
-          duration: r(3200, 4400),
-          ease: (x) => x * x * (2 - x * 0.6)
+          kind, farEnd: true,
+          p0: ndcToWorldAtZ(s.x, s.y, z0),
+          p1: ndcToWorldAtZ(m.x, m.y, z0 + (z2 - z0) * 0.55 + r(-4, 4)),
+          p2: ndcToWorldAtZ(e.x, e.y, z2),
+          duration: r(3800, 5400),
+          ease: (x) => x * (2 - x)                 // ease-out: quick entry, long glide
         };
       }
-      if (kind === 'edge_escape_out') {
-        // Enters at a frame edge near the viewer, then shrinks away into the far
-        // distance. Stays on ONE side so it never crosses the central cards.
-        const side = pickSign();
-        const startZ = camZ - r(7, 12);
-        const endZ = r(-85, -65);
-        const s = { x: side * r(1.04, 1.30), y: pickSign() * r(0.40, 0.95) };
-        const e = { x: side * r(0.70, 0.98), y: pickSign() * r(0.42, 0.90) };
-        const m = {
-          x: (s.x + e.x) * 0.5,
-          y: (s.y + e.y) * 0.5
-        };
+      if (kind === 'emerge_exit') {
+        // Emerges from the far distance, flies toward the viewer and exits at a
+        // screen EDGE (one free far endpoint, one edge endpoint).
+        const { edge: e, free: s } = matchedPair();
+        const z0 = farZ(), z2 = nearZ();
+        const m = { x: (s.x + e.x) * 0.5, y: (s.y + e.y) * 0.5 };
         return {
-          kind,
-          p0: ndcToWorldAtZ(s.x, s.y, startZ),
-          p1: ndcToWorldAtZ(m.x, m.y, (startZ + endZ) * 0.5 + r(-3, 3)),
-          p2: ndcToWorldAtZ(e.x, e.y, endZ),
-          duration: r(2800, 3900),
-          ease: (x) => x * (2 - x)
+          kind, farEnd: false,
+          p0: ndcToWorldAtZ(s.x, s.y, z0),
+          p1: ndcToWorldAtZ(m.x, m.y, z2 + (z0 - z2) * 0.55 + r(-4, 4)),
+          p2: ndcToWorldAtZ(e.x, e.y, z2),
+          duration: r(3200, 4600),
+          ease: (x) => x * x * (3 - 2 * x)          // smoothstep
         };
       }
-      // edge_lateral: horizontal sweep across a TOP or BOTTOM lane, kept clear of
-      // the central cards. Enters one frame edge and exits the other.
+      // cross_pass: full edge-to-edge sweep for variety, routed through a TOP or
+      // BOTTOM lane so it never rakes across the card faces.
       const dir = pickSign();
-      const lane = pickSign();                  // +1 top lane, -1 bottom lane
-      const y0 = lane * r(0.80, 0.96);
-      const y1 = lane * r(0.80, 0.96);
-      const z0 = r(-58, -38);
-      const z2 = z0 + r(-8, 8);
+      const lane = pickSign();
+      const y0 = lane * r(0.60, 0.88), y1 = lane * r(0.60, 0.88);
+      const z0 = r(-58, -36), z2 = z0 + r(-10, 10);
       return {
-        kind: 'edge_lateral',
-        p0: ndcToWorldAtZ(-dir * r(1.06, 1.32), y0, z0),
-        p1: ndcToWorldAtZ(r(-0.20, 0.20), lane * r(0.82, 0.98), (z0 + z2) * 0.5 + r(-2, 2)),
-        p2: ndcToWorldAtZ(dir * r(1.06, 1.32), y1, z2),
-        duration: r(2600, 3600),
+        kind: 'cross_pass', farEnd: false,
+        p0: ndcToWorldAtZ(-dir * r(1.08, 1.34), y0, z0),
+        p1: ndcToWorldAtZ(r(-0.28, 0.28), lane * r(0.62, 0.90), (z0 + z2) * 0.5 + r(-3, 3)),
+        p2: ndcToWorldAtZ(dir * r(1.08, 1.34), y1, z2),
+        duration: r(2800, 3800),
         ease: (x) => x
       };
     };
     const pickProfileKind = () => {
       const x = Math.random();
-      if (x < 0.36) return 'edge_charge_in';
-      if (x < 0.70) return 'edge_escape_out';
-      return 'edge_lateral';
+      if (x < 0.46) return 'enter_recede';
+      if (x < 0.86) return 'emerge_exit';
+      return 'cross_pass';
     };
 
     let path = null;
-    for (let i = 0; i < 14; i++) {
+    for (let i = 0; i < 24; i++) {
       const cand = buildProfile(pickProfileKind());
-      if (!crossesCardZone(cand.p0, cand.p1, cand.p2)) { path = cand; break; }
+      if (!hitsCard(cand.p0, cand.p1, cand.p2)) { path = cand; break; }
     }
     if (!path) {
-      // deterministic edge fallback: stays in upper-right perimeter lane
+      // deterministic clean fallback: high sweep across the open sky above the cards.
       path = {
-        kind: 'edge_lateral',
-        p0: ndcToWorldAtZ(-1.18, 0.80, -52),
-        p1: ndcToWorldAtZ(0.06, 0.86, -50),
-        p2: ndcToWorldAtZ(1.18, 0.82, -48),
+        kind: 'cross_pass', farEnd: false,
+        p0: ndcToWorldAtZ(-1.22, 0.86, -48),
+        p1: ndcToWorldAtZ(0.0, 0.92, -46),
+        p2: ndcToWorldAtZ(1.22, 0.86, -44),
         duration: 3200,
         ease: (x) => x
       };
@@ -1886,10 +1898,21 @@ function resolveStat(stat, pCard, cCard) {
           _qRoll.setFromAxisAngle(_ZAXIS, rollDir * Math.sin(t * Math.PI * 2 + bankPhase) * 0.16);
           xwing.quaternion.multiply(_qRoll);
         }
-        // No approach fade: the craft enters and exits at the frame edge, so it
-        // simply flies out of view. Keep only a tiny fade at the very start/end so
-        // the distant spawn/despawn never pops in or out.
-        const alpha = Math.max(0, Math.min(1, Math.min(1, t / 0.05) * Math.min(1, (1 - t) / 0.06)));
+        // Fade policy: a short spawn fade-in, then HOLD full opacity through the
+        // flight. Craft that recede into the distance melt out gently over a long,
+        // EXTENDED range so they shrink away naturally instead of ghost-vanishing;
+        // craft that exit at a screen edge stay fully opaque and just leave frame
+        // (no approach fade).
+        const fadeIn = Math.min(1, t / 0.05);
+        let distFade = 1;
+        if (path.farEnd) {
+          const zNow = _pos.z, zKeep = -82, zGone = -116;   // hold, then gentle melt
+          distFade = zNow >= zKeep ? 1
+                   : zNow <= zGone ? 0
+                   : (zNow - zGone) / (zKeep - zGone);
+        }
+        const endGuard = path.farEnd ? Math.min(1, (1 - t) / 0.12) : 1;
+        const alpha = Math.max(0, Math.min(1, fadeIn * distFade * endGuard));
         xwing.traverse(child => {
           if (child.material && child.material.opacity !== undefined) {
             child.material.opacity = alpha;
