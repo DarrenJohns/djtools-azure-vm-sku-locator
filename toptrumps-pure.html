@@ -1590,7 +1590,7 @@ function resolveStat(stat, pCard, cCard) {
   // -20 puts it first in the draw list (a pure background paint), and depth
   // test/write are off so it never occludes the stars/moons in front of it. The
   // image is a committed local asset (no CDN). */
-  const _galaxyMap = new THREE.TextureLoader().load('./assets/milky-way-galaxy.jpg');
+  const _galaxyMap = new THREE.TextureLoader().load('./assets/milky-way-galaxy-v2.jpg');
   _galaxyMap.colorSpace = THREE.SRGBColorSpace;
   _galaxyMap.anisotropy = 8;
   const galaxy = new THREE.Mesh(
