@@ -1709,15 +1709,14 @@ function resolveStat(stat, pCard, cCard) {
     const inst = _xwingProto.clone(true);
     inst.traverse(child => {
       if (child.isMesh && child.material) {
+        const prepMat = (m) => { const c = m.clone(); c.transparent = true; c.depthTest = false; c.depthWrite = false; return c; };
         child.material = Array.isArray(child.material)
-          ? child.material.map(m => { const c = m.clone(); c.transparent = true; return c; })
-          : (() => { const c = child.material.clone(); c.transparent = true; return c; })();
+          ? child.material.map(prepMat)
+          : prepMat(child.material);
+        child.renderOrder = 6;   // draw on top of moons/stars so a moon never occludes the craft
       }
     });
-    inst.renderOrder = 0;                         // let the depth buffer decide vs the cards
-                                                  // (renderOrder 0 == cards; both write depth,
-                                                  // so it passes BEHIND cards when farther and
-                                                  // in FRONT when nearer, instead of always on top)
+    inst.renderOrder = 6;   // craft always reads in front of the moons/stars (depthTest:false above)
     return inst;
   }
 
@@ -1752,7 +1751,7 @@ function resolveStat(stat, pCard, cCard) {
     };
     const crossesCardZone = (a, b, c) => {
       const tmp = new THREE.Vector3();
-      const zoneX = 0.50, zoneY = 0.42;   // center "no-fly" window in NDC
+      const zoneX = 0.66, zoneY = 0.74;   // central card no-fly window in NDC
       for (let i = 0; i <= 16; i++) {
         bezierPoint(tmp, i / 16, a, b, c);
         const nd = tmp.clone().project(camera);
@@ -1761,29 +1760,20 @@ function resolveStat(stat, pCard, cCard) {
       }
       return false;
     };
-    const edgeLaneNdc = (allowOffscreen = false) => {
-      const off = allowOffscreen;
-      if (Math.random() < 0.5) {
-        return {
-          x: pickSign() * r(off ? 1.04 : 0.58, off ? 1.30 : 0.96),
-          y: pickSign() * r(0.46, 0.90)
-        };
-      }
-      return {
-        x: pickSign() * r(0.50, 0.90),
-        y: pickSign() * r(off ? 1.02 : 0.56, off ? 1.24 : 0.94)
-      };
-    };
+    // (edge-lane helper removed - profiles now build edge anchors inline)
     const buildProfile = (kind) => {
       if (kind === 'edge_charge_in') {
+        // Comes in from the far distance toward the viewer, but stays on ONE side
+        // (|x| large) so it never crosses the central cards, and exits the frame
+        // edge (|x| > 1) near the user instead of looming over the cards.
         const side = pickSign();
-        const startZ = r(-84, -64);
-        const endZ = camZ - r(1.8, 3.3);
-        const s = { x: side * r(0.60, 0.96), y: pickSign() * r(0.46, 0.92) };
-        const e = { x: side * r(0.62, 0.94), y: pickSign() * r(0.34, 0.84) };
+        const startZ = r(-85, -65);
+        const endZ = camZ - r(7, 12);
+        const s = { x: side * r(0.70, 0.98), y: pickSign() * r(0.42, 0.90) };
+        const e = { x: side * r(1.04, 1.30), y: pickSign() * r(0.40, 0.95) };
         const m = {
-          x: (s.x + e.x) * 0.5 + side * r(0.04, 0.18),
-          y: (s.y + e.y) * 0.5 + pickSign() * r(0.06, 0.20)
+          x: (s.x + e.x) * 0.5,
+          y: (s.y + e.y) * 0.5
         };
         return {
           kind,
@@ -1795,13 +1785,16 @@ function resolveStat(stat, pCard, cCard) {
         };
       }
       if (kind === 'edge_escape_out') {
-        const s = edgeLaneNdc(true);   // can begin just off-screen edge
-        const e = edgeLaneNdc(false);
-        const startZ = camZ - r(2.0, 5.2);
-        const endZ = r(-84, -64);
+        // Enters at a frame edge near the viewer, then shrinks away into the far
+        // distance. Stays on ONE side so it never crosses the central cards.
+        const side = pickSign();
+        const startZ = camZ - r(7, 12);
+        const endZ = r(-85, -65);
+        const s = { x: side * r(1.04, 1.30), y: pickSign() * r(0.40, 0.95) };
+        const e = { x: side * r(0.70, 0.98), y: pickSign() * r(0.42, 0.90) };
         const m = {
-          x: (s.x + e.x) * 0.5 + pickSign() * r(0.04, 0.16),
-          y: (s.y + e.y) * 0.5 + pickSign() * r(0.04, 0.16)
+          x: (s.x + e.x) * 0.5,
+          y: (s.y + e.y) * 0.5
         };
         return {
           kind,
@@ -1812,17 +1805,19 @@ function resolveStat(stat, pCard, cCard) {
           ease: (x) => x * (2 - x)
         };
       }
-      // edge_lateral: side-to-side sweep across top/bottom lanes, with depth drift.
+      // edge_lateral: horizontal sweep across a TOP or BOTTOM lane, kept clear of
+      // the central cards. Enters one frame edge and exits the other.
       const dir = pickSign();
-      const y0 = pickSign() * r(0.50, 0.90);
-      const y1 = y0 + pickSign() * r(0.02, 0.16);
-      const z0 = r(-60, -40);
+      const lane = pickSign();                  // +1 top lane, -1 bottom lane
+      const y0 = lane * r(0.80, 0.96);
+      const y1 = lane * r(0.80, 0.96);
+      const z0 = r(-58, -38);
       const z2 = z0 + r(-8, 8);
       return {
         kind: 'edge_lateral',
-        p0: ndcToWorldAtZ(-dir * r(1.05, 1.32), y0, z0),
-        p1: ndcToWorldAtZ(r(-0.24, 0.24), (y0 + y1) * 0.5 + pickSign() * r(0.04, 0.12), (z0 + z2) * 0.5 + r(-2, 2)),
-        p2: ndcToWorldAtZ(dir * r(1.05, 1.32), y1, z2),
+        p0: ndcToWorldAtZ(-dir * r(1.06, 1.32), y0, z0),
+        p1: ndcToWorldAtZ(r(-0.20, 0.20), lane * r(0.82, 0.98), (z0 + z2) * 0.5 + r(-2, 2)),
+        p2: ndcToWorldAtZ(dir * r(1.06, 1.32), y1, z2),
         duration: r(2600, 3600),
         ease: (x) => x
       };
@@ -1891,24 +1886,10 @@ function resolveStat(stat, pCard, cCard) {
           _qRoll.setFromAxisAngle(_ZAXIS, rollDir * Math.sin(t * Math.PI * 2 + bankPhase) * 0.16);
           xwing.quaternion.multiply(_qRoll);
         }
-        // Generic envelope (fade in/out) plus profile-specific near-lens guard.
-        let profileFade = 1;
-        if (path.kind === 'edge_charge_in') {
-          const zNow = _pos.z;
-          const zFadeStart = camZ - 7.2;
-          const zFadeEnd   = camZ - 2.0;
-          profileFade = zNow <= zFadeStart ? 1
-                      : zNow >= zFadeEnd   ? 0
-                      : 1 - (zNow - zFadeStart) / (zFadeEnd - zFadeStart);
-        } else if (path.kind === 'edge_escape_out') {
-          const zNow = _pos.z;
-          const nearA = camZ - 4.6;
-          const nearB = camZ - 1.2;
-          profileFade = zNow <= nearA ? 1
-                      : zNow >= nearB ? 0
-                      : 1 - (zNow - nearA) / (nearB - nearA);
-        }
-        const alpha = Math.max(0, Math.min(1, Math.min(1, t / 0.10) * Math.min(1, (1 - t) / 0.12) * profileFade));
+        // No approach fade: the craft enters and exits at the frame edge, so it
+        // simply flies out of view. Keep only a tiny fade at the very start/end so
+        // the distant spawn/despawn never pops in or out.
+        const alpha = Math.max(0, Math.min(1, Math.min(1, t / 0.05) * Math.min(1, (1 - t) / 0.06)));
         xwing.traverse(child => {
           if (child.material && child.material.opacity !== undefined) {
             child.material.opacity = alpha;
