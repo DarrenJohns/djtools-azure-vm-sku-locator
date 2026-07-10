@@ -2824,10 +2824,10 @@ function resolveStat(stat, pCard, cCard) {
     sideBySide = aspect >= 1.05;
     if (sideBySide) {
       const dx = CARD_W / 2 + 0.30;                 // half-gap between the two cards
-      PLAYER_SLOT.set(-dx, 0, 0);
-      CPU_SLOT.set(   dx, 0, 0);
-      PLAYER_PILE.set(-(dx + CARD_W * 1.4), 0, 0.5);
-      CPU_PILE.set(    (dx + CARD_W * 1.4), 0, 0.5);
+      CPU_SLOT.set(   -dx, 0, 0);                    // CPU (opponent) on the LEFT
+      PLAYER_SLOT.set( dx, 0, 0);                    // player on the RIGHT
+      CPU_PILE.set(   -(dx + CARD_W * 1.4), 0, 0.5);
+      PLAYER_PILE.set( (dx + CARD_W * 1.4), 0, 0.5);
     } else {
       const dy = CARD_H / 2 - 0.21;                 // half-gap, slight overlap of margins
       PLAYER_SLOT.set(0, -dy, 0);
@@ -3449,10 +3449,12 @@ function resolveStat(stat, pCard, cCard) {
       spinToPot(localC, cDest, { dir }, after);
     } else {
       // both cards fly out to the WINNER's side of the screen; mirrored spin +
-      // a slight stagger keep them readable as two distinct cards.
-      const sign = winner === 'player' ? -1 : 1;
-      const dir = sideBySide ? new THREE.Vector3(sign, 0, 0)
-                             : new THREE.Vector3(0, sign, 0);
+      // a slight stagger keep them readable as two distinct cards. Direction is
+      // derived from the winner's actual pile so it tracks the layout (landscape:
+      // player RIGHT / CPU LEFT · portrait: player bottom / CPU top).
+      const winPile = winner === 'player' ? PLAYER_PILE : CPU_PILE;
+      const dir = sideBySide ? new THREE.Vector3(Math.sign(winPile.x), 0, 0)
+                             : new THREE.Vector3(0, Math.sign(winPile.y), 0);
       const winCard  = winner === 'player' ? localP : localC;
       const loseCard = winner === 'player' ? localC : localP;
       flyOut(winCard,  dir, { spin:  0.9, delay: 0 },   after);
