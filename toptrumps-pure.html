@@ -1214,6 +1214,7 @@ function resolveStat(stat, pCard, cCard) {
     }).join('');
     _helpEl.innerHTML = '<h3>Toggle keys</h3>' + rows +
       '<div class="row"><span><kbd>P</kbd> Flight paths</span><span class="state on">' + PATH_PROFILE.toUpperCase() + '</span></div>' +
+      '<div class="row"><span><kbd>T</kbd> Test pot animation</span><span class="state on">RUN</span></div>' +
       '<div class="hint">Press the key to toggle · <kbd>?</kbd> or <kbd>Esc</kbd> to close</div>';
   }
   function toggleHelp(force) {
@@ -2933,7 +2934,7 @@ function resolveStat(stat, pCard, cCard) {
      A soft, slow drift + tilt applied around each card's slot anchor so the
      pair reads as suspended, not pinned. Runs only while a card is the live
      top card and NOT mid-flip (flip owns z-lift/scale/rot.y). Written as an
-     absolute transform from the anchor each frame, so fly-out/sweep — which
+     absolute transform from the anchor each frame, so fly-out/spinToPot — which
      read the card's current position as their start — pick up seamlessly. */
   function floatCard(cardG, et) {
     if (!cardG || cardG.userData.flipping || cardG.userData.entering || REDUCED) return;
@@ -2964,20 +2965,78 @@ function resolveStat(stat, pCard, cCard) {
     cardG.userData.dispose && cardG.userData.dispose();
   }
 
-  /* slide a resolved card toward the winner's pile (or the pot centre on a
-     tie), shrinking + fading, then dispose. Pure function of eased t (G4). */
-  function sweep(cardG, dest, done) {
+  /* Radial smoke burst — a card dissolving into an all-around puff, rather than
+     dustEmit's one-sided trailing wisp. Reuses the dust particle system; no-op
+     when the Smoke toggle is off. Positions are passed in tableGroup-local space
+     (same convention flyOut uses — the table's slight X-tilt is negligible). */
+  function smokePuff(pos) {
+    if (!FEAT.smoke) return;
+    const RINGS = 8;
+    for (let k = 0; k < RINGS; k++) {
+      const a = (k / RINGS) * Math.PI * 2 + Math.random() * 0.4;
+      const dir = new THREE.Vector3(Math.cos(a) * 0.9, Math.sin(a) * 0.9 + 0.25, (Math.random() - 0.5) * 0.4);
+      dustEmit(pos, dir, 3);
+    }
+  }
+
+  /* v1 tie/pot animation: the resolved card ORBITS the pot centre (both cards
+     share `dir`+`turns`, so the pair stays opposite and chases each other around
+     one ring), SPIRALS inward while SHRINKING and self-tumbling, then vanishes in
+     a PUFF OF SMOKE. Replaces the old straight slide-to-centre. Driven off linear
+     progress (ease is identity); all shaping is internal so the curves are easy
+     to retune for a future v2. */
+  function spinToPot(cardG, center, opts, done) {
+    opts = opts || {};
+    const dir    = opts.dir    != null ? opts.dir    : 1;
+    const turns  = opts.turns  != null ? opts.turns  : 1.75;   // full orbits around the centre
+    const dur    = opts.dur    != null ? opts.dur    : 1100;
+    const tumble = opts.tumble != null ? opts.tumble : Math.PI * 2.2;   // self-spin about Z
     const from = cardG.position.clone();
+    const r0 = Math.hypot(from.x - center.x, from.y - center.y);
+    const a0 = Math.atan2(from.y - center.y, from.x - center.x);
+    const z0 = from.z, rotZ0 = cardG.rotation.z, rotX0 = cardG.rotation.x;
+    let puffed = false;
     tween({
-      dur: md(460),
+      dur: md(dur),
+      ease: (x) => x,
       update: (e) => {
-        cardG.position.lerpVectors(from, dest, e);
-        const s = 1 - 0.45 * e;
+        const ang = a0 + dir * turns * Math.PI * 2 * e;
+        const r   = r0 * (1 - Math.pow(e, 1.6));               // hold the ring, then rush inward
+        cardG.position.x = center.x + Math.cos(ang) * r;
+        cardG.position.y = center.y + Math.sin(ang) * r;
+        cardG.position.z = z0 + (center.z - z0) * e + Math.sin(e * Math.PI) * 0.35;   // lift as it swirls
+        const s = Math.max(0.05, 1 - 0.9 * Math.pow(e, 1.3));  // big during the orbit, collapses late
         cardG.scale.set(s, s, s);
-        cardG.userData.setOpacity(1 - e);
+        cardG.rotation.z = rotZ0 + dir * tumble * e;
+        cardG.rotation.x = rotX0 * (1 - e);
+        cardG.userData.setOpacity(e < 0.72 ? 1 : Math.max(0, 1 - (e - 0.72) / 0.28));
+        if (!puffed && e >= 0.8) { puffed = true; smokePuff(cardG.position); }
       },
-      done: () => { disposeCard(cardG); done && done(); }
+      done: () => { if (!puffed) smokePuff(cardG.position); disposeCard(cardG); done && done(); }
     });
+  }
+
+  /* Dev/test: run the tie/pot animation on a throwaway pair of face-up demo
+     cards placed at the two slots, WITHOUT touching the live round. Bound to the
+     T key + __pure.potAnim(). Lets the pot animation be inspected on demand
+     rather than having to engineer a real draw in play. */
+  function testPotAnim() {
+    if (!(G.data && G.data.cards && G.data.cards.length >= 2)) { showToast('Pot test: deck not ready'); return; }
+    const a = makeCard(G.data.cards[0]);
+    const b = makeCard(G.data.cards[1]);
+    placeCard(a, PLAYER_SLOT, true);
+    placeCard(b, CPU_SLOT, true);
+    a.userData.setOpacity(1); b.userData.setOpacity(1);
+    a.userData.shadow = makeShadow();
+    b.userData.shadow = makeShadow();
+    tableGroup.add(a, b);
+    warmCardTextures(a); warmCardTextures(b);
+    showToast('Pot animation (test)');
+    announce('Testing pot animation.');
+    const dir = Math.random() < 0.5 ? 1 : -1;
+    const center = new THREE.Vector3(0, 0, -0.4);
+    spinToPot(a, center, { dir }, null);
+    spinToPot(b, center, { dir }, null);
   }
 
   /* fly a WON card dramatically off the winner's side of the screen: it
@@ -3382,8 +3441,12 @@ function resolveStat(stat, pCard, cCard) {
       setTimeout(() => { if (G.matchToken === token) startRound(); }, 260);
     };
     if (winner === 'tie') {
-      sweep(localP, pDest, after);
-      sweep(localC, cDest, after);
+      // Draw: both cards spin around the pot centre, spiral in + shrink, then
+      // vanish in a puff of smoke. Shared spin direction so the pair chases each
+      // other around one ring (they start opposite, on the two slots).
+      const dir = Math.random() < 0.5 ? 1 : -1;
+      spinToPot(localP, pDest, { dir }, after);
+      spinToPot(localC, cDest, { dir }, after);
     } else {
       // both cards fly out to the WINNER's side of the screen; mirrored spin +
       // a slight stagger keep them readable as two distinct cards.
@@ -3429,6 +3492,8 @@ function resolveStat(stat, pCard, cCard) {
       toggleHelp(false);
     } else if (e.key === 'p' || e.key === 'P') {
       setPathProfile();                              // swap craft flight-path profile set (v1 <-> v2)
+    } else if (e.key === 't' || e.key === 'T') {
+      testPotAnim();                                 // test the tie/pot card animation on demand
     } else {
       const bind = FEAT_KEYS[e.key.toLowerCase()];   // dev/test feature toggles
       if (bind) { setFeature(bind.flag); }
@@ -3533,6 +3598,7 @@ function resolveStat(stat, pCard, cCard) {
       pinWarp: (v) => { _warpPin = v; },   // freeze star warp strength for screenshots (test hook)
       meteor: () => { spawnMeteor(); },     // force-spawn a shooting star (test hook)
       xwing: () => { spawnFlyby(); },       // force-spawn a craft chase pass (test hook)
+      potAnim: () => { testPotAnim(); },    // run the tie/pot card animation on demo cards (test hook)
       pathProfile: (v) => setPathProfile(v),   // swap flight-path profile set: 'v1'/'v2', or no arg to cycle (test hook)
       xwingStatic: (x, y, z, ry) => {       // place a static X-wing for inspection
         const m = makeXWing(); if (!m) return false;
