@@ -1862,7 +1862,7 @@ function resolveStat(stat, pCard, cCard) {
       return { edge: { x: side * r(1.06, 1.32), y: r(-0.6, 0.6) }, free: { x: side * r(0.66, 0.9), y: r(-0.5, 0.5) } };
     };
     const nearZ = () => camZ - r(5, 16);    // just in front of the viewer at the edge
-    const farZ  = () => r(-262, -228);       // +50% deeper: craft shrinks to a far dot before it melts (camera far=320)
+    const farZ  = () => r(-292, -252);       // deeper still: craft flies a longer arc and shrinks to a far dot before it melts (camera far=320)
     // Build a cubic that flies STRAIGHT in, then hooks off to one side late. The
     // first control point stays on the s->e line (so the run-in holds the entry
     // heading) and the second is kicked laterally (so the back half breaks away
@@ -2063,12 +2063,12 @@ function resolveStat(stat, pCard, cCard) {
         const fadeIn = Math.min(1, t / 0.05);
         let distFade = 1;
         if (path.farEnd) {
-          const zNow = _pos.z, zKeep = -174, zGone = -225;  // +50% deeper: stay opaque much further out, then melt only at the far end
+          const zNow = _pos.z, zKeep = -214, zGone = -288;  // stay fully opaque much further out, then melt only at the very far end so craft don't vanish early
           distFade = zNow >= zKeep ? 1
                    : zNow <= zGone ? 0
                    : (zNow - zGone) / (zKeep - zGone);
         }
-        const endGuard = path.farEnd ? Math.min(1, (1 - t) / 0.12) : 1;
+        const endGuard = path.farEnd ? Math.min(1, (1 - t) / 0.08) : 1;
         const alpha = Math.max(0, Math.min(1, fadeIn * distFade * endGuard));
         xwing.traverse(child => {
           if (child.material && child.material.opacity !== undefined) {
