@@ -1794,7 +1794,7 @@ function resolveStat(stat, pCard, cCard) {
   // genuinely lit, bump-mapped, spherical body that spins on its axis in the
   // SAME direction as the other moons. Kept out of the `planets` array so it
   // never streams/recycles; a dedicated updater spins it and drives the exit.
-  let welcomeMoon = null, _wMoonSpin = 0.05, _wMoonExit = 0;
+  let welcomeMoon = null, _wMoonSpin = 0.02, _wMoonExit = 0;   // slower than game moons: bigger + closer reads as more massive
   function makeWelcomeMoon() {
     if (welcomeMoon) return welcomeMoon;
     const r = 15;
