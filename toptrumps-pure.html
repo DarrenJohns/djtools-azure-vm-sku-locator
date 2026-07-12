@@ -130,21 +130,6 @@
     color: var(--ink); }
   #welcome.w-hidden { display: none; }
 
-  /* huge MOON rising from the bottom (real lunar texture) — plain shading */
-  #welcome .w-moon { position: fixed; left: 50%; bottom: -620px;
-    transform: translateX(-50%); width: 1100px; height: 1100px; border-radius: 50%;
-    background-color: #20242c; background-image: url("assets/moon.jpg");
-    background-repeat: repeat-x; background-size: 2200px 1100px; background-position: 0 center;
-    filter: grayscale(.25) brightness(.66) contrast(1.02);
-    box-shadow: inset -70px -50px 180px rgba(0,0,0,.85);
-    transition: transform 1.15s cubic-bezier(.42,0,1,1), opacity .45s ease .75s;
-    animation: w-moonspin 110s linear infinite; will-change: transform, background-position; }
-  #welcome .w-moon::before { content: ""; position: absolute; inset: 0; border-radius: 50%;
-    background: radial-gradient(150% 150% at 62% 78%, transparent 42%, rgba(2,6,14,.9) 100%); }
-  #welcome.w-go .w-moon { transform: translateX(-50%) translateY(1320px); opacity: 0; }
-  /* slow axis-spin: pan the surface under the fixed terminator (one tile = 2200px, seamless) */
-  @keyframes w-moonspin { from { background-position-x: 0; } to { background-position-x: -2200px; } }
-
   /* darken the sky a touch behind the title for legibility over the live scene */
   #welcome .w-vignette { content: ""; position: fixed; inset: 0; pointer-events: none;
     background: radial-gradient(95% 62% at 50% 40%, transparent, rgba(3,7,15,.55)); }
@@ -274,7 +259,7 @@
     cursor: pointer; font-weight: 700; color: #04121f; background: linear-gradient(120deg,#8fd8ff,#37b6ff); }
 
   @media (prefers-reduced-motion: reduce) {
-    #welcome .w-moon, #welcome .w-title3d .w-title, #welcome .w-card { animation: none; }
+    #welcome .w-title3d .w-title, #welcome .w-card { animation: none; }
   }
 </style>
 </head>
@@ -290,7 +275,6 @@
 
   <!-- ===== Welcome / title overlay (DOM, on top of the live WebGL scene) ===== -->
   <div id="welcome" class="w-hidden" aria-label="Azure Top Trumps — start screen">
-    <div class="w-moon" aria-hidden="true"></div>
     <div class="w-vignette" aria-hidden="true"></div>
     <div class="w-stack">
       <div class="w-eyebrow w-fade">WebGL · Star Wars Edition</div>
@@ -1805,6 +1789,47 @@ function resolveStat(stat, pCard, cCard) {
     p.userData.vz = 26 + Math.random() * 10;
   }
 
+  // --- welcome moon: a real 3D sphere (same material family as the game moons
+  // above) that rises from the bottom of the title screen. NOT a DOM cheat — a
+  // genuinely lit, bump-mapped, spherical body that spins on its axis in the
+  // SAME direction as the other moons. Kept out of the `planets` array so it
+  // never streams/recycles; a dedicated updater spins it and drives the exit.
+  let welcomeMoon = null, _wMoonSpin = 0.05, _wMoonExit = 0;
+  function makeWelcomeMoon() {
+    if (welcomeMoon) return welcomeMoon;
+    const r = 15;
+    const mesh = new THREE.Mesh(
+      new THREE.SphereGeometry(r, 96, 60),
+      new THREE.MeshStandardMaterial({
+        map: _moonMap, color: 0xc7dbf4,
+        bumpMap: _moonMap, bumpScale: r * 0.14,
+        emissive: 0x2c4f80, emissiveMap: _moonMap, emissiveIntensity: 0.42,
+        roughness: 1.0, metalness: 0.0,
+        transparent: true, opacity: 1
+      })
+    );
+    mesh.position.set(0, -15.5, -18);     // low + near so it fills the lower screen (top curve behind the card fan)
+    mesh.rotation.z = 0.32;               // matching axial tilt so the spin reads
+    mesh.rotation.y = Math.random() * 6.2832;
+    mesh.visible = false;
+    mesh.renderOrder = -1;
+    space.add(mesh);
+    welcomeMoon = mesh;
+    return mesh;
+  }
+  function showWelcomeMoon() { makeWelcomeMoon(); welcomeMoon.visible = true;
+    welcomeMoon.position.set(0, -15.5, -18); welcomeMoon.material.opacity = 1; _wMoonExit = 0; }
+  function updateWelcomeMoon(dt) {
+    if (!welcomeMoon || !welcomeMoon.visible) return;
+    // same sign/scale as the game-moon spin (updateBackdrop) → same direction
+    welcomeMoon.rotation.y += _wMoonSpin * dt * 6;
+    if (_wMoonExit > 0) {
+      welcomeMoon.position.y -= 26 * dt;                 // slide down out of frame
+      welcomeMoon.material.opacity = Math.max(0, welcomeMoon.material.opacity - dt * 1.1);
+      if (welcomeMoon.position.y < -34) { welcomeMoon.visible = false; _wMoonExit = 0; }
+    }
+  }
+
   // --- nebula wash: dim additive glows for colour depth ---
   function makeNebula(color, x, y, z, s, op) {
     const m = new THREE.Mesh(new THREE.PlaneGeometry(s, s),
@@ -1876,6 +1901,7 @@ function resolveStat(stat, pCard, cCard) {
       }
     }
     updateMeteors(dt, w, rm);   // occasional shooting stars while the scene is idle
+    updateWelcomeMoon(dt);      // title-screen 3D moon: axis-spin + exit slide
   }
 
   /* ---- Craft 3D model flybys (X-wing + TIE fighter) ------------------- */
@@ -2329,9 +2355,9 @@ function resolveStat(stat, pCard, cCard) {
      _heldXwing.rotation.z = Math.sin(_heldT * 0.9 + 1.0) * 0.07;       // slight bank
      _heldXwing.rotation.x = -0.05 + Math.sin(_heldT * 0.5) * 0.04;     // subtle pitch bob
    }
-   // Random spawn during gameplay: ~5% chance per frame during picking/revealing
+   // Random spawn during the welcome screen + gameplay: ~5% chance per frame.
    if (!FEAT.xwings || REDUCED) return;
-   if ((G.phase === 'picking' || G.phase === 'revealing') && Math.random() < 0.05 && _xwings.length === 0) {
+   if ((G.phase === 'welcome' || G.phase === 'picking' || G.phase === 'revealing') && Math.random() < 0.05 && _xwings.length === 0) {
      spawnXWingFlyby();
    }
   }
@@ -3865,6 +3891,10 @@ function resolveStat(stat, pCard, cCard) {
       // welcome-screen hooks (transition testing)
       welcome: () => { const w = document.getElementById('welcome'); if (w) w.classList.remove('w-hidden'); },
       welcomeExit: () => onPlay(),                 // replay the welcome→game transition
+      wmoon: () => welcomeMoon ? ({ vis: welcomeMoon.visible, y: +welcomeMoon.position.y.toFixed(2),
+        z: +welcomeMoon.position.z.toFixed(2), ry: +welcomeMoon.rotation.y.toFixed(3),
+        op: +welcomeMoon.material.opacity.toFixed(2) }) : null,
+      craftCount: () => _xwings.length,
       diff: (n) => { if (n >= 1 && n <= 5) { G.difficulty = n; syncDifficultyUI(); } return G.difficulty; }
     };
   }
@@ -4018,7 +4048,16 @@ function resolveStat(stat, pCard, cCard) {
     syncDifficultyUI();
     buildHowtoDifficulty();
     if (wHintEl) wHintEl.style.opacity = '0';   // suppress the loading pill under the overlay
+    showWelcomeMoon();                          // real 3D moon rises in the WebGL scene
     welcomeEl.classList.remove('w-hidden');
+    // kick an early X-wing/TIE pass so craft appear promptly once the GLBs load
+    let tries = 0;
+    const kick = setInterval(() => {
+      if (typeof _craftProtos !== 'undefined' && (_craftProtos.xwing || _craftProtos.tie)) {
+        if (G.phase === 'welcome' && _xwings.length === 0) spawnFlyby();
+        clearInterval(kick);
+      } else if (++tries > 40) { clearInterval(kick); }
+    }, 250);
   }
 
   // Spawn soft DOM smoke sprites over an element's rect and dissolve the element
@@ -4057,10 +4096,12 @@ function resolveStat(stat, pCard, cCard) {
     // Reduced motion: skip smoke + slide, quick overlay fade.
     if (REDUCED) {
       welcomeEl.classList.add('w-quickexit');
+      if (welcomeMoon) welcomeMoon.visible = false;
       return new Promise(res => setTimeout(res, 270));
     }
-    // Kick the declarative exits: text fades + moon slides down (CSS transitions).
+    // Kick the declarative exits: text fades (CSS) + 3D moon slides down (WebGL).
     welcomeEl.classList.add('w-go');
+    _wMoonExit = 1;                          // start the real 3D moon sliding out of frame
     // Title puffs (wide element → keep it faint so it reads as smoke, not a flash), then cards puff left→right.
     setTimeout(() => domPuff(document.querySelector('#welcome .w-title3d'), 'w-poof', 8, 0.34), 120);
     const cards = [...document.querySelectorAll('#welcome .w-card')];
