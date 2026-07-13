@@ -11,6 +11,7 @@
     --ink: #eaf2ff;
     --muted: #9fb3d0;
     --accent: #37b6ff;
+    --danger: #ff6a6a;
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; height: 100%; background: var(--bg0); color: var(--ink);
@@ -33,46 +34,77 @@
   #hud .counts { text-align: right; font-variant-numeric: tabular-nums; }
   #hud .counts b { color: var(--accent); }
 
-  #hint { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%);
+  #hint { position: fixed; left: 50%; top: 64px; transform: translateX(-50%);
     z-index: 5; color: var(--muted); font-size: 14px; letter-spacing: .2px;
     background: rgba(6,12,24,.55); border: 1px solid rgba(120,160,220,.18);
     padding: 8px 16px; border-radius: 999px; backdrop-filter: blur(6px);
     transition: opacity .4s ease; }
 
-  /* ---- Continue pause button — hands round pacing to the player. Sits above
-     the hint pill; a thin progress bar shows the safety auto-advance. ---- */
-  #continue-btn { position: fixed; left: 50%; bottom: 70px;
-    transform: translateX(-50%) translateY(8px); z-index: 7;
-    display: inline-flex; align-items: center; gap: 12px;
-    padding: 12px 18px 12px 20px; border-radius: 999px; cursor: pointer;
-    font: 700 14px/1 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    letter-spacing: .02em; color: var(--ink); white-space: nowrap; overflow: hidden;
-    background: linear-gradient(135deg, rgba(20,44,78,.92), rgba(10,21,38,.92));
-    border: 1px solid rgba(120,170,235,.35);
-    box-shadow: 0 18px 44px rgba(0,0,0,.6), 0 0 0 0 rgba(55,182,255,0);
-    backdrop-filter: blur(7px);
+  /* ---- Round HUD control cluster — appears at each round's verdict so the
+     player sets the pace. Continue (⏩, wrapped in an auto-advance countdown
+     RING), Pause (freeze the countdown), and Quit (return to the title
+     screen). Three equal-diameter sci-fi HUD discs. ---- */
+  #round-controls { position: fixed; left: 50%; bottom: 64px;
+    transform: translateX(-50%) translateY(10px); z-index: 7;
+    display: inline-flex; align-items: center; gap: 26px;
     opacity: 0; pointer-events: none;
-    transition: opacity .25s ease, transform .25s cubic-bezier(.2,.7,.3,1.4), box-shadow .3s ease;
-    --progress: 100%; }
-  #continue-btn::before { content: ''; position: absolute; left: 0; bottom: 0; height: 3px;
-    width: var(--progress, 100%);
-    background: linear-gradient(90deg, rgba(120,220,255,.9), rgba(55,182,255,.5));
-    box-shadow: 0 0 8px rgba(90,200,255,.55); transition: width .15s linear; pointer-events: none; }
-  #continue-btn[hidden] { display: none; }
-  #continue-btn.show { opacity: 1; pointer-events: auto;
-    transform: translateX(-50%) translateY(0);
-    animation: continuePulse 1.9s ease-in-out infinite; }
-  #continue-btn:hover { border-color: rgba(140,195,255,.6);
-    background: linear-gradient(135deg, rgba(26,58,98,.95), rgba(14,28,50,.95)); }
-  #continue-btn:active { transform: translateX(-50%) translateY(1px) scale(.98); }
-  #continue-btn .c-arrow { font-size: 12px; color: var(--accent); }
-  #continue-btn .c-key { font-size: 10.5px; font-weight: 600; letter-spacing: .04em;
-    background: rgba(120,170,235,.2); padding: 4px 8px; border-radius: 6px; color: #cfe4ff; }
-  @keyframes continuePulse {
-    0%,100% { box-shadow: 0 18px 44px rgba(0,0,0,.6), 0 0 0 0 rgba(55,182,255,0); }
-    50%     { box-shadow: 0 18px 44px rgba(0,0,0,.6), 0 0 22px 4px rgba(55,182,255,.5); }
+    transition: opacity .25s ease, transform .25s cubic-bezier(.2,.7,.3,1.4); }
+  #round-controls[hidden] { display: none; }
+  #round-controls.show { opacity: 1; pointer-events: auto;
+    transform: translateX(-50%) translateY(0); }
+
+  .rb { position: relative; width: 76px; height: 76px; border-radius: 50%; border: 0;
+    background: none; cursor: pointer; display: grid; place-items: center; padding: 0;
+    transition: transform .14s ease, filter .2s ease; -webkit-tap-highlight-color: transparent; }
+  .rb:active { transform: scale(.94); }
+  .rb .glyph { position: relative; z-index: 2; width: 30px; height: 30px;
+    stroke: #d4ecff; fill: none; transition: stroke .2s ease; }
+  .rb .ring { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+  .rb .disc { position: absolute; inset: 0; border-radius: 50%;
+    background: radial-gradient(circle at 50% 35%, rgba(24,54,92,.95), rgba(7,16,32,.95));
+    border: 1px solid rgba(90,200,255,.55);
+    box-shadow: inset 0 0 16px rgba(60,170,255,.25), 0 10px 30px rgba(0,0,0,.5), 0 0 16px rgba(55,182,255,.25);
+    transition: border-color .2s ease, box-shadow .25s ease; }
+  .rb .disc::after { content: ''; position: absolute; inset: 6px; border-radius: 50%;
+    border: 1px solid rgba(90,200,255,.18); }
+  .rb:hover .disc { border-color: rgba(150,220,255,.95);
+    box-shadow: inset 0 0 20px rgba(60,170,255,.35), 0 10px 30px rgba(0,0,0,.5), 0 0 28px rgba(55,182,255,.55); }
+  .rb:hover .glyph { stroke: #eaf6ff; }
+
+  /* Continue's countdown ring (SVG stroke drains as the safety timer runs) */
+  .rb .ring .ring-track { fill: none; stroke: rgba(90,200,255,.15); stroke-width: 3.5; }
+  .rb .ring .ring-fill  { fill: none; stroke: #7fd8ff; stroke-width: 3.5; stroke-linecap: round;
+    filter: drop-shadow(0 0 5px rgba(90,200,255,.9)); transition: stroke-dashoffset .12s linear; }
+
+  /* soft idle pulse draws the eye to Continue */
+  #round-controls.show #rc-continue .disc { animation: rbPulse 1.9s ease-in-out infinite; }
+  @keyframes rbPulse {
+    0%,100% { box-shadow: inset 0 0 16px rgba(60,170,255,.25), 0 10px 30px rgba(0,0,0,.5), 0 0 16px rgba(55,182,255,.25); }
+    50%     { box-shadow: inset 0 0 18px rgba(60,170,255,.3),  0 10px 30px rgba(0,0,0,.5), 0 0 26px rgba(55,182,255,.5); }
   }
-  @media (prefers-reduced-motion: reduce) { #continue-btn.show { animation: none; } }
+  /* while the countdown is frozen, calm Continue's pulse */
+  #round-controls.rc-paused #rc-continue .disc { animation: none; }
+
+  /* Quit turns red on hover + when armed for the two-click confirm */
+  #rc-quit:hover .disc { border-color: var(--danger);
+    box-shadow: inset 0 0 20px rgba(255,90,90,.25), 0 10px 30px rgba(0,0,0,.5), 0 0 26px rgba(255,90,90,.45); }
+  #rc-quit:hover .glyph { stroke: #ffd9d9; }
+  #round-controls.rc-armed #rc-quit .disc { border-color: var(--danger);
+    box-shadow: inset 0 0 20px rgba(255,90,90,.3), 0 0 26px rgba(255,90,90,.55); }
+  #round-controls.rc-armed #rc-quit .glyph { stroke: #ffd9d9; }
+
+  /* confirm label above the cluster (two-click safety) */
+  #round-controls .rc-confirm { position: absolute; left: 50%; top: -32px; transform: translateX(-50%);
+    white-space: nowrap; font-size: 11.5px; font-weight: 700; letter-spacing: .04em; color: #ffd9d9;
+    background: rgba(48,14,18,.72); border: 1px solid rgba(255,120,120,.5); border-radius: 999px;
+    padding: 5px 12px; opacity: 0; pointer-events: none; transition: opacity .2s ease;
+    backdrop-filter: blur(4px); }
+  #round-controls.rc-armed .rc-confirm { opacity: 1; }
+
+  @media (prefers-reduced-motion: reduce) {
+    #round-controls.show #rc-continue .disc { animation: none; }
+    #round-controls { transition: opacity .2s ease; }
+  }
 
   /* ---- loading / error ---- */
   #loading { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center;
@@ -326,11 +358,43 @@
     </div>
   </div>
 
-  <button id="continue-btn" class="continue-btn" type="button" hidden aria-label="Continue to next round">
-    <span class="c-label">Continue</span>
-    <span class="c-arrow" aria-hidden="true">▶</span>
-    <span class="c-key" aria-hidden="true">Space</span>
-  </button>
+  <div id="round-controls" hidden aria-label="Round controls">
+    <span class="rc-confirm" aria-hidden="true">Leave match? Click Quit again</span>
+    <button class="rb" id="rc-continue" type="button" aria-label="Continue to next round (Space)">
+      <span class="disc"></span>
+      <svg class="ring" viewBox="0 0 76 76" aria-hidden="true">
+        <circle class="ring-track" cx="38" cy="38" r="35"></circle>
+        <circle class="ring-fill" cx="38" cy="38" r="35" transform="rotate(-90 38 38)"
+          stroke-dasharray="219.9" stroke-dashoffset="0"></circle>
+      </svg>
+      <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true"><use href="#g-fwd"/></svg>
+    </button>
+    <button class="rb" id="rc-pause" type="button" aria-label="Pause the countdown">
+      <span class="disc"></span>
+      <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true"><use id="rc-pause-glyph" href="#g-pause"/></svg>
+    </button>
+    <button class="rb" id="rc-quit" type="button" aria-label="Quit to the title screen">
+      <span class="disc"></span>
+      <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true"><use href="#g-power"/></svg>
+    </button>
+  </div>
+
+  <!-- shared round-button glyph defs -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+    <g id="g-fwd" stroke-linejoin="round">
+      <polygon points="3,4 13,12 3,20" stroke-width="2" fill="none"/>
+      <polygon points="13,4 23,12 13,20" stroke-width="2" fill="none"/>
+    </g>
+    <g id="g-play"><polygon points="6,4 20,12 6,20" stroke-width="2" stroke-linejoin="round" fill="none"/></g>
+    <g id="g-pause">
+      <rect x="6" y="4" width="4.5" height="16" rx="1" stroke-width="2" fill="none"/>
+      <rect x="15" y="4" width="4.5" height="16" rx="1" stroke-width="2" fill="none"/>
+    </g>
+    <g id="g-power" stroke-linecap="round">
+      <line x1="12" y1="2.5" x2="12" y2="12" stroke-width="2.2"/>
+      <path d="M6.5,7 a8,8 0 1 0 11,0" stroke-width="2.2" fill="none"/>
+    </g>
+  </defs></svg>
 
   <div id="fps"></div>
 
@@ -3319,50 +3383,101 @@ function resolveStat(stat, pCard, cCard) {
   }
   function setHint(msg) { if (elHint) elHint.textContent = msg; }
 
-  /* ---- Continue pause: hand round pacing to the player ------------------
-     After a round resolves we pause with a Continue button (Space/Enter/click)
-     so the player can read both cards before the next hand warps in — mirrors
-     the original game's pacing. A safety countdown auto-advances if ignored,
-     drawn as the thin progress bar inside the pill. `hideContinue` force-clears
-     it (and resolves any pending wait) if the match restarts mid-pause. */
-  const elContinue = document.getElementById('continue-btn');
+  /* ---- Round control cluster: hand round pacing to the player -----------
+     After a round resolves we surface a round-button cluster so the player
+     sets the pace before the next hand warps in — mirroring the original
+     game's pacing. Continue advances now (Space/Enter/click); a safety
+     countdown auto-advances if ignored, drawn as the draining ring around
+     Continue. Pause freezes that countdown so the verdict can be studied.
+     Quit returns to the title screen (two-click confirm). `hideContinue`
+     force-clears the cluster (and resolves any pending wait) on restart. */
+  const elRoundControls = document.getElementById('round-controls');
+  const btnContinue = document.getElementById('rc-continue');
+  const btnPause    = document.getElementById('rc-pause');
+  const btnQuit     = document.getElementById('rc-quit');
+  const ringFill    = elRoundControls ? elRoundControls.querySelector('.ring-fill') : null;
+  const usePauseGlyph = document.getElementById('rc-pause-glyph');
+  const RING_C = 219.9;                 // 2·π·r with r=35 (see the ring markup)
   let _continueCleanup = null;
+  let _rcPaused = false;
+
+  function showRoundControls() {
+    if (!elRoundControls) return;
+    elRoundControls.hidden = false;
+    requestAnimationFrame(() => elRoundControls.classList.add('show'));
+  }
+  function hideRoundControls() {
+    if (!elRoundControls) return;
+    elRoundControls.classList.remove('show', 'rc-paused', 'rc-armed');
+    elRoundControls.hidden = true;
+  }
   function hideContinue() {
     if (_continueCleanup) { _continueCleanup(); return; }
-    if (elContinue) { elContinue.classList.remove('show', 'is-paused'); elContinue.hidden = true; }
+    hideRoundControls();
+  }
+  function setRing(frac) {
+    if (ringFill) ringFill.style.strokeDashoffset = (RING_C * (1 - frac)).toFixed(1);
   }
   function waitForContinue(autoMs) {
     return new Promise((resolve) => {
-      const btn = elContinue;
-      if (!btn) { setTimeout(resolve, autoMs); return; }
+      if (!elRoundControls || !btnContinue) { setTimeout(resolve, autoMs); return; }
       let done = false, remaining = autoMs, last = performance.now(), raf = 0;
+      let armed = false, armTimer = null;
       const finish = () => {
         if (done) return;
         done = true;
         cancelAnimationFrame(raf);
+        clearTimeout(armTimer);
         document.removeEventListener('keydown', onKey, true);
-        btn.removeEventListener('click', finish);
-        btn.classList.remove('show', 'is-paused');
-        btn.hidden = true;
+        btnContinue.removeEventListener('click', finish);
+        if (btnPause) btnPause.removeEventListener('click', onPause);
+        if (btnQuit)  btnQuit.removeEventListener('click', onQuit);
+        hideRoundControls();
         _continueCleanup = null;
         resolve();
       };
       const tick = () => {
         if (done) return;
-        const now = performance.now();
-        remaining -= (now - last); last = now;
+        const now = performance.now(); const dt = now - last; last = now;
+        if (!_rcPaused) remaining -= dt;                 // Pause freezes the drain
         if (remaining <= 0) { finish(); return; }
-        btn.style.setProperty('--progress', Math.max(0, remaining / autoMs * 100) + '%');
+        setRing(Math.max(0, remaining / autoMs));
         raf = requestAnimationFrame(tick);
       };
       const onKey = (e) => {
         if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); finish(); }
       };
+      const onPause = () => {
+        _rcPaused = !_rcPaused;
+        elRoundControls.classList.toggle('rc-paused', _rcPaused);
+        if (usePauseGlyph) usePauseGlyph.setAttribute('href', _rcPaused ? '#g-play' : '#g-pause');
+        btnPause.setAttribute('aria-label', _rcPaused ? 'Resume the countdown' : 'Pause the countdown');
+      };
+      const onQuit = () => {
+        if (!armed) {                                     // first click arms the confirm
+          armed = true;
+          elRoundControls.classList.add('rc-armed');
+          _rcPaused = true;                               // hold the countdown while deciding
+          elRoundControls.classList.add('rc-paused');
+          armTimer = setTimeout(() => {
+            armed = false;
+            elRoundControls.classList.remove('rc-armed');
+          }, 3200);
+          return;
+        }
+        clearTimeout(armTimer);                           // second click confirms
+        returnToWelcome();                                // bumps matchToken first, so the
+        finish();                                         // awaiting caller bails before resolveRound
+      };
       _continueCleanup = finish;
-      btn.hidden = false;
-      btn.style.setProperty('--progress', '100%');
-      requestAnimationFrame(() => { if (!done) btn.classList.add('show'); });
-      btn.addEventListener('click', finish);
+      _rcPaused = false;
+      elRoundControls.classList.remove('rc-paused', 'rc-armed');
+      if (usePauseGlyph) usePauseGlyph.setAttribute('href', '#g-pause');
+      setRing(1);
+      showRoundControls();
+      btnContinue.addEventListener('click', finish);
+      if (btnPause) btnPause.addEventListener('click', onPause);
+      if (btnQuit)  btnQuit.addEventListener('click', onQuit);
       document.addEventListener('keydown', onKey, true);
       last = performance.now();
       raf = requestAnimationFrame(tick);
@@ -3868,8 +3983,14 @@ function resolveStat(stat, pCard, cCard) {
       orbit: (y, p) => { _orbYawT = y || 0; _orbPitchT = p || 0; },   // drive camera peek deterministically (test hook)
       _cam: () => ({ x: +camera.position.x.toFixed(3), y: +camera.position.y.toFixed(3), z: +camera.position.z.toFixed(3) }),
       _planetZ: () => planets.map(p => +p.position.z.toFixed(2)),   // moon z positions (parallax warp verification)
-      paused: () => !!_continueCleanup,    // true while the Continue pause is waiting (test hook)
-      cont: () => { hideContinue(); },     // advance past the Continue pause (test hook)
+      paused: () => !!_continueCleanup,    // true while the round-control pause is waiting (test hook)
+      cont: () => { hideContinue(); },     // advance past the round-control pause (test hook)
+      rcVisible: () => !!(elRoundControls && elRoundControls.classList.contains('show')),
+      rcRing: () => ringFill ? +parseFloat(ringFill.style.strokeDashoffset || '0').toFixed(1) : null,
+      rcPause: () => { if (btnPause) btnPause.click(); },   // toggle the countdown freeze
+      rcPaused: () => _rcPaused,
+      quit: () => { if (btnQuit) { btnQuit.click(); btnQuit.click(); } else returnToWelcome(); },
+      quitNow: () => returnToWelcome(),
       pick: (n) => {
         if (G.phase === 'picking' && G.turn === 'player') {
           const s = STATS[n - 1]; if (s) playerPicksStat(s.key);
@@ -3895,7 +4016,9 @@ function resolveStat(stat, pCard, cCard) {
         z: +welcomeMoon.position.z.toFixed(2), ry: +welcomeMoon.rotation.y.toFixed(3),
         op: +welcomeMoon.material.opacity.toFixed(2) }) : null,
       craftCount: () => _xwings.length,
-      diff: (n) => { if (n >= 1 && n <= 5) { G.difficulty = n; syncDifficultyUI(); } return G.difficulty; }
+      diff: (n) => { if (n >= 1 && n <= 5) { G.difficulty = n; syncDifficultyUI(); } return G.difficulty; },
+      state: () => ({ phase: G.phase, turn: G.turn, you: G.player.hand.length, cpu: G.cpu.hand.length }),
+      welcomeShown: () => !!(welcomeEl && !welcomeEl.classList.contains('w-hidden'))
     };
   }
 
@@ -4116,10 +4239,32 @@ function resolveStat(stat, pCard, cCard) {
     if (wPlayBtn) wPlayBtn.disabled = true;
     if (wHowto) wHowto.classList.remove('show');
     await runWelcomeExit();
-    welcomeEl.remove();                 // moon + stack gone; .w-credit sibling stays
+    welcomeEl.classList.add('w-hidden');   // HIDE (not remove) so Quit can re-show it
     if (smokeEl) smokeEl.innerHTML = '';
     if (wHintEl) wHintEl.style.opacity = '';   // hand the hint pill back to the game
     startMatch();
+  }
+
+  /* Quit → title: tear down the live match and restore the welcome overlay to
+     a pristine, visible state. Bumps matchToken FIRST so any awaited round
+     callback bails out before mutating state. */
+  function returnToWelcome() {
+    G.matchToken++;                             // invalidate pending round callbacks
+    G.phase = 'welcome';
+    hideRoundControls();
+    if (_continueCleanup) { const f = _continueCleanup; _continueCleanup = null; f(); }
+    disposeCard(playerCard); disposeCard(cpuCard); playerCard = cpuCard = null;
+    G.player.hand = []; G.cpu.hand = []; G.pot = []; G.round = 0; G.history = [];
+    updateHUD();
+    // rewind the welcome overlay's exit choreography so it reads fresh again
+    welcomeEl.classList.remove('w-go', 'w-quickexit');
+    const t = welcomeEl.querySelector('.w-title3d'); if (t) t.classList.remove('w-poof');
+    welcomeEl.querySelectorAll('.w-card').forEach(c => c.classList.remove('w-poof'));
+    if (smokeEl) smokeEl.innerHTML = '';
+    if (wPlayBtn) wPlayBtn.disabled = false;
+    _welcomeExiting = false;
+    _wMoonExit = 0;
+    showWelcome();                              // resets moon + reveals overlay + craft kick
   }
 
   // Wiring
