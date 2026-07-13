@@ -40,10 +40,11 @@
     padding: 8px 16px; border-radius: 999px; backdrop-filter: blur(6px);
     transition: opacity .4s ease; }
 
-  /* ---- Round HUD control cluster — appears at each round's verdict so the
-     player sets the pace. Continue (⏩, wrapped in an auto-advance countdown
-     RING), Pause (freeze the countdown), and Quit (return to the title
-     screen). Three equal-diameter sci-fi HUD discs. ---- */
+  /* ---- Round HUD control cluster — PERSISTENT during a match so the player
+     can Pause or Quit at any time. Continue (⏩, wrapped in an auto-advance
+     countdown RING) lights up only at each round's verdict; Pause (⏸) freezes
+     the whole game clock; Quit (⏻) returns to the title screen. Three
+     equal-diameter sci-fi HUD discs, bottom-centre. ---- */
   #round-controls { position: fixed; left: 50%; bottom: 64px;
     transform: translateX(-50%) translateY(10px); z-index: 7;
     display: inline-flex; align-items: center; gap: 26px;
@@ -76,14 +77,35 @@
   .rb .ring .ring-fill  { fill: none; stroke: #7fd8ff; stroke-width: 3.5; stroke-linecap: round;
     filter: drop-shadow(0 0 5px rgba(90,200,255,.9)); transition: stroke-dashoffset .12s linear; }
 
-  /* soft idle pulse draws the eye to Continue */
-  #round-controls.show #rc-continue .disc { animation: rbPulse 1.9s ease-in-out infinite; }
+  /* The cluster is persistent during a match, but Continue is only live at a
+     round's verdict (rc-active). Between rounds it rests dim while Pause + Quit
+     stay available. */
+  #round-controls #rc-continue { opacity: .4; pointer-events: none;
+    transition: opacity .3s ease; }
+  #round-controls.rc-active #rc-continue { opacity: 1; pointer-events: auto; }
+
+  /* soft idle pulse draws the eye to Continue while it's live */
+  #round-controls.rc-active #rc-continue .disc { animation: rbPulse 1.9s ease-in-out infinite; }
   @keyframes rbPulse {
     0%,100% { box-shadow: inset 0 0 16px rgba(60,170,255,.25), 0 10px 30px rgba(0,0,0,.5), 0 0 16px rgba(55,182,255,.25); }
     50%     { box-shadow: inset 0 0 18px rgba(60,170,255,.3),  0 10px 30px rgba(0,0,0,.5), 0 0 26px rgba(55,182,255,.5); }
   }
-  /* while the countdown is frozen, calm Continue's pulse */
+  /* while the game is paused, calm Continue's pulse */
   #round-controls.rc-paused #rc-continue .disc { animation: none; }
+
+  /* Pause disc reads "active" (cyan) while the game is held */
+  #round-controls.rc-paused #rc-pause .disc { border-color: rgba(150,220,255,.95);
+    box-shadow: inset 0 0 20px rgba(60,170,255,.4), 0 10px 30px rgba(0,0,0,.5), 0 0 26px rgba(55,182,255,.6); }
+  #round-controls.rc-paused #rc-pause .glyph { stroke: #eaf6ff; }
+
+  /* PAUSED badge above the cluster */
+  #round-controls .rc-status { position: absolute; left: 50%; top: -32px; transform: translateX(-50%);
+    white-space: nowrap; font-size: 11.5px; font-weight: 700; letter-spacing: .14em; color: #cfebff;
+    text-transform: uppercase; background: rgba(10,26,46,.72); border: 1px solid rgba(90,200,255,.5);
+    border-radius: 999px; padding: 5px 12px; opacity: 0; pointer-events: none;
+    transition: opacity .2s ease; backdrop-filter: blur(4px); }
+  #round-controls.rc-paused .rc-status { opacity: 1; }
+  #round-controls.rc-armed  .rc-status { opacity: 0; }   /* quit confirm takes precedence */
 
   /* Quit turns red on hover + when armed for the two-click confirm */
   #rc-quit:hover .disc { border-color: var(--danger);
@@ -102,7 +124,7 @@
   #round-controls.rc-armed .rc-confirm { opacity: 1; }
 
   @media (prefers-reduced-motion: reduce) {
-    #round-controls.show #rc-continue .disc { animation: none; }
+    #round-controls.rc-active #rc-continue .disc { animation: none; }
     #round-controls { transition: opacity .2s ease; }
   }
 
@@ -360,6 +382,7 @@
 
   <div id="round-controls" hidden aria-label="Round controls">
     <span class="rc-confirm" aria-hidden="true">Leave match? Click Quit again</span>
+    <span class="rc-status" aria-hidden="true">Paused</span>
     <button class="rb" id="rc-continue" type="button" aria-label="Continue to next round (Space)">
       <span class="disc"></span>
       <svg class="ring" viewBox="0 0 76 76" aria-hidden="true">
@@ -2971,6 +2994,24 @@ function resolveStat(stat, pCard, cCard) {
   const easeIn    = t => t*t*t;                       // accelerate outward (fly-out)
   const easeOut   = t => 1 - Math.pow(1 - t, 3);      // decelerate into rest (zoom-in)
 
+  /* ---- global pause clock ------------------------------------------------
+     A single monotonic game clock that STOPS advancing while paused. Tweens,
+     the beat() sequencer, and the round-end countdown all read gameNow(), so
+     toggling Pause freezes card motion, phase progression, and the auto-advance
+     timer together — the whole match holds. Ambient scene drift (starfield,
+     idle float) keeps running off THREE's own clock so the paused board still
+     feels alive. */
+  let _paused = false, _pauseStart = 0, _pauseAccum = 0;
+  function gameNow() { return (_paused ? _pauseStart : performance.now()) - _pauseAccum; }
+  function isPaused() { return _paused; }
+  function setPaused(p) {
+    p = !!p;
+    if (p === _paused) return;
+    if (p) _pauseStart = performance.now();
+    else   _pauseAccum += performance.now() - _pauseStart;   // credit the paused span so gameNow resumes seamlessly
+    _paused = p;
+  }
+
   /* honour prefers-reduced-motion: collapse animation durations to ~instant
      (G5). md() floors at 1ms so tweens still complete cleanly next frame. */
   const _rmq = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -2979,7 +3020,7 @@ function resolveStat(stat, pCard, cCard) {
   const md = (ms) => REDUCED ? 1 : ms;
 
   function tween({ dur = 600, ease = easeInOut, update, done, tag = null }) {
-    const tw = { t0: performance.now(), dur, ease, update, done, tag };
+    const tw = { t0: gameNow(), dur, ease, update, done, tag };
     tweens.add(tw);
     return tw;
   }
@@ -3383,14 +3424,14 @@ function resolveStat(stat, pCard, cCard) {
   }
   function setHint(msg) { if (elHint) elHint.textContent = msg; }
 
-  /* ---- Round control cluster: hand round pacing to the player -----------
-     After a round resolves we surface a round-button cluster so the player
-     sets the pace before the next hand warps in — mirroring the original
-     game's pacing. Continue advances now (Space/Enter/click); a safety
-     countdown auto-advances if ignored, drawn as the draining ring around
-     Continue. Pause freezes that countdown so the verdict can be studied.
-     Quit returns to the title screen (two-click confirm). `hideContinue`
-     force-clears the cluster (and resolves any pending wait) on restart. */
+  /* ---- Round control cluster: persistent match HUD ---------------------
+     The cluster lives for the whole match (bottom-centre) so the player can
+     Pause or Quit at any time. Continue lights up only at a round's verdict
+     (rc-active), where a safety countdown ring auto-advances if ignored;
+     clicking it (or Space/Enter) advances now. Pause freezes the GLOBAL game
+     clock — card motion, phase pacing, and the countdown all hold together.
+     Quit returns to the title screen (two-click confirm). Pause + Quit are
+     wired once and persist; only Continue is armed per round. */
   const elRoundControls = document.getElementById('round-controls');
   const btnContinue = document.getElementById('rc-continue');
   const btnPause    = document.getElementById('rc-pause');
@@ -3398,8 +3439,9 @@ function resolveStat(stat, pCard, cCard) {
   const ringFill    = elRoundControls ? elRoundControls.querySelector('.ring-fill') : null;
   const usePauseGlyph = document.getElementById('rc-pause-glyph');
   const RING_C = 219.9;                 // 2·π·r with r=35 (see the ring markup)
-  let _continueCleanup = null;
-  let _rcPaused = false;
+  let _continueCleanup = null;          // resolves the current round-end wait, if any
+  let _continueResolve = null;          // Continue button/keys call this while a wait is pending
+  let _quitArmed = false, _quitArmTimer = null;
 
   function showRoundControls() {
     if (!elRoundControls) return;
@@ -3408,38 +3450,75 @@ function resolveStat(stat, pCard, cCard) {
   }
   function hideRoundControls() {
     if (!elRoundControls) return;
-    elRoundControls.classList.remove('show', 'rc-paused', 'rc-armed');
+    elRoundControls.classList.remove('show', 'rc-active', 'rc-paused', 'rc-armed');
     elRoundControls.hidden = true;
-  }
-  function hideContinue() {
-    if (_continueCleanup) { _continueCleanup(); return; }
-    hideRoundControls();
   }
   function setRing(frac) {
     if (ringFill) ringFill.style.strokeDashoffset = (RING_C * (1 - frac)).toFixed(1);
   }
+  // Clear any pending round-end wait (e.g. on restart) without tearing down the
+  // persistent cluster.
+  function hideContinue() {
+    if (_continueCleanup) { _continueCleanup(); return; }
+    if (elRoundControls) elRoundControls.classList.remove('rc-active');
+    setRing(0);
+  }
+  // Pause is global: freeze/thaw the game clock and reflect it on the cluster.
+  function setGamePaused(p) {
+    setPaused(p);
+    if (!elRoundControls) return;
+    elRoundControls.classList.toggle('rc-paused', p);
+    if (usePauseGlyph) usePauseGlyph.setAttribute('href', p ? '#g-play' : '#g-pause');
+    if (btnPause) btnPause.setAttribute('aria-label', p ? 'Resume the game' : 'Pause the game');
+  }
+  function togglePause() {
+    if (G.phase === 'welcome') return;   // nothing to pause on the title screen
+    setGamePaused(!isPaused());
+  }
+  function disarmQuit() {
+    _quitArmed = false;
+    clearTimeout(_quitArmTimer);
+    if (elRoundControls) elRoundControls.classList.remove('rc-armed');
+  }
+  function onQuitClick() {
+    if (G.phase === 'welcome') return;
+    if (!_quitArmed) {                        // first click arms the two-click confirm
+      _quitArmed = true;
+      if (elRoundControls) elRoundControls.classList.add('rc-armed');
+      _quitArmTimer = setTimeout(disarmQuit, 3200);
+      return;
+    }
+    disarmQuit();                             // second click confirms
+    if (isPaused()) setGamePaused(false);     // release the clock before tearing down
+    returnToWelcome();                        // bumps matchToken first, so any awaiting
+    if (_continueResolve) _continueResolve(); // round callback bails before mutating state
+  }
+
+  // Persistent wiring: Pause + Quit live for the whole match; Continue is wired
+  // here too but only acts while a round-end wait is pending.
+  if (btnPause)    btnPause.addEventListener('click', togglePause);
+  if (btnQuit)     btnQuit.addEventListener('click', onQuitClick);
+  if (btnContinue) btnContinue.addEventListener('click', () => { if (_continueResolve) _continueResolve(); });
+
   function waitForContinue(autoMs) {
     return new Promise((resolve) => {
       if (!elRoundControls || !btnContinue) { setTimeout(resolve, autoMs); return; }
-      let done = false, remaining = autoMs, last = performance.now(), raf = 0;
-      let armed = false, armTimer = null;
+      let done = false, remaining = autoMs, last = gameNow(), raf = 0;
       const finish = () => {
         if (done) return;
         done = true;
         cancelAnimationFrame(raf);
-        clearTimeout(armTimer);
         document.removeEventListener('keydown', onKey, true);
-        btnContinue.removeEventListener('click', finish);
-        if (btnPause) btnPause.removeEventListener('click', onPause);
-        if (btnQuit)  btnQuit.removeEventListener('click', onQuit);
-        hideRoundControls();
+        elRoundControls.classList.remove('rc-active');
+        setRing(0);
+        _continueResolve = null;
         _continueCleanup = null;
         resolve();
       };
       const tick = () => {
         if (done) return;
-        const now = performance.now(); const dt = now - last; last = now;
-        if (!_rcPaused) remaining -= dt;                 // Pause freezes the drain
+        const now = gameNow(); const dt = now - last; last = now;   // frozen while paused
+        remaining -= dt;
         if (remaining <= 0) { finish(); return; }
         setRing(Math.max(0, remaining / autoMs));
         raf = requestAnimationFrame(tick);
@@ -3447,39 +3526,12 @@ function resolveStat(stat, pCard, cCard) {
       const onKey = (e) => {
         if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); finish(); }
       };
-      const onPause = () => {
-        _rcPaused = !_rcPaused;
-        elRoundControls.classList.toggle('rc-paused', _rcPaused);
-        if (usePauseGlyph) usePauseGlyph.setAttribute('href', _rcPaused ? '#g-play' : '#g-pause');
-        btnPause.setAttribute('aria-label', _rcPaused ? 'Resume the countdown' : 'Pause the countdown');
-      };
-      const onQuit = () => {
-        if (!armed) {                                     // first click arms the confirm
-          armed = true;
-          elRoundControls.classList.add('rc-armed');
-          _rcPaused = true;                               // hold the countdown while deciding
-          elRoundControls.classList.add('rc-paused');
-          armTimer = setTimeout(() => {
-            armed = false;
-            elRoundControls.classList.remove('rc-armed');
-          }, 3200);
-          return;
-        }
-        clearTimeout(armTimer);                           // second click confirms
-        returnToWelcome();                                // bumps matchToken first, so the
-        finish();                                         // awaiting caller bails before resolveRound
-      };
+      _continueResolve = finish;
       _continueCleanup = finish;
-      _rcPaused = false;
-      elRoundControls.classList.remove('rc-paused', 'rc-armed');
-      if (usePauseGlyph) usePauseGlyph.setAttribute('href', '#g-pause');
+      elRoundControls.classList.add('rc-active');   // light Continue + start the ring
       setRing(1);
-      showRoundControls();
-      btnContinue.addEventListener('click', finish);
-      if (btnPause) btnPause.addEventListener('click', onPause);
-      if (btnQuit)  btnQuit.addEventListener('click', onQuit);
       document.addEventListener('keydown', onKey, true);
-      last = performance.now();
+      last = gameNow();
       raf = requestAnimationFrame(tick);
     });
   }
@@ -3495,10 +3547,21 @@ function resolveStat(stat, pCard, cCard) {
     difficulty: (_diffParam >= 1 && _diffParam <= 5) ? _diffParam : 3,
     matchToken: 0
   };
-  const beat = (ms) => new Promise(r => setTimeout(r, ms));
+  const beat = (ms) => new Promise(resolve => {
+    if (ms <= 0) { resolve(); return; }
+    const start = gameNow();                 // gameNow freezes while paused, so the wait holds
+    const step = () => {
+      if (gameNow() - start >= ms) { resolve(); return; }
+      requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  });
 
   function startMatch() {
     hideContinue();
+    disarmQuit();
+    setGamePaused(false);
+    showRoundControls();            // persistent cluster for the whole match
     const deck = shuffle(G.data.cards.slice()).slice(0, DECK_SIZE);
     G.player.hand = []; G.cpu.hand = [];
     for (let i = 0; i < deck.length; i++) {
@@ -3695,6 +3758,7 @@ function resolveStat(stat, pCard, cCard) {
   }
 
   function playerPicksStat(key) {
+    if (isPaused()) return;                 // ignore stat input while the game is held
     if (G.phase !== 'picking' || G.turn !== 'player') return;
     G.pickedStat = key; G.phase = 'revealing';
     syncStatControls();
@@ -3983,12 +4047,15 @@ function resolveStat(stat, pCard, cCard) {
       orbit: (y, p) => { _orbYawT = y || 0; _orbPitchT = p || 0; },   // drive camera peek deterministically (test hook)
       _cam: () => ({ x: +camera.position.x.toFixed(3), y: +camera.position.y.toFixed(3), z: +camera.position.z.toFixed(3) }),
       _planetZ: () => planets.map(p => +p.position.z.toFixed(2)),   // moon z positions (parallax warp verification)
-      paused: () => !!_continueCleanup,    // true while the round-control pause is waiting (test hook)
+      paused: () => isPaused(),            // true while the game clock is held (test hook)
       cont: () => { hideContinue(); },     // advance past the round-control pause (test hook)
       rcVisible: () => !!(elRoundControls && elRoundControls.classList.contains('show')),
+      rcActive: () => !!(elRoundControls && elRoundControls.classList.contains('rc-active')),
       rcRing: () => ringFill ? +parseFloat(ringFill.style.strokeDashoffset || '0').toFixed(1) : null,
-      rcPause: () => { if (btnPause) btnPause.click(); },   // toggle the countdown freeze
-      rcPaused: () => _rcPaused,
+      rcPause: () => { if (btnPause) btnPause.click(); },   // toggle the global game pause
+      rcPaused: () => isPaused(),
+      pauseGame: (p) => setGamePaused(p == null ? !isPaused() : !!p),   // direct pause set (test hook)
+      gnow: () => +gameNow().toFixed(1),   // read the game clock (freezes while paused; test hook)
       quit: () => { if (btnQuit) { btnQuit.click(); btnQuit.click(); } else returnToWelcome(); },
       quitNow: () => returnToWelcome(),
       pick: (n) => {
@@ -4052,7 +4119,7 @@ function resolveStat(stat, pCard, cCard) {
   if (_showFps && _fpsEl) _fpsEl.style.display = 'block';
   let _prevMs = performance.now(), _fpsAvg = 60, _slowFrames = 0, _fpsSince = _prevMs, _govStep = 0;
   function frame() {
-    stepTweens(performance.now());
+    stepTweens(gameNow());          // frozen while paused → card motion holds
     const et = clock.getElapsedTime();
     const dt = Math.min(0.05, et - _lastEt); _lastEt = et;
     updateBackdrop(et, dt);
@@ -4251,6 +4318,8 @@ function resolveStat(stat, pCard, cCard) {
   function returnToWelcome() {
     G.matchToken++;                             // invalidate pending round callbacks
     G.phase = 'welcome';
+    setGamePaused(false);                       // thaw the game clock for the next match
+    disarmQuit();
     hideRoundControls();
     if (_continueCleanup) { const f = _continueCleanup; _continueCleanup = null; f(); }
     disposeCard(playerCard); disposeCard(cpuCard); playerCard = cpuCard = null;
