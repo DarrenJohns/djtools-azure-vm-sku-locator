@@ -165,18 +165,19 @@ jobs:
         run: |
           $config = Get-Content "config.json" | ConvertFrom-Json
           $regions = $config.targetRegions
-          # Fetch pricing for key currencies only (USD, AUD, NZD) to stay within 6h limit.
-          # Each currency × 47 regions × 2 passes (PAYG + RI) takes ~1h.
+          # Fetch pricing for key currencies only (USD, AUD, NZD), PAYG only to stay within 6h limit.
+          # 3 currencies × 47 regions × 1 pass (PAYG only, skip RI) = ~3 hours of API work.
+          # RI data updates monthly but doesn't change frequently; OK to reuse from prior month.
           $currencies = @("USD", "AUD", "NZD")
           foreach ($currency in $currencies) {
-            Write-Host "=== Fetching pricing in $currency ==="
+            Write-Host "=== Fetching PAYG pricing in $currency ==="
             foreach ($region in $regions) {
               $name = $region.name
               $dataFile = "data/$name.json"
               $pricingFile = "data/$name-pricing-$currency.json"
               if (Test-Path $dataFile) {
                 Write-Host "  Fetching pricing for $name ($currency)..."
-                python scripts/fetch-pricing.py $dataFile $pricingFile --currency $currency
+                python scripts/fetch-pricing.py $dataFile $pricingFile --currency $currency --payg-only
               }
             }
           }
@@ -189,7 +190,7 @@ jobs:
               Copy-Item $usdFile $compatFile -Force
             }
           }
-          Write-Host "[OK] Pricing data refresh complete ($($currencies.Count) currencies: USD, AUD, NZD)"
+          Write-Host "[OK] Pricing data refresh complete ($($currencies.Count) currencies: USD, AUD, NZD, PAYG only)"
         shell: pwsh
 
       - name: Fetch disk SKU data
