@@ -17,6 +17,13 @@ jobs:
         with:
           persist-credentials: true
 
+      - name: Verify environment
+        run: |
+          Write-Host "Runner OS: $env:RUNNER_OS"
+          pwsh -Version
+          az --version 2>&1 | Select-Object -First 3
+        shell: pwsh
+
       - name: Azure Login (OIDC)
         uses: azure/login@v2
         with:
