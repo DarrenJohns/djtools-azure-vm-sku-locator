@@ -1,7 +1,7 @@
 {
   "region": "southafricanorth",
   "regionDisplayName": "South Africa North",
-  "lastUpdated": "2026-05-02T08:24:50Z",
+  "lastUpdated": "2026-07-20T04:06:40Z",
   "skuCount": 872,
   "skus": [
     {
@@ -665,7 +665,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -686,7 +687,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -707,7 +709,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -728,7 +731,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -749,7 +753,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -770,7 +775,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -791,7 +797,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -812,7 +819,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -833,7 +841,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -854,7 +863,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -875,7 +885,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -896,7 +907,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -917,7 +929,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -938,7 +951,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -959,7 +973,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -980,7 +995,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -1001,7 +1017,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -1022,7 +1039,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -1043,7 +1061,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -1064,7 +1083,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -1085,7 +1105,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -1106,7 +1127,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -1127,7 +1149,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -1148,7 +1171,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -1169,7 +1193,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -1190,7 +1215,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -1211,7 +1237,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -1232,7 +1259,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -1253,7 +1281,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -1274,7 +1303,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -1295,7 +1325,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -1316,7 +1347,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -2119,7 +2151,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -2140,7 +2173,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -2161,7 +2195,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -2182,7 +2217,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -2203,7 +2239,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -2224,7 +2261,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -2245,7 +2283,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -2266,7 +2305,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -2287,7 +2327,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -2308,7 +2349,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -2329,7 +2371,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -2350,7 +2393,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -2371,7 +2415,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -2392,7 +2437,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -2413,7 +2459,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -2434,7 +2481,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -17738,7 +17786,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -17759,7 +17808,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -17780,7 +17830,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -17801,7 +17852,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -17822,7 +17874,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -17843,7 +17896,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -18086,6 +18140,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "2",
         "3"
       ],
@@ -18108,6 +18163,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "2",
         "3"
       ],
@@ -18130,6 +18186,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "2",
         "3"
       ],
@@ -18152,6 +18209,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "2",
         "3"
       ],
@@ -18174,6 +18232,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "2",
         "3"
       ],
@@ -18196,6 +18255,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "2",
         "3"
       ],
@@ -18218,6 +18278,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "2",
         "3"
       ],
@@ -18240,6 +18301,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "2",
         "3"
       ],
@@ -18262,6 +18324,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "2",
         "3"
       ],
@@ -18284,6 +18347,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "2",
         "3"
       ],
@@ -18306,6 +18370,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "2",
         "3"
       ],
@@ -18328,6 +18393,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "2",
         "3"
       ],
@@ -18350,6 +18416,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "2",
         "3"
       ],
@@ -18372,6 +18439,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "2",
         "3"
       ],
@@ -18394,6 +18462,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "2",
         "3"
       ],
@@ -18416,6 +18485,7 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
+        "1",
         "2",
         "3"
       ],

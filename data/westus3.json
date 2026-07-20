@@ -1,8 +1,8 @@
 {
   "region": "westus3",
   "regionDisplayName": "West US 3",
-  "lastUpdated": "2026-05-02T07:46:00Z",
-  "skuCount": 1158,
+  "lastUpdated": "2026-07-20T03:20:00Z",
+  "skuCount": 1160,
   "skus": [
     {
       "name": "Standard_NC4as_T4_v3",
@@ -3456,6 +3456,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": []
@@ -3984,6 +3985,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": []
@@ -8734,7 +8736,7 @@
       "vCPUs": 4,
       "memoryGB": 16.0,
       "maxDataDisks": 26,
-      "maxNICs": 2,
+      "maxNICs": 4,
       "cpuArchitecture": "x64",
       "hyperVGenerations": "V2",
       "acceleratedNetworking": true,
@@ -24625,6 +24627,75 @@
       "restrictions": []
     },
     {
+      "name": "Standard_M416ds_9_v3",
+      "family": "standardMDSHighMemoryv3Family",
+      "tier": "Standard",
+      "size": "M416ds_9_v3",
+      "vCPUs": 416,
+      "memoryGB": 8568.0,
+      "maxDataDisks": 64,
+      "maxNICs": 8,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "1",
+        "2",
+        "3"
+      ],
+      "restrictions": []
+    },
+    {
+      "name": "Standard_M416ds_10_v3",
+      "family": "standardMDSHighMemoryv3Family",
+      "tier": "Standard",
+      "size": "M416ds_10_v3",
+      "vCPUs": 416,
+      "memoryGB": 9496.0,
+      "maxDataDisks": 64,
+      "maxNICs": 8,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "1",
+        "2",
+        "3"
+      ],
+      "restrictions": []
+    },
+    {
+      "name": "Standard_M416ds_12_v3",
+      "family": "standardMDSHighMemoryv3Family",
+      "tier": "Standard",
+      "size": "M416ds_12_v3",
+      "vCPUs": 416,
+      "memoryGB": 11400.0,
+      "maxDataDisks": 64,
+      "maxNICs": 8,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "1",
+        "2",
+        "3"
+      ],
+      "restrictions": []
+    },
+    {
       "name": "Standard_M624ds_12_v3",
       "family": "standardMDSHighMemoryv3Family",
       "tier": "Standard",
@@ -25679,6 +25750,75 @@
       "restrictions": []
     },
     {
+      "name": "Standard_M416s_9_v3",
+      "family": "standardMSHighMemoryv3Family",
+      "tier": "Standard",
+      "size": "M416s_9_v3",
+      "vCPUs": 416,
+      "memoryGB": 8568.0,
+      "maxDataDisks": 64,
+      "maxNICs": 8,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": false,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "1",
+        "2",
+        "3"
+      ],
+      "restrictions": []
+    },
+    {
+      "name": "Standard_M416s_10_v3",
+      "family": "standardMSHighMemoryv3Family",
+      "tier": "Standard",
+      "size": "M416s_10_v3",
+      "vCPUs": 416,
+      "memoryGB": 9496.0,
+      "maxDataDisks": 64,
+      "maxNICs": 8,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": false,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "1",
+        "2",
+        "3"
+      ],
+      "restrictions": []
+    },
+    {
+      "name": "Standard_M416s_12_v3",
+      "family": "standardMSHighMemoryv3Family",
+      "tier": "Standard",
+      "size": "M416s_12_v3",
+      "vCPUs": 416,
+      "memoryGB": 11400.0,
+      "maxDataDisks": 64,
+      "maxNICs": 8,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": false,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "1",
+        "2",
+        "3"
+      ],
+      "restrictions": []
+    },
+    {
       "name": "Standard_M624s_12_v3",
       "family": "standardMSHighMemoryv3Family",
       "tier": "Standard",
@@ -26208,102 +26348,6 @@
       "restrictions": []
     },
     {
-      "name": "Standard_NC6s_v3",
-      "family": "standardNCSv3Family",
-      "tier": "Standard",
-      "size": "NC6s_v3",
-      "vCPUs": 6,
-      "memoryGB": 112.0,
-      "maxDataDisks": 12,
-      "maxNICs": 4,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V1,V2",
-      "acceleratedNetworking": true,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "3"
-      ],
-      "restrictions": [
-        "NotAvailableForSubscription",
-        "NotAvailableForSubscription"
-      ]
-    },
-    {
-      "name": "Standard_NC12s_v3",
-      "family": "standardNCSv3Family",
-      "tier": "Standard",
-      "size": "NC12s_v3",
-      "vCPUs": 12,
-      "memoryGB": 224.0,
-      "maxDataDisks": 24,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V1,V2",
-      "acceleratedNetworking": true,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "3"
-      ],
-      "restrictions": [
-        "NotAvailableForSubscription",
-        "NotAvailableForSubscription"
-      ]
-    },
-    {
-      "name": "Standard_NC24rs_v3",
-      "family": "standardNCSv3Family",
-      "tier": "Standard",
-      "size": "NC24rs_v3",
-      "vCPUs": 24,
-      "memoryGB": 448.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V1,V2",
-      "acceleratedNetworking": false,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "3"
-      ],
-      "restrictions": [
-        "NotAvailableForSubscription",
-        "NotAvailableForSubscription"
-      ]
-    },
-    {
-      "name": "Standard_NC24s_v3",
-      "family": "standardNCSv3Family",
-      "tier": "Standard",
-      "size": "NC24s_v3",
-      "vCPUs": 24,
-      "memoryGB": 448.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V1,V2",
-      "acceleratedNetworking": true,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "3"
-      ],
-      "restrictions": [
-        "NotAvailableForSubscription",
-        "NotAvailableForSubscription"
-      ]
-    },
-    {
       "name": "Standard_ND128isr_NDR_GB200_v6",
       "family": "standardNDISRGB200V6NDRFamily",
       "tier": "Standard",
@@ -26323,7 +26367,10 @@
         "2",
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_ND128isr_GB300_v6",
@@ -26344,7 +26391,10 @@
       "zones": [
         "3"
       ],
-      "restrictions": []
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_ND96isr_H200_v5",
@@ -26363,7 +26413,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "1"
+        "1",
+        "3"
       ],
       "restrictions": [
         "NotAvailableForSubscription",

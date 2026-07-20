@@ -1,26 +1,26 @@
 {
   "version": "1.0",
-  "generated": "2026-05-21T02:43:01Z",
+  "generated": "2026-07-20T08:10:48Z",
   "regions": [
     {
       "id": "australiaeast",
       "short": "AU-EAST",
       "display": "Australia East",
-      "cardCount": 1185
+      "cardCount": 1177
     },
     {
       "id": "newzealandnorth",
       "short": "NZ-NORTH",
       "display": "New Zealand North",
-      "cardCount": 663
+      "cardCount": 796
     }
   ],
   "rarityCounts": {
-    "rare": 468,
-    "common": 229,
-    "uncommon": 852,
-    "epic": 228,
-    "legendary": 71
+    "rare": 511,
+    "common": 240,
+    "uncommon": 885,
+    "epic": 260,
+    "legendary": 77
   },
   "cards": [
     {
@@ -13508,9 +13508,9 @@
         "vcpus": 4,
         "memoryGB": 16.0,
         "maxDataDisks": 26,
-        "nics": 2,
+        "nics": 4,
         "pricePerHourUSD": 0.343,
-        "powerScore": 10
+        "powerScore": 11
       },
       "tags": {
         "gpu": null,
@@ -14774,7 +14774,7 @@
         "gpu": "A100",
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": true,
+        "spotEligible": false,
         "encryptionAtHost": true,
         "ephemeralOSDisk": true,
         "cpuArchitecture": "x64",
@@ -14811,7 +14811,7 @@
         "gpu": "A100",
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": true,
+        "spotEligible": false,
         "encryptionAtHost": true,
         "ephemeralOSDisk": true,
         "cpuArchitecture": "x64",
@@ -18094,154 +18094,6 @@
       "ability": {
         "title": "Modern General Purpose",
         "description": "Balanced CPU/memory on the latest silicon — the default for most production workloads."
-      }
-    },
-    {
-      "id": "australiaeast::Standard_DC1s_v2",
-      "sku": "Standard_DC1s_v2",
-      "displayName": "DC1s v2",
-      "nickname": "Cloak Pup",
-      "region": "australiaeast",
-      "regionShort": "AU-EAST",
-      "regionDisplay": "Australia East",
-      "family": "standardDCSv2Family",
-      "familyDisplay": "DCSv2",
-      "familyType": "Confidential",
-      "familyColor": "#7a7574",
-      "rarity": "common",
-      "stats": {
-        "vcpus": 1,
-        "memoryGB": 4.0,
-        "maxDataDisks": 1,
-        "nics": 2,
-        "pricePerHourUSD": 0.12,
-        "powerScore": 3
-      },
-      "tags": {
-        "gpu": null,
-        "acceleratedNetworking": false,
-        "premiumIO": true,
-        "spotEligible": true,
-        "encryptionAtHost": true,
-        "ephemeralOSDisk": true,
-        "cpuArchitecture": "x64",
-        "retiring": false,
-        "retirementDate": null
-      },
-      "ability": {
-        "title": "Confidential VM",
-        "description": "Hardware-rooted trusted execution — protected memory and remote attestation."
-      }
-    },
-    {
-      "id": "australiaeast::Standard_DC2s_v2",
-      "sku": "Standard_DC2s_v2",
-      "displayName": "DC2s v2",
-      "nickname": "Cipher Pup",
-      "region": "australiaeast",
-      "regionShort": "AU-EAST",
-      "regionDisplay": "Australia East",
-      "family": "standardDCSv2Family",
-      "familyDisplay": "DCSv2",
-      "familyType": "Confidential",
-      "familyColor": "#7a7574",
-      "rarity": "common",
-      "stats": {
-        "vcpus": 2,
-        "memoryGB": 8.0,
-        "maxDataDisks": 2,
-        "nics": 2,
-        "pricePerHourUSD": 0.24,
-        "powerScore": 5
-      },
-      "tags": {
-        "gpu": null,
-        "acceleratedNetworking": true,
-        "premiumIO": true,
-        "spotEligible": true,
-        "encryptionAtHost": true,
-        "ephemeralOSDisk": true,
-        "cpuArchitecture": "x64",
-        "retiring": false,
-        "retirementDate": null
-      },
-      "ability": {
-        "title": "Confidential VM",
-        "description": "Hardware-rooted trusted execution — protected memory and remote attestation."
-      }
-    },
-    {
-      "id": "australiaeast::Standard_DC4s_v2",
-      "sku": "Standard_DC4s_v2",
-      "displayName": "DC4s v2",
-      "nickname": "Vault Sprout",
-      "region": "australiaeast",
-      "regionShort": "AU-EAST",
-      "regionDisplay": "Australia East",
-      "family": "standardDCSv2Family",
-      "familyDisplay": "DCSv2",
-      "familyType": "Confidential",
-      "familyColor": "#7a7574",
-      "rarity": "common",
-      "stats": {
-        "vcpus": 4,
-        "memoryGB": 16.0,
-        "maxDataDisks": 4,
-        "nics": 2,
-        "pricePerHourUSD": 0.48,
-        "powerScore": 8
-      },
-      "tags": {
-        "gpu": null,
-        "acceleratedNetworking": true,
-        "premiumIO": true,
-        "spotEligible": true,
-        "encryptionAtHost": true,
-        "ephemeralOSDisk": true,
-        "cpuArchitecture": "x64",
-        "retiring": false,
-        "retirementDate": null
-      },
-      "ability": {
-        "title": "Confidential VM",
-        "description": "Hardware-rooted trusted execution — protected memory and remote attestation."
-      }
-    },
-    {
-      "id": "australiaeast::Standard_DC8_v2",
-      "sku": "Standard_DC8_v2",
-      "displayName": "DC8 v2",
-      "nickname": "Sealed Runner",
-      "region": "australiaeast",
-      "regionShort": "AU-EAST",
-      "regionDisplay": "Australia East",
-      "family": "standardDCSv2Family",
-      "familyDisplay": "DCSv2",
-      "familyType": "Confidential",
-      "familyColor": "#7a7574",
-      "rarity": "uncommon",
-      "stats": {
-        "vcpus": 8,
-        "memoryGB": 32.0,
-        "maxDataDisks": 8,
-        "nics": 1,
-        "pricePerHourUSD": 0.96,
-        "powerScore": 9
-      },
-      "tags": {
-        "gpu": null,
-        "acceleratedNetworking": true,
-        "premiumIO": true,
-        "spotEligible": true,
-        "encryptionAtHost": true,
-        "ephemeralOSDisk": true,
-        "cpuArchitecture": "x64",
-        "retiring": false,
-        "retirementDate": null
-      },
-      "ability": {
-        "title": "Confidential VM",
-        "description": "Hardware-rooted trusted execution — protected memory and remote attestation."
       }
     },
     {
@@ -43242,154 +43094,6 @@
       }
     },
     {
-      "id": "australiaeast::Standard_NC6s_v3",
-      "sku": "Standard_NC6s_v3",
-      "displayName": "NC6s v3",
-      "nickname": "GPU Worker",
-      "region": "australiaeast",
-      "regionShort": "AU-EAST",
-      "regionDisplay": "Australia East",
-      "family": "standardNCSv3Family",
-      "familyDisplay": "NCSv3",
-      "familyType": "GPU Accelerated",
-      "familyColor": "#c4314b",
-      "rarity": "uncommon",
-      "stats": {
-        "vcpus": 6,
-        "memoryGB": 112.0,
-        "maxDataDisks": 12,
-        "nics": 4,
-        "pricePerHourUSD": 4.234,
-        "powerScore": 14
-      },
-      "tags": {
-        "gpu": null,
-        "acceleratedNetworking": true,
-        "premiumIO": true,
-        "spotEligible": true,
-        "encryptionAtHost": true,
-        "ephemeralOSDisk": true,
-        "cpuArchitecture": "x64",
-        "retiring": false,
-        "retirementDate": null
-      },
-      "ability": {
-        "title": "Compute GPU",
-        "description": "NVIDIA compute GPU — CUDA training and inference workloads."
-      }
-    },
-    {
-      "id": "australiaeast::Standard_NC12s_v3",
-      "sku": "Standard_NC12s_v3",
-      "displayName": "NC12s v3",
-      "nickname": "GPU Builder",
-      "region": "australiaeast",
-      "regionShort": "AU-EAST",
-      "regionDisplay": "Australia East",
-      "family": "standardNCSv3Family",
-      "familyDisplay": "NCSv3",
-      "familyType": "GPU Accelerated",
-      "familyColor": "#c4314b",
-      "rarity": "uncommon",
-      "stats": {
-        "vcpus": 12,
-        "memoryGB": 224.0,
-        "maxDataDisks": 24,
-        "nics": 8,
-        "pricePerHourUSD": 8.468,
-        "powerScore": 20
-      },
-      "tags": {
-        "gpu": null,
-        "acceleratedNetworking": true,
-        "premiumIO": true,
-        "spotEligible": true,
-        "encryptionAtHost": true,
-        "ephemeralOSDisk": true,
-        "cpuArchitecture": "x64",
-        "retiring": false,
-        "retirementDate": null
-      },
-      "ability": {
-        "title": "Compute GPU",
-        "description": "NVIDIA compute GPU — CUDA training and inference workloads."
-      }
-    },
-    {
-      "id": "australiaeast::Standard_NC24rs_v3",
-      "sku": "Standard_NC24rs_v3",
-      "displayName": "NC24rs v3",
-      "nickname": "CUDA Squire",
-      "region": "australiaeast",
-      "regionShort": "AU-EAST",
-      "regionDisplay": "Australia East",
-      "family": "standardNCSv3Family",
-      "familyDisplay": "NCSv3",
-      "familyType": "GPU Accelerated",
-      "familyColor": "#c4314b",
-      "rarity": "uncommon",
-      "stats": {
-        "vcpus": 24,
-        "memoryGB": 448.0,
-        "maxDataDisks": 32,
-        "nics": 8,
-        "pricePerHourUSD": 18.63,
-        "powerScore": 26
-      },
-      "tags": {
-        "gpu": null,
-        "acceleratedNetworking": false,
-        "premiumIO": true,
-        "spotEligible": true,
-        "encryptionAtHost": true,
-        "ephemeralOSDisk": true,
-        "cpuArchitecture": "x64",
-        "retiring": false,
-        "retirementDate": null
-      },
-      "ability": {
-        "title": "Compute GPU",
-        "description": "NVIDIA compute GPU — CUDA training and inference workloads."
-      }
-    },
-    {
-      "id": "australiaeast::Standard_NC24s_v3",
-      "sku": "Standard_NC24s_v3",
-      "displayName": "NC24s v3",
-      "nickname": "Render Builder",
-      "region": "australiaeast",
-      "regionShort": "AU-EAST",
-      "regionDisplay": "Australia East",
-      "family": "standardNCSv3Family",
-      "familyDisplay": "NCSv3",
-      "familyType": "GPU Accelerated",
-      "familyColor": "#c4314b",
-      "rarity": "uncommon",
-      "stats": {
-        "vcpus": 24,
-        "memoryGB": 448.0,
-        "maxDataDisks": 32,
-        "nics": 8,
-        "pricePerHourUSD": 16.936,
-        "powerScore": 26
-      },
-      "tags": {
-        "gpu": null,
-        "acceleratedNetworking": true,
-        "premiumIO": true,
-        "spotEligible": true,
-        "encryptionAtHost": true,
-        "ephemeralOSDisk": true,
-        "cpuArchitecture": "x64",
-        "retiring": false,
-        "retirementDate": null
-      },
-      "ability": {
-        "title": "Compute GPU",
-        "description": "NVIDIA compute GPU — CUDA training and inference workloads."
-      }
-    },
-    {
       "id": "australiaeast::Standard_ND128isr_NDR_GB200_v6",
       "sku": "Standard_ND128isr_NDR_GB200_v6",
       "displayName": "ND128isr NDR GB200 v6",
@@ -43942,6 +43646,1412 @@
       "ability": {
         "title": "Multi-NIC Fabric",
         "description": "8 NICs with accelerated networking — strong for NVAs and multi-tier apps."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D2ds_v6",
+      "sku": "Standard_D2ds_v6",
+      "displayName": "D2ds v6",
+      "nickname": "Pocket Sprout",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDdsv6Family",
+      "familyDisplay": "Ddsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "common",
+      "stats": {
+        "vcpus": 2,
+        "memoryGB": 8.0,
+        "maxDataDisks": 8,
+        "nics": 2,
+        "pricePerHourUSD": null,
+        "powerScore": 6
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Modern General Purpose",
+        "description": "Balanced CPU/memory on the latest silicon — the default for most production workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D4ds_v6",
+      "sku": "Standard_D4ds_v6",
+      "displayName": "D4ds v6",
+      "nickname": "Steady Sprout",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDdsv6Family",
+      "familyDisplay": "Ddsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "common",
+      "stats": {
+        "vcpus": 4,
+        "memoryGB": 16.0,
+        "maxDataDisks": 12,
+        "nics": 2,
+        "pricePerHourUSD": null,
+        "powerScore": 9
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Modern General Purpose",
+        "description": "Balanced CPU/memory on the latest silicon — the default for most production workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D8ds_v6",
+      "sku": "Standard_D8ds_v6",
+      "displayName": "D8ds v6",
+      "nickname": "Field Squire",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDdsv6Family",
+      "familyDisplay": "Ddsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 8,
+        "memoryGB": 32.0,
+        "maxDataDisks": 24,
+        "nics": 4,
+        "pricePerHourUSD": null,
+        "powerScore": 13
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Modern General Purpose",
+        "description": "Balanced CPU/memory on the latest silicon — the default for most production workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D16ds_v6",
+      "sku": "Standard_D16ds_v6",
+      "displayName": "D16ds v6",
+      "nickname": "Worker Scout",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDdsv6Family",
+      "familyDisplay": "Ddsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 16,
+        "memoryGB": 64.0,
+        "maxDataDisks": 48,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 19
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Modern General Purpose",
+        "description": "Balanced CPU/memory on the latest silicon — the default for most production workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D32ds_v6",
+      "sku": "Standard_D32ds_v6",
+      "displayName": "D32ds v6",
+      "nickname": "Field Scout",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDdsv6Family",
+      "familyDisplay": "Ddsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 32,
+        "memoryGB": 128.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 25
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Modern General Purpose",
+        "description": "Balanced CPU/memory on the latest silicon — the default for most production workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D48ds_v6",
+      "sku": "Standard_D48ds_v6",
+      "displayName": "D48ds v6",
+      "nickname": "Worker Knight",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDdsv6Family",
+      "familyDisplay": "Ddsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 48,
+        "memoryGB": 192.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 28
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Modern General Purpose",
+        "description": "Balanced CPU/memory on the latest silicon — the default for most production workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D64ds_v6",
+      "sku": "Standard_D64ds_v6",
+      "displayName": "D64ds v6",
+      "nickname": "Field Knight",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDdsv6Family",
+      "familyDisplay": "Ddsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 64,
+        "memoryGB": 256.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 31
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Modern General Purpose",
+        "description": "Balanced CPU/memory on the latest silicon — the default for most production workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D96ds_v6",
+      "sku": "Standard_D96ds_v6",
+      "displayName": "D96ds v6",
+      "nickname": "Field Reaver",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDdsv6Family",
+      "familyDisplay": "Ddsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "epic",
+      "stats": {
+        "vcpus": 96,
+        "memoryGB": 384.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 35
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Modern General Purpose",
+        "description": "Balanced CPU/memory on the latest silicon — the default for most production workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D128ds_v6",
+      "sku": "Standard_D128ds_v6",
+      "displayName": "D128ds v6",
+      "nickname": "Pocket Titan",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDdsv6Family",
+      "familyDisplay": "Ddsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "epic",
+      "stats": {
+        "vcpus": 128,
+        "memoryGB": 512.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 39
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Modern General Purpose",
+        "description": "Balanced CPU/memory on the latest silicon — the default for most production workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D192ds_v6",
+      "sku": "Standard_D192ds_v6",
+      "displayName": "D192ds v6",
+      "nickname": "Field Titan",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDdsv6Family",
+      "familyDisplay": "Ddsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "epic",
+      "stats": {
+        "vcpus": 192,
+        "memoryGB": 768.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 46
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Modern General Purpose",
+        "description": "Balanced CPU/memory on the latest silicon — the default for most production workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D2lds_v6",
+      "sku": "Standard_D2lds_v6",
+      "displayName": "D2lds v6",
+      "nickname": "Worker Sprout",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDldsv6Family",
+      "familyDisplay": "Dldsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "common",
+      "stats": {
+        "vcpus": 2,
+        "memoryGB": 4.0,
+        "maxDataDisks": 8,
+        "nics": 2,
+        "pricePerHourUSD": null,
+        "powerScore": 6
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Modern General Purpose",
+        "description": "Balanced CPU/memory on the latest silicon — the default for most production workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D4lds_v6",
+      "sku": "Standard_D4lds_v6",
+      "displayName": "D4lds v6",
+      "nickname": "Pocket Sprout",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDldsv6Family",
+      "familyDisplay": "Dldsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "common",
+      "stats": {
+        "vcpus": 4,
+        "memoryGB": 8.0,
+        "maxDataDisks": 12,
+        "nics": 2,
+        "pricePerHourUSD": null,
+        "powerScore": 8
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Modern General Purpose",
+        "description": "Balanced CPU/memory on the latest silicon — the default for most production workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D8lds_v6",
+      "sku": "Standard_D8lds_v6",
+      "displayName": "D8lds v6",
+      "nickname": "Daily Worker",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDldsv6Family",
+      "familyDisplay": "Dldsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 8,
+        "memoryGB": 16.0,
+        "maxDataDisks": 24,
+        "nics": 4,
+        "pricePerHourUSD": null,
+        "powerScore": 13
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Modern General Purpose",
+        "description": "Balanced CPU/memory on the latest silicon — the default for most production workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D16lds_v6",
+      "sku": "Standard_D16lds_v6",
+      "displayName": "D16lds v6",
+      "nickname": "Field Builder",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDldsv6Family",
+      "familyDisplay": "Dldsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 16,
+        "memoryGB": 32.0,
+        "maxDataDisks": 48,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 19
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Modern General Purpose",
+        "description": "Balanced CPU/memory on the latest silicon — the default for most production workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D32lds_v6",
+      "sku": "Standard_D32lds_v6",
+      "displayName": "D32lds v6",
+      "nickname": "Daily Scout",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDldsv6Family",
+      "familyDisplay": "Dldsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 32,
+        "memoryGB": 64.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 23
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Modern General Purpose",
+        "description": "Balanced CPU/memory on the latest silicon — the default for most production workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D48lds_v6",
+      "sku": "Standard_D48lds_v6",
+      "displayName": "D48lds v6",
+      "nickname": "Field Knight",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDldsv6Family",
+      "familyDisplay": "Dldsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 48,
+        "memoryGB": 96.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 26
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Modern General Purpose",
+        "description": "Balanced CPU/memory on the latest silicon — the default for most production workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D64lds_v6",
+      "sku": "Standard_D64lds_v6",
+      "displayName": "D64lds v6",
+      "nickname": "Daily Knight",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDldsv6Family",
+      "familyDisplay": "Dldsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 64,
+        "memoryGB": 128.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 29
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Modern General Purpose",
+        "description": "Balanced CPU/memory on the latest silicon — the default for most production workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D96lds_v6",
+      "sku": "Standard_D96lds_v6",
+      "displayName": "D96lds v6",
+      "nickname": "Daily Crusher",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDldsv6Family",
+      "familyDisplay": "Dldsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "epic",
+      "stats": {
+        "vcpus": 96,
+        "memoryGB": 192.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 33
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Modern General Purpose",
+        "description": "Balanced CPU/memory on the latest silicon — the default for most production workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D128lds_v6",
+      "sku": "Standard_D128lds_v6",
+      "displayName": "D128lds v6",
+      "nickname": "Worker Titan",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDldsv6Family",
+      "familyDisplay": "Dldsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "epic",
+      "stats": {
+        "vcpus": 128,
+        "memoryGB": 256.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 37
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Modern General Purpose",
+        "description": "Balanced CPU/memory on the latest silicon — the default for most production workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D2ls_v6",
+      "sku": "Standard_D2ls_v6",
+      "displayName": "D2ls v6",
+      "nickname": "Worker Whelp",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDlsv6Family",
+      "familyDisplay": "Dlsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "common",
+      "stats": {
+        "vcpus": 2,
+        "memoryGB": 4.0,
+        "maxDataDisks": 8,
+        "nics": 2,
+        "pricePerHourUSD": null,
+        "powerScore": 6
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Modern General Purpose",
+        "description": "Balanced CPU/memory on the latest silicon — the default for most production workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D4ls_v6",
+      "sku": "Standard_D4ls_v6",
+      "displayName": "D4ls v6",
+      "nickname": "Pocket Whelp",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDlsv6Family",
+      "familyDisplay": "Dlsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "common",
+      "stats": {
+        "vcpus": 4,
+        "memoryGB": 8.0,
+        "maxDataDisks": 12,
+        "nics": 2,
+        "pricePerHourUSD": null,
+        "powerScore": 8
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Modern General Purpose",
+        "description": "Balanced CPU/memory on the latest silicon — the default for most production workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D8ls_v6",
+      "sku": "Standard_D8ls_v6",
+      "displayName": "D8ls v6",
+      "nickname": "Daily Scout",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDlsv6Family",
+      "familyDisplay": "Dlsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 8,
+        "memoryGB": 16.0,
+        "maxDataDisks": 24,
+        "nics": 4,
+        "pricePerHourUSD": null,
+        "powerScore": 13
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Modern General Purpose",
+        "description": "Balanced CPU/memory on the latest silicon — the default for most production workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D16ls_v6",
+      "sku": "Standard_D16ls_v6",
+      "displayName": "D16ls v6",
+      "nickname": "Field Builder",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDlsv6Family",
+      "familyDisplay": "Dlsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 16,
+        "memoryGB": 32.0,
+        "maxDataDisks": 48,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 19
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Modern General Purpose",
+        "description": "Balanced CPU/memory on the latest silicon — the default for most production workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D32ls_v6",
+      "sku": "Standard_D32ls_v6",
+      "displayName": "D32ls v6",
+      "nickname": "Daily Builder",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDlsv6Family",
+      "familyDisplay": "Dlsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 32,
+        "memoryGB": 64.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 23
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Modern General Purpose",
+        "description": "Balanced CPU/memory on the latest silicon — the default for most production workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D48ls_v6",
+      "sku": "Standard_D48ls_v6",
+      "displayName": "D48ls v6",
+      "nickname": "Field Hunter",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDlsv6Family",
+      "familyDisplay": "Dlsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 48,
+        "memoryGB": 96.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 26
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Modern General Purpose",
+        "description": "Balanced CPU/memory on the latest silicon — the default for most production workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D64ls_v6",
+      "sku": "Standard_D64ls_v6",
+      "displayName": "D64ls v6",
+      "nickname": "Daily Hunter",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDlsv6Family",
+      "familyDisplay": "Dlsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 64,
+        "memoryGB": 128.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 29
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Modern General Purpose",
+        "description": "Balanced CPU/memory on the latest silicon — the default for most production workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D96ls_v6",
+      "sku": "Standard_D96ls_v6",
+      "displayName": "D96ls v6",
+      "nickname": "Daily Crusher",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDlsv6Family",
+      "familyDisplay": "Dlsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "epic",
+      "stats": {
+        "vcpus": 96,
+        "memoryGB": 192.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 33
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Modern General Purpose",
+        "description": "Balanced CPU/memory on the latest silicon — the default for most production workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D128ls_v6",
+      "sku": "Standard_D128ls_v6",
+      "displayName": "D128ls v6",
+      "nickname": "Worker Warlord",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDlsv6Family",
+      "familyDisplay": "Dlsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "epic",
+      "stats": {
+        "vcpus": 128,
+        "memoryGB": 256.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 37
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Modern General Purpose",
+        "description": "Balanced CPU/memory on the latest silicon — the default for most production workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D2s_v6",
+      "sku": "Standard_D2s_v6",
+      "displayName": "D2s v6",
+      "nickname": "Pocket Sprout",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDsv6Family",
+      "familyDisplay": "Dsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "common",
+      "stats": {
+        "vcpus": 2,
+        "memoryGB": 8.0,
+        "maxDataDisks": 8,
+        "nics": 2,
+        "pricePerHourUSD": null,
+        "powerScore": 6
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Modern General Purpose",
+        "description": "Balanced CPU/memory on the latest silicon — the default for most production workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D4s_v6",
+      "sku": "Standard_D4s_v6",
+      "displayName": "D4s v6",
+      "nickname": "Steady Whelp",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDsv6Family",
+      "familyDisplay": "Dsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "common",
+      "stats": {
+        "vcpus": 4,
+        "memoryGB": 16.0,
+        "maxDataDisks": 12,
+        "nics": 2,
+        "pricePerHourUSD": null,
+        "powerScore": 9
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Modern General Purpose",
+        "description": "Balanced CPU/memory on the latest silicon — the default for most production workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D8s_v6",
+      "sku": "Standard_D8s_v6",
+      "displayName": "D8s v6",
+      "nickname": "Field Worker",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDsv6Family",
+      "familyDisplay": "Dsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 8,
+        "memoryGB": 32.0,
+        "maxDataDisks": 24,
+        "nics": 4,
+        "pricePerHourUSD": null,
+        "powerScore": 13
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Modern General Purpose",
+        "description": "Balanced CPU/memory on the latest silicon — the default for most production workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D16s_v6",
+      "sku": "Standard_D16s_v6",
+      "displayName": "D16s v6",
+      "nickname": "Worker Builder",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDsv6Family",
+      "familyDisplay": "Dsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 16,
+        "memoryGB": 64.0,
+        "maxDataDisks": 48,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 19
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Modern General Purpose",
+        "description": "Balanced CPU/memory on the latest silicon — the default for most production workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D32s_v6",
+      "sku": "Standard_D32s_v6",
+      "displayName": "D32s v6",
+      "nickname": "Field Builder",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDsv6Family",
+      "familyDisplay": "Dsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 32,
+        "memoryGB": 128.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 25
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Modern General Purpose",
+        "description": "Balanced CPU/memory on the latest silicon — the default for most production workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D48s_v6",
+      "sku": "Standard_D48s_v6",
+      "displayName": "D48s v6",
+      "nickname": "Worker Hunter",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDsv6Family",
+      "familyDisplay": "Dsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 48,
+        "memoryGB": 192.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 28
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Modern General Purpose",
+        "description": "Balanced CPU/memory on the latest silicon — the default for most production workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D64s_v6",
+      "sku": "Standard_D64s_v6",
+      "displayName": "D64s v6",
+      "nickname": "Field Knight",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDsv6Family",
+      "familyDisplay": "Dsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 64,
+        "memoryGB": 256.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 31
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Modern General Purpose",
+        "description": "Balanced CPU/memory on the latest silicon — the default for most production workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D96s_v6",
+      "sku": "Standard_D96s_v6",
+      "displayName": "D96s v6",
+      "nickname": "Field Crusher",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDsv6Family",
+      "familyDisplay": "Dsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "epic",
+      "stats": {
+        "vcpus": 96,
+        "memoryGB": 384.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 35
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Modern General Purpose",
+        "description": "Balanced CPU/memory on the latest silicon — the default for most production workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D128s_v6",
+      "sku": "Standard_D128s_v6",
+      "displayName": "D128s v6",
+      "nickname": "Pocket Titan",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDsv6Family",
+      "familyDisplay": "Dsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "epic",
+      "stats": {
+        "vcpus": 128,
+        "memoryGB": 512.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 39
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Modern General Purpose",
+        "description": "Balanced CPU/memory on the latest silicon — the default for most production workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D192s_v6",
+      "sku": "Standard_D192s_v6",
+      "displayName": "D192s v6",
+      "nickname": "Field Titan",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDsv6Family",
+      "familyDisplay": "Dsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "epic",
+      "stats": {
+        "vcpus": 192,
+        "memoryGB": 768.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 46
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Modern General Purpose",
+        "description": "Balanced CPU/memory on the latest silicon — the default for most production workloads."
       }
     },
     {
@@ -48422,6 +49532,968 @@
       }
     },
     {
+      "id": "newzealandnorth::Standard_M16bds_v3",
+      "sku": "Standard_M16bds_v3",
+      "displayName": "M16bds v3",
+      "nickname": "Buffer Scout",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardMBDSMediumMemoryv3Family",
+      "familyDisplay": "MBDSMediumMemoryv3",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 16,
+        "memoryGB": 128.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 1.8372,
+        "powerScore": 21
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "SAP HANA Class",
+        "description": "Certified for SAP HANA — multi-TB RAM for in-memory analytics and large databases."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_M32bds_v3",
+      "sku": "Standard_M32bds_v3",
+      "displayName": "M32bds v3",
+      "nickname": "RAM Guardian",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardMBDSMediumMemoryv3Family",
+      "familyDisplay": "MBDSMediumMemoryv3",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 32,
+        "memoryGB": 256.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 3.6869,
+        "powerScore": 26
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "SAP HANA Class",
+        "description": "Certified for SAP HANA — multi-TB RAM for in-memory analytics and large databases."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_M48bds_v3",
+      "sku": "Standard_M48bds_v3",
+      "displayName": "M48bds v3",
+      "nickname": "Buffer Knight",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardMBDSMediumMemoryv3Family",
+      "familyDisplay": "MBDSMediumMemoryv3",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 48,
+        "memoryGB": 384.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 5.5241,
+        "powerScore": 30
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "SAP HANA Class",
+        "description": "Certified for SAP HANA — multi-TB RAM for in-memory analytics and large databases."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_M64bds_v3",
+      "sku": "Standard_M64bds_v3",
+      "displayName": "M64bds v3",
+      "nickname": "RAM Guardian",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardMBDSMediumMemoryv3Family",
+      "familyDisplay": "MBDSMediumMemoryv3",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 64,
+        "memoryGB": 512.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 7.3738,
+        "powerScore": 33
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "SAP HANA Class",
+        "description": "Certified for SAP HANA — multi-TB RAM for in-memory analytics and large databases."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_M64-32bds_1_v3",
+      "sku": "Standard_M64-32bds_1_v3",
+      "displayName": "M64-32bds 1 v3",
+      "nickname": "RAM Crusher",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardMBDSMediumMemoryv3Family",
+      "familyDisplay": "MBDSMediumMemoryv3",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "epic",
+      "stats": {
+        "vcpus": 64,
+        "memoryGB": 1397.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 28.9165,
+        "powerScore": 39
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "SAP HANA Class",
+        "description": "Certified for SAP HANA — multi-TB RAM for in-memory analytics and large databases."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_M64bds_1_v3",
+      "sku": "Standard_M64bds_1_v3",
+      "displayName": "M64bds 1 v3",
+      "nickname": "Cache Reaver",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardMBDSMediumMemoryv3Family",
+      "familyDisplay": "MBDSMediumMemoryv3",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "epic",
+      "stats": {
+        "vcpus": 64,
+        "memoryGB": 1397.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 28.9165,
+        "powerScore": 39
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "SAP HANA Class",
+        "description": "Certified for SAP HANA — multi-TB RAM for in-memory analytics and large databases."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_M96bds_v3",
+      "sku": "Standard_M96bds_v3",
+      "displayName": "M96bds v3",
+      "nickname": "RAM Reaver",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardMBDSMediumMemoryv3Family",
+      "familyDisplay": "MBDSMediumMemoryv3",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "epic",
+      "stats": {
+        "vcpus": 96,
+        "memoryGB": 768.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 11.0608,
+        "powerScore": 39
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "SAP HANA Class",
+        "description": "Certified for SAP HANA — multi-TB RAM for in-memory analytics and large databases."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_M96-48bds_2_v3",
+      "sku": "Standard_M96-48bds_2_v3",
+      "displayName": "M96-48bds 2 v3",
+      "nickname": "Memory Avatar",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardMBDSMediumMemoryv3Family",
+      "familyDisplay": "MBDSMediumMemoryv3",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "legendary",
+      "stats": {
+        "vcpus": 96,
+        "memoryGB": 1946.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 43.3747,
+        "powerScore": 45
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "SAP HANA Class",
+        "description": "Certified for SAP HANA — multi-TB RAM for in-memory analytics and large databases."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_M96bds_2_v3",
+      "sku": "Standard_M96bds_2_v3",
+      "displayName": "M96bds 2 v3",
+      "nickname": "RAM King",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardMBDSMediumMemoryv3Family",
+      "familyDisplay": "MBDSMediumMemoryv3",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "legendary",
+      "stats": {
+        "vcpus": 96,
+        "memoryGB": 1946.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 43.3747,
+        "powerScore": 45
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "SAP HANA Class",
+        "description": "Certified for SAP HANA — multi-TB RAM for in-memory analytics and large databases."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_M128-64bds_v3",
+      "sku": "Standard_M128-64bds_v3",
+      "displayName": "M128-64bds v3",
+      "nickname": "RAM Warlord",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardMBDSMediumMemoryv3Family",
+      "familyDisplay": "MBDSMediumMemoryv3",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "epic",
+      "stats": {
+        "vcpus": 128,
+        "memoryGB": 1024.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 14.7351,
+        "powerScore": 43
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "SAP HANA Class",
+        "description": "Certified for SAP HANA — multi-TB RAM for in-memory analytics and large databases."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_M128bds_v3",
+      "sku": "Standard_M128bds_v3",
+      "displayName": "M128bds v3",
+      "nickname": "Cache Crusher",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardMBDSMediumMemoryv3Family",
+      "familyDisplay": "MBDSMediumMemoryv3",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "epic",
+      "stats": {
+        "vcpus": 128,
+        "memoryGB": 1024.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 14.7351,
+        "powerScore": 43
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "SAP HANA Class",
+        "description": "Certified for SAP HANA — multi-TB RAM for in-memory analytics and large databases."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_M128-64bds_3_v3",
+      "sku": "Standard_M128-64bds_3_v3",
+      "displayName": "M128-64bds 3 v3",
+      "nickname": "Heap Colossus",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardMBDSMediumMemoryv3Family",
+      "familyDisplay": "MBDSMediumMemoryv3",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "legendary",
+      "stats": {
+        "vcpus": 128,
+        "memoryGB": 2794.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 57.833,
+        "powerScore": 51
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "SAP HANA Class",
+        "description": "Certified for SAP HANA — multi-TB RAM for in-memory analytics and large databases."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_M128bds_3_v3",
+      "sku": "Standard_M128bds_3_v3",
+      "displayName": "M128bds 3 v3",
+      "nickname": "RAM Sovereign",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardMBDSMediumMemoryv3Family",
+      "familyDisplay": "MBDSMediumMemoryv3",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "legendary",
+      "stats": {
+        "vcpus": 128,
+        "memoryGB": 2794.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 57.833,
+        "powerScore": 51
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "SAP HANA Class",
+        "description": "Certified for SAP HANA — multi-TB RAM for in-memory analytics and large databases."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_M176-88bds_v3",
+      "sku": "Standard_M176-88bds_v3",
+      "displayName": "M176-88bds v3",
+      "nickname": "Cache Behemoth",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardMBDSMediumMemoryv3Family",
+      "familyDisplay": "MBDSMediumMemoryv3",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "epic",
+      "stats": {
+        "vcpus": 176,
+        "memoryGB": 1536.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 20.2718,
+        "powerScore": 49
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "SAP HANA Class",
+        "description": "Certified for SAP HANA — multi-TB RAM for in-memory analytics and large databases."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_M176bds_v3",
+      "sku": "Standard_M176bds_v3",
+      "displayName": "M176bds v3",
+      "nickname": "Buffer Titan",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardMBDSMediumMemoryv3Family",
+      "familyDisplay": "MBDSMediumMemoryv3",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "epic",
+      "stats": {
+        "vcpus": 176,
+        "memoryGB": 1536.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 20.2718,
+        "powerScore": 49
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "SAP HANA Class",
+        "description": "Certified for SAP HANA — multi-TB RAM for in-memory analytics and large databases."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_M176-88bds_4_v3",
+      "sku": "Standard_M176-88bds_4_v3",
+      "displayName": "M176-88bds 4 v3",
+      "nickname": "Heap Apex",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardMBDSMediumMemoryv3Family",
+      "familyDisplay": "MBDSMediumMemoryv3",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "legendary",
+      "stats": {
+        "vcpus": 176,
+        "memoryGB": 3892.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 79.0611,
+        "powerScore": 59
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "SAP HANA Class",
+        "description": "Certified for SAP HANA — multi-TB RAM for in-memory analytics and large databases."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_M176bds_4_v3",
+      "sku": "Standard_M176bds_4_v3",
+      "displayName": "M176bds 4 v3",
+      "nickname": "Cache Avatar",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardMBDSMediumMemoryv3Family",
+      "familyDisplay": "MBDSMediumMemoryv3",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "legendary",
+      "stats": {
+        "vcpus": 176,
+        "memoryGB": 3892.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 79.0611,
+        "powerScore": 59
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "SAP HANA Class",
+        "description": "Certified for SAP HANA — multi-TB RAM for in-memory analytics and large databases."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_M16bs_v3",
+      "sku": "Standard_M16bs_v3",
+      "displayName": "M16bs v3",
+      "nickname": "Buffer Builder",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardMBSMediumMemoryv3Family",
+      "familyDisplay": "MBSMediumMemoryv3",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 16,
+        "memoryGB": 128.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 1.7617,
+        "powerScore": 21
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "SAP HANA Class",
+        "description": "Certified for SAP HANA — multi-TB RAM for in-memory analytics and large databases."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_M32bs_v3",
+      "sku": "Standard_M32bs_v3",
+      "displayName": "M32bs v3",
+      "nickname": "RAM Guardian",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardMBSMediumMemoryv3Family",
+      "familyDisplay": "MBSMediumMemoryv3",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 32,
+        "memoryGB": 256.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 3.5107,
+        "powerScore": 26
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "SAP HANA Class",
+        "description": "Certified for SAP HANA — multi-TB RAM for in-memory analytics and large databases."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_M48bs_v3",
+      "sku": "Standard_M48bs_v3",
+      "displayName": "M48bs v3",
+      "nickname": "Buffer Knight",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardMBSMediumMemoryv3Family",
+      "familyDisplay": "MBSMediumMemoryv3",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 48,
+        "memoryGB": 384.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 5.2598,
+        "powerScore": 30
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "SAP HANA Class",
+        "description": "Certified for SAP HANA — multi-TB RAM for in-memory analytics and large databases."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_M64bs_v3",
+      "sku": "Standard_M64bs_v3",
+      "displayName": "M64bs v3",
+      "nickname": "RAM Knight",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardMBSMediumMemoryv3Family",
+      "familyDisplay": "MBSMediumMemoryv3",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 64,
+        "memoryGB": 512.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 7.0215,
+        "powerScore": 33
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "SAP HANA Class",
+        "description": "Certified for SAP HANA — multi-TB RAM for in-memory analytics and large databases."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_M96bs_v3",
+      "sku": "Standard_M96bs_v3",
+      "displayName": "M96bs v3",
+      "nickname": "RAM Crusher",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardMBSMediumMemoryv3Family",
+      "familyDisplay": "MBSMediumMemoryv3",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "epic",
+      "stats": {
+        "vcpus": 96,
+        "memoryGB": 768.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 10.5322,
+        "powerScore": 39
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "SAP HANA Class",
+        "description": "Certified for SAP HANA — multi-TB RAM for in-memory analytics and large databases."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_M128-64bs_v3",
+      "sku": "Standard_M128-64bs_v3",
+      "displayName": "M128-64bs v3",
+      "nickname": "RAM Behemoth",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardMBSMediumMemoryv3Family",
+      "familyDisplay": "MBSMediumMemoryv3",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "epic",
+      "stats": {
+        "vcpus": 128,
+        "memoryGB": 1024.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 14.043,
+        "powerScore": 43
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "SAP HANA Class",
+        "description": "Certified for SAP HANA — multi-TB RAM for in-memory analytics and large databases."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_M128bs_v3",
+      "sku": "Standard_M128bs_v3",
+      "displayName": "M128bs v3",
+      "nickname": "Cache Titan",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardMBSMediumMemoryv3Family",
+      "familyDisplay": "MBSMediumMemoryv3",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "epic",
+      "stats": {
+        "vcpus": 128,
+        "memoryGB": 1024.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 14.043,
+        "powerScore": 43
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "SAP HANA Class",
+        "description": "Certified for SAP HANA — multi-TB RAM for in-memory analytics and large databases."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_M176-88bs_v3",
+      "sku": "Standard_M176-88bs_v3",
+      "displayName": "M176-88bs v3",
+      "nickname": "Cache Reaver",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardMBSMediumMemoryv3Family",
+      "familyDisplay": "MBSMediumMemoryv3",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "epic",
+      "stats": {
+        "vcpus": 176,
+        "memoryGB": 1536.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 19.3028,
+        "powerScore": 49
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "SAP HANA Class",
+        "description": "Certified for SAP HANA — multi-TB RAM for in-memory analytics and large databases."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_M176bs_v3",
+      "sku": "Standard_M176bs_v3",
+      "displayName": "M176bs v3",
+      "nickname": "Buffer Warlord",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardMBSMediumMemoryv3Family",
+      "familyDisplay": "MBSMediumMemoryv3",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "epic",
+      "stats": {
+        "vcpus": 176,
+        "memoryGB": 1536.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 19.3028,
+        "powerScore": 49
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "SAP HANA Class",
+        "description": "Certified for SAP HANA — multi-TB RAM for in-memory analytics and large databases."
+      }
+    },
+    {
       "id": "newzealandnorth::Standard_A1_v2",
       "sku": "Standard_A1_v2",
       "displayName": "A1 v2",
@@ -51063,6 +53135,598 @@
       "ability": {
         "title": "Modern General Purpose",
         "description": "Balanced CPU/memory on the latest silicon — the default for most production workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_DC2ads_v6",
+      "sku": "Standard_DC2ads_v6",
+      "displayName": "DC2ads v6",
+      "nickname": "Sealed Drone",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardDCadsv6Family",
+      "familyDisplay": "DCadsv6",
+      "familyType": "Confidential",
+      "familyColor": "#7a7574",
+      "rarity": "common",
+      "stats": {
+        "vcpus": 2,
+        "memoryGB": 8.0,
+        "maxDataDisks": 4,
+        "nics": 2,
+        "pricePerHourUSD": null,
+        "powerScore": 6
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": false,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "AMD SEV-SNP",
+        "description": "Confidential VM with AMD SEV-SNP — TEE-protected memory and attestation for sensitive workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_DC4ads_v6",
+      "sku": "Standard_DC4ads_v6",
+      "displayName": "DC4ads v6",
+      "nickname": "Veil Drone",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardDCadsv6Family",
+      "familyDisplay": "DCadsv6",
+      "familyType": "Confidential",
+      "familyColor": "#7a7574",
+      "rarity": "common",
+      "stats": {
+        "vcpus": 4,
+        "memoryGB": 16.0,
+        "maxDataDisks": 8,
+        "nics": 2,
+        "pricePerHourUSD": null,
+        "powerScore": 8
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": false,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "AMD SEV-SNP",
+        "description": "Confidential VM with AMD SEV-SNP — TEE-protected memory and attestation for sensitive workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_DC8ads_v6",
+      "sku": "Standard_DC8ads_v6",
+      "displayName": "DC8ads v6",
+      "nickname": "Vault Runner",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardDCadsv6Family",
+      "familyDisplay": "DCadsv6",
+      "familyType": "Confidential",
+      "familyColor": "#7a7574",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 8,
+        "memoryGB": 32.0,
+        "maxDataDisks": 16,
+        "nics": 4,
+        "pricePerHourUSD": null,
+        "powerScore": 13
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": false,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "AMD SEV-SNP",
+        "description": "Confidential VM with AMD SEV-SNP — TEE-protected memory and attestation for sensitive workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_DC16ads_v6",
+      "sku": "Standard_DC16ads_v6",
+      "displayName": "DC16ads v6",
+      "nickname": "Cloak Vanguard",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardDCadsv6Family",
+      "familyDisplay": "DCadsv6",
+      "familyType": "Confidential",
+      "familyColor": "#7a7574",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 16,
+        "memoryGB": 64.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 19
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": false,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "AMD SEV-SNP",
+        "description": "Confidential VM with AMD SEV-SNP — TEE-protected memory and attestation for sensitive workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_DC32ads_v6",
+      "sku": "Standard_DC32ads_v6",
+      "displayName": "DC32ads v6",
+      "nickname": "Vault Champion",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardDCadsv6Family",
+      "familyDisplay": "DCadsv6",
+      "familyType": "Confidential",
+      "familyColor": "#7a7574",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 32,
+        "memoryGB": 128.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 23
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": false,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "AMD SEV-SNP",
+        "description": "Confidential VM with AMD SEV-SNP — TEE-protected memory and attestation for sensitive workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_DC48ads_v6",
+      "sku": "Standard_DC48ads_v6",
+      "displayName": "DC48ads v6",
+      "nickname": "Cloak Vanguard",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardDCadsv6Family",
+      "familyDisplay": "DCadsv6",
+      "familyType": "Confidential",
+      "familyColor": "#7a7574",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 48,
+        "memoryGB": 192.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 26
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": false,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "AMD SEV-SNP",
+        "description": "Confidential VM with AMD SEV-SNP — TEE-protected memory and attestation for sensitive workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_DC64ads_v6",
+      "sku": "Standard_DC64ads_v6",
+      "displayName": "DC64ads v6",
+      "nickname": "Vault Vanguard",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardDCadsv6Family",
+      "familyDisplay": "DCadsv6",
+      "familyType": "Confidential",
+      "familyColor": "#7a7574",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 64,
+        "memoryGB": 256.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 29
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": false,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "AMD SEV-SNP",
+        "description": "Confidential VM with AMD SEV-SNP — TEE-protected memory and attestation for sensitive workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_DC96ads_v6",
+      "sku": "Standard_DC96ads_v6",
+      "displayName": "DC96ads v6",
+      "nickname": "Vault Behemoth",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardDCadsv6Family",
+      "familyDisplay": "DCadsv6",
+      "familyType": "Confidential",
+      "familyColor": "#7a7574",
+      "rarity": "epic",
+      "stats": {
+        "vcpus": 96,
+        "memoryGB": 384.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 34
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": false,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "AMD SEV-SNP",
+        "description": "Confidential VM with AMD SEV-SNP — TEE-protected memory and attestation for sensitive workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_DC2as_v6",
+      "sku": "Standard_DC2as_v6",
+      "displayName": "DC2as v6",
+      "nickname": "Sealed Pup",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardDCasv6Family",
+      "familyDisplay": "DCasv6",
+      "familyType": "Confidential",
+      "familyColor": "#7a7574",
+      "rarity": "common",
+      "stats": {
+        "vcpus": 2,
+        "memoryGB": 8.0,
+        "maxDataDisks": 4,
+        "nics": 2,
+        "pricePerHourUSD": null,
+        "powerScore": 6
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": false,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "AMD SEV-SNP",
+        "description": "Confidential VM with AMD SEV-SNP — TEE-protected memory and attestation for sensitive workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_DC4as_v6",
+      "sku": "Standard_DC4as_v6",
+      "displayName": "DC4as v6",
+      "nickname": "Veil Pup",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardDCasv6Family",
+      "familyDisplay": "DCasv6",
+      "familyType": "Confidential",
+      "familyColor": "#7a7574",
+      "rarity": "common",
+      "stats": {
+        "vcpus": 4,
+        "memoryGB": 16.0,
+        "maxDataDisks": 8,
+        "nics": 2,
+        "pricePerHourUSD": null,
+        "powerScore": 8
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": false,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "AMD SEV-SNP",
+        "description": "Confidential VM with AMD SEV-SNP — TEE-protected memory and attestation for sensitive workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_DC8as_v6",
+      "sku": "Standard_DC8as_v6",
+      "displayName": "DC8as v6",
+      "nickname": "Vault Squire",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardDCasv6Family",
+      "familyDisplay": "DCasv6",
+      "familyType": "Confidential",
+      "familyColor": "#7a7574",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 8,
+        "memoryGB": 32.0,
+        "maxDataDisks": 16,
+        "nics": 4,
+        "pricePerHourUSD": null,
+        "powerScore": 13
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": false,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "AMD SEV-SNP",
+        "description": "Confidential VM with AMD SEV-SNP — TEE-protected memory and attestation for sensitive workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_DC16as_v6",
+      "sku": "Standard_DC16as_v6",
+      "displayName": "DC16as v6",
+      "nickname": "Cloak Vanguard",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardDCasv6Family",
+      "familyDisplay": "DCasv6",
+      "familyType": "Confidential",
+      "familyColor": "#7a7574",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 16,
+        "memoryGB": 64.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 19
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": false,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "AMD SEV-SNP",
+        "description": "Confidential VM with AMD SEV-SNP — TEE-protected memory and attestation for sensitive workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_DC32as_v6",
+      "sku": "Standard_DC32as_v6",
+      "displayName": "DC32as v6",
+      "nickname": "Vault Vanguard",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardDCasv6Family",
+      "familyDisplay": "DCasv6",
+      "familyType": "Confidential",
+      "familyColor": "#7a7574",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 32,
+        "memoryGB": 128.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 23
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": false,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "AMD SEV-SNP",
+        "description": "Confidential VM with AMD SEV-SNP — TEE-protected memory and attestation for sensitive workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_DC48as_v6",
+      "sku": "Standard_DC48as_v6",
+      "displayName": "DC48as v6",
+      "nickname": "Cloak Guardian",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardDCasv6Family",
+      "familyDisplay": "DCasv6",
+      "familyType": "Confidential",
+      "familyColor": "#7a7574",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 48,
+        "memoryGB": 192.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 26
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": false,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "AMD SEV-SNP",
+        "description": "Confidential VM with AMD SEV-SNP — TEE-protected memory and attestation for sensitive workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_DC64as_v6",
+      "sku": "Standard_DC64as_v6",
+      "displayName": "DC64as v6",
+      "nickname": "Vault Guardian",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardDCasv6Family",
+      "familyDisplay": "DCasv6",
+      "familyType": "Confidential",
+      "familyColor": "#7a7574",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 64,
+        "memoryGB": 256.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 29
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": false,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "AMD SEV-SNP",
+        "description": "Confidential VM with AMD SEV-SNP — TEE-protected memory and attestation for sensitive workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_DC96as_v6",
+      "sku": "Standard_DC96as_v6",
+      "displayName": "DC96as v6",
+      "nickname": "Vault Behemoth",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardDCasv6Family",
+      "familyDisplay": "DCasv6",
+      "familyType": "Confidential",
+      "familyColor": "#7a7574",
+      "rarity": "epic",
+      "stats": {
+        "vcpus": 96,
+        "memoryGB": 384.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 34
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": false,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "AMD SEV-SNP",
+        "description": "Confidential VM with AMD SEV-SNP — TEE-protected memory and attestation for sensitive workloads."
       }
     },
     {
@@ -57954,6 +60618,746 @@
       }
     },
     {
+      "id": "newzealandnorth::Standard_E2as_v4",
+      "sku": "Standard_E2as_v4",
+      "displayName": "E2as v4",
+      "nickname": "Heap Runner",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardEASv4Family",
+      "familyDisplay": "EASv4",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 2,
+        "memoryGB": 16.0,
+        "maxDataDisks": 4,
+        "nics": 2,
+        "pricePerHourUSD": 0.159,
+        "powerScore": 6
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Memory Heavy",
+        "description": "Higher memory-per-vCPU ratio — built for in-memory caches, relational DBs, and analytics."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E4-2as_v4",
+      "sku": "Standard_E4-2as_v4",
+      "displayName": "E4-2as v4",
+      "nickname": "Memory Builder",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardEASv4Family",
+      "familyDisplay": "EASv4",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 4,
+        "memoryGB": 32.0,
+        "maxDataDisks": 8,
+        "nics": 2,
+        "pricePerHourUSD": 0.317,
+        "powerScore": 9
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Memory Heavy",
+        "description": "Higher memory-per-vCPU ratio — built for in-memory caches, relational DBs, and analytics."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E4as_v4",
+      "sku": "Standard_E4as_v4",
+      "displayName": "E4as v4",
+      "nickname": "Memory Runner",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardEASv4Family",
+      "familyDisplay": "EASv4",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 4,
+        "memoryGB": 32.0,
+        "maxDataDisks": 8,
+        "nics": 2,
+        "pricePerHourUSD": 0.317,
+        "powerScore": 9
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Memory Heavy",
+        "description": "Higher memory-per-vCPU ratio — built for in-memory caches, relational DBs, and analytics."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E8-2as_v4",
+      "sku": "Standard_E8-2as_v4",
+      "displayName": "E8-2as v4",
+      "nickname": "Buffer Builder",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardEASv4Family",
+      "familyDisplay": "EASv4",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 8,
+        "memoryGB": 64.0,
+        "maxDataDisks": 16,
+        "nics": 4,
+        "pricePerHourUSD": 0.634,
+        "powerScore": 14
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Memory Heavy",
+        "description": "Higher memory-per-vCPU ratio — built for in-memory caches, relational DBs, and analytics."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E8-4as_v4",
+      "sku": "Standard_E8-4as_v4",
+      "displayName": "E8-4as v4",
+      "nickname": "Cache Runner",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardEASv4Family",
+      "familyDisplay": "EASv4",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 8,
+        "memoryGB": 64.0,
+        "maxDataDisks": 16,
+        "nics": 4,
+        "pricePerHourUSD": 0.634,
+        "powerScore": 14
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Memory Heavy",
+        "description": "Higher memory-per-vCPU ratio — built for in-memory caches, relational DBs, and analytics."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E8as_v4",
+      "sku": "Standard_E8as_v4",
+      "displayName": "E8as v4",
+      "nickname": "Buffer Squire",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardEASv4Family",
+      "familyDisplay": "EASv4",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 8,
+        "memoryGB": 64.0,
+        "maxDataDisks": 16,
+        "nics": 4,
+        "pricePerHourUSD": 0.634,
+        "powerScore": 14
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Memory Heavy",
+        "description": "Higher memory-per-vCPU ratio — built for in-memory caches, relational DBs, and analytics."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E16-4as_v4",
+      "sku": "Standard_E16-4as_v4",
+      "displayName": "E16-4as v4",
+      "nickname": "Heap Squire",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardEASv4Family",
+      "familyDisplay": "EASv4",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 16,
+        "memoryGB": 128.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": 1.268,
+        "powerScore": 20
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Memory Heavy",
+        "description": "Higher memory-per-vCPU ratio — built for in-memory caches, relational DBs, and analytics."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E16-8as_v4",
+      "sku": "Standard_E16-8as_v4",
+      "displayName": "E16-8as v4",
+      "nickname": "RAM Worker",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardEASv4Family",
+      "familyDisplay": "EASv4",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 16,
+        "memoryGB": 128.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": 1.268,
+        "powerScore": 20
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Memory Heavy",
+        "description": "Higher memory-per-vCPU ratio — built for in-memory caches, relational DBs, and analytics."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E16as_v4",
+      "sku": "Standard_E16as_v4",
+      "displayName": "E16as v4",
+      "nickname": "Cache Scout",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardEASv4Family",
+      "familyDisplay": "EASv4",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 16,
+        "memoryGB": 128.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": 1.268,
+        "powerScore": 20
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Memory Heavy",
+        "description": "Higher memory-per-vCPU ratio — built for in-memory caches, relational DBs, and analytics."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E20as_v4",
+      "sku": "Standard_E20as_v4",
+      "displayName": "E20as v4",
+      "nickname": "Cache Worker",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardEASv4Family",
+      "familyDisplay": "EASv4",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 20,
+        "memoryGB": 160.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": 1.586,
+        "powerScore": 21
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Memory Heavy",
+        "description": "Higher memory-per-vCPU ratio — built for in-memory caches, relational DBs, and analytics."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E32-16as_v4",
+      "sku": "Standard_E32-16as_v4",
+      "displayName": "E32-16as v4",
+      "nickname": "RAM Guardian",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardEASv4Family",
+      "familyDisplay": "EASv4",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 32,
+        "memoryGB": 256.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": 2.537,
+        "powerScore": 25
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Memory Heavy",
+        "description": "Higher memory-per-vCPU ratio — built for in-memory caches, relational DBs, and analytics."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E32-8as_v4",
+      "sku": "Standard_E32-8as_v4",
+      "displayName": "E32-8as v4",
+      "nickname": "Memory Vanguard",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardEASv4Family",
+      "familyDisplay": "EASv4",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 32,
+        "memoryGB": 256.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": 2.537,
+        "powerScore": 25
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Memory Heavy",
+        "description": "Higher memory-per-vCPU ratio — built for in-memory caches, relational DBs, and analytics."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E32as_v4",
+      "sku": "Standard_E32as_v4",
+      "displayName": "E32as v4",
+      "nickname": "Buffer Vanguard",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardEASv4Family",
+      "familyDisplay": "EASv4",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 32,
+        "memoryGB": 256.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": 2.537,
+        "powerScore": 25
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Memory Heavy",
+        "description": "Higher memory-per-vCPU ratio — built for in-memory caches, relational DBs, and analytics."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E48as_v4",
+      "sku": "Standard_E48as_v4",
+      "displayName": "E48as v4",
+      "nickname": "Cache Guardian",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardEASv4Family",
+      "familyDisplay": "EASv4",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 48,
+        "memoryGB": 384.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": 3.805,
+        "powerScore": 29
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Memory Heavy",
+        "description": "Higher memory-per-vCPU ratio — built for in-memory caches, relational DBs, and analytics."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E64-16as_v4",
+      "sku": "Standard_E64-16as_v4",
+      "displayName": "E64-16as v4",
+      "nickname": "RAM Knight",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardEASv4Family",
+      "familyDisplay": "EASv4",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 64,
+        "memoryGB": 512.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": 5.074,
+        "powerScore": 32
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Memory Heavy",
+        "description": "Higher memory-per-vCPU ratio — built for in-memory caches, relational DBs, and analytics."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E64-32as_v4",
+      "sku": "Standard_E64-32as_v4",
+      "displayName": "E64-32as v4",
+      "nickname": "Memory Knight",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardEASv4Family",
+      "familyDisplay": "EASv4",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 64,
+        "memoryGB": 512.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": 5.074,
+        "powerScore": 32
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Memory Heavy",
+        "description": "Higher memory-per-vCPU ratio — built for in-memory caches, relational DBs, and analytics."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E64as_v4",
+      "sku": "Standard_E64as_v4",
+      "displayName": "E64as v4",
+      "nickname": "Buffer Guardian",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardEASv4Family",
+      "familyDisplay": "EASv4",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 64,
+        "memoryGB": 512.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": 5.074,
+        "powerScore": 32
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Memory Heavy",
+        "description": "Higher memory-per-vCPU ratio — built for in-memory caches, relational DBs, and analytics."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E96-24as_v4",
+      "sku": "Standard_E96-24as_v4",
+      "displayName": "E96-24as v4",
+      "nickname": "Cache Crusher",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardEASv4Family",
+      "familyDisplay": "EASv4",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "epic",
+      "stats": {
+        "vcpus": 96,
+        "memoryGB": 672.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": 7.61,
+        "powerScore": 36
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Memory Heavy",
+        "description": "Higher memory-per-vCPU ratio — built for in-memory caches, relational DBs, and analytics."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E96-48as_v4",
+      "sku": "Standard_E96-48as_v4",
+      "displayName": "E96-48as v4",
+      "nickname": "RAM Titan",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardEASv4Family",
+      "familyDisplay": "EASv4",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "epic",
+      "stats": {
+        "vcpus": 96,
+        "memoryGB": 672.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": 7.61,
+        "powerScore": 36
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Memory Heavy",
+        "description": "Higher memory-per-vCPU ratio — built for in-memory caches, relational DBs, and analytics."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E96as_v4",
+      "sku": "Standard_E96as_v4",
+      "displayName": "E96as v4",
+      "nickname": "Buffer Reaver",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardEASv4Family",
+      "familyDisplay": "EASv4",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "epic",
+      "stats": {
+        "vcpus": 96,
+        "memoryGB": 672.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": 7.61,
+        "powerScore": 36
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Memory Heavy",
+        "description": "Higher memory-per-vCPU ratio — built for in-memory caches, relational DBs, and analytics."
+      }
+    },
+    {
       "id": "newzealandnorth::Standard_E2as_v5",
       "sku": "Standard_E2as_v5",
       "displayName": "E2as v5",
@@ -58694,6 +62098,339 @@
       }
     },
     {
+      "id": "newzealandnorth::Standard_E2a_v4",
+      "sku": "Standard_E2a_v4",
+      "displayName": "E2a v4",
+      "nickname": "Heap Builder",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardEAv4Family",
+      "familyDisplay": "EAv4",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 2,
+        "memoryGB": 16.0,
+        "maxDataDisks": 4,
+        "nics": 2,
+        "pricePerHourUSD": 0.159,
+        "powerScore": 6
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": false,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Memory Heavy",
+        "description": "Higher memory-per-vCPU ratio — built for in-memory caches, relational DBs, and analytics."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E4a_v4",
+      "sku": "Standard_E4a_v4",
+      "displayName": "E4a v4",
+      "nickname": "Memory Builder",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardEAv4Family",
+      "familyDisplay": "EAv4",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 4,
+        "memoryGB": 32.0,
+        "maxDataDisks": 8,
+        "nics": 2,
+        "pricePerHourUSD": 0.317,
+        "powerScore": 9
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": false,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Memory Heavy",
+        "description": "Higher memory-per-vCPU ratio — built for in-memory caches, relational DBs, and analytics."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E8a_v4",
+      "sku": "Standard_E8a_v4",
+      "displayName": "E8a v4",
+      "nickname": "Buffer Builder",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardEAv4Family",
+      "familyDisplay": "EAv4",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 8,
+        "memoryGB": 64.0,
+        "maxDataDisks": 16,
+        "nics": 4,
+        "pricePerHourUSD": 0.634,
+        "powerScore": 14
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": false,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Memory Heavy",
+        "description": "Higher memory-per-vCPU ratio — built for in-memory caches, relational DBs, and analytics."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E16a_v4",
+      "sku": "Standard_E16a_v4",
+      "displayName": "E16a v4",
+      "nickname": "Cache Squire",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardEAv4Family",
+      "familyDisplay": "EAv4",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 16,
+        "memoryGB": 128.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": 1.268,
+        "powerScore": 20
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": false,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Memory Heavy",
+        "description": "Higher memory-per-vCPU ratio — built for in-memory caches, relational DBs, and analytics."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E20a_v4",
+      "sku": "Standard_E20a_v4",
+      "displayName": "E20a v4",
+      "nickname": "Cache Runner",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardEAv4Family",
+      "familyDisplay": "EAv4",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 20,
+        "memoryGB": 160.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": 1.586,
+        "powerScore": 21
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": false,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Memory Heavy",
+        "description": "Higher memory-per-vCPU ratio — built for in-memory caches, relational DBs, and analytics."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E32a_v4",
+      "sku": "Standard_E32a_v4",
+      "displayName": "E32a v4",
+      "nickname": "Buffer Champion",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardEAv4Family",
+      "familyDisplay": "EAv4",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 32,
+        "memoryGB": 256.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": 2.537,
+        "powerScore": 25
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": false,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Memory Heavy",
+        "description": "Higher memory-per-vCPU ratio — built for in-memory caches, relational DBs, and analytics."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E48a_v4",
+      "sku": "Standard_E48a_v4",
+      "displayName": "E48a v4",
+      "nickname": "Cache Vanguard",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardEAv4Family",
+      "familyDisplay": "EAv4",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 48,
+        "memoryGB": 384.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": 3.805,
+        "powerScore": 29
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": false,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Memory Heavy",
+        "description": "Higher memory-per-vCPU ratio — built for in-memory caches, relational DBs, and analytics."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E64a_v4",
+      "sku": "Standard_E64a_v4",
+      "displayName": "E64a v4",
+      "nickname": "Buffer Vanguard",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardEAv4Family",
+      "familyDisplay": "EAv4",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 64,
+        "memoryGB": 512.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": 5.074,
+        "powerScore": 32
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": false,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Memory Heavy",
+        "description": "Higher memory-per-vCPU ratio — built for in-memory caches, relational DBs, and analytics."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E96a_v4",
+      "sku": "Standard_E96a_v4",
+      "displayName": "E96a v4",
+      "nickname": "Buffer Warlord",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardEAv4Family",
+      "familyDisplay": "EAv4",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "epic",
+      "stats": {
+        "vcpus": 96,
+        "memoryGB": 672.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": 7.61,
+        "powerScore": 36
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": false,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Memory Heavy",
+        "description": "Higher memory-per-vCPU ratio — built for in-memory caches, relational DBs, and analytics."
+      }
+    },
+    {
       "id": "newzealandnorth::Standard_E2bds_v5",
       "sku": "Standard_E2bds_v5",
       "displayName": "E2bds v5",
@@ -59283,6 +63020,598 @@
       "ability": {
         "title": "Memory Heavy",
         "description": "Higher memory-per-vCPU ratio — built for in-memory caches, relational DBs, and analytics."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_EC2ads_v6",
+      "sku": "Standard_EC2ads_v6",
+      "displayName": "EC2ads v6",
+      "nickname": "Vault Drone",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardECadsv6Family",
+      "familyDisplay": "ECadsv6",
+      "familyType": "Confidential",
+      "familyColor": "#7a7574",
+      "rarity": "common",
+      "stats": {
+        "vcpus": 2,
+        "memoryGB": 16.0,
+        "maxDataDisks": 4,
+        "nics": 2,
+        "pricePerHourUSD": null,
+        "powerScore": 6
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": false,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "AMD SEV-SNP",
+        "description": "Confidential VM with AMD SEV-SNP — TEE-protected memory and attestation for sensitive workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_EC4ads_v6",
+      "sku": "Standard_EC4ads_v6",
+      "displayName": "EC4ads v6",
+      "nickname": "Cloak Builder",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardECadsv6Family",
+      "familyDisplay": "ECadsv6",
+      "familyType": "Confidential",
+      "familyColor": "#7a7574",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 4,
+        "memoryGB": 32.0,
+        "maxDataDisks": 8,
+        "nics": 2,
+        "pricePerHourUSD": null,
+        "powerScore": 9
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": false,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "AMD SEV-SNP",
+        "description": "Confidential VM with AMD SEV-SNP — TEE-protected memory and attestation for sensitive workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_EC8ads_v6",
+      "sku": "Standard_EC8ads_v6",
+      "displayName": "EC8ads v6",
+      "nickname": "Veil Runner",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardECadsv6Family",
+      "familyDisplay": "ECadsv6",
+      "familyType": "Confidential",
+      "familyColor": "#7a7574",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 8,
+        "memoryGB": 64.0,
+        "maxDataDisks": 16,
+        "nics": 4,
+        "pricePerHourUSD": null,
+        "powerScore": 14
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": false,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "AMD SEV-SNP",
+        "description": "Confidential VM with AMD SEV-SNP — TEE-protected memory and attestation for sensitive workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_EC16ads_v6",
+      "sku": "Standard_EC16ads_v6",
+      "displayName": "EC16ads v6",
+      "nickname": "Cipher Vanguard",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardECadsv6Family",
+      "familyDisplay": "ECadsv6",
+      "familyType": "Confidential",
+      "familyColor": "#7a7574",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 16,
+        "memoryGB": 128.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 20
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": false,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "AMD SEV-SNP",
+        "description": "Confidential VM with AMD SEV-SNP — TEE-protected memory and attestation for sensitive workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_EC32ads_v6",
+      "sku": "Standard_EC32ads_v6",
+      "displayName": "EC32ads v6",
+      "nickname": "Veil Champion",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardECadsv6Family",
+      "familyDisplay": "ECadsv6",
+      "familyType": "Confidential",
+      "familyColor": "#7a7574",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 32,
+        "memoryGB": 256.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 25
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": false,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "AMD SEV-SNP",
+        "description": "Confidential VM with AMD SEV-SNP — TEE-protected memory and attestation for sensitive workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_EC48ads_v6",
+      "sku": "Standard_EC48ads_v6",
+      "displayName": "EC48ads v6",
+      "nickname": "Cipher Vanguard",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardECadsv6Family",
+      "familyDisplay": "ECadsv6",
+      "familyType": "Confidential",
+      "familyColor": "#7a7574",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 48,
+        "memoryGB": 384.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 29
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": false,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "AMD SEV-SNP",
+        "description": "Confidential VM with AMD SEV-SNP — TEE-protected memory and attestation for sensitive workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_EC64ads_v6",
+      "sku": "Standard_EC64ads_v6",
+      "displayName": "EC64ads v6",
+      "nickname": "Veil Vanguard",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardECadsv6Family",
+      "familyDisplay": "ECadsv6",
+      "familyType": "Confidential",
+      "familyColor": "#7a7574",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 64,
+        "memoryGB": 512.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 32
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": false,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "AMD SEV-SNP",
+        "description": "Confidential VM with AMD SEV-SNP — TEE-protected memory and attestation for sensitive workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_EC96ads_v6",
+      "sku": "Standard_EC96ads_v6",
+      "displayName": "EC96ads v6",
+      "nickname": "Veil Behemoth",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardECadsv6Family",
+      "familyDisplay": "ECadsv6",
+      "familyType": "Confidential",
+      "familyColor": "#7a7574",
+      "rarity": "epic",
+      "stats": {
+        "vcpus": 96,
+        "memoryGB": 672.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 36
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": false,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "AMD SEV-SNP",
+        "description": "Confidential VM with AMD SEV-SNP — TEE-protected memory and attestation for sensitive workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_EC2as_v6",
+      "sku": "Standard_EC2as_v6",
+      "displayName": "EC2as v6",
+      "nickname": "Vault Pup",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardECasv6Family",
+      "familyDisplay": "ECasv6",
+      "familyType": "Confidential",
+      "familyColor": "#7a7574",
+      "rarity": "common",
+      "stats": {
+        "vcpus": 2,
+        "memoryGB": 16.0,
+        "maxDataDisks": 4,
+        "nics": 2,
+        "pricePerHourUSD": null,
+        "powerScore": 6
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": false,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "AMD SEV-SNP",
+        "description": "Confidential VM with AMD SEV-SNP — TEE-protected memory and attestation for sensitive workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_EC4as_v6",
+      "sku": "Standard_EC4as_v6",
+      "displayName": "EC4as v6",
+      "nickname": "Cloak Runner",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardECasv6Family",
+      "familyDisplay": "ECasv6",
+      "familyType": "Confidential",
+      "familyColor": "#7a7574",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 4,
+        "memoryGB": 32.0,
+        "maxDataDisks": 8,
+        "nics": 2,
+        "pricePerHourUSD": null,
+        "powerScore": 9
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": false,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "AMD SEV-SNP",
+        "description": "Confidential VM with AMD SEV-SNP — TEE-protected memory and attestation for sensitive workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_EC8as_v6",
+      "sku": "Standard_EC8as_v6",
+      "displayName": "EC8as v6",
+      "nickname": "Veil Squire",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardECasv6Family",
+      "familyDisplay": "ECasv6",
+      "familyType": "Confidential",
+      "familyColor": "#7a7574",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 8,
+        "memoryGB": 64.0,
+        "maxDataDisks": 16,
+        "nics": 4,
+        "pricePerHourUSD": null,
+        "powerScore": 14
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": false,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "AMD SEV-SNP",
+        "description": "Confidential VM with AMD SEV-SNP — TEE-protected memory and attestation for sensitive workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_EC16as_v6",
+      "sku": "Standard_EC16as_v6",
+      "displayName": "EC16as v6",
+      "nickname": "Cipher Vanguard",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardECasv6Family",
+      "familyDisplay": "ECasv6",
+      "familyType": "Confidential",
+      "familyColor": "#7a7574",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 16,
+        "memoryGB": 128.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 20
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": false,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "AMD SEV-SNP",
+        "description": "Confidential VM with AMD SEV-SNP — TEE-protected memory and attestation for sensitive workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_EC32as_v6",
+      "sku": "Standard_EC32as_v6",
+      "displayName": "EC32as v6",
+      "nickname": "Veil Vanguard",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardECasv6Family",
+      "familyDisplay": "ECasv6",
+      "familyType": "Confidential",
+      "familyColor": "#7a7574",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 32,
+        "memoryGB": 256.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 25
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": false,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "AMD SEV-SNP",
+        "description": "Confidential VM with AMD SEV-SNP — TEE-protected memory and attestation for sensitive workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_EC48as_v6",
+      "sku": "Standard_EC48as_v6",
+      "displayName": "EC48as v6",
+      "nickname": "Cipher Guardian",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardECasv6Family",
+      "familyDisplay": "ECasv6",
+      "familyType": "Confidential",
+      "familyColor": "#7a7574",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 48,
+        "memoryGB": 384.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 29
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": false,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "AMD SEV-SNP",
+        "description": "Confidential VM with AMD SEV-SNP — TEE-protected memory and attestation for sensitive workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_EC64as_v6",
+      "sku": "Standard_EC64as_v6",
+      "displayName": "EC64as v6",
+      "nickname": "Veil Guardian",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardECasv6Family",
+      "familyDisplay": "ECasv6",
+      "familyType": "Confidential",
+      "familyColor": "#7a7574",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 64,
+        "memoryGB": 512.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 32
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": false,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "AMD SEV-SNP",
+        "description": "Confidential VM with AMD SEV-SNP — TEE-protected memory and attestation for sensitive workloads."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_EC96as_v6",
+      "sku": "Standard_EC96as_v6",
+      "displayName": "EC96as v6",
+      "nickname": "Veil Reaver",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardECasv6Family",
+      "familyDisplay": "ECasv6",
+      "familyType": "Confidential",
+      "familyColor": "#7a7574",
+      "rarity": "epic",
+      "stats": {
+        "vcpus": 96,
+        "memoryGB": 672.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 36
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": false,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "AMD SEV-SNP",
+        "description": "Confidential VM with AMD SEV-SNP — TEE-protected memory and attestation for sensitive workloads."
       }
     },
     {
@@ -61274,6 +65603,80 @@
         "spotEligible": true,
         "encryptionAtHost": true,
         "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Memory Heavy",
+        "description": "Higher memory-per-vCPU ratio — built for in-memory caches, relational DBs, and analytics."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E112iads_v5",
+      "sku": "Standard_E112iads_v5",
+      "displayName": "E112iads v5",
+      "nickname": "RAM Behemoth",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardEIADSv5Family",
+      "familyDisplay": "EIADSv5",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "epic",
+      "stats": {
+        "vcpus": 112,
+        "memoryGB": 672.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 10.284,
+        "powerScore": 39
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Memory Heavy",
+        "description": "Higher memory-per-vCPU ratio — built for in-memory caches, relational DBs, and analytics."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E112ias_v5",
+      "sku": "Standard_E112ias_v5",
+      "displayName": "E112ias v5",
+      "nickname": "RAM Reaver",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardEIASv5Family",
+      "familyDisplay": "EIASv5",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "epic",
+      "stats": {
+        "vcpus": 112,
+        "memoryGB": 672.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 8.796,
+        "powerScore": 39
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
         "cpuArchitecture": "x64",
         "retiring": false,
         "retirementDate": null
@@ -65832,6 +70235,228 @@
       "ability": {
         "title": "Compute Heavy",
         "description": "Higher CPU-per-memory ratio — web tier, batch processing, gaming servers, build agents."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_L8as_v3",
+      "sku": "Standard_L8as_v3",
+      "displayName": "L8as v3",
+      "nickname": "Spindle Worker",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardLASv3Family",
+      "familyDisplay": "LASv3",
+      "familyType": "Storage Optimized",
+      "familyColor": "#038387",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 8,
+        "memoryGB": 64.0,
+        "maxDataDisks": 16,
+        "nics": 4,
+        "pricePerHourUSD": null,
+        "powerScore": 14
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Local NVMe SSD",
+        "description": "Direct-attached NVMe — multi-GB/s throughput for transactional DBs, NoSQL, big-data scans."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_L16as_v3",
+      "sku": "Standard_L16as_v3",
+      "displayName": "L16as v3",
+      "nickname": "Vault Scout",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardLASv3Family",
+      "familyDisplay": "LASv3",
+      "familyType": "Storage Optimized",
+      "familyColor": "#038387",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 16,
+        "memoryGB": 128.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 20
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Local NVMe SSD",
+        "description": "Direct-attached NVMe — multi-GB/s throughput for transactional DBs, NoSQL, big-data scans."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_L32as_v3",
+      "sku": "Standard_L32as_v3",
+      "displayName": "L32as v3",
+      "nickname": "Spindle Scout",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardLASv3Family",
+      "familyDisplay": "LASv3",
+      "familyType": "Storage Optimized",
+      "familyColor": "#038387",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 32,
+        "memoryGB": 256.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 25
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Local NVMe SSD",
+        "description": "Direct-attached NVMe — multi-GB/s throughput for transactional DBs, NoSQL, big-data scans."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_L48as_v3",
+      "sku": "Standard_L48as_v3",
+      "displayName": "L48as v3",
+      "nickname": "Vault Knight",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardLASv3Family",
+      "familyDisplay": "LASv3",
+      "familyType": "Storage Optimized",
+      "familyColor": "#038387",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 48,
+        "memoryGB": 384.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 29
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Local NVMe SSD",
+        "description": "Direct-attached NVMe — multi-GB/s throughput for transactional DBs, NoSQL, big-data scans."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_L64as_v3",
+      "sku": "Standard_L64as_v3",
+      "displayName": "L64as v3",
+      "nickname": "Spindle Knight",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardLASv3Family",
+      "familyDisplay": "LASv3",
+      "familyType": "Storage Optimized",
+      "familyColor": "#038387",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 64,
+        "memoryGB": 512.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 32
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Local NVMe SSD",
+        "description": "Direct-attached NVMe — multi-GB/s throughput for transactional DBs, NoSQL, big-data scans."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_L80as_v3",
+      "sku": "Standard_L80as_v3",
+      "displayName": "L80as v3",
+      "nickname": "Stream Knight",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardLASv3Family",
+      "familyDisplay": "LASv3",
+      "familyType": "Storage Optimized",
+      "familyColor": "#038387",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 80,
+        "memoryGB": 640.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": null,
+        "powerScore": 35
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Local NVMe SSD",
+        "description": "Direct-attached NVMe — multi-GB/s throughput for transactional DBs, NoSQL, big-data scans."
       }
     },
     {

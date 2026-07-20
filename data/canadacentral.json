@@ -1,8 +1,8 @@
 {
   "region": "canadacentral",
   "regionDisplayName": "Canada Central",
-  "lastUpdated": "2026-05-02T07:51:17Z",
-  "skuCount": 1003,
+  "lastUpdated": "2026-07-20T03:26:20Z",
+  "skuCount": 999,
   "skus": [
     {
       "name": "Standard_NC4as_T4_v3",
@@ -5461,7 +5461,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1"
       ],
@@ -5482,7 +5482,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1"
       ],
@@ -7508,90 +7508,6 @@
         "1",
         "2",
         "3"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_DC1s_v2",
-      "family": "standardDCSv2Family",
-      "tier": "Standard",
-      "size": "DC1s_v2",
-      "vCPUs": 1,
-      "memoryGB": 4.0,
-      "maxDataDisks": 1,
-      "maxNICs": 2,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V2",
-      "acceleratedNetworking": false,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "1"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_DC2s_v2",
-      "family": "standardDCSv2Family",
-      "tier": "Standard",
-      "size": "DC2s_v2",
-      "vCPUs": 2,
-      "memoryGB": 8.0,
-      "maxDataDisks": 2,
-      "maxNICs": 2,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V2",
-      "acceleratedNetworking": true,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "1"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_DC4s_v2",
-      "family": "standardDCSv2Family",
-      "tier": "Standard",
-      "size": "DC4s_v2",
-      "vCPUs": 4,
-      "memoryGB": 16.0,
-      "maxDataDisks": 4,
-      "maxNICs": 2,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V2",
-      "acceleratedNetworking": true,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "1"
-      ],
-      "restrictions": []
-    },
-    {
-      "name": "Standard_DC8_v2",
-      "family": "standardDCSv2Family",
-      "tier": "Standard",
-      "size": "DC8_v2",
-      "vCPUs": 8,
-      "memoryGB": 32.0,
-      "maxDataDisks": 8,
-      "maxNICs": 1,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V2",
-      "acceleratedNetworking": true,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "1"
       ],
       "restrictions": []
     },

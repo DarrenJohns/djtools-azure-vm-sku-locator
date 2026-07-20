@@ -1,8 +1,8 @@
 {
   "region": "norwayeast",
   "regionDisplayName": "Norway East",
-  "lastUpdated": "2026-05-02T08:02:46Z",
-  "skuCount": 818,
+  "lastUpdated": "2026-07-20T03:40:09Z",
+  "skuCount": 817,
   "skus": [
     {
       "name": "Standard_D2ds_v6",
@@ -18428,30 +18428,6 @@
         "3"
       ],
       "restrictions": [
-        "NotAvailableForSubscription"
-      ]
-    },
-    {
-      "name": "Standard_ND96isr_H200_v5",
-      "family": "standardNDISRH200V5Family",
-      "tier": "Standard",
-      "size": "ND96isr_H200_v5",
-      "vCPUs": 96,
-      "memoryGB": 1850.0,
-      "maxDataDisks": 16,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V2",
-      "acceleratedNetworking": true,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "1"
-      ],
-      "restrictions": [
-        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },
