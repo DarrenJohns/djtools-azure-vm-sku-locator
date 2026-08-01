@@ -1,7 +1,7 @@
 {
   "region": "ukwest",
   "regionDisplayName": "UK West",
-  "lastUpdated": "2026-07-20T03:35:06Z",
+  "lastUpdated": "2026-08-01T02:11:10Z",
   "skuCount": 867,
   "skus": [
     {
@@ -15194,7 +15194,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [],
       "restrictions": []
     },
@@ -15213,7 +15213,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [],
       "restrictions": []
     },
@@ -15346,7 +15346,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [],
       "restrictions": []
     },
@@ -15365,7 +15365,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [],
       "restrictions": []
     },
@@ -15384,7 +15384,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [],
       "restrictions": []
     },

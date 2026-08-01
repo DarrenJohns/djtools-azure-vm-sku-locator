@@ -1,7 +1,7 @@
 {
   "region": "francecentral",
   "regionDisplayName": "France Central",
-  "lastUpdated": "2026-07-20T03:36:27Z",
+  "lastUpdated": "2026-08-01T02:12:28Z",
   "skuCount": 1091,
   "skus": [
     {
@@ -85,7 +85,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": false,
+      "spotEligible": true,
       "zones": [
         "1",
         "2"

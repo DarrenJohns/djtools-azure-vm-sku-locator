@@ -1,7 +1,7 @@
 {
   "region": "canadacentral",
   "regionDisplayName": "Canada Central",
-  "lastUpdated": "2026-07-20T03:26:20Z",
+  "lastUpdated": "2026-08-01T02:02:31Z",
   "skuCount": 999,
   "skus": [
     {
@@ -5440,7 +5440,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1"
       ],
@@ -5503,7 +5503,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "3"
       ],
@@ -5524,7 +5524,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "3"
       ],
@@ -18705,7 +18705,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": false,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1",
         "2",
@@ -20294,7 +20294,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1",
         "2",

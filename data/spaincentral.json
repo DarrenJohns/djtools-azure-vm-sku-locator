@@ -1,7 +1,7 @@
 {
   "region": "spaincentral",
   "regionDisplayName": "Spain Central",
-  "lastUpdated": "2026-07-20T03:45:15Z",
+  "lastUpdated": "2026-08-01T02:21:25Z",
   "skuCount": 837,
   "skus": [
     {
@@ -4698,7 +4698,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },
@@ -4719,7 +4720,8 @@
       "encryptionAtHost": true,
       "spotEligible": true,
       "zones": [
-        "2"
+        "2",
+        "3"
       ],
       "restrictions": []
     },

@@ -1,8 +1,8 @@
 {
   "region": "westus",
   "regionDisplayName": "West US",
-  "lastUpdated": "2026-07-20T03:17:25Z",
-  "skuCount": 1278,
+  "lastUpdated": "2026-08-01T01:53:34Z",
+  "skuCount": 1277,
   "skus": [
     {
       "name": "Standard_NC4as_T4_v3",
@@ -8783,27 +8783,6 @@
       "vCPUs": 24,
       "memoryGB": 128.0,
       "maxDataDisks": 12,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V2",
-      "acceleratedNetworking": true,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [],
-      "restrictions": [
-        "NotAvailableForSubscription"
-      ]
-    },
-    {
-      "name": "Standard_NV28adms_V710_v5",
-      "family": "StandardNVadsV710v5Family",
-      "tier": "Standard",
-      "size": "NV28adms_V710_v5",
-      "vCPUs": 28,
-      "memoryGB": 160.0,
-      "maxDataDisks": 14,
       "maxNICs": 8,
       "cpuArchitecture": "x64",
       "hyperVGenerations": "V2",

@@ -1,7 +1,7 @@
 {
   "region": "centralindia",
   "regionDisplayName": "Central India",
-  "lastUpdated": "2026-07-20T03:55:18Z",
+  "lastUpdated": "2026-08-01T02:31:28Z",
   "skuCount": 1070,
   "skus": [
     {
@@ -5459,7 +5459,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": false,
+      "spotEligible": true,
       "zones": [
         "2",
         "3"
@@ -5481,7 +5481,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": false,
+      "spotEligible": true,
       "zones": [
         "2",
         "3"

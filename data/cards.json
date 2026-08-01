@@ -1,25 +1,25 @@
 {
   "version": "1.0",
-  "generated": "2026-07-20T08:10:48Z",
+  "generated": "2026-08-01T07:44:01Z",
   "regions": [
     {
       "id": "australiaeast",
       "short": "AU-EAST",
       "display": "Australia East",
-      "cardCount": 1177
+      "cardCount": 1181
     },
     {
       "id": "newzealandnorth",
       "short": "NZ-NORTH",
       "display": "New Zealand North",
-      "cardCount": 796
+      "cardCount": 844
     }
   ],
   "rarityCounts": {
-    "rare": 511,
-    "common": 240,
-    "uncommon": 885,
-    "epic": 260,
+    "rare": 525,
+    "common": 248,
+    "uncommon": 909,
+    "epic": 266,
     "legendary": 77
   },
   "cards": [
@@ -43094,6 +43094,154 @@
       }
     },
     {
+      "id": "australiaeast::Standard_NC6s_v3",
+      "sku": "Standard_NC6s_v3",
+      "displayName": "NC6s v3",
+      "nickname": "GPU Worker",
+      "region": "australiaeast",
+      "regionShort": "AU-EAST",
+      "regionDisplay": "Australia East",
+      "family": "standardNCSv3Family",
+      "familyDisplay": "NCSv3",
+      "familyType": "GPU Accelerated",
+      "familyColor": "#c4314b",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 6,
+        "memoryGB": 112.0,
+        "maxDataDisks": 12,
+        "nics": 4,
+        "pricePerHourUSD": 4.234,
+        "powerScore": 14
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Compute GPU",
+        "description": "NVIDIA compute GPU — CUDA training and inference workloads."
+      }
+    },
+    {
+      "id": "australiaeast::Standard_NC12s_v3",
+      "sku": "Standard_NC12s_v3",
+      "displayName": "NC12s v3",
+      "nickname": "GPU Builder",
+      "region": "australiaeast",
+      "regionShort": "AU-EAST",
+      "regionDisplay": "Australia East",
+      "family": "standardNCSv3Family",
+      "familyDisplay": "NCSv3",
+      "familyType": "GPU Accelerated",
+      "familyColor": "#c4314b",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 12,
+        "memoryGB": 224.0,
+        "maxDataDisks": 24,
+        "nics": 8,
+        "pricePerHourUSD": 8.468,
+        "powerScore": 20
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Compute GPU",
+        "description": "NVIDIA compute GPU — CUDA training and inference workloads."
+      }
+    },
+    {
+      "id": "australiaeast::Standard_NC24rs_v3",
+      "sku": "Standard_NC24rs_v3",
+      "displayName": "NC24rs v3",
+      "nickname": "CUDA Squire",
+      "region": "australiaeast",
+      "regionShort": "AU-EAST",
+      "regionDisplay": "Australia East",
+      "family": "standardNCSv3Family",
+      "familyDisplay": "NCSv3",
+      "familyType": "GPU Accelerated",
+      "familyColor": "#c4314b",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 24,
+        "memoryGB": 448.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": 18.63,
+        "powerScore": 26
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": false,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Compute GPU",
+        "description": "NVIDIA compute GPU — CUDA training and inference workloads."
+      }
+    },
+    {
+      "id": "australiaeast::Standard_NC24s_v3",
+      "sku": "Standard_NC24s_v3",
+      "displayName": "NC24s v3",
+      "nickname": "Render Builder",
+      "region": "australiaeast",
+      "regionShort": "AU-EAST",
+      "regionDisplay": "Australia East",
+      "family": "standardNCSv3Family",
+      "familyDisplay": "NCSv3",
+      "familyType": "GPU Accelerated",
+      "familyColor": "#c4314b",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 24,
+        "memoryGB": 448.0,
+        "maxDataDisks": 32,
+        "nics": 8,
+        "pricePerHourUSD": 16.936,
+        "powerScore": 26
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Compute GPU",
+        "description": "NVIDIA compute GPU — CUDA training and inference workloads."
+      }
+    },
+    {
       "id": "australiaeast::Standard_ND128isr_NDR_GB200_v6",
       "sku": "Standard_ND128isr_NDR_GB200_v6",
       "displayName": "ND128isr NDR GB200 v6",
@@ -44685,6 +44833,1190 @@
       }
     },
     {
+      "id": "newzealandnorth::Standard_D2pds_v6",
+      "sku": "Standard_D2pds_v6",
+      "displayName": "D2pds v6",
+      "nickname": "Steady Whelp",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDpdsv6Family",
+      "familyDisplay": "Dpdsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "common",
+      "stats": {
+        "vcpus": 2,
+        "memoryGB": 8.0,
+        "maxDataDisks": 8,
+        "nics": 2,
+        "pricePerHourUSD": 0.12,
+        "powerScore": 6
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D4pds_v6",
+      "sku": "Standard_D4pds_v6",
+      "displayName": "D4pds v6",
+      "nickname": "Daily Whelp",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDpdsv6Family",
+      "familyDisplay": "Dpdsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "common",
+      "stats": {
+        "vcpus": 4,
+        "memoryGB": 16.0,
+        "maxDataDisks": 12,
+        "nics": 2,
+        "pricePerHourUSD": 0.24,
+        "powerScore": 9
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D8pds_v6",
+      "sku": "Standard_D8pds_v6",
+      "displayName": "D8pds v6",
+      "nickname": "Worker Worker",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDpdsv6Family",
+      "familyDisplay": "Dpdsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 8,
+        "memoryGB": 32.0,
+        "maxDataDisks": 24,
+        "nics": 4,
+        "pricePerHourUSD": 0.481,
+        "powerScore": 13
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D16pds_v6",
+      "sku": "Standard_D16pds_v6",
+      "displayName": "D16pds v6",
+      "nickname": "Pocket Builder",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDpdsv6Family",
+      "familyDisplay": "Dpdsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 16,
+        "memoryGB": 64.0,
+        "maxDataDisks": 48,
+        "nics": 8,
+        "pricePerHourUSD": 0.962,
+        "powerScore": 19
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D32pds_v6",
+      "sku": "Standard_D32pds_v6",
+      "displayName": "D32pds v6",
+      "nickname": "Worker Builder",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDpdsv6Family",
+      "familyDisplay": "Dpdsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 32,
+        "memoryGB": 128.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 1.923,
+        "powerScore": 25
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D48pds_v6",
+      "sku": "Standard_D48pds_v6",
+      "displayName": "D48pds v6",
+      "nickname": "Pocket Hunter",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDpdsv6Family",
+      "familyDisplay": "Dpdsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 48,
+        "memoryGB": 192.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 2.885,
+        "powerScore": 28
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D64pds_v6",
+      "sku": "Standard_D64pds_v6",
+      "displayName": "D64pds v6",
+      "nickname": "Worker Hunter",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDpdsv6Family",
+      "familyDisplay": "Dpdsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 64,
+        "memoryGB": 256.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 3.846,
+        "powerScore": 31
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D96pds_v6",
+      "sku": "Standard_D96pds_v6",
+      "displayName": "D96pds v6",
+      "nickname": "Worker Crusher",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDpdsv6Family",
+      "familyDisplay": "Dpdsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "epic",
+      "stats": {
+        "vcpus": 96,
+        "memoryGB": 384.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 5.77,
+        "powerScore": 35
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D2plds_v6",
+      "sku": "Standard_D2plds_v6",
+      "displayName": "D2plds v6",
+      "nickname": "Pocket Whelp",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDpldsv6Family",
+      "familyDisplay": "Dpldsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "common",
+      "stats": {
+        "vcpus": 2,
+        "memoryGB": 4.0,
+        "maxDataDisks": 8,
+        "nics": 2,
+        "pricePerHourUSD": 0.102,
+        "powerScore": 6
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D4plds_v6",
+      "sku": "Standard_D4plds_v6",
+      "displayName": "D4plds v6",
+      "nickname": "Steady Whelp",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDpldsv6Family",
+      "familyDisplay": "Dpldsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "common",
+      "stats": {
+        "vcpus": 4,
+        "memoryGB": 8.0,
+        "maxDataDisks": 12,
+        "nics": 2,
+        "pricePerHourUSD": 0.204,
+        "powerScore": 8
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D8plds_v6",
+      "sku": "Standard_D8plds_v6",
+      "displayName": "D8plds v6",
+      "nickname": "Field Scout",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDpldsv6Family",
+      "familyDisplay": "Dpldsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 8,
+        "memoryGB": 16.0,
+        "maxDataDisks": 24,
+        "nics": 4,
+        "pricePerHourUSD": 0.409,
+        "powerScore": 13
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D16plds_v6",
+      "sku": "Standard_D16plds_v6",
+      "displayName": "D16plds v6",
+      "nickname": "Worker Runner",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDpldsv6Family",
+      "familyDisplay": "Dpldsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 16,
+        "memoryGB": 32.0,
+        "maxDataDisks": 48,
+        "nics": 8,
+        "pricePerHourUSD": 0.818,
+        "powerScore": 19
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D32plds_v6",
+      "sku": "Standard_D32plds_v6",
+      "displayName": "D32plds v6",
+      "nickname": "Field Builder",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDpldsv6Family",
+      "familyDisplay": "Dpldsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 32,
+        "memoryGB": 64.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 1.635,
+        "powerScore": 23
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D48plds_v6",
+      "sku": "Standard_D48plds_v6",
+      "displayName": "D48plds v6",
+      "nickname": "Worker Hunter",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDpldsv6Family",
+      "familyDisplay": "Dpldsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 48,
+        "memoryGB": 96.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 2.453,
+        "powerScore": 26
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D64plds_v6",
+      "sku": "Standard_D64plds_v6",
+      "displayName": "D64plds v6",
+      "nickname": "Field Hunter",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDpldsv6Family",
+      "familyDisplay": "Dpldsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 64,
+        "memoryGB": 128.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 3.27,
+        "powerScore": 29
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D96plds_v6",
+      "sku": "Standard_D96plds_v6",
+      "displayName": "D96plds v6",
+      "nickname": "Field Titan",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDpldsv6Family",
+      "familyDisplay": "Dpldsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "epic",
+      "stats": {
+        "vcpus": 96,
+        "memoryGB": 192.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 4.906,
+        "powerScore": 33
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D2pls_v6",
+      "sku": "Standard_D2pls_v6",
+      "displayName": "D2pls v6",
+      "nickname": "Pocket Cub",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDplsv6Family",
+      "familyDisplay": "Dplsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "common",
+      "stats": {
+        "vcpus": 2,
+        "memoryGB": 4.0,
+        "maxDataDisks": 8,
+        "nics": 2,
+        "pricePerHourUSD": 0.0812,
+        "powerScore": 6
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D4pls_v6",
+      "sku": "Standard_D4pls_v6",
+      "displayName": "D4pls v6",
+      "nickname": "Steady Cub",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDplsv6Family",
+      "familyDisplay": "Dplsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "common",
+      "stats": {
+        "vcpus": 4,
+        "memoryGB": 8.0,
+        "maxDataDisks": 12,
+        "nics": 2,
+        "pricePerHourUSD": 0.162,
+        "powerScore": 8
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D8pls_v6",
+      "sku": "Standard_D8pls_v6",
+      "displayName": "D8pls v6",
+      "nickname": "Field Builder",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDplsv6Family",
+      "familyDisplay": "Dplsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 8,
+        "memoryGB": 16.0,
+        "maxDataDisks": 24,
+        "nics": 4,
+        "pricePerHourUSD": 0.325,
+        "powerScore": 13
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D16pls_v6",
+      "sku": "Standard_D16pls_v6",
+      "displayName": "D16pls v6",
+      "nickname": "Worker Runner",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDplsv6Family",
+      "familyDisplay": "Dplsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 16,
+        "memoryGB": 32.0,
+        "maxDataDisks": 48,
+        "nics": 8,
+        "pricePerHourUSD": 0.65,
+        "powerScore": 19
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D32pls_v6",
+      "sku": "Standard_D32pls_v6",
+      "displayName": "D32pls v6",
+      "nickname": "Field Runner",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDplsv6Family",
+      "familyDisplay": "Dplsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 32,
+        "memoryGB": 64.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 1.299,
+        "powerScore": 23
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D48pls_v6",
+      "sku": "Standard_D48pls_v6",
+      "displayName": "D48pls v6",
+      "nickname": "Worker Champion",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDplsv6Family",
+      "familyDisplay": "Dplsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 48,
+        "memoryGB": 96.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 1.949,
+        "powerScore": 26
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D64pls_v6",
+      "sku": "Standard_D64pls_v6",
+      "displayName": "D64pls v6",
+      "nickname": "Field Champion",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDplsv6Family",
+      "familyDisplay": "Dplsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 64,
+        "memoryGB": 128.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 2.598,
+        "powerScore": 29
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D96pls_v6",
+      "sku": "Standard_D96pls_v6",
+      "displayName": "D96pls v6",
+      "nickname": "Field Titan",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDplsv6Family",
+      "familyDisplay": "Dplsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "epic",
+      "stats": {
+        "vcpus": 96,
+        "memoryGB": 192.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 3.898,
+        "powerScore": 33
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D2ps_v6",
+      "sku": "Standard_D2ps_v6",
+      "displayName": "D2ps v6",
+      "nickname": "Steady Whelp",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDpsv6Family",
+      "familyDisplay": "Dpsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "common",
+      "stats": {
+        "vcpus": 2,
+        "memoryGB": 8.0,
+        "maxDataDisks": 8,
+        "nics": 2,
+        "pricePerHourUSD": 0.0918,
+        "powerScore": 6
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D4ps_v6",
+      "sku": "Standard_D4ps_v6",
+      "displayName": "D4ps v6",
+      "nickname": "Daily Cub",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDpsv6Family",
+      "familyDisplay": "Dpsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "common",
+      "stats": {
+        "vcpus": 4,
+        "memoryGB": 16.0,
+        "maxDataDisks": 12,
+        "nics": 2,
+        "pricePerHourUSD": 0.184,
+        "powerScore": 9
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D8ps_v6",
+      "sku": "Standard_D8ps_v6",
+      "displayName": "D8ps v6",
+      "nickname": "Worker Scout",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDpsv6Family",
+      "familyDisplay": "Dpsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 8,
+        "memoryGB": 32.0,
+        "maxDataDisks": 24,
+        "nics": 4,
+        "pricePerHourUSD": 0.367,
+        "powerScore": 13
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D16ps_v6",
+      "sku": "Standard_D16ps_v6",
+      "displayName": "D16ps v6",
+      "nickname": "Pocket Runner",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDpsv6Family",
+      "familyDisplay": "Dpsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 16,
+        "memoryGB": 64.0,
+        "maxDataDisks": 48,
+        "nics": 8,
+        "pricePerHourUSD": 0.734,
+        "powerScore": 19
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D32ps_v6",
+      "sku": "Standard_D32ps_v6",
+      "displayName": "D32ps v6",
+      "nickname": "Worker Runner",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDpsv6Family",
+      "familyDisplay": "Dpsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 32,
+        "memoryGB": 128.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 1.469,
+        "powerScore": 25
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D48ps_v6",
+      "sku": "Standard_D48ps_v6",
+      "displayName": "D48ps v6",
+      "nickname": "Pocket Champion",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDpsv6Family",
+      "familyDisplay": "Dpsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 48,
+        "memoryGB": 192.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 2.203,
+        "powerScore": 28
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D64ps_v6",
+      "sku": "Standard_D64ps_v6",
+      "displayName": "D64ps v6",
+      "nickname": "Worker Hunter",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDpsv6Family",
+      "familyDisplay": "Dpsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 64,
+        "memoryGB": 256.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 2.938,
+        "powerScore": 31
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_D96ps_v6",
+      "sku": "Standard_D96ps_v6",
+      "displayName": "D96ps v6",
+      "nickname": "Worker Titan",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardDpsv6Family",
+      "familyDisplay": "Dpsv6",
+      "familyType": "General Purpose",
+      "familyColor": "#0f6cbd",
+      "rarity": "epic",
+      "stats": {
+        "vcpus": 96,
+        "memoryGB": 384.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 4.406,
+        "powerScore": 35
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
       "id": "newzealandnorth::Standard_D2s_v6",
       "sku": "Standard_D2s_v6",
       "displayName": "D2s v6",
@@ -45940,6 +47272,598 @@
       "ability": {
         "title": "Memory Heavy",
         "description": "Higher memory-per-vCPU ratio — built for in-memory caches, relational DBs, and analytics."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E2pds_v6",
+      "sku": "Standard_E2pds_v6",
+      "displayName": "E2pds v6",
+      "nickname": "Memory Worker",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardEpdsv6Family",
+      "familyDisplay": "Epdsv6",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 2,
+        "memoryGB": 16.0,
+        "maxDataDisks": 8,
+        "nics": 2,
+        "pricePerHourUSD": 0.153,
+        "powerScore": 7
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E4pds_v6",
+      "sku": "Standard_E4pds_v6",
+      "displayName": "E4pds v6",
+      "nickname": "RAM Worker",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardEpdsv6Family",
+      "familyDisplay": "Epdsv6",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 4,
+        "memoryGB": 32.0,
+        "maxDataDisks": 12,
+        "nics": 2,
+        "pricePerHourUSD": 0.306,
+        "powerScore": 9
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E8pds_v6",
+      "sku": "Standard_E8pds_v6",
+      "displayName": "E8pds v6",
+      "nickname": "Cache Scout",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardEpdsv6Family",
+      "familyDisplay": "Epdsv6",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 8,
+        "memoryGB": 64.0,
+        "maxDataDisks": 24,
+        "nics": 4,
+        "pricePerHourUSD": 0.612,
+        "powerScore": 14
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E16pds_v6",
+      "sku": "Standard_E16pds_v6",
+      "displayName": "E16pds v6",
+      "nickname": "Heap Builder",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardEpdsv6Family",
+      "familyDisplay": "Epdsv6",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 16,
+        "memoryGB": 128.0,
+        "maxDataDisks": 48,
+        "nics": 8,
+        "pricePerHourUSD": 1.224,
+        "powerScore": 21
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E32pds_v6",
+      "sku": "Standard_E32pds_v6",
+      "displayName": "E32pds v6",
+      "nickname": "Cache Knight",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardEpdsv6Family",
+      "familyDisplay": "Epdsv6",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 32,
+        "memoryGB": 256.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 2.448,
+        "powerScore": 26
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E48pds_v6",
+      "sku": "Standard_E48pds_v6",
+      "displayName": "E48pds v6",
+      "nickname": "Heap Hunter",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardEpdsv6Family",
+      "familyDisplay": "Epdsv6",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 48,
+        "memoryGB": 384.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 3.672,
+        "powerScore": 30
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E64pds_v6",
+      "sku": "Standard_E64pds_v6",
+      "displayName": "E64pds v6",
+      "nickname": "Cache Hunter",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardEpdsv6Family",
+      "familyDisplay": "Epdsv6",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 64,
+        "memoryGB": 512.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 4.896,
+        "powerScore": 33
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E96pds_v6",
+      "sku": "Standard_E96pds_v6",
+      "displayName": "E96pds v6",
+      "nickname": "Cache Crusher",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardEpdsv6Family",
+      "familyDisplay": "Epdsv6",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "epic",
+      "stats": {
+        "vcpus": 96,
+        "memoryGB": 672.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 7.344,
+        "powerScore": 38
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": true,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E2ps_v6",
+      "sku": "Standard_E2ps_v6",
+      "displayName": "E2ps v6",
+      "nickname": "Memory Worker",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardEpsv6Family",
+      "familyDisplay": "Epsv6",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 2,
+        "memoryGB": 16.0,
+        "maxDataDisks": 8,
+        "nics": 2,
+        "pricePerHourUSD": 0.121,
+        "powerScore": 7
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E4ps_v6",
+      "sku": "Standard_E4ps_v6",
+      "displayName": "E4ps v6",
+      "nickname": "RAM Scout",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardEpsv6Family",
+      "familyDisplay": "Epsv6",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 4,
+        "memoryGB": 32.0,
+        "maxDataDisks": 12,
+        "nics": 2,
+        "pricePerHourUSD": 0.241,
+        "powerScore": 9
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E8ps_v6",
+      "sku": "Standard_E8ps_v6",
+      "displayName": "E8ps v6",
+      "nickname": "Cache Scout",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardEpsv6Family",
+      "familyDisplay": "Epsv6",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 8,
+        "memoryGB": 64.0,
+        "maxDataDisks": 24,
+        "nics": 4,
+        "pricePerHourUSD": 0.482,
+        "powerScore": 14
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E16ps_v6",
+      "sku": "Standard_E16ps_v6",
+      "displayName": "E16ps v6",
+      "nickname": "Heap Runner",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardEpsv6Family",
+      "familyDisplay": "Epsv6",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "uncommon",
+      "stats": {
+        "vcpus": 16,
+        "memoryGB": 128.0,
+        "maxDataDisks": 48,
+        "nics": 8,
+        "pricePerHourUSD": 0.965,
+        "powerScore": 21
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E32ps_v6",
+      "sku": "Standard_E32ps_v6",
+      "displayName": "E32ps v6",
+      "nickname": "Cache Hunter",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardEpsv6Family",
+      "familyDisplay": "Epsv6",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 32,
+        "memoryGB": 256.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 1.93,
+        "powerScore": 26
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E48ps_v6",
+      "sku": "Standard_E48ps_v6",
+      "displayName": "E48ps v6",
+      "nickname": "Heap Champion",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardEpsv6Family",
+      "familyDisplay": "Epsv6",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 48,
+        "memoryGB": 384.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 2.894,
+        "powerScore": 30
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E64ps_v6",
+      "sku": "Standard_E64ps_v6",
+      "displayName": "E64ps v6",
+      "nickname": "Cache Hunter",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardEpsv6Family",
+      "familyDisplay": "Epsv6",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 64,
+        "memoryGB": 512.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 3.859,
+        "powerScore": 33
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_E96ps_v6",
+      "sku": "Standard_E96ps_v6",
+      "displayName": "E96ps v6",
+      "nickname": "Cache Titan",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "StandardEpsv6Family",
+      "familyDisplay": "Epsv6",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "epic",
+      "stats": {
+        "vcpus": 96,
+        "memoryGB": 672.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 5.789,
+        "powerScore": 38
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "Arm64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "Arm64 Native",
+        "description": "Cobalt / Ampere Altra Arm cores — efficient price-perf for cloud-native scale-out."
       }
     },
     {

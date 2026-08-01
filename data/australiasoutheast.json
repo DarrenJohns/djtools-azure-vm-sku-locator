@@ -1,7 +1,7 @@
 {
   "region": "australiasoutheast",
   "regionDisplayName": "Australia Southeast",
-  "lastUpdated": "2026-07-20T04:02:51Z",
+  "lastUpdated": "2026-08-01T02:39:04Z",
   "skuCount": 1021,
   "skus": [
     {
@@ -190,7 +190,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [],
       "restrictions": []
     },
@@ -380,7 +380,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [],
       "restrictions": []
     },
@@ -570,7 +570,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": false,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [],
       "restrictions": []
     },
@@ -760,7 +760,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": false,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [],
       "restrictions": []
     },
@@ -5301,7 +5301,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [],
       "restrictions": []
     },
@@ -5472,7 +5472,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [],
       "restrictions": []
     },
@@ -5776,7 +5776,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": false,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [],
       "restrictions": []
     },
@@ -6156,7 +6156,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [],
       "restrictions": []
     },
@@ -6669,7 +6669,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": false,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [],
       "restrictions": []
     },
@@ -6973,7 +6973,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": false,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [],
       "restrictions": []
     },

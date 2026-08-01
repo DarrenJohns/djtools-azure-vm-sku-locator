@@ -1,8 +1,8 @@
 {
   "region": "southeastasia",
   "regionDisplayName": "Southeast Asia",
-  "lastUpdated": "2026-07-20T03:47:46Z",
-  "skuCount": 1263,
+  "lastUpdated": "2026-08-01T02:23:54Z",
+  "skuCount": 1271,
   "skus": [
     {
       "name": "Standard_NC4as_T4_v3",
@@ -11732,6 +11732,106 @@
         "1"
       ],
       "restrictions": []
+    },
+    {
+      "name": "Standard_DC1s_v2",
+      "family": "standardDCSv2Family",
+      "tier": "Standard",
+      "size": "DC1s_v2",
+      "vCPUs": 1,
+      "memoryGB": 4.0,
+      "maxDataDisks": 1,
+      "maxNICs": 2,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": false,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "2",
+        "3"
+      ],
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
+    },
+    {
+      "name": "Standard_DC2s_v2",
+      "family": "standardDCSv2Family",
+      "tier": "Standard",
+      "size": "DC2s_v2",
+      "vCPUs": 2,
+      "memoryGB": 8.0,
+      "maxDataDisks": 2,
+      "maxNICs": 2,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "2",
+        "3"
+      ],
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
+    },
+    {
+      "name": "Standard_DC4s_v2",
+      "family": "standardDCSv2Family",
+      "tier": "Standard",
+      "size": "DC4s_v2",
+      "vCPUs": 4,
+      "memoryGB": 16.0,
+      "maxDataDisks": 4,
+      "maxNICs": 2,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "2",
+        "3"
+      ],
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
+    },
+    {
+      "name": "Standard_DC8_v2",
+      "family": "standardDCSv2Family",
+      "tier": "Standard",
+      "size": "DC8_v2",
+      "vCPUs": 8,
+      "memoryGB": 32.0,
+      "maxDataDisks": 8,
+      "maxNICs": 1,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "2",
+        "3"
+      ],
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
     },
     {
       "name": "Standard_DC1s_v3",
@@ -28149,6 +28249,106 @@
         "3"
       ],
       "restrictions": [
+        "NotAvailableForSubscription"
+      ]
+    },
+    {
+      "name": "Standard_NC6s_v3",
+      "family": "standardNCSv3Family",
+      "tier": "Standard",
+      "size": "NC6s_v3",
+      "vCPUs": 6,
+      "memoryGB": 112.0,
+      "maxDataDisks": 12,
+      "maxNICs": 4,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V1,V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "1",
+        "3"
+      ],
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
+    },
+    {
+      "name": "Standard_NC12s_v3",
+      "family": "standardNCSv3Family",
+      "tier": "Standard",
+      "size": "NC12s_v3",
+      "vCPUs": 12,
+      "memoryGB": 224.0,
+      "maxDataDisks": 24,
+      "maxNICs": 8,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V1,V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "1",
+        "3"
+      ],
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
+    },
+    {
+      "name": "Standard_NC24rs_v3",
+      "family": "standardNCSv3Family",
+      "tier": "Standard",
+      "size": "NC24rs_v3",
+      "vCPUs": 24,
+      "memoryGB": 448.0,
+      "maxDataDisks": 32,
+      "maxNICs": 8,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V1,V2",
+      "acceleratedNetworking": false,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "1",
+        "3"
+      ],
+      "restrictions": [
+        "NotAvailableForSubscription",
+        "NotAvailableForSubscription"
+      ]
+    },
+    {
+      "name": "Standard_NC24s_v3",
+      "family": "standardNCSv3Family",
+      "tier": "Standard",
+      "size": "NC24s_v3",
+      "vCPUs": 24,
+      "memoryGB": 448.0,
+      "maxDataDisks": 32,
+      "maxNICs": 8,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V1,V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "1",
+        "3"
+      ],
+      "restrictions": [
+        "NotAvailableForSubscription",
         "NotAvailableForSubscription"
       ]
     },

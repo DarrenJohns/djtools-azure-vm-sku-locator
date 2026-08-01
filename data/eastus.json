@@ -1,7 +1,7 @@
 {
   "region": "eastus",
   "regionDisplayName": "East US",
-  "lastUpdated": "2026-07-20T03:14:45Z",
+  "lastUpdated": "2026-08-01T01:51:04Z",
   "skuCount": 1356,
   "skus": [
     {
@@ -19,7 +19,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1",
         "2",
@@ -45,7 +45,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1",
         "2",
@@ -71,7 +71,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1",
         "2",
@@ -97,7 +97,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1",
         "2",
@@ -150,6 +150,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -175,6 +176,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -200,6 +202,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -225,6 +228,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -250,6 +254,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -275,6 +280,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -300,6 +306,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -325,6 +332,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -350,6 +358,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -375,6 +384,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -400,6 +410,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -425,6 +436,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -450,6 +462,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -475,6 +488,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -500,6 +514,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -525,6 +540,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -550,6 +566,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -575,6 +592,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -600,6 +618,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -625,6 +644,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -650,6 +670,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -675,6 +696,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -700,6 +722,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -725,6 +748,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -750,6 +774,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -775,6 +800,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -800,6 +826,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -825,6 +852,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -850,6 +878,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -875,6 +904,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -900,6 +930,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -925,6 +956,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -950,6 +982,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -975,6 +1008,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -1000,6 +1034,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -1025,6 +1060,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -1050,6 +1086,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -1075,6 +1112,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -1100,6 +1138,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -1125,6 +1164,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -8790,6 +8830,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -8815,6 +8856,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -8840,6 +8882,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -8865,6 +8908,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -8890,6 +8934,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -8915,6 +8960,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -8940,6 +8986,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -8965,6 +9012,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -8990,6 +9038,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -9015,6 +9064,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -9040,6 +9090,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -9065,6 +9116,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -9090,6 +9142,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -9115,6 +9168,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -9140,6 +9194,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -9165,6 +9220,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -9190,6 +9246,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -9215,6 +9272,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -9422,6 +9480,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -9447,6 +9506,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -9472,6 +9532,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -9497,6 +9558,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -9522,6 +9584,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -9547,6 +9610,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -9572,6 +9636,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -9597,6 +9662,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -9622,6 +9688,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -9647,6 +9714,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -9672,6 +9740,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -9697,6 +9766,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -9722,6 +9792,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -9747,6 +9818,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -9772,6 +9844,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -9797,6 +9870,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -9822,6 +9896,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -9847,6 +9922,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -9872,6 +9948,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -9897,6 +9974,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -9922,6 +10000,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -9947,6 +10026,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -9972,6 +10052,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -9997,6 +10078,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -10022,6 +10104,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -10047,6 +10130,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -10072,6 +10156,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -10097,6 +10182,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -10122,6 +10208,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -10329,6 +10416,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -10354,6 +10442,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -10379,6 +10468,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -10404,6 +10494,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -10429,6 +10520,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -10454,6 +10546,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -10479,6 +10572,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -10504,6 +10598,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -10529,6 +10624,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -10554,6 +10650,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -10579,6 +10676,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -10604,6 +10702,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -10629,6 +10728,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -10654,6 +10754,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -10679,6 +10780,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -10704,6 +10806,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -10729,6 +10832,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -10754,6 +10858,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -10779,6 +10884,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -10804,6 +10910,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -11011,6 +11118,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -11036,6 +11144,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -11061,6 +11170,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -11086,6 +11196,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -11111,6 +11222,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -11136,6 +11248,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -11161,6 +11274,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -11186,6 +11300,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -11211,6 +11326,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": [
@@ -11934,7 +12050,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": false,
+      "spotEligible": true,
       "zones": [
         "3"
       ],
@@ -11958,7 +12074,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": false,
+      "spotEligible": true,
       "zones": [
         "3"
       ],
@@ -11982,7 +12098,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": false,
+      "spotEligible": true,
       "zones": [
         "3"
       ],

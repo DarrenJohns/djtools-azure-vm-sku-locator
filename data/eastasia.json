@@ -1,7 +1,7 @@
 {
   "region": "eastasia",
   "regionDisplayName": "East Asia",
-  "lastUpdated": "2026-07-20T03:49:03Z",
+  "lastUpdated": "2026-08-01T02:25:08Z",
   "skuCount": 1049,
   "skus": [
     {
@@ -3125,7 +3125,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": false,
+      "spotEligible": true,
       "zones": [
         "1",
         "3"
@@ -4480,7 +4480,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": false,
       "encryptionAtHost": true,
-      "spotEligible": false,
+      "spotEligible": true,
       "zones": [
         "1",
         "3"
@@ -5008,7 +5008,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": false,
+      "spotEligible": true,
       "zones": [
         "1",
         "3"
@@ -5030,7 +5030,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": false,
+      "spotEligible": true,
       "zones": [
         "1",
         "3"
@@ -5052,7 +5052,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": false,
+      "spotEligible": true,
       "zones": [
         "1",
         "3"
@@ -5580,7 +5580,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": false,
       "encryptionAtHost": true,
-      "spotEligible": false,
+      "spotEligible": true,
       "zones": [
         "1",
         "3"
@@ -5602,7 +5602,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": false,
       "encryptionAtHost": true,
-      "spotEligible": false,
+      "spotEligible": true,
       "zones": [
         "1",
         "3"
@@ -5624,7 +5624,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": false,
       "encryptionAtHost": true,
-      "spotEligible": false,
+      "spotEligible": true,
       "zones": [
         "1",
         "3"
@@ -22256,6 +22256,7 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "2",
         "3"
       ],
       "restrictions": []
@@ -22429,7 +22430,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": false,
+      "spotEligible": true,
       "zones": [
         "1",
         "3"
@@ -22451,7 +22452,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": false,
+      "spotEligible": true,
       "zones": [
         "1",
         "3"

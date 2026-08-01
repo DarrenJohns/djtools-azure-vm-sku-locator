@@ -1,9 +1,9 @@
 {
-  "lastUpdated": "2026-07-20T04:10:28Z",
-  "lastUpdatedDisplay": "July 2026",
   "failedRegions": [],
-  "physicalRegionCount": 63,
   "regionsWithData": 45,
+  "physicalRegionCount": 63,
+  "lastUpdated": "2026-08-01T02:46:27Z",
+  "lastUpdatedDisplay": "August 2026",
   "availableRegions": [
     "eastus",
     "eastus2",

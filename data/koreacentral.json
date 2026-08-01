@@ -1,7 +1,7 @@
 {
   "region": "koreacentral",
   "regionDisplayName": "Korea Central",
-  "lastUpdated": "2026-07-20T03:52:49Z",
+  "lastUpdated": "2026-08-01T02:28:56Z",
   "skuCount": 932,
   "skus": [
     {
@@ -5461,7 +5461,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": false,
+      "spotEligible": true,
       "zones": [
         "3"
       ],
@@ -5482,7 +5482,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": false,
+      "spotEligible": true,
       "zones": [
         "3"
       ],
