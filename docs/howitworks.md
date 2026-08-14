@@ -42,10 +42,11 @@ Normalized: { vCPUs: 4, memoryGB: 16, ... }
 - `spotEligible`, `zones`, `restrictions`
 
 ### Disk SKU Normalization
-Raw disk data is filtered (type-level entries removed) and normalized to include:
+Raw disk data is normalized to include:
 - `maxIOPS`, `maxThroughputMBps`, `burstIOPS`, `burstThroughputMBps`
 - `maxSizeGiB`, `maxShares`, `zones`
 - Tier labels: Premium SSD, Standard SSD, Standard HDD, Ultra, PremiumV2
+- `variableSize` for Azure's type-level Premium SSD v2 (`P`) and Ultra (`U`) records
 
 ### Processor Detection
 The `getProcessorType(size)` helper parses SKU name suffixes to identify processor type:
@@ -101,9 +102,12 @@ Users specify minimum requirements (vCPUs, memory, disks, NICs, processor, featu
 
 ### Disk SKUs
 - Summary cards showing disk count by tier
+- Availability cards for Ultra Disk and Premium SSD v2 in the selected region
 - Collapsible groups by disk tier with expand/collapse all
 - Filters: disk type, redundancy (LRS/ZRS), availability zones, IOPS range
 - Performance details: IOPS, throughput, burst, max shares
+
+The availability indicators reflect disk families returned by the Azure Resource SKU API. They do not replace VM-size compatibility checks.
 
 ### KPI Dashboard
 Summary cards showing: Total SKUs, vCPU Range, Memory Range, Unique Families, Intel count, AMD/ARM count, plus data freshness indicator.

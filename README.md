@@ -8,7 +8,7 @@
 >
 > **Browse Azure VM and managed disk SKU availability across every region — filter by processor, family, and features, compare across regions, pin, and see pricing and retirements.**
 
-![Version](https://img.shields.io/badge/version-1.2.0-blue)
+![Version](https://img.shields.io/badge/version-1.2.1-orange)
 ![Azure](https://img.shields.io/badge/Azure-VM_SKUs-0078D4)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Built with](https://img.shields.io/badge/built_with-Copilot_CLI-8957e5)
@@ -41,6 +41,7 @@
 
 | Feature | Description |
 |---------|-------------|
+| **Disk Type Availability** | See whether Ultra Disk and Premium SSD v2 are listed for the selected region |
 | **Browse Disk Tiers** | View Premium SSD, Standard SSD, Standard HDD, Ultra, and PremiumV2 disks |
 | **Filter & Search** | Filter by disk type, redundancy (LRS/ZRS), availability zones, and IOPS range |
 | **Performance Details** | See max IOPS, throughput, burst capabilities, and max shares per disk size |
@@ -66,7 +67,7 @@
 3. **Filter** — Narrow results by name, family, processor, vCPU range, or features
 4. **Find a Match** — Set your requirements and get ranked results with match scores
 5. **Pin & Compare** — Pin SKUs to your shortlist, then compare across regions
-6. **View Disks** — Switch to the Disk SKUs tab to browse available disk sizes
+6. **View Disks** — Switch to the Disk SKUs tab to see region-level disk type availability and browse available sizes
 7. **Export** — Download filtered results or your pinned shortlist as CSV
 
 ---

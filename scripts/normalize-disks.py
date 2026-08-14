@@ -63,8 +63,8 @@ for item in raw:
     size = item.get('size', '')
     tier = item.get('tier', '')
 
-    # Skip type-level entries (no specific size like "P" or "U")
-    if size in ('P', 'U', 'E', 'S'):
+    # Keep variable-size Premium v2 and Ultra records; skip legacy type-only entries.
+    if size in ('E', 'S'):
         continue
 
     disk = {
@@ -72,6 +72,7 @@ for item in raw:
         'size': size,
         'tier': tier,
         'tierLabel': TIER_LABELS.get(name, name),
+        'variableSize': size in ('P', 'U'),
         'maxSizeGiB': safe_int(get_cap(caps, 'MaxSizeGiB')),
         'minSizeGiB': safe_int(get_cap(caps, 'MinSizeGiB')),
         'maxIOPS': safe_int(get_cap(caps, 'MaxIOps') or get_cap(caps, 'MaxIOpsReadWrite')),

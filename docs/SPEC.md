@@ -1,6 +1,6 @@
 # VM SKU Per Region — Specification
 
-> Version: v1.1.0
+> Version: v1.2.1
 
 ## 1. Overview
 
@@ -57,6 +57,7 @@ This application helps Azure VM administrators browse virtual machine SKU availa
 | `maxIOPS` | number | Maximum IOPS |
 | `maxThroughputMBps` | number | Maximum throughput in MB/s |
 | `zones` | string[] | Available availability zones |
+| `variableSize` | boolean | Whether the API record describes a variable-size disk type |
 
 ### Retirement Data (`data/retirements.json`)
 
@@ -158,9 +159,12 @@ All UI sections are organized into **6 tabs** using a sticky tab strip below the
 
 ### 💿 Disk SKUs
 - Displays managed disk SKUs available in the selected region
+- Shows whether Ultra Disk and Premium SSD v2 are listed in the selected region using availability cards
 - Filters: Tier (Premium/Standard/Ultra), Redundancy, Zone support, IOPS range
 - Table with sortable columns: Name, Tier, Max Size, Max IOPS, Max Throughput, Zones
 - CSV export
+
+Availability indicates that the disk family was returned by the Azure Resource SKU API for the selected region. It does not guarantee compatibility with every VM size.
 
 ### Workload Recommendations
 - Cards for each workload type (general purpose, compute-optimized, memory-optimized, GPU, HPC, etc.)

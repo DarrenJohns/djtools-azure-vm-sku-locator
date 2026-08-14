@@ -423,6 +423,64 @@ select:focus, input:focus { outline: 2px solid var(--brand-primary); outline-off
 .summary-card[data-accent="teal"] .summary-value { color: #20c997; }
 .summary-card[data-accent="red"] { border-top-color: #dc3545; }
 .summary-card[data-accent="red"] .summary-value { color: #dc3545; }
+.disk-availability-mockups {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.disk-mockup {
+  background: var(--bg-layer1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: 14px;
+}
+.disk-mockup-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.disk-mockup-note {
+  color: var(--text-tertiary);
+  font-size: 11px;
+  font-weight: 400;
+}
+.disk-availability-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+}
+.disk-availability-card {
+  border: 1px solid var(--border-subtle);
+  border-left: 4px solid var(--brand-primary);
+  border-radius: var(--radius-sm);
+  padding: 11px 12px;
+}
+.disk-availability-card[data-disk-family="Ultra Disk"] { border-left-color: #e3008c; }
+.disk-availability-card[data-disk-family="Premium SSD v2"] { border-left-color: #8764b8; }
+.disk-availability-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.disk-availability-card-header strong { color: var(--text-primary); }
+.disk-availability-status {
+  color: #198754;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.disk-availability-detail {
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1.45;
+  margin-top: 6px;
+}
 [data-theme="dark"] .summary-card[data-accent="blue"] .summary-value { color: #6ea8fe; }
 [data-theme="dark"] .summary-card[data-accent="green"] .summary-value { color: #75b798; }
 [data-theme="dark"] .summary-card[data-accent="purple"] .summary-value { color: #a98eda; }
@@ -1261,6 +1319,7 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
       </div>
       <div class="section-body" id="body-disks">
         <div class="disk-summary-cards" id="disk-summary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px;"></div>
+        <div class="disk-availability-mockups" id="disk-availability-mockups"></div>
         <div class="filters-row">
           <div class="filters-search">
             <input type="search" id="disk-search-input" placeholder="Search by disk size, type..." oninput="applyDiskFilters()">
@@ -1406,7 +1465,7 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
   <a href="https://github.com/features/copilot/cli/" target="_blank" rel="noopener noreferrer" style="color:var(--brand-primary);text-decoration:none;font-weight:600;">Learn more ↗</a>
   &nbsp;·&nbsp;
   <a href="https://github.com/darjohn_microsoft/vm-sku-per-region" target="_blank" rel="noopener noreferrer" style="color:var(--brand-primary);text-decoration:none;font-weight:600;">GitHub ↗</a>
-  <div style="margin-top:8px;font-size:11px;color:var(--text-tertiary);opacity:0.7;">v1.1.0-beta</div>
+  <div style="margin-top:8px;font-size:11px;color:var(--text-tertiary);opacity:0.7;">v1.2.1</div>
 </footer>
 
 <div class="toast-container" id="toast-container"></div>
@@ -2338,6 +2397,7 @@ function renderDiskSection() {
 
   if (!allDisks.length) {
     document.getElementById('disk-summary').innerHTML = '';
+    document.getElementById('disk-availability-mockups').innerHTML = '';
     document.getElementById('disk-table-container').innerHTML = '<p style="color:var(--text-secondary);font-size:13px;">No disk SKU data available for this region.</p>';
     document.getElementById('disk-result-count').textContent = '';
     return;
@@ -2373,8 +2433,50 @@ function renderDiskSection() {
     </div>`;
   });
   document.getElementById('disk-summary').innerHTML = summaryHtml;
+  renderDiskAvailabilityMockups();
 
   applyDiskFilters();
+}
+
+function renderDiskAvailabilityMockups() {
+  const container = document.getElementById('disk-availability-mockups');
+  if (!container) return;
+
+  const families = [
+    { label: 'Ultra Disk', name: 'UltraSSD_LRS', accent: '#e3008c', detail: '4–65,536 GiB · up to 400,000 IOPS · up to 10,000 MB/s' },
+    { label: 'Premium SSD v2', name: 'PremiumV2_LRS', accent: '#8764b8', detail: '1–65,536 GiB · up to 80,000 IOPS · up to 2,000 MB/s' }
+  ];
+  const available = family => allDisks.find(d => d.name === family.name && d.variableSize);
+  const cardData = families.map(family => {
+    const disk = available(family);
+    const zoneText = disk && disk.zones && disk.zones.length ? `Zones ${disk.zones.join(', ')}` : 'Region-level availability';
+    return { ...family, disk, zoneText };
+  });
+
+  const cards = cardData.map(item => item.disk ? `
+    <div class="disk-availability-card" data-disk-family="${escapeHtml(item.label)}" style="--disk-accent:${item.accent};">
+      <div class="disk-availability-card-header">
+        <strong>${escapeHtml(item.label)}</strong>
+        <span class="disk-availability-status">Available</span>
+      </div>
+      <div class="disk-availability-detail">${escapeHtml(item.detail)}<br>${escapeHtml(item.zoneText)} · LRS</div>
+    </div>` : `
+    <div class="disk-availability-card" data-disk-family="${escapeHtml(item.label)}">
+      <div class="disk-availability-card-header">
+        <strong>${escapeHtml(item.label)}</strong>
+        <span class="disk-availability-status" style="color:var(--text-tertiary);">Not listed</span>
+      </div>
+      <div class="disk-availability-detail">Not returned by the Azure Resource SKU API for this region.</div>
+    </div>`).join('');
+
+  container.innerHTML = `
+    <div class="disk-mockup">
+      <div class="disk-mockup-title">
+        <span>Disk type availability</span>
+        <span class="disk-mockup-note">Returned for the selected region</span>
+      </div>
+      <div class="disk-availability-cards">${cards}</div>
+    </div>`;
 }
 
 function applyDiskFilters() {
@@ -2449,7 +2551,7 @@ function renderDiskTable() {
       const burst = d.burstIOPS ? d.burstIOPS.toLocaleString() : '—';
       const burstMB = d.burstThroughputMBps ? d.burstThroughputMBps : '—';
       html += `<tr class="${shaded ? 'row-shaded' : ''} disk-grp-row-${gid}" style="display:none;">
-        <td style="font-weight:600;">${escapeHtml(d.size)}</td>
+        <td style="font-weight:600;">${escapeHtml(d.size)}${d.variableSize ? ' <span title="Variable-size disk type" style="color:var(--text-tertiary);">↕</span>' : ''}</td>
         <td>${escapeHtml(d.tierLabel)}</td>
         <td>${d.maxSizeGiB.toLocaleString()}</td>
         <td>${d.maxIOPS.toLocaleString()}</td>

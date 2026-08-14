@@ -69,6 +69,8 @@
 **"We also have managed disk information."**
 
 - Switch to the **💿 Disk SKUs** tab (or press **5**)
+- Show the disk type availability cards for **Ultra Disk** and **Premium SSD v2**
+- Explain that “Available” means the family is returned for the selected region, not that every VM size supports it
 - Show tier summary cards: Premium SSD, Standard SSD, Standard HDD, Ultra
 - Expand a disk group — show IOPS, throughput, burst capabilities
 - Demo filters: disk type, redundancy (LRS/ZRS), IOPS range
