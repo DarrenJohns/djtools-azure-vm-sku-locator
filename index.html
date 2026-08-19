@@ -1,3 +1,4 @@
+<!-- VM SKU Per Region - Deployed via GitHub Actions -->
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
@@ -59,15 +60,12 @@ body {
   line-height: 1.5;
   font-size: 14px;
   -webkit-font-smoothing: antialiased;
-  display: flex;
-  flex-direction: column;
   background-image:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600' viewBox='0 0 600 600'%3E%3Cg opacity='0.18'%3E%3Ccircle cx='80' cy='80' r='5' fill='%230f6cbd'/%3E%3Ccircle cx='200' cy='40' r='4' fill='%230f6cbd'/%3E%3Ccircle cx='320' cy='100' r='6' fill='%230e7a0d'/%3E%3Ccircle cx='480' cy='60' r='4.5' fill='%230f6cbd'/%3E%3Ccircle cx='560' cy='140' r='5' fill='%238764b8'/%3E%3Ccircle cx='140' cy='200' r='6' fill='%230e7a0d'/%3E%3Ccircle cx='300' cy='240' r='5' fill='%230f6cbd'/%3E%3Ccircle cx='440' cy='200' r='4' fill='%23c4314b'/%3E%3Ccircle cx='60' cy='340' r='4.5' fill='%238764b8'/%3E%3Ccircle cx='220' cy='380' r='5' fill='%230f6cbd'/%3E%3Ccircle cx='380' cy='340' r='6' fill='%230e7a0d'/%3E%3Ccircle cx='520' cy='320' r='4' fill='%230f6cbd'/%3E%3Ccircle cx='120' cy='480' r='5' fill='%23c4314b'/%3E%3Ccircle cx='280' cy='520' r='4.5' fill='%230f6cbd'/%3E%3Ccircle cx='460' cy='460' r='5' fill='%238764b8'/%3E%3Ccircle cx='560' cy='520' r='6' fill='%230e7a0d'/%3E%3Cline x1='80' y1='80' x2='200' y2='40' stroke='%230f6cbd' stroke-width='1.2'/%3E%3Cline x1='200' y1='40' x2='320' y2='100' stroke='%230f6cbd' stroke-width='1.2'/%3E%3Cline x1='320' y1='100' x2='480' y2='60' stroke='%230f6cbd' stroke-width='1.2'/%3E%3Cline x1='480' y1='60' x2='560' y2='140' stroke='%230f6cbd' stroke-width='1.2'/%3E%3Cline x1='80' y1='80' x2='140' y2='200' stroke='%230e7a0d' stroke-width='1.2'/%3E%3Cline x1='140' y1='200' x2='300' y2='240' stroke='%230f6cbd' stroke-width='1.2'/%3E%3Cline x1='300' y1='240' x2='440' y2='200' stroke='%230f6cbd' stroke-width='1.2'/%3E%3Cline x1='440' y1='200' x2='560' y2='140' stroke='%238764b8' stroke-width='1.2'/%3E%3Cline x1='60' y1='340' x2='220' y2='380' stroke='%230f6cbd' stroke-width='1.2'/%3E%3Cline x1='220' y1='380' x2='380' y2='340' stroke='%230e7a0d' stroke-width='1.2'/%3E%3Cline x1='380' y1='340' x2='520' y2='320' stroke='%230f6cbd' stroke-width='1.2'/%3E%3Cline x1='140' y1='200' x2='60' y2='340' stroke='%238764b8' stroke-width='1.2'/%3E%3Cline x1='300' y1='240' x2='220' y2='380' stroke='%230f6cbd' stroke-width='1.2'/%3E%3Cline x1='300' y1='240' x2='380' y2='340' stroke='%230f6cbd' stroke-width='1.2'/%3E%3Cline x1='440' y1='200' x2='520' y2='320' stroke='%230f6cbd' stroke-width='1.2'/%3E%3Cline x1='60' y1='340' x2='120' y2='480' stroke='%23c4314b' stroke-width='1.2'/%3E%3Cline x1='220' y1='380' x2='280' y2='520' stroke='%230f6cbd' stroke-width='1.2'/%3E%3Cline x1='380' y1='340' x2='460' y2='460' stroke='%238764b8' stroke-width='1.2'/%3E%3Cline x1='520' y1='320' x2='560' y2='520' stroke='%230e7a0d' stroke-width='1.2'/%3E%3Cline x1='120' y1='480' x2='280' y2='520' stroke='%230f6cbd' stroke-width='1.2'/%3E%3Cline x1='280' y1='520' x2='460' y2='460' stroke='%230f6cbd' stroke-width='1.2'/%3E%3Cline x1='460' y1='460' x2='560' y2='520' stroke='%230e7a0d' stroke-width='1.2'/%3E%3C/g%3E%3C/svg%3E"),
     radial-gradient(ellipse at 0% 0%, rgba(15,108,189,0.06) 0%, transparent 60%),
     radial-gradient(ellipse at 100% 100%, rgba(14,122,13,0.05) 0%, transparent 60%);
   background-attachment: fixed;
   min-height: 100vh;
-  padding-top: 120px;
 }
 [data-theme="dark"] body {
   background-image:
@@ -92,16 +90,31 @@ body {
 }
 [data-theme="dark"] .header { background: linear-gradient(135deg, #1a1d24 0%, #12151a 100%); }
 .header h1 { font-size: 20px; font-weight: 600; }
-.nav-btn { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); color: #fff; padding: 6px 14px; border-radius: 20px; cursor: pointer; font-size: 0.82rem; font-weight: 600; transition: background 0.2s; backdrop-filter: blur(4px); }
-.nav-btn-icon { font-size: 16px; padding: 6px 12px; line-height: 1; }
-.nav-btn-bare { background: transparent; border: 1px solid transparent; padding: 0; margin: 0; width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; transition: box-shadow 0.2s ease, background 0.2s ease; }
-.nav-btn-bare + .nav-btn-bare { margin-left: -10px; }
-.nav-btn-bare:hover { background: rgba(91,184,245,0.10); border-color: transparent; box-shadow: 0 0 0 2px rgba(91,184,245,0.45), 0 0 14px 2px rgba(91,184,245,0.55); }
-.nav-btn-bare svg { display: block; width: 30px; height: 30px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4)); }
-.nav-btn-bare-emoji { font-size: 24px; line-height: 1; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4)); }
-.nav-btn:hover { background: rgba(255,255,255,0.25); }
-.container { max-width: 1400px; margin: 0 auto; padding: 48px 24px 16px; }
-.page-flex { flex: 1 0 auto; min-width: 0; }
+.theme-toggle {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.25);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  backdrop-filter: blur(4px);
+  transition: background 0.15s;
+}
+.theme-toggle:hover { background: rgba(255,255,255,0.25); }
+.kbd-shortcut-btn {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.25);
+  color: white;
+  border-radius: 20px;
+  padding: 6px 14px;
+  cursor: pointer;
+  font-size: 14px;
+  backdrop-filter: blur(4px);
+  transition: background 0.15s;
+}
+.kbd-shortcut-btn:hover { background: rgba(255,255,255,0.25); }
+.container { max-width: 1400px; margin: 0 auto; padding: 176px 24px 16px; }
 .section {
   margin-bottom: 24px;
 }
@@ -160,35 +173,37 @@ body {
 .section-group-divider .group-icon {
   font-size: 14px;
 }
-.region-selector-bar {
+.region-bar {
+  position: fixed;
+  top: 56px;
+  left: 0;
+  right: 0;
+  z-index: 999;
+  background: var(--bg-layer1);
+  border-bottom: 1px solid var(--border-default);
+  padding: 12px 24px;
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 14px 18px;
-  background: var(--bg-layer1);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
-  margin-bottom: 18px;
-  flex-wrap: wrap;
 }
-.region-selector-bar label {
+.region-bar label {
   font-size: 14px;
   font-weight: 600;
   color: var(--text-secondary);
   white-space: nowrap;
 }
-.region-selector-bar select {
+.region-bar select {
   font-family: var(--font-sans);
   font-size: 14px;
-  padding: 8px 14px;
+  padding: 6px 12px;
   border: 1px solid var(--border-default);
   border-radius: var(--radius-sm);
   background: var(--bg-layer2);
   color: var(--text-primary);
-  min-width: 260px;
+  max-width: 280px;
 }
-.region-selector-bar .current-region {
+.region-bar .current-region {
   font-size: 15px;
   font-weight: 600;
   color: var(--brand-primary);
@@ -212,15 +227,15 @@ body {
 .freshness-overlay.show { display: flex; }
 .freshness-card {
   background: var(--bg-layer1);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+  padding: 24px 28px;
   max-width: 420px;
   width: 90%;
-  overflow: hidden;
   animation: fadeInUp 0.2s ease;
 }
-.freshness-card .modal-banner h2 { font-size: 18px; }
-.freshness-card .modal-body { padding: 16px 24px 20px; }
+.freshness-card h4 { font-size: 15px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
 .freshness-card table { width: 100%; font-size: 13px; border-collapse: collapse; }
 .freshness-card td { padding: 8px 10px; border-bottom: 1px solid var(--border-subtle); vertical-align: middle; }
 .freshness-card td:first-child { font-weight: 600; white-space: nowrap; }
@@ -232,10 +247,22 @@ body {
 [data-theme="dark"] .freshness-badge.fresh { background: #1a3d1a; color: #81c995; border-color: #2d5a2d; }
 [data-theme="dark"] .freshness-badge.aging { background: #3d3200; color: #fdd663; border-color: #665200; }
 [data-theme="dark"] .freshness-badge.stale { background: #3d1a1a; color: #f28b82; border-color: #5a2d2d; }
+/* Top Trumps edition chooser */
+.game-edition-card { max-width: 520px; }
+.game-edition-card h4 { margin-bottom: 6px; }
+.game-edition-card > p { margin: 0 0 16px; color: var(--text-secondary); font-size: 13px; line-height: 1.45; }
+.game-edition-options { display: grid; gap: 10px; }
+.game-edition-option { width: 100%; padding: 14px 16px; border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--bg-layer1); color: var(--text-primary); text-align: left; cursor: pointer; transition: border-color 0.15s, background 0.15s, box-shadow 0.15s; }
+.game-edition-option:hover, .game-edition-option:focus-visible { background: var(--bg-layer2); border-color: var(--brand-primary); box-shadow: var(--shadow-sm); outline: none; }
+.game-edition-option.classic { border-color: var(--brand-primary); }
+.game-edition-option-title { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; }
+.game-edition-option-description { display: block; margin-top: 5px; font-size: 12px; color: var(--text-secondary); line-height: 1.45; }
+.game-edition-badge { padding: 2px 7px; border-radius: 10px; background: var(--brand-primary); color: var(--text-on-brand); font-size: 10px; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; }
+.game-edition-note { margin: 14px 0 0; font-size: 11px; color: var(--text-tertiary); line-height: 1.45; }
 /* Tab strip */
 .tab-strip {
   position: fixed;
-  top: 64px;
+  top: 120px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 998;
@@ -248,25 +275,24 @@ body {
   justify-content: center;
   gap: 2px;
   max-width: 1400px;
-  width: calc(100% - 48px);
+  margin: 8px auto 20px;
   padding: 0 24px;
   overflow-x: auto;
   scrollbar-width: thin;
   box-shadow: var(--shadow-sm);
 }
 [data-theme="dark"] .tab-strip {
-  background: rgba(30,33,40, 0.55);
+  background: rgba(30,33,40, 0.5);
 }
-.tab-strip::-webkit-scrollbar { height: 6px; }
 .tab-strip .tab {
   flex: 0 0 auto;
   background: transparent;
   border: none;
   border-bottom: 3px solid transparent;
   color: var(--text-tertiary);
-  padding: 12px 14px;
+  padding: 10px 14px;
   cursor: pointer;
-  font-size: 0.88rem;
+  font-size: 0.85rem;
   font-weight: 600;
   white-space: nowrap;
   transition: color 0.15s, border-color 0.15s;
@@ -299,8 +325,6 @@ select, input[type="text"], input[type="search"] {
   width: 100%;
 }
 select:focus, input:focus { outline: 2px solid var(--brand-primary); outline-offset: -1px; }
-*:focus { outline: none; }
-*:focus-visible { outline: 2px solid var(--brand-primary); outline-offset: 2px; border-radius: 4px; }
 .badge {
   display: inline-block;
   background: var(--brand-primary);
@@ -358,19 +382,11 @@ select:focus, input:focus { outline: 2px solid var(--brand-primary); outline-off
   border-radius: var(--radius-md);
   padding: 14px 16px;
   box-shadow: var(--shadow-sm);
+  border-top: 3px solid var(--brand-primary);
   position: relative;
-  overflow: hidden;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
-  outline: none;
 }
-.summary-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 4px;
-  background: var(--accent-strip, linear-gradient(90deg, #0078D4, #50E6FF));
-}
-.summary-card:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(0,120,212,0.18); }
+.summary-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
 .summary-card .summary-icon {
   font-size: 22px;
   margin-bottom: 4px;
@@ -382,9 +398,10 @@ select:focus, input:focus { outline: 2px solid var(--brand-primary); outline-off
   line-height: 1.2;
 }
 .summary-card .summary-label {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-secondary);
-  margin-top: 4px;
+  margin-top: 2px;
+  text-transform: uppercase;
   letter-spacing: 0.5px;
   font-weight: 500;
 }
@@ -394,18 +411,18 @@ select:focus, input:focus { outline: 2px solid var(--brand-primary); outline-off
   margin-top: 4px;
   line-height: 1.4;
 }
-.summary-card[data-accent="blue"]   { --accent-strip: linear-gradient(90deg, #0d6efd, #6ea8fe); }
-.summary-card[data-accent="blue"]   .summary-value { color: #0d6efd; }
-.summary-card[data-accent="green"]  { --accent-strip: linear-gradient(90deg, #198754, #75b798); }
-.summary-card[data-accent="green"]  .summary-value { color: #198754; }
-.summary-card[data-accent="purple"] { --accent-strip: linear-gradient(90deg, #6f42c1, #a98eda); }
+.summary-card[data-accent="blue"] { border-top-color: #0d6efd; }
+.summary-card[data-accent="blue"] .summary-value { color: #0d6efd; }
+.summary-card[data-accent="green"] { border-top-color: #198754; }
+.summary-card[data-accent="green"] .summary-value { color: #198754; }
+.summary-card[data-accent="purple"] { border-top-color: #6f42c1; }
 .summary-card[data-accent="purple"] .summary-value { color: #6f42c1; }
-.summary-card[data-accent="orange"] { --accent-strip: linear-gradient(90deg, #fd7e14, #feb272); }
+.summary-card[data-accent="orange"] { border-top-color: #fd7e14; }
 .summary-card[data-accent="orange"] .summary-value { color: #fd7e14; }
-.summary-card[data-accent="teal"]   { --accent-strip: linear-gradient(90deg, #20c997, #79dfc1); }
-.summary-card[data-accent="teal"]   .summary-value { color: #20c997; }
-.summary-card[data-accent="red"]    { --accent-strip: linear-gradient(90deg, #dc3545, #ea868f); }
-.summary-card[data-accent="red"]    .summary-value { color: #dc3545; }
+.summary-card[data-accent="teal"] { border-top-color: #20c997; }
+.summary-card[data-accent="teal"] .summary-value { color: #20c997; }
+.summary-card[data-accent="red"] { border-top-color: #dc3545; }
+.summary-card[data-accent="red"] .summary-value { color: #dc3545; }
 [data-theme="dark"] .summary-card[data-accent="blue"] .summary-value { color: #6ea8fe; }
 [data-theme="dark"] .summary-card[data-accent="green"] .summary-value { color: #75b798; }
 [data-theme="dark"] .summary-card[data-accent="purple"] .summary-value { color: #a98eda; }
@@ -671,7 +688,7 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
 [data-theme="dark"] .shortlist-chip { background: #1a3050; border-color: #2a4a6a; }
 .shortlist-chip .remove-pin { cursor: pointer; font-size: 14px; margin-left: 2px; opacity: 0.6; }
 .shortlist-chip .remove-pin:hover { opacity: 1; color: var(--status-danger); }
-.shortlist-actions { display: flex; gap: 8px; margin-top: 10px; justify-content: space-between; align-items: center; }
+.shortlist-actions { display: flex; gap: 8px; margin-top: 10px; }
 /* Pricing table */
 .pricing-container { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border-default); }
 .pricing-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
@@ -681,13 +698,6 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
 .pricing-table .price-cell { font-family: 'Cascadia Code', 'Consolas', monospace; font-size: 12px; }
 .pricing-table .price-cell.cheapest { color: var(--status-success); font-weight: 700; }
 .pricing-note { font-size: 11px; color: var(--text-tertiary); margin-top: 6px; }
-.term-pills { display: inline-flex; gap: 2px; background: var(--bg-layer2); border-radius: var(--radius-sm); padding: 2px; border: 1px solid var(--border-default); }
-.term-pill { font-size: 11px; padding: 3px 10px; border: none; border-radius: var(--radius-sm); background: transparent; color: var(--text-secondary); cursor: pointer; font-weight: 500; transition: all 0.15s; white-space: nowrap; }
-.term-pill:hover { color: var(--text-primary); background: var(--bg-hover); }
-.term-pill.active { background: var(--brand-primary); color: #fff; font-weight: 600; }
-.currency-select-wrapper { display: inline-flex; align-items: center; gap: 6px; }
-.currency-select-wrapper label { font-size: 12px; color: var(--text-secondary); font-weight: 600; white-space: nowrap; }
-.currency-select-wrapper select { font-size: 12px; padding: 4px 8px; border: 1px solid var(--border-default); border-radius: var(--radius-sm); background: var(--bg-layer2); color: var(--text-primary); cursor: pointer; }
 .pricing-loading { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); padding: 8px 0; }
 .pin-btn { cursor: pointer; font-size: 16px; opacity: 0.3; transition: all 0.15s; background: none; border: none; padding: 0 2px; }
 .pin-btn:hover { opacity: 0.7; transform: scale(1.2); }
@@ -880,41 +890,50 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
 }
 .modal-close:hover { background: var(--bg-layer2); }
 .modal-body-content { padding: 20px; }
-.shortcuts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 8px; }
-.shortcut-item { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: var(--radius-sm); background: var(--bg-layer2); }
+.shortcuts-grid { display: grid; gap: 8px; }
+.shortcut-item { display: flex; align-items: center; gap: 12px; padding: 6px 0; }
 .shortcut-key {
-  min-width: 36px;
-  text-align: center;
-  padding: 4px 8px;
-  background: var(--bg-layer1);
+  font-family: 'Cascadia Code', monospace;
+  font-size: 12px;
+  background: var(--bg-layer2);
   border: 1px solid var(--border-default);
-  border-radius: var(--radius-sm);
-  font-family: 'Cascadia Code', 'Consolas', monospace;
-  font-size: 13px;
+  border-radius: 4px;
+  padding: 2px 8px;
+  min-width: 60px;
+  text-align: center;
   font-weight: 600;
 }
 .shortcut-desc { font-size: 13px; color: var(--text-secondary); }
-.modal-close-row { display: flex; justify-content: flex-end; margin-top: 8px; }
-.modal-banner { background: linear-gradient(135deg, #0f6cbd 0%, #0e4a8a 100%); color: #fff; padding: 24px 28px 18px; text-align: center; }
-.modal-banner h2 { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
-.modal-body { padding: 20px 28px 24px; overflow-y: auto; }
-.modal-body .btn { width: 100%; justify-content: center; font-size: 14px; padding: 10px; }
 /* ── Welcome Modal ── */
-.welcome-overlay { position: fixed; inset: 0; z-index: 10001; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+.welcome-overlay { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
 .welcome-overlay.active { opacity: 1; pointer-events: auto; }
 .welcome-card { background: var(--bg-layer1); border-radius: var(--radius-md); box-shadow: var(--shadow-md); max-width: 540px; width: 90%; overflow: hidden; }
 .welcome-banner { background: linear-gradient(135deg, #0f6cbd 0%, #0e4a8a 100%); color: white; padding: 28px 32px 20px; text-align: center; }
-.welcome-banner h2 { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
+.welcome-banner h2 { font-size: 22px; margin-bottom: 6px; }
 .welcome-banner p { font-size: 14px; opacity: 0.85; }
 .welcome-body { padding: 24px 32px 28px; }
-.welcome-body ul { list-style: none; margin: 0 0 20px; padding: 0; }
-.welcome-body li { padding: 8px 0; display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: var(--text-primary); line-height: 1.5; }
-.welcome-body li > span:first-child { font-size: 18px; flex-shrink: 0; line-height: 1.4; }
-.welcome-body li strong { font-weight: 600; }
-.welcome-body .btn { width: 100%; justify-content: center; font-size: 14px; font-weight: 400; padding: 10px; display: flex; }
+.welcome-body ul { list-style: none; margin-bottom: 20px; }
+.welcome-body li { padding: 8px 0; display: flex; gap: 10px; align-items: flex-start; white-space: nowrap; }
+.welcome-body li span { font-size: 18px; flex-shrink: 0; }
+.welcome-body .btn { width: 100%; justify-content: center; font-size: 14px; padding: 10px; display: flex; }
+/* ── Guided Tips ── */
+.tips-overlay { position: fixed; inset: 0; z-index: 1050; display: none; }
+.tips-overlay.active { display: block; }
+.tips-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.45); backdrop-filter: blur(2px); }
+.tips-spotlight { position: fixed; z-index: 1051; border: 3px solid var(--brand-primary); border-radius: var(--radius-md); box-shadow: 0 0 0 9999px rgba(0,0,0,0.45), 0 0 24px rgba(15,108,189,0.4); pointer-events: none; transition: all 0.4s ease; }
+.tips-card { position: fixed; z-index: 1052; background: var(--bg-layer1); border-radius: var(--radius-md); box-shadow: var(--shadow-md); padding: 20px; width: 320px; opacity: 0; pointer-events: none; }
+.tips-card.positioned { opacity: 1; pointer-events: auto; animation: tipsSlideIn 0.35s ease; }
+@keyframes tipsSlideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.tips-step { font-size: 11px; color: var(--brand-primary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.tips-card h4 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+.tips-card p { font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.5; }
+.tips-footer { display: flex; justify-content: space-between; align-items: center; }
+.tips-dots { display: flex; gap: 6px; }
+.tips-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border-default); transition: all 0.2s; }
+.tips-dot.active { background: var(--brand-primary); transform: scale(1.3); }
+.tips-dot.done { background: var(--status-success); }
 .btn-outline { background: var(--bg-layer1); border: 1px solid var(--border-default); color: var(--text-primary); }
 .btn-outline:hover { background: var(--bg-layer2); border-color: var(--brand-primary); }
-.btn-danger-hover:hover { background: var(--status-danger); border-color: var(--status-danger); color: #fff; }
 .btn-sm { font-size: 12px; padding: 4px 10px; }
 /* ── Deployment Checker ── */
 .checker-form { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 12px; }
@@ -956,15 +975,38 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
       <p>Explore Azure Virtual Machine SKU availability by region</p>
     </div>
     <div class="welcome-body">
-      <!-- Welcome should display 5 items -->
       <ul>
-        <li><span>🌏</span> <strong>Browse</strong> — Select any Azure region to view available VM and disk SKUs</li>
+        <li><span>🌏</span> <strong>Browse</strong> — Select any Azure region to view available VM SKUs</li>
+        <li><span>🔍</span> <strong>Filter</strong> — Search by size, family, vCPUs, processor type, or capability</li>
         <li><span>🎯</span> <strong>Find a Match</strong> — Specify requirements and find SKUs that fit</li>
+        <li><span>💿</span> <strong>Disk SKUs</strong> — Browse available disk types, IOPS, throughput, and burst capabilities</li>
         <li><span>📌</span> <strong>Pin &amp; Compare</strong> — Pin SKUs to a shortlist with pricing data</li>
+        <li><span>🔄</span> <strong>Retirement Alerts</strong> — See which SKUs are scheduled for retirement</li>
         <li><span>📊</span> <strong>What's New</strong> — Track SKU additions and removals over time</li>
-        <li><span>🔄</span> <strong>Updates</strong> — Data refreshed automatically on the 1st of every month</li>
+        <li><span>🔤</span> <strong>Naming Guide</strong> — Interactive decoder for Azure VM naming conventions</li>
+        <li><span>💡</span> <strong>Nearby Regions</strong> — Get suggestions for alternative regions</li>
+        <li><span>📥</span> <strong>Export</strong> — Download filtered results as CSV</li>
+        <li><span>⌨️</span> <strong>Shortcuts</strong> — Press <strong>?</strong> anytime for keyboard shortcuts</li>
       </ul>
       <button class="btn btn-primary" onclick="closeWelcome()">Get Started</button>
+    </div>
+  </div>
+</div>
+
+<!-- Guided Tips Overlay -->
+<div class="tips-overlay" id="tipsOverlay">
+  <div class="tips-backdrop" id="tipsBackdrop"></div>
+  <div class="tips-spotlight" id="tipsSpotlight"></div>
+  <div class="tips-card" id="tipsCard">
+    <div class="tips-step" id="tipsStepLabel"></div>
+    <h4 id="tipsTitle"></h4>
+    <p id="tipsText"></p>
+    <div class="tips-footer">
+      <div class="tips-dots" id="tipsDots"></div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-outline btn-sm" onclick="dismissTips()">Skip</button>
+        <button class="btn btn-primary btn-sm" id="tipsNextBtn" onclick="advanceTip()">Next</button>
+      </div>
     </div>
   </div>
 </div>
@@ -973,111 +1015,107 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
   <svg viewBox="0 0 100 100" style="width:32px;height:32px;flex-shrink:0;"><defs><linearGradient id="hg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#5bb8f5"/><stop offset="100%" stop-color="#ffffff"/></linearGradient></defs><rect x="8" y="8" width="84" height="60" rx="8" fill="url(#hg)"/><rect x="14" y="14" width="72" height="48" rx="4" fill="#0a3d6b"/><rect x="20" y="22" width="26" height="4" rx="2" fill="#00b7c3"/><rect x="20" y="30" width="18" height="4" rx="2" fill="#00b7c3" opacity="0.7"/><rect x="20" y="38" width="32" height="4" rx="2" fill="#00b7c3" opacity="0.5"/><rect x="20" y="46" width="14" height="4" rx="2" fill="#00b7c3" opacity="0.3"/><circle cx="70" cy="30" r="8" fill="none" stroke="#00b7c3" stroke-width="2"/><path d="M70 24v6h5" fill="none" stroke="#00b7c3" stroke-width="2" stroke-linecap="round"/><rect x="60" y="44" width="18" height="8" rx="2" fill="#00b7c3" opacity="0.4"/><rect x="62" y="46" width="4" height="4" rx="1" fill="#00b7c3"/><rect x="68" y="46" width="4" height="4" rx="1" fill="#00b7c3" opacity="0.7"/><rect x="40" y="68" width="20" height="6" rx="2" fill="rgba(255,255,255,0.4)"/><rect x="30" y="74" width="40" height="8" rx="4" fill="rgba(255,255,255,0.3)"/><rect x="32" y="76" width="8" height="4" rx="1" fill="rgba(255,255,255,0.5)"/><rect x="42" y="76" width="8" height="4" rx="1" fill="rgba(255,255,255,0.5)"/><rect x="52" y="76" width="8" height="4" rx="1" fill="rgba(255,255,255,0.5)"/></svg>
   <h1>Azure Virtual Machine SKU by Region</h1>
   <span style="flex:1;"></span>
-  <button class="nav-btn nav-btn-icon nav-btn-bare" onclick="openTopTrumps()" title="Play Top Trumps – Azure VM Edition" aria-label="Play Top Trumps – Azure VM Edition">
-    <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" width="22" height="22" aria-hidden="true">
-      <g transform="translate(28 34) rotate(-14)">
-        <rect x="-18" y="-24" width="36" height="48" rx="4" fill="#0f6cbd" stroke="#094780" stroke-width="1.5"/>
-        <rect x="-14" y="-20" width="28" height="40" rx="2" fill="none" stroke="#2596e7" stroke-width="0.9" opacity="0.7"/>
-      </g>
-      <g transform="translate(36 32) rotate(9)">
-        <rect x="-18" y="-24" width="36" height="48" rx="4" fill="#f7f5ec" stroke="#0a1424" stroke-width="1.5"/>
-        <text x="0" y="11" font-family="Arial Black,Impact,sans-serif" font-size="30" font-weight="900" fill="#0f6cbd" text-anchor="middle">A</text>
-        <text x="-12" y="-14" font-size="9" fill="#d8a14a" text-anchor="middle">★</text>
-      </g>
-    </svg>
-  </button>
-  <button class="nav-btn nav-btn-icon nav-btn-bare nav-btn-bare-emoji" id="themeToggle" onclick="toggleTheme()" title="Toggle light/dark theme">🌙</button>
+  <button class="kbd-shortcut-btn" id="topTrumpsLauncher" type="button" onclick="openTopTrumpsChooser()" title="Choose a Top Trumps edition" aria-label="Choose a Top Trumps edition" aria-haspopup="dialog" aria-controls="toptrumps-edition-overlay" aria-expanded="false">🃏</button>
+  <button class="kbd-shortcut-btn" onclick="openShortcutsModal()" title="Keyboard shortcuts (?)">⌨</button>
+  <button class="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark theme">🌙</button>
 </header>
 
+<div class="freshness-overlay" id="toptrumps-edition-overlay" onclick="if (event.target === this) closeTopTrumpsChooser()" aria-hidden="true">
+  <div class="freshness-card game-edition-card" role="dialog" aria-modal="true" aria-labelledby="toptrumps-edition-title" aria-describedby="toptrumps-edition-description">
+    <h4 id="toptrumps-edition-title">Choose Top Trumps</h4>
+    <p id="toptrumps-edition-description">Pick the Azure VM card-game experience you want to play.</p>
+    <div class="game-edition-options">
+      <button class="game-edition-option classic" type="button" onclick="launchTopTrumps('classic')">
+        <span class="game-edition-option-title">Classic game <span class="game-edition-badge">Recommended</span></span>
+        <span class="game-edition-option-description">The original Top Trumps experience with the widest browser support.</span>
+      </button>
+      <button class="game-edition-option" type="button" onclick="launchTopTrumps('beta')">
+        <span class="game-edition-option-title">WebGL beta</span>
+        <span class="game-edition-option-description">The experimental 3D card-table experience. Requires WebGL support.</span>
+      </button>
+    </div>
+    <p class="game-edition-note">Both editions use the same Azure VM SKU card deck. Press Escape to close.</p>
+  </div>
+</div>
 
+<!-- Sticky Region Selector Bar -->
+<div class="region-bar">
+  <label for="region-select">🌏 Azure Region:</label>
+  <select id="region-select" onchange="selectRegion(this.value)">
+    <option value="">Loading regions...</option>
+  </select>
+  <span class="current-region" id="current-region-label"></span>
+  <span class="freshness-badge" id="freshness-badge" style="display:none;" onclick="toggleFreshnessFlyout(event)">
+    <span id="freshness-label"></span>
+  </span>
+</div>
 
 <!-- Freshness Detail Overlay -->
 <div class="freshness-overlay" id="freshness-overlay" onclick="closeFreshnessFlyout()">
   <div class="freshness-card" onclick="event.stopPropagation()">
-    <div class="modal-banner">
-      <h2>📋 Data Refresh Summary</h2>
-    </div>
-    <div class="modal-body">
-      <div id="freshness-detail"></div>
-      <div class="modal-close-row"><button class="btn btn-outline" onclick="closeFreshnessFlyout()">Close</button></div>
-    </div>
+    <h4>📋 Data Refresh Summary <button class="btn btn-outline btn-sm" style="margin-left:auto;" onclick="closeFreshnessFlyout()">✕</button></h4>
+    <div id="freshness-detail"></div>
   </div>
 </div>
 
-<div class="page-flex">
 <div class="container">
 
   <!-- Tab Strip -->
   <div class="tab-strip" id="tabStrip" role="tablist">
     <button class="tab active" data-tab="overview" onclick="activateTab('overview')">📊 Overview</button>
     <button class="tab" data-tab="browse" onclick="activateTab('browse')">🔍 Browse SKUs<span class="tab-badge" id="tab-badge-browse"></span></button>
-    <button class="tab" data-tab="disks" onclick="activateTab('disks')">💿 Disk SKUs<span class="tab-badge" id="tab-badge-disks"></span></button>
     <button class="tab" data-tab="match" onclick="activateTab('match')">🎯 Find a Match</button>
     <button class="tab" data-tab="pinned" onclick="activateTab('pinned')">📌 Pinned<span class="tab-badge" id="tab-badge-pinned"></span></button>
+    <button class="tab" data-tab="disks" onclick="activateTab('disks')">💿 Disk SKUs<span class="tab-badge" id="tab-badge-disks"></span></button>
     <button class="tab" data-tab="reference" onclick="activateTab('reference')">📖 Reference</button>
   </div>
 
-  <!-- TAB: Overview (always visible — contains region selector) -->
-  <div class="tab-pane active" data-tab="overview">
-
-    <!-- Region Selector -->
-    <div class="region-selector-bar">
-      <label for="region-select">🌏 Azure Region:</label>
-      <select id="region-select" onchange="selectRegion(this.value)">
-        <option value="">Loading regions...</option>
-      </select>
-      <span class="current-region" id="current-region-label"></span>
-      <span class="freshness-badge" id="freshness-badge" style="display:none;" onclick="toggleFreshnessFlyout(event)">
-        <span id="freshness-label"></span>
-      </span>
+  <!-- No-Data Message -->
+  <div class="no-data-box hidden" id="no-data-msg">
+    <div class="icon">📭</div>
+    <h3 id="no-data-title">No SKU data available</h3>
+    <p id="no-data-desc" style="margin-top:8px;color:var(--text-secondary);font-size:14px;"></p>
+    <div class="cli-box" style="margin-top:12px;display:inline-block;text-align:left;">
+      <code id="no-data-cli"></code>
     </div>
+  </div>
 
-    <!-- No-Data Message -->
-    <div class="no-data-box hidden" id="no-data-msg">
-      <div class="icon">📭</div>
-      <h3 id="no-data-title">No SKU data available</h3>
-      <p id="no-data-desc" style="margin-top:8px;color:var(--text-secondary);font-size:14px;"></p>
-      <div class="cli-box" style="margin-top:12px;display:inline-block;text-align:left;">
-        <code id="no-data-cli"></code>
-      </div>
-    </div>
-
-    <!-- Overview Data (shown when region has data) -->
-    <div id="overview-data" class="hidden">
-      <!-- Summary Dashboard -->
-      <div class="summary-heading">
-        <span class="summary-heading-icon">📊</span>
-        <span class="summary-heading-title">VM SKU Summary</span>
-      </div>
-      <div id="sku-summary" class="summary-grid"></div>
-
-      <!-- What's New -->
-      <div class="section" id="sec-whatsnew">
-        <div class="section-header">
-          <span class="section-title">📊 What's New</span>
-          <span class="section-badge" id="whatsnew-count">0 changes</span>
-        </div>
-        <div class="section-body" id="body-whatsnew">
-          <div id="whatsnew-content">
-            <span style="font-size:12px;color:var(--text-tertiary);">Loading history...</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Workload Recommendations (in Overview tab) -->
-      <div class="section" id="sec-workloads">
-        <div class="section-header">
-          <span class="section-title">💼 Workload Recommendations</span>
-        </div>
-        <div class="section-body" id="body-workloads">
-          <div class="workload-grid" id="workload-grid"></div>
-        </div>
-      </div>
-    </div>
-  </div><!-- /tab-pane overview -->
-
-  <!-- SKU Results (other tabs — shown when region has data) -->
+  <!-- SKU Results -->
   <div id="sku-results" class="hidden">
+
+    <!-- TAB: Overview -->
+    <div class="tab-pane active" data-tab="overview">
+    <!-- Summary Dashboard -->
+    <div class="summary-heading">
+      <span class="summary-heading-icon">📊</span>
+      <span class="summary-heading-title">VM SKU Summary</span>
+    </div>
+    <div id="sku-summary" class="summary-grid"></div>
+
+
+    <!-- What's New -->
+    <div class="section" id="sec-whatsnew">
+      <div class="section-header">
+        <span class="section-title">📊 What's New</span>
+        <span class="section-badge" id="whatsnew-count">0 changes</span>
+      </div>
+      <div class="section-body" id="body-whatsnew">
+        <div id="whatsnew-content">
+          <span style="font-size:12px;color:var(--text-tertiary);">Loading history...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Workload Recommendations (in Overview tab) -->
+    <div class="section" id="sec-workloads">
+      <div class="section-header">
+        <span class="section-title">💼 Workload Recommendations</span>
+      </div>
+      <div class="section-body" id="body-workloads">
+        <div class="workload-grid" id="workload-grid"></div>
+      </div>
+    </div>
+    </div><!-- /tab-pane overview -->
 
     <!-- TAB: Browse SKUs -->
     <div class="tab-pane" data-tab="browse">
@@ -1088,7 +1126,6 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
         <span class="section-badge" id="available-count"></span>
       </div>
       <div class="section-body" id="body-filters">
-        <div id="browse-summary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-bottom:16px;"></div>
         <div class="filters-row">
           <div class="filters-search">
             <input type="search" id="search-input" placeholder="Search by size, version, family type, vCPUs..." oninput="applyFilters()">
@@ -1194,27 +1231,13 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
       </div>
       <div class="section-body" id="body-shortlist">
         <div class="shortlist-chips" id="shortlist-chips"><span style="font-size:12px;color:var(--text-tertiary);">Pin VM SKUs from the table using the ○ button to build your shortlist</span></div>
-        <div class="shortlist-actions" id="shortlist-actions" style="display:none;margin-top:8px;justify-content:space-between;align-items:center;">
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span class="currency-select-wrapper">
-              <label for="currency-select">💲</label>
-              <select id="currency-select" onchange="onCurrencyChange()"></select>
-            </span>
-            <button class="btn btn-outline btn-sm btn-danger-hover" onclick="clearShortlist()">📌 Clear All Pins</button>
-          </div>
+        <div class="shortlist-actions" id="shortlist-actions" style="display:none;margin-top:8px;">
           <button class="btn btn-primary btn-sm" onclick="exportShortlistCsv()">📥 Export Shortlist</button>
+          <button class="btn btn-outline btn-sm" onclick="fetchPinnedPricing()">💰 Load Pricing</button>
+          <button class="btn btn-outline btn-sm" onclick="clearShortlist()">📌 Clear All Pins</button>
         </div>
         <div class="pricing-container" id="pricing-container" style="display:none;">
-          <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;flex-wrap:wrap;">
-            <p style="margin:0;font-size:13px;font-weight:600;">💰 Pricing Comparison <span id="pricing-currency-label" style="font-size:11px;font-weight:400;color:var(--text-tertiary);">(USD/hr, Pay-As-You-Go)</span></p>
-            <div class="term-pills" id="term-pills">
-              <button class="term-pill active" data-term="payg" onclick="selectPricingTerm('payg')">PAYG</button>
-              <button class="term-pill" data-term="ri1" onclick="selectPricingTerm('ri1')">1yr RI</button>
-              <button class="term-pill" data-term="ri3" onclick="selectPricingTerm('ri3')">3yr RI</button>
-              <button class="term-pill" data-term="sp1" onclick="selectPricingTerm('sp1')">1yr SP</button>
-              <button class="term-pill" data-term="sp3" onclick="selectPricingTerm('sp3')">3yr SP</button>
-            </div>
-          </div>
+          <p style="margin-bottom:4px;font-size:13px;font-weight:600;">💰 Pricing Comparison <span style="font-size:11px;font-weight:400;color:var(--text-tertiary);">(USD/hr, Pay-As-You-Go)</span></p>
           <div id="pricing-content"></div>
         </div>
         <div id="multiregion-container" style="display:none;margin-top:14px;padding-top:12px;border-top:1px solid var(--border-default);">
@@ -1377,47 +1400,33 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
     <div class="snippet-body" id="snippet-body"></div>
   </div>
 </div>
-</div><!-- /page-flex -->
 
 <footer style="text-align:center;padding:24px 16px 28px;font-size:12px;color:var(--text-tertiary);border-top:1px solid var(--border-default);margin-top:24px;background:linear-gradient(180deg, transparent 0%, var(--bg-layer2) 100%);">
   <span style="font-weight:600;color:var(--text-secondary);">DJ Tools</span> powered by <strong style="color:var(--brand-primary);">GitHub Copilot CLI</strong> &nbsp;·&nbsp;
   <a href="https://github.com/features/copilot/cli/" target="_blank" rel="noopener noreferrer" style="color:var(--brand-primary);text-decoration:none;font-weight:600;">Learn more ↗</a>
   &nbsp;·&nbsp;
-  <a href="https://github.com/DarrenJohns/djtools-azure-vm-sku-locator" target="_blank" rel="noopener noreferrer" style="color:var(--brand-primary);text-decoration:none;font-weight:600;">GitHub ↗</a>
-  <div style="margin-top:8px;font-size:11px;color:var(--text-tertiary);opacity:0.7;">v1.2.0</div>
+  <a href="https://github.com/darjohn_microsoft/vm-sku-per-region" target="_blank" rel="noopener noreferrer" style="color:var(--brand-primary);text-decoration:none;font-weight:600;">GitHub ↗</a>
+  <div style="margin-top:8px;font-size:11px;color:var(--text-tertiary);opacity:0.7;">v1.1.0-beta</div>
 </footer>
 
 <div class="toast-container" id="toast-container"></div>
 
-<div class="modal-overlay" id="confirmModal" onclick="if(event.target===this)closeConfirmModal(false)">
-  <div class="modal" style="max-width:420px;width:90%;" role="dialog" aria-modal="true">
-    <div style="background:linear-gradient(135deg,#c42b1c 0%,#961b1b 100%);color:#fff;padding:20px 24px 16px;text-align:center;border-radius:var(--radius-md) var(--radius-md) 0 0;">
-      <div style="font-size:28px;margin-bottom:6px;">⚠️</div>
-      <h3 id="confirmModal-title" style="font-size:18px;font-weight:600;margin:0;">Confirm</h3>
+<div class="modal-overlay" id="shortcutsModal">
+  <div class="modal" style="width:440px;">
+    <div class="modal-header-bar">
+      <h3>⌨ Keyboard Shortcuts</h3>
+      <button class="modal-close" onclick="closeShortcutsModal()">&times;</button>
     </div>
-    <div style="padding:24px;">
-      <p id="confirmModal-message" style="font-size:14px;color:var(--text-secondary);margin:0 0 24px;line-height:1.5;"></p>
-      <div style="display:flex;gap:10px;justify-content:flex-end;">
-        <button class="btn btn-outline" onclick="closeConfirmModal(false)" style="padding:8px 20px;">Cancel</button>
-        <button class="btn" id="confirmModal-ok" style="background:var(--status-danger);color:#fff;border:none;padding:8px 20px;font-weight:600;" onclick="closeConfirmModal(true)">Confirm</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="shortcutsModal" onclick="if(event.target===this)closeShortcutsModal()">
-  <div class="modal" style="max-width:480px;width:90%;" role="dialog" aria-modal="true">
-    <div class="modal-banner">
-      <h2>⌨️ Keyboard Shortcuts</h2>
-    </div>
-    <div class="modal-body">
+    <div class="modal-body-content">
       <div class="shortcuts-grid">
-        <div class="shortcut-item"><span class="shortcut-key">?</span><span class="shortcut-desc">Show shortcuts</span></div>
-        <div class="shortcut-item"><span class="shortcut-key">T</span><span class="shortcut-desc">Toggle dark mode</span></div>
-        <div class="shortcut-item"><span class="shortcut-key">Esc</span><span class="shortcut-desc">Close modal</span></div>
-        <div class="shortcut-item"><span class="shortcut-key">1–6</span><span class="shortcut-desc">Switch tabs</span></div>
+        <div class="shortcut-item"><span class="shortcut-key">1–6</span><span class="shortcut-desc">Switch between tabs</span></div>
+        <div class="shortcut-item"><span class="shortcut-key">T</span><span class="shortcut-desc">Toggle light/dark theme</span></div>
+        <div class="shortcut-item"><span class="shortcut-key">F</span><span class="shortcut-desc">Focus search filter</span></div>
+        <div class="shortcut-item"><span class="shortcut-key">C</span><span class="shortcut-desc">Clear all filters</span></div>
+        <div class="shortcut-item"><span class="shortcut-key">X</span><span class="shortcut-desc">Export CSV</span></div>
+        <div class="shortcut-item"><span class="shortcut-key">?</span><span class="shortcut-desc">Show this shortcuts panel</span></div>
+        <div class="shortcut-item"><span class="shortcut-key">Esc</span><span class="shortcut-desc">Close any open modal</span></div>
       </div>
-      <div class="modal-close-row"><button class="btn btn-outline" onclick="closeShortcutsModal()">Close</button></div>
     </div>
   </div>
 </div>
@@ -1731,19 +1740,47 @@ function toggleTheme() {
   const current = html.getAttribute('data-theme');
   const next = current === 'dark' ? 'light' : 'dark';
   html.setAttribute('data-theme', next);
-  document.getElementById('themeToggle').textContent = next === 'dark' ? '☀️' : '🌙';
+  document.querySelector('.theme-toggle').textContent = next === 'dark' ? '☀️' : '🌙';
   localStorage.setItem('vmsku-theme', next);
 }
 
-function openTopTrumps() {
+let topTrumpsLaunchTrigger = null;
+
+function openTopTrumpsChooser() {
+  topTrumpsLaunchTrigger = document.activeElement;
+  const overlay = document.getElementById('toptrumps-edition-overlay');
+  overlay.classList.add('show');
+  overlay.setAttribute('aria-hidden', 'false');
+  document.getElementById('topTrumpsLauncher').setAttribute('aria-expanded', 'true');
+  overlay.querySelector('.game-edition-option.classic').focus();
+}
+
+function closeTopTrumpsChooser() {
+  const overlay = document.getElementById('toptrumps-edition-overlay');
+  overlay.classList.remove('show');
+  overlay.setAttribute('aria-hidden', 'true');
+  document.getElementById('topTrumpsLauncher').setAttribute('aria-expanded', 'false');
+  if (topTrumpsLaunchTrigger instanceof HTMLElement) topTrumpsLaunchTrigger.focus();
+}
+
+function launchTopTrumps(edition) {
+  const editions = {
+    classic: { url: 'toptrumps.html', target: 'azureTopTrumpsClassic' },
+    beta: { url: 'toptrumps-beta.html', target: 'azureTopTrumpsBeta' }
+  };
+  const selectedEdition = editions[edition];
+  if (!selectedEdition) return;
   const w = 1200, h = 900;
-  const left = Math.max(0, (window.screen.availWidth  - w) / 2);
-  const top  = Math.max(0, (window.screen.availHeight - h) / 2);
-  const features = `popup=yes,width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes,noopener`;
-  const win = window.open('toptrumps.html', 'azureTopTrumps', features);
-  // Some browsers (or popup blockers) ignore the popup feature flags and
-  // return null. Fall back to a regular new tab so the link still works.
-  if (!win) { window.open('toptrumps.html', '_blank', 'noopener'); }
+  const left = Math.max(0, (window.screen.availWidth - w) / 2);
+  const top = Math.max(0, (window.screen.availHeight - h) / 2);
+  const features = `popup=yes,width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`;
+  const win = window.open(selectedEdition.url, selectedEdition.target, features);
+  if (win) {
+    win.opener = null;
+  } else {
+    window.open(selectedEdition.url, '_blank', 'noopener');
+  }
+  closeTopTrumpsChooser();
 }
 
 (function initTheme() {
@@ -1753,7 +1790,7 @@ function openTopTrumps() {
   else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) { theme = 'dark'; }
   if (theme === 'dark') {
     document.documentElement.setAttribute('data-theme', 'dark');
-    document.addEventListener('DOMContentLoaded', () => { document.getElementById('themeToggle').textContent = '☀️'; });
+    document.addEventListener('DOMContentLoaded', () => { document.querySelector('.theme-toggle').textContent = '☀️'; });
   }
 })();
 
@@ -1762,11 +1799,137 @@ function closeShortcutsModal() { document.getElementById('shortcutsModal').class
 
 function closeWelcome() {
   document.getElementById('welcomeModal').classList.remove('active');
+  setTimeout(startGuidedTips, 400);
 }
 
 // === GUIDED TIPS ===
+const GUIDED_TIPS = [
+  {
+    target: '#region-select',
+    title: '🌏 Select an Azure Region',
+    text: 'Choose any Azure region from the dropdown to see which VM SKUs are available there. Data is pre-fetched so results appear instantly.'
+  },
+  {
+    target: '#sec-filters',
+    tab: 'browse',
+    title: '🔍 See What\'s Available',
+    text: 'Browse and filter all VM SKUs in the region. Search by size, version, or family type — then expand letter groups to explore the full data table.'
+  },
+  {
+    target: '#sec-checker',
+    tab: 'match',
+    title: '🎯 Find a Match',
+    text: 'Enter your workload requirements like vCPUs, memory, and capabilities — the app will find and rank the best matching VM SKUs for you.'
+  }
+];
+let _tipIdx = 0;
+let _tipsActive = false;
+
+function startGuidedTips() {
+  _tipIdx = 0;
+  _tipsActive = true;
+  _renderTip();
+}
+
+function _renderTip() {
+  if (_tipIdx >= GUIDED_TIPS.length) { dismissTips(); return; }
+  const tip = GUIDED_TIPS[_tipIdx];
+  const overlay = document.getElementById('tipsOverlay');
+  const spotlight = document.getElementById('tipsSpotlight');
+  const card = document.getElementById('tipsCard');
+  const backdrop = document.getElementById('tipsBackdrop');
+
+  document.getElementById('tipsStepLabel').textContent = 'TIP ' + (_tipIdx + 1) + ' OF ' + GUIDED_TIPS.length;
+  document.getElementById('tipsTitle').textContent = tip.title;
+  document.getElementById('tipsText').textContent = tip.text;
+
+  document.getElementById('tipsDots').innerHTML = GUIDED_TIPS.map((_, i) => {
+    const cls = i < _tipIdx ? 'tips-dot done' : i === _tipIdx ? 'tips-dot active' : 'tips-dot';
+    return '<div class="' + cls + '"></div>';
+  }).join('');
+
+  document.getElementById('tipsNextBtn').textContent = _tipIdx === GUIDED_TIPS.length - 1 ? 'Got it!' : 'Next →';
+
+  var el = document.querySelector(tip.target);
+  if (tip.tab) activateTab(tip.tab);
+  card.classList.remove('positioned');
+  spotlight.style.display = 'none';
+  overlay.classList.add('active');
+
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(function() {
+      var rect = el.getBoundingClientRect();
+      spotlight.style.top = (rect.top - 6) + 'px';
+      spotlight.style.left = (rect.left - 6) + 'px';
+      spotlight.style.width = (rect.width + 12) + 'px';
+      spotlight.style.height = (rect.height + 12) + 'px';
+      spotlight.style.display = 'block';
+
+      var cardW = 320;
+      var cardH = card.offsetHeight || 200;
+      var top = rect.bottom + 16;
+      var left = rect.left + (rect.width / 2) - (cardW / 2);
+      if (top + cardH > window.innerHeight - 20) top = rect.top - cardH - 16;
+      if (left < 12) left = 12;
+      if (left + cardW > window.innerWidth - 12) left = window.innerWidth - cardW - 12;
+
+      card.style.top = top + 'px';
+      card.style.left = left + 'px';
+      card.style.transform = 'none';
+      card.classList.add('positioned');
+    }, 350);
+  } else {
+    spotlight.style.display = 'none';
+    card.style.top = '50%';
+    card.style.left = '50%';
+    card.style.transform = 'translate(-50%, -50%)';
+    card.classList.add('positioned');
+  }
+  backdrop.onclick = dismissTips;
+}
+
+function advanceTip() {
+  _tipIdx++;
+  if (_tipIdx >= GUIDED_TIPS.length) {
+    dismissTips();
+  } else {
+    var card = document.getElementById('tipsCard');
+    card.classList.remove('positioned');
+    card.style.transform = 'none';
+    _renderTip();
+  }
+}
+
+function dismissTips() {
+  _tipsActive = false;
+  document.getElementById('tipsOverlay').classList.remove('active');
+  document.getElementById('tipsSpotlight').style.display = 'none';
+  document.getElementById('tipsCard').classList.remove('positioned');
+}
 
 document.addEventListener('keydown', function(e) {
+  const topTrumpsOverlay = document.getElementById('toptrumps-edition-overlay');
+  if (topTrumpsOverlay.classList.contains('show')) {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      closeTopTrumpsChooser();
+      return;
+    }
+    if (e.key === 'Tab') {
+      const focusable = [...topTrumpsOverlay.querySelectorAll('button:not([disabled])')];
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+      return;
+    }
+  }
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
   if (e.key === '?') { e.preventDefault(); openShortcutsModal(); }
   if (e.key === 't' || e.key === 'T') { e.preventDefault(); toggleTheme(); }
@@ -1776,14 +1939,14 @@ document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') { closeShortcutsModal(); closeSnippetModal(); }
   if (e.key === '1') { e.preventDefault(); activateTab('overview'); }
   if (e.key === '2') { e.preventDefault(); activateTab('browse'); }
-  if (e.key === '3') { e.preventDefault(); activateTab('disks'); }
-  if (e.key === '4') { e.preventDefault(); activateTab('match'); }
-  if (e.key === '5') { e.preventDefault(); activateTab('pinned'); }
+  if (e.key === '3') { e.preventDefault(); activateTab('match'); }
+  if (e.key === '4') { e.preventDefault(); activateTab('pinned'); }
+  if (e.key === '5') { e.preventDefault(); activateTab('disks'); }
   if (e.key === '6') { e.preventDefault(); activateTab('reference'); }
 });
 
 // === TAB NAVIGATION ===
-const TAB_KEYS = ['overview','browse','disks','match','pinned','reference'];
+const TAB_KEYS = ['overview','browse','match','pinned','disks','reference'];
 
 function activateTab(key) {
   if (!TAB_KEYS.includes(key)) return;
@@ -1802,7 +1965,6 @@ function activateTab(key) {
 function activateTabFromHash() {
   const h = (location.hash || '').replace('#','').toLowerCase();
   if (TAB_KEYS.includes(h)) activateTab(h);
-  else activateTab('overview');
 }
 
 window.addEventListener('hashchange', activateTabFromHash);
@@ -1848,15 +2010,10 @@ async function init() {
       retirementFamilies = {};
     }
     availableDataRegions = new Set(metadata.availableRegions || []);
-    try {
-      const currResp = await fetch('data/currencies.json');
-      if (currResp.ok) { currencyMeta = await currResp.json(); populateCurrencySelector(); }
-    } catch(e) {}
     renderFreshness();
     buildDropdown();
     selectRegion('newzealandnorth');
-    history.replaceState(null, '', location.pathname);
-    activateTab('overview');
+    activateTabFromHash();
   } catch (e) {
     showToast('Failed to load data: ' + e.message, 'error');
   }
@@ -1992,11 +2149,9 @@ function selectRegion(regionName) {
 
   if (availableDataRegions.has(regionName)) {
     document.getElementById('no-data-msg').classList.add('hidden');
-    document.getElementById('overview-data').classList.remove('hidden');
     document.getElementById('sku-results').classList.remove('hidden');
     loadRegionData(regionName);
   } else {
-    document.getElementById('overview-data').classList.add('hidden');
     document.getElementById('sku-results').classList.add('hidden');
     document.getElementById('no-data-msg').classList.remove('hidden');
     document.getElementById('no-data-title').textContent = `No SKU data available for ${displayName}`;
@@ -2072,44 +2227,11 @@ function rebuildSkuList(regionName) {
   if (prevType && typeSet.has(prevType)) familyTypeFilter.value = prevType;
 
   applyFilters();
-  renderBrowseSummary();
   renderSummary();
   renderWorkloads();
   populateMultiRegionCheckboxes();
   loadHistory(regionName);
   loadDiskData(regionName);
-}
-
-// === BROWSE SUMMARY BADGES ===
-function renderBrowseSummary() {
-  const el = document.getElementById('browse-summary');
-  if (!el || !allSkus.length) { if (el) el.innerHTML = ''; return; }
-
-  const sizes = new Set(allSkus.map(s => s.size)).size;
-  const versions = new Set(allSkus.map(s => {
-    const m = (s.size || '').match(/_v(\d+)$/i);
-    return m ? 'v' + m[1] : 'v1';
-  })).size;
-  const families = new Set(allSkus.map(s => s.family)).size;
-  const intelCount = allSkus.filter(s => getProcessorType(s.size) === 'Intel').length;
-  const amdCount = allSkus.filter(s => getProcessorType(s.size) === 'AMD').length;
-  const armCount = allSkus.filter(s => getProcessorType(s.size) === 'ARM').length;
-
-  const cards = [
-    { label: 'Total Sizes', value: sizes, color: '#0078d4' },
-    { label: 'Versions', value: versions, color: '#8764b8' },
-    { label: 'Families', value: families, color: '#107c10' },
-    { label: 'Intel', value: intelCount, color: '#0071c5' },
-    { label: 'AMD', value: amdCount, color: '#ed1c24' },
-  ];
-  if (armCount > 0) cards.push({ label: 'ARM', value: armCount, color: '#00a86b' });
-
-  el.innerHTML = cards.map(c =>
-    `<div class="summary-card" style="--accent-strip: linear-gradient(90deg, ${c.color}, color-mix(in srgb, ${c.color} 45%, white));">
-      <div class="summary-value" style="font-size:22px;color:${c.color};">${c.value}</div>
-      <div class="summary-label" style="font-size:11px;">${c.label}</div>
-    </div>`
-  ).join('');
 }
 
 // === SUMMARY DASHBOARD ===
@@ -2245,7 +2367,7 @@ function renderDiskSection() {
   let summaryHtml = '';
   Object.entries(tierCounts).forEach(([label, count]) => {
     const color = tierColors[label] || '#0078d4';
-    summaryHtml += `<div class="summary-card" style="--accent-strip: linear-gradient(90deg, ${color}, color-mix(in srgb, ${color} 45%, white));">
+    summaryHtml += `<div class="summary-card" style="border-top:3px solid ${color};cursor:pointer;" onclick="document.getElementById('disk-tier-filter').value='${escapeHtml(label)}';applyDiskFilters();">
       <div class="summary-value" style="font-size:22px;color:${color};">${count}</div>
       <div class="summary-label" style="font-size:11px;">${escapeHtml(label)}</div>
     </div>`;
@@ -2475,7 +2597,8 @@ function renderTable() {
       </td>
     </tr>`;
     rows.forEach(s => {
-      html += `<tr class="group-row-${letter}">` + visCols.map(c => {
+      const rowCls = shaded ? 'row-shaded' : '';
+      html += `<tr class="${rowCls} group-row-${letter}">` + visCols.map(c => {
         const val = s[c.key];
         const rendered = c.render ? c.render(val, s) : escapeHtml(val);
         const cls = c.vertical ? ' class="icon-cell"' : '';
@@ -2562,18 +2685,6 @@ function togglePin(size) {
   }
   renderShortlist();
   renderTable();
-  // Update pin buttons in checker table without full re-render
-  document.querySelectorAll('.checker-table .pin-btn').forEach(btn => {
-    const onclick = btn.getAttribute('onclick') || '';
-    const match = onclick.match(/togglePin\('([^']+)'\)/);
-    if (match) {
-      const s = match[1];
-      const isPinned = pinnedSkus.has(s);
-      btn.classList.toggle('pinned', isPinned);
-      btn.textContent = isPinned ? '📌' : '○';
-      btn.title = isPinned ? 'Unpin' : 'Pin to shortlist';
-    }
-  });
 }
 
 function renderShortlist() {
@@ -2606,74 +2717,24 @@ function renderShortlist() {
     const badge = sku ? getLifecycleBadge(sku) : '';
     return `<span class="shortlist-chip">${escapeHtml(size)}<span style="color:var(--text-secondary);font-weight:400;">${info}</span>${badge}<span class="remove-pin" onclick="togglePin('${escapeHtml(size)}')" title="Remove">×</span></span>`;
   }).join('');
-
-  // Auto-load pricing when pins exist
-  fetchPinnedPricing();
 }
 
 function clearShortlist() {
-  showConfirmModal(
-    'Clear All Pins',
-    `Remove all ${pinnedSkus.size} pinned SKUs from your shortlist? This cannot be undone.`,
-    'Clear All',
-    () => {
-      pinnedSkus.clear();
-      renderShortlist();
-      renderTable();
-      showToast('Shortlist cleared');
-    }
-  );
-}
-
-let _confirmResolve = null;
-function showConfirmModal(title, message, okLabel, onConfirm) {
-  const overlay = document.getElementById('confirmModal');
-  document.getElementById('confirmModal-title').textContent = title;
-  document.getElementById('confirmModal-message').textContent = message;
-  document.getElementById('confirmModal-ok').textContent = okLabel || 'Confirm';
-  _confirmResolve = onConfirm;
-  overlay.classList.add('active');
-}
-function closeConfirmModal(confirmed) {
-  document.getElementById('confirmModal').classList.remove('active');
-  if (confirmed && _confirmResolve) _confirmResolve();
-  _confirmResolve = null;
+  pinnedSkus.clear();
+  renderShortlist();
+  renderTable();
+  showToast('Shortlist cleared');
 }
 
 function exportShortlistCsv() {
   const pinned = allSkus.filter(s => pinnedSkus.has(s.size));
   if (!pinned.length) { showToast('No pinned SKUs to export', 'error'); return; }
-  const specHeaders = columns.filter(c => c.key !== '_pin').map(c => c.label);
-  const hasPricing = _pricingCache && _pricingCache._region === selectedRegion;
-  const ci = getCurrencyInfo();
-  const currCode = selectedCurrency || 'USD';
-  const term = selectedTerm || 'payg';
-  const termLabel = TERM_LABELS[term] || 'PAYG';
-  const pricingHeaders = hasPricing ? [`Linux/hr ${termLabel} (${currCode})`, `Windows/hr ${termLabel} (${currCode})`, `~Monthly ${termLabel} (${currCode})`] : [];
-  const headers = [...specHeaders, ...pricingHeaders, 'Retirement Status', 'Retirement Date'];
-  const rows = pinned.map(s => {
-    const specCols = columns.filter(c => c.key !== '_pin').map(c => {
-      const v = s[c.key];
-      if (Array.isArray(v)) return v.join(';');
-      return v != null ? String(v) : '';
-    });
-    if (hasPricing) {
-      const prices = _pricingCache[s.size] || {};
-      const fmt = (p) => p != null ? `${ci.symbol}${p.toFixed(ci.decimalPlaces)}` : '';
-      // Compute term-adjusted prices for export
-      let linuxPrice = prices.linux;
-      let winPrice = prices.windows;
-      if (term === 'ri1') { linuxPrice = prices.ri1yr; winPrice = null; }
-      else if (term === 'ri3') { linuxPrice = prices.ri3yr; winPrice = null; }
-      else if (term === 'sp1') { linuxPrice = prices.linux != null ? prices.linux * SP_DISCOUNTS.sp1 : null; winPrice = prices.windows != null ? prices.windows * SP_DISCOUNTS.sp1 : null; }
-      else if (term === 'sp3') { linuxPrice = prices.linux != null ? prices.linux * SP_DISCOUNTS.sp3 : null; winPrice = prices.windows != null ? prices.windows * SP_DISCOUNTS.sp3 : null; }
-      const monthly = linuxPrice != null ? `${ci.symbol}${(linuxPrice * 730).toFixed(0)}` : '';
-      specCols.push(fmt(linuxPrice), fmt(winPrice), monthly);
-    }
-    const ret = s.family && retirementFamilies[s.family.toLowerCase()] ? retirementFamilies[s.family.toLowerCase()] : null;
-    specCols.push(ret ? 'Retiring' : '', ret ? ret.date : '');
-    return specCols;
-  });
+  const headers = columns.filter(c => c.key !== '_pin').map(c => c.label);
+  const rows = pinned.map(s => columns.filter(c => c.key !== '_pin').map(c => {
+    const v = s[c.key];
+    if (Array.isArray(v)) return v.join(';');
+    return v != null ? String(v) : '';
+  }));
   const csv = [headers.join(','), ...rows.map(r => r.map(v => `"${v}"`).join(','))].join('\n');
   const blob = new Blob([csv], { type: 'text/csv' });
   const a = document.createElement('a');
@@ -2681,56 +2742,15 @@ function exportShortlistCsv() {
   a.download = `shortlist-${selectedRegion || 'export'}.csv`;
   a.click();
   URL.revokeObjectURL(a.href);
-  showToast(`Exported ${pinned.length} pinned SKUs to CSV${hasPricing ? ` with ${currCode} ${termLabel} pricing` : ''}`);
+  showToast(`Exported ${pinned.length} pinned SKUs to CSV`);
 }
 
 // === PRICING COMPARISON ===
-let currencyMeta = []; // loaded from data/currencies.json
-let selectedCurrency = localStorage.getItem('vmsku_currency') || 'USD';
-let selectedTerm = 'payg'; // payg | ri1 | ri3 | sp1 | sp3
-
-const SP_DISCOUNTS = Object.freeze({ sp1: 0.78, sp3: 0.58 });
-const TERM_LABELS = Object.freeze({ payg: 'Pay-As-You-Go', ri1: '1-Year Reserved', ri3: '3-Year Reserved', sp1: '1-Year Savings Plan', sp3: '3-Year Savings Plan' });
-
-let _pricingCache = null; // { skuName: { linux, windows, spot, ri1yr, ri3yr } }
-
-function selectPricingTerm(term) {
-  selectedTerm = term;
-  document.querySelectorAll('.term-pill').forEach(btn => btn.classList.toggle('active', btn.dataset.term === term));
-  // Update header label
-  const currLabel = document.getElementById('pricing-currency-label');
-  if (currLabel) currLabel.textContent = `(${selectedCurrency || 'USD'}/hr, ${TERM_LABELS[term] || 'Pay-As-You-Go'})`;
-  // Re-render pricing table if data loaded
-  const content = document.getElementById('pricing-content');
-  if (_pricingCache && pinnedSkus.size && content) {
-    renderPricingTable([...pinnedSkus].sort(), content);
-  }
-}
-
-function populateCurrencySelector() {
-  const sel = document.getElementById('currency-select');
-  if (!sel || !currencyMeta.length) return;
-  sel.innerHTML = currencyMeta.map(c => 
-    `<option value="${c.code}" ${c.code === selectedCurrency ? 'selected' : ''}>${c.code} ${c.symbol}</option>`
-  ).join('');
-}
-
-function onCurrencyChange() {
-  const sel = document.getElementById('currency-select');
-  selectedCurrency = sel.value;
-  localStorage.setItem('vmsku_currency', selectedCurrency);
-  if (_pricingCache && _pricingCache._region) {
-    _pricingCache = null;
-    fetchPinnedPricing();
-  }
-}
-
-function getCurrencyInfo() {
-  return currencyMeta.find(c => c.code === selectedCurrency) || { code: 'USD', symbol: '$', decimalPlaces: 4 };
-}
+let _pricingCache = null; // { skuName: { linux, windows, spot } }
 
 async function fetchPinnedPricing() {
-  if (!pinnedSkus.size || !selectedRegion) return;
+  if (!pinnedSkus.size) { showToast('Pin some SKUs first', 'warning'); return; }
+  if (!selectedRegion) { showToast('Select a region first', 'warning'); return; }
 
   const container = document.getElementById('pricing-container');
   const content = document.getElementById('pricing-content');
@@ -2740,12 +2760,9 @@ async function fetchPinnedPricing() {
   content.innerHTML = '<div class="pricing-loading">⏳ Loading pricing data...</div>';
 
   // Load pricing file if not cached for this region
-  if (!_pricingCache || _pricingCache._region !== selectedRegion || _pricingCache._currency !== selectedCurrency) {
+  if (!_pricingCache || _pricingCache._region !== selectedRegion) {
     try {
-      let resp = await fetch(`data/${selectedRegion}-pricing-${selectedCurrency}.json`);
-      if (!resp.ok) {
-        resp = await fetch(`data/${selectedRegion}-pricing.json`);
-      }
+      const resp = await fetch(`data/${selectedRegion}-pricing.json`);
       if (!resp.ok) {
         content.innerHTML = '<div style="font-size:12px;color:var(--text-tertiary);padding:8px 0;">💰 Pricing data not yet available for this region. It will be generated on the next scheduled data refresh.</div>';
         return;
@@ -2753,7 +2770,6 @@ async function fetchPinnedPricing() {
       const data = await resp.json();
       _pricingCache = data.prices || {};
       _pricingCache._region = selectedRegion;
-      _pricingCache._currency = selectedCurrency;
       _pricingCache._lastUpdated = data.lastUpdated;
     } catch (e) {
       content.innerHTML = '<div style="font-size:12px;color:var(--status-danger);padding:8px 0;">⚠️ Failed to load pricing data.</div>';
@@ -2766,29 +2782,10 @@ async function fetchPinnedPricing() {
 }
 
 function renderPricingTable(skuNames, content) {
-  const ci = getCurrencyInfo();
-  const currCode = selectedCurrency || 'USD';
-  const term = selectedTerm || 'payg';
-
-  // Compute effective hourly price based on selected term
-  function getTermPrice(prices, os) {
-    const payg = prices[os];
-    if (payg == null) return null;
-    if (term === 'payg') return payg;
-    if (term === 'ri1') return prices.ri1yr != null ? prices.ri1yr : null;
-    if (term === 'ri3') return prices.ri3yr != null ? prices.ri3yr : null;
-    if (term === 'sp1') return payg * SP_DISCOUNTS.sp1;
-    if (term === 'sp3') return payg * SP_DISCOUNTS.sp3;
-    return payg;
-  }
-
   const rows = skuNames.map(name => {
     const prices = _pricingCache[name] || {};
     const sku = allSkus.find(s => s.size === name);
-    const linux = getTermPrice(prices, 'linux');
-    const windows = (term === 'payg') ? prices.windows : (term.startsWith('sp') && prices.windows != null ? prices.windows * SP_DISCOUNTS[term] : null);
-    const spot = (term === 'payg') ? prices.spot : null; // Spot only shown for PAYG
-    return { name, linux, windows, spot, sku, rawPrices: prices };
+    return { name, linux: prices.linux, windows: prices.windows, spot: prices.spot, sku };
   });
 
   // Find cheapest in each column for highlighting
@@ -2799,20 +2796,19 @@ function renderPricingTable(skuNames, content) {
   const minWindows = windowsPrices.length ? Math.min(...windowsPrices) : null;
   const minSpot = spotPrices.length ? Math.min(...spotPrices) : null;
 
-  const fmt = (price) => price != null ? `${ci.symbol}${price.toFixed(ci.decimalPlaces)}` : '—';
-  const monthly = (price) => price != null ? `${ci.symbol}${(price * 730).toFixed(0)}/mo` : '';
+  const fmt = (price) => price != null ? `$${price.toFixed(4)}` : '—';
+  const monthly = (price) => price != null ? `$${(price * 730).toFixed(0)}/mo` : '';
 
-  const showSpot = (term === 'payg');
   let html = `<table class="pricing-table">
     <thead><tr>
       <th>SKU</th><th>vCPUs</th><th>Memory</th>
-      <th>🐧 Linux/hr (${currCode})</th><th>🪟 Windows/hr (${currCode})</th>${showSpot ? `<th>⚡ Spot/hr (${currCode})</th>` : ''}<th>🐧 ~Monthly (${currCode})</th>
+      <th>🐧 Linux/hr</th><th>🪟 Windows/hr</th><th>⚡ Spot/hr</th><th>🐧 ~Monthly</th>
     </tr></thead><tbody>`;
 
   for (const r of rows) {
-    const lp = r.linux;
-    const wp = r.windows;
-    const sp = r.spot;
+    const lp = r.linux != null ? r.linux : null;
+    const wp = r.windows != null ? r.windows : null;
+    const sp = r.spot != null ? r.spot : null;
     const lClass = (lp !== null && lp === minLinux && rows.length > 1) ? ' cheapest' : '';
     const wClass = (wp !== null && wp === minWindows && rows.length > 1) ? ' cheapest' : '';
     const sClass = (sp !== null && sp === minSpot && rows.length > 1) ? ' cheapest' : '';
@@ -2822,25 +2818,15 @@ function renderPricingTable(skuNames, content) {
       <td>${r.sku ? r.sku.vCPUs : '—'}</td>
       <td>${r.sku ? r.sku.memoryGB + ' GB' : '—'}</td>
       <td class="price-cell${lClass}">${fmt(lp)}</td>
-      <td class="price-cell${wClass}">${fmt(wp)}</td>${showSpot ? `
-      <td class="price-cell${sClass}">${fmt(sp)}</td>` : ''}
+      <td class="price-cell${wClass}">${fmt(wp)}</td>
+      <td class="price-cell${sClass}">${fmt(sp)}</td>
       <td class="price-cell" style="color:var(--text-tertiary);">${monthly(lp)}</td>
     </tr>`;
   }
 
   html += '</tbody></table>';
   const updated = _pricingCache._lastUpdated ? ` · Updated ${new Date(_pricingCache._lastUpdated).toLocaleDateString()}` : '';
-  const termNote = TERM_LABELS[term] || 'Pay-As-You-Go';
-  const sourceNote = (term === 'ri1' || term === 'ri3')
-    ? 'RI pricing from Azure Retail Prices API (actual per-SKU rates)'
-    : (term === 'sp1' || term === 'sp3')
-    ? 'SP pricing estimated using industry-average discount multipliers against PAYG'
-    : `${currCode} pay-as-you-go rates`;
-  html += `<p class="pricing-note">💡 ${sourceNote} · <a href="https://prices.azure.com" target="_blank" style="color:var(--brand-primary);">Azure Retail Prices API</a> · Est. ~730 hrs/mo${updated}<br>— indicates the SKU has no published price in this region (may be in preview or not yet commercially available)</p>`;
-
-  // Update header label
-  const currLabel = document.getElementById('pricing-currency-label');
-  if (currLabel) currLabel.textContent = `(${currCode}/hr, ${termNote})`;
+  html += `<p class="pricing-note">💡 Data from <a href="https://prices.azure.com" target="_blank" style="color:var(--brand-primary);">Azure Retail Prices API</a> · USD pay-as-you-go · ~730 hrs/mo${updated}<br>— indicates the SKU is not yet priced in this region (may be in preview or not commercially available)</p>`;
 
   content.innerHTML = html;
 }

@@ -3,12 +3,11 @@ name: Deploy to Azure Static Web Apps
 on:
   push:
     branches: [main]
-    paths: ['index.html', 'toptrumps.html', 'toptrumps-webgl.html', 'azure-logo.png', 'data/**', 'config.json', 'vendor/**']
-  workflow_dispatch:
+    paths: ['index.html', 'toptrumps.html', 'toptrumps-beta.html', 'data/**', 'config.json', 'vendor/**']
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     environment: production
     steps:
       - uses: actions/checkout@v4
@@ -21,15 +20,8 @@ jobs:
           New-Item -ItemType Directory -Path $staging -Force | Out-Null
 
           Copy-Item "index.html" "$staging/"
-          if (Test-Path "toptrumps.html") {
-            Copy-Item "toptrumps.html" "$staging/"
-          }
-          if (Test-Path "toptrumps-webgl.html") {
-            Copy-Item "toptrumps-webgl.html" "$staging/"
-          }
-          if (Test-Path "azure-logo.png") {
-            Copy-Item "azure-logo.png" "$staging/"
-          }
+          Copy-Item "toptrumps.html" "$staging/"
+          Copy-Item "toptrumps-beta.html" "$staging/"
           Copy-Item "config.json" "$staging/"
           if (Test-Path "data") {
             Copy-Item -Recurse "data" "$staging/data"
