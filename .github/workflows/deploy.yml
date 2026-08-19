@@ -12,6 +12,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set up Node.js for SWA CLI
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
       - name: Prepare deployment staging folder
         run: |
           # Only deploy web-servable files (exclude scripts/, docs, etc.)
