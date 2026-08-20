@@ -24,6 +24,7 @@ jobs:
           Copy-Item "toptrumps.html" "$staging/"
           Copy-Item "toptrumps-beta.html" "$staging/"
           Copy-Item "config.json" "$staging/"
+          Copy-Item "azure-logo.png" "$staging/"
           if (Test-Path "data") {
             Copy-Item -Recurse "data" "$staging/data"
           }
