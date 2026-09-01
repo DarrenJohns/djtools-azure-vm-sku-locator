@@ -1,7 +1,7 @@
 {
   "region": "qatarcentral",
   "regionDisplayName": "Qatar Central",
-  "lastUpdated": "2026-08-01T02:45:13Z",
+  "lastUpdated": "2026-09-01T03:34:33Z",
   "skuCount": 391,
   "skus": [
     {
@@ -7851,7 +7851,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1"
       ],
@@ -7872,7 +7872,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1"
       ],
@@ -7893,7 +7893,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1"
       ],
@@ -7914,7 +7914,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1"
       ],
@@ -7935,7 +7935,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1"
       ],

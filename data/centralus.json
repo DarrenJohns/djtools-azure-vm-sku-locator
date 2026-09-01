@@ -1,8 +1,8 @@
 {
   "region": "centralus",
   "regionDisplayName": "Central US",
-  "lastUpdated": "2026-08-01T01:57:24Z",
-  "skuCount": 1294,
+  "lastUpdated": "2026-09-01T02:41:26Z",
+  "skuCount": 1304,
   "skus": [
     {
       "name": "Standard_NC4as_T4_v3",
@@ -1477,6 +1477,52 @@
       "restrictions": []
     },
     {
+      "name": "Standard_D248ds_v7",
+      "family": "StandardDdsv7Family",
+      "tier": "Standard",
+      "size": "D248ds_v7",
+      "vCPUs": 248,
+      "memoryGB": 992.0,
+      "maxDataDisks": 64,
+      "maxNICs": 15,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "1",
+        "2",
+        "3"
+      ],
+      "restrictions": []
+    },
+    {
+      "name": "Standard_D372ds_v7",
+      "family": "StandardDdsv7Family",
+      "tier": "Standard",
+      "size": "D372ds_v7",
+      "vCPUs": 372,
+      "memoryGB": 1488.0,
+      "maxDataDisks": 64,
+      "maxNICs": 15,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "1",
+        "2",
+        "3"
+      ],
+      "restrictions": []
+    },
+    {
       "name": "Standard_D2lds_v6",
       "family": "StandardDldsv6Family",
       "tier": "Standard",
@@ -1914,6 +1960,29 @@
       "restrictions": []
     },
     {
+      "name": "Standard_D248lds_v7",
+      "family": "StandardDldsv7Family",
+      "tier": "Standard",
+      "size": "D248lds_v7",
+      "vCPUs": 248,
+      "memoryGB": 496.0,
+      "maxDataDisks": 64,
+      "maxNICs": 15,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "1",
+        "2",
+        "3"
+      ],
+      "restrictions": []
+    },
+    {
       "name": "Standard_D2ls_v6",
       "family": "StandardDlsv6Family",
       "tier": "Standard",
@@ -2334,6 +2403,29 @@
       "size": "D192ls_v7",
       "vCPUs": 192,
       "memoryGB": 384.0,
+      "maxDataDisks": 64,
+      "maxNICs": 15,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": false,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "1",
+        "2",
+        "3"
+      ],
+      "restrictions": []
+    },
+    {
+      "name": "Standard_D248ls_v7",
+      "family": "StandardDlsv7Family",
+      "tier": "Standard",
+      "size": "D248ls_v7",
+      "vCPUs": 248,
+      "memoryGB": 496.0,
       "maxDataDisks": 64,
       "maxNICs": 15,
       "cpuArchitecture": "x64",
@@ -4483,6 +4575,52 @@
       "restrictions": []
     },
     {
+      "name": "Standard_D248s_v7",
+      "family": "StandardDsv7Family",
+      "tier": "Standard",
+      "size": "D248s_v7",
+      "vCPUs": 248,
+      "memoryGB": 992.0,
+      "maxDataDisks": 64,
+      "maxNICs": 15,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": false,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "1",
+        "2",
+        "3"
+      ],
+      "restrictions": []
+    },
+    {
+      "name": "Standard_D372s_v7",
+      "family": "StandardDsv7Family",
+      "tier": "Standard",
+      "size": "D372s_v7",
+      "vCPUs": 372,
+      "memoryGB": 1488.0,
+      "maxDataDisks": 64,
+      "maxNICs": 15,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": false,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "1",
+        "2",
+        "3"
+      ],
+      "restrictions": []
+    },
+    {
       "name": "Standard_E2ads_v7",
       "family": "StandardEadsv7Family",
       "tier": "Standard",
@@ -6346,6 +6484,52 @@
       "restrictions": []
     },
     {
+      "name": "Standard_E248ds_v7",
+      "family": "StandardEdsv7Family",
+      "tier": "Standard",
+      "size": "E248ds_v7",
+      "vCPUs": 248,
+      "memoryGB": 1888.0,
+      "maxDataDisks": 64,
+      "maxNICs": 15,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "1",
+        "2",
+        "3"
+      ],
+      "restrictions": []
+    },
+    {
+      "name": "Standard_E372ids_v7",
+      "family": "StandardEdsv7Family",
+      "tier": "Standard",
+      "size": "E372ids_v7",
+      "vCPUs": 372,
+      "memoryGB": 2832.0,
+      "maxDataDisks": 64,
+      "maxNICs": 15,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "1",
+        "2",
+        "3"
+      ],
+      "restrictions": []
+    },
+    {
       "name": "Standard_E2nds_v6",
       "family": "StandardEndv6Family",
       "tier": "Standard",
@@ -7970,6 +8154,52 @@
       "size": "E192s_v7",
       "vCPUs": 192,
       "memoryGB": 1536.0,
+      "maxDataDisks": 64,
+      "maxNICs": 15,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": false,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "1",
+        "2",
+        "3"
+      ],
+      "restrictions": []
+    },
+    {
+      "name": "Standard_E248s_v7",
+      "family": "StandardEsv7Family",
+      "tier": "Standard",
+      "size": "E248s_v7",
+      "vCPUs": 248,
+      "memoryGB": 1888.0,
+      "maxDataDisks": 64,
+      "maxNICs": 15,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": false,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "1",
+        "2",
+        "3"
+      ],
+      "restrictions": []
+    },
+    {
+      "name": "Standard_E372is_v7",
+      "family": "StandardEsv7Family",
+      "tier": "Standard",
+      "size": "E372is_v7",
+      "vCPUs": 372,
+      "memoryGB": 2832.0,
       "maxDataDisks": 64,
       "maxNICs": 15,
       "cpuArchitecture": "x64",
