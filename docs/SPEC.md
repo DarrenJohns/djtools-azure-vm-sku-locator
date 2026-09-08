@@ -218,39 +218,21 @@ Availability indicates that the disk family was returned by the Azure Resource S
 
 - **Hosting**: Azure Static Web Apps (SWA)
 - **Custom domain**: `vmsku.djtools.co.nz`
-- **CI/CD**: GitHub Actions workflow on push to `main` (triggers on `index.html`, `data/**`, `config.json`)
-- **Deploy tool**: `@azure/static-web-apps-cli` with `SWA_DEPLOYMENT_TOKEN`
-- **Runner**: Self-hosted runner
+- **CI/CD**: GitHub Actions workflow on push to `main` for site or deployment-workflow changes
+- **Deploy tool**: official Azure Static Web Apps deploy action with `SWA_DEPLOYMENT_TOKEN`; the monthly refresh uses the SWA CLI
+- **Runner**: GitHub-hosted for standard deploys; self-hosted for monthly data refreshes
 - **Environment**: `production` (enables GitHub deployment tracking)
-- **Staged deploy**: Only `index.html`, `config.json`, and `data/` are deployed (not scripts, docs, etc.)
+- **Staged deploy**: `index.html`, both supported Top Trumps pages, `config.json`, `azure-logo.png`, `assets/`, `data/`, and `vendor/` are deployed (not scripts or docs)
 
 ## 9. Experimental WebGL Top Trumps Build
 
 A second, optional build of the Top Trumps companion ships alongside the stable file:
 
-- **File**: `toptrumps-webgl.html` (forked from `toptrumps.html`, same game logic and data)
-- **Dependency**: Three.js r170 ES module, vendored locally at `vendor/three.module.min.js` (MIT, ~675 KB). Loaded via a native browser **import map** — no CDN, no build step, no npm.
-- **Three additions over the stable build:**
-  1. **3D globe background** — replaces the existing Canvas2D `GlobeBg` IIFE with a Three.js `SphereGeometry` + custom `ShaderMaterial` (procedural dot grid, fresnel rim, additive halo, pulsing region nodes, animated great-circle arc bursts).
-  2. **Holographic foil overlay** on rare/epic/legendary cards — per-card mini `WebGLRenderer` + `ShaderMaterial` driven by pointer position (hue band, rainbow shimmer, specular hot-spot, edge fade).
-  3. **GPU confetti** on win — Three.js `Points` system (~1400 particles, vertex-shader physics: gravity + per-particle flutter) replacing the CSS `@keyframes confettiFall` pieces.
-- **Fallbacks**:
-  - If `new THREE.WebGLRenderer()` throws on load, the BETA chip switches to "BETA · 2D fallback" and the original `runCanvas2DGlobe()` is invoked. Cards render without the foil overlay; confetti uses the original CSS implementation.
-  - `prefers-reduced-motion` halts the globe RAF after one frame, skips foil RAF loops, and bypasses the confetti burst entirely (matching the stable build behaviour).
-- **Discovery**: a small "✨ WebGL beta" chip in the stable build's topbar links to `toptrumps-webgl.html`; the WebGL build's topbar has a reciprocal "← Stable" link.
-- **Global contracts** preserved on the WebGL build:
-  - `window.globeBurst(n)` — arc cascade trigger (same signature as Canvas2D)
-  - `window.runCanvas2DGlobe()` — fallback init
-  - `window.__attachFoilOverlay(cardEl)` — called from `mountFlipCard`
-  - `window.__webglConfetti({count})` — called from `triggerVictoryFx`
-- **Deployment**: ships from the same site root via the same SWA deploy. The `vendor/` directory is included in the deploy staging.
-
-### 9.1 CSS3D card transport (Phase 2A–2D)
-
-The WebGL build adds a `CSS3DRenderer` layer (vendored at `vendor/CSS3DRenderer.js`) for true-3D card motion that the stable CSS-transform build can't deliver:
-
-- **Lift to 3D** (Phase 2A/2B). When a hand's top card mounts, the host `<div>` is moved into a `CSS3DObject` parented to a dedicated `CSS3D` scene. Viewport coordinates map to world coords as `worldX = viewportX - W/2`, `worldY = -(viewportY - H/2)`, with the camera distance set so 1 world unit = 1 screen pixel at z=0. `realignCard` keeps the 3D object's transform in sync with the DOM rect on resize / layout change.
-- **3D arc-deal** (Phase 2C). At round start, each card flies in along a Bezier arc with rotation. After resolve, the loser's top card slides to the winner's pile, then fades.
-- **Persistent deck depth** (Phase 2D). Each side renders up to `MAX_DECK_VISIBLE = 12` face-down cards behind the lifted top card via `renderDeckStack3D`, with small jitter (±2.5px x, ±2px y, ±1.5° rotZ, z = −0.8 − i·1.0). Stack entries are flagged `isDeckStack: true` so the existing `clearAllCards` / per-round eviction paths sweep them automatically.
-- **Flip polish**. `flipCard3D` runs the Y rotation as a cosine-eased tween with a peak forward lift (`liftZ = 40`) and a slight back-tilt (`tiltX = 0.12`). During the flip, the foil overlay is hidden (its `mix-blend-mode: screen` blow forces per-frame backdrop rasterization that visibly stutters the spin), and the deck stack fades out (cards rotating to 90° of Y go near-edge-on and would otherwise expose the pile behind, reading as clipping).
-- **MutationObserver discipline**. `mountFlipCard` watches the host's `class` attribute to translate game-side `.is-flipped` toggles into `flipCard3D` calls. **The flip implementation must not toggle any class on the host**, or it re-enters the observer and breaks game flow. The fix uses two non-class signals: a `data-flipping` attribute on the host (for foil suppression CSS) and an `activeFlips` Set gating an `is-flipping` class on `#css3d-root` (for deck-stack suppression CSS).
+- **File**: `toptrumps-beta.html` (the current experimental build; `toptrumps-webgl.html` and `toptrumps-pure.html` are older development artifacts)
+- **Dependencies**: Three.js r170 and `GLTFLoader`, vendored locally under `vendor/` and loaded through a native browser import map; textures and models are loaded from `assets/` and `vendor/models/`. There is no CDN, npm install, or build step.
+- **Rendering**: cards are baked to canvas textures and rendered as Three.js meshes, so card ownership, deals, flips, win movement, and deck depth all remain inside the WebGL scene.
+- **Scene**: a galaxy backdrop, starfield, animated textured moons, hyperspace streaks, shooting stars, and X-wing/TIE fighter GLTF flybys provide the environment.
+- **Card effects**: rarity foil, lighting, shadows, and back-face sheen are rendered in the scene.
+- **Fallback**: WebGL is required for this beta. If renderer creation fails or the context is lost, the page displays an explicit WebGL-unavailable message rather than silently switching implementations.
+- **Discovery**: the launcher in `index.html` and the "✨ WebGL beta" chip in `toptrumps.html` both open `toptrumps-beta.html`.
+- **Deployment**: both standard and monthly refresh deployments stage `toptrumps-beta.html`, `assets/`, and `vendor/` from the site root.

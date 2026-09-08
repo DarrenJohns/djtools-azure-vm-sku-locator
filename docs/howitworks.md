@@ -149,7 +149,7 @@ The app is hosted on Azure Static Web Apps (Free tier) with a custom domain and 
 Push to main → GitHub Actions → swa deploy (staging folder) → Live
 ```
 
-Only web-servable files are deployed (`index.html`, `toptrumps.html`, `toptrumps-webgl.html`, `config.json`, `data/`, `vendor/`). Scripts and docs are excluded.
+Only web-servable files are deployed (`index.html`, `toptrumps.html`, `toptrumps-beta.html`, `azure-logo.png`, `config.json`, `assets/`, `data/`, and `vendor/`). Scripts and docs are excluded. The standard deploy and monthly refresh workflows stage the same site content so a data refresh cannot remove companion pages or their dependencies.
 
 ### Data Refresh Pipeline
 ```
@@ -160,56 +160,34 @@ The refresh pipeline runs on a self-hosted runner with Azure CLI access.
 
 ## Experimental WebGL Top Trumps Build
 
-`toptrumps-webgl.html` is an experimental WebGL fork of the Top Trumps companion. It ships alongside `toptrumps.html` and is intentionally a separate file so the stable build stays at zero JS dependencies.
+`toptrumps-beta.html` is the current experimental WebGL version of the Top Trumps companion. It ships alongside `toptrumps.html` and remains separate so the stable build stays at zero JavaScript dependencies. The older `toptrumps-webgl.html` and `toptrumps-pure.html` files are retained as development artifacts but are not deployed.
 
 ### Dependency
-- **Three.js r170 ES module**, vendored locally at `vendor/three.module.min.js` (MIT, ~675 KB).
+- **Three.js r170 ES module** and **GLTFLoader**, vendored locally under `vendor/`.
+- Moon and galaxy textures are stored under `assets/`; spacecraft models are stored under `vendor/models/`.
 - Loaded via a native browser **import map** — no CDN, no build step, no npm.
   ```html
   <script type="importmap">
-    { "imports": { "three": "./vendor/three.module.min.js" } }
+    { "imports": {
+      "three": "./vendor/three.module.min.js",
+      "three/addons/loaders/GLTFLoader.js": "./vendor/GLTFLoader.js"
+    } }
   </script>
   <script type="module">
     import * as THREE from 'three';
-    // ...
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
   </script>
   ```
 
 ### What WebGL adds
-1. **3D globe background** — replaces the Canvas2D `GlobeBg` IIFE with a Three.js `SphereGeometry` + custom `ShaderMaterial`. Procedural dot grid via `fract(lonBand)/fract(latBand) + smoothstep`, fresnel rim via `pow(1 - dot(N, V), 2.2)`, additive halo on a `BackSide` shell. 32 Azure region nodes as pulsing `Points`. Great-circle arcs rendered as `LineBasicMaterial` with vertex-color trails fading per frame. Auto-rotates at `0.06 rad/s`.
-2. **Holographic foil overlay** on rare/epic/legendary cards — per-card mini `WebGLRenderer` + `ShaderMaterial` on a `PlaneGeometry(2,2)` quad. Pointer-driven hue band (`sin(t * 14)`), rainbow shimmer (RGB sinusoids out of phase), specular hot-spot (`exp(-dist² * 16) * uHover`), edge fade. Smoothed hover transition `cur + (target - cur) * min(1, dt * 8)`. Auto-tilts via `sin(now * 0.0007) * 0.3` when idle.
-3. **GPU confetti** on win — Three.js `Points` system (~1400 particles) with vertex-shader physics. Each particle has `position`, `aVelocity`, `aColor`, `aSize`, `aFlutter` (freq + phase), `aDelay`. Vertex shader integrates: `x = pos.x + vx*t + sin(t * freq + phase) * 0.04; y = pos.y + vy*t - 0.5 * gravity * t²`. Maps `0..1 → -1..1` clip space directly with an identity `THREE.Camera`. Discards via `gl_PointSize = 0` when life exceeds limit or below screen.
+1. **Mesh-rendered cards** — card faces are baked to high-resolution canvas textures and mapped onto rounded Three.js geometry. Deals, flips, win movement, and deck depth are all driven in the same scene.
+2. **Space environment** — a galaxy image, starfield, textured moons, hyperspace streaks, and shooting stars provide depth and motion.
+3. **Spacecraft flybys** — vendored X-wing and TIE fighter GLTF models cross the scene on randomized, card-safe paths.
+4. **Rarity and lighting effects** — foil, reflections, shadows, and animated card-back sheen are rendered directly on the card meshes.
 
 ### Fallbacks
-- If `new THREE.WebGLRenderer()` throws on load, `markFallback(reason)` is called: the BETA chip switches to "BETA · 2D fallback" and `runCanvas2DGlobe()` is invoked. Cards render without the foil overlay; confetti uses the CSS implementation.
-- `prefers-reduced-motion` stops the globe RAF after one frame, skips foil RAF loops, and bypasses the confetti burst entirely.
-
-### Global contracts preserved
-- `window.globeBurst(n)` — arc cascade trigger (matches the Canvas2D API).
-- `window.runCanvas2DGlobe()` — fallback init.
-- `window.__attachFoilOverlay(cardEl)` — attached to `mountFlipCard`'s post-build hook.
-- `window.__webglConfetti({count})` — called from `triggerVictoryFx`.
+- WebGL is required for the beta build. Renderer creation failures and context loss show an explicit fallback message instead of leaving a frozen canvas.
+- The stable `toptrumps.html` game remains available for browsers that cannot run the beta.
 
 ### Discovery
-A small "✨ WebGL beta" chip in `toptrumps.html`'s topbar links to `toptrumps-webgl.html`; the WebGL build has a reciprocal "← Stable" chip linking back.
-
-### CSS3D card transport (Phase 2A–2D)
-
-On top of the three WebGL additions above, the build runs a parallel `CSS3DRenderer` scene (vendored at `vendor/CSS3DRenderer.js`) that owns the top card on each side plus a stack of face-down cards behind it. This is what gives the WebGL build true depth-of-stage motion that the CSS-transform stable build can't reach.
-
-**Coordinate system.** A `PerspectiveCamera(fov=50)` sits at `z = (H/2)/tan(fov/2)` so 1 world unit equals 1 screen pixel at `z=0`. Viewport-space rects map as `worldX = viewportX - W/2`, `worldY = -(viewportY - H/2)`. The renderer's DOM element (`#css3d-root`) is `position: fixed; inset: 0; z-index: 5; pointer-events: none;` — children re-enable pointer events per card.
-
-**Lifecycle (mount→fly→flip→slide→evict).**
-1. **Lift** (`mountFlipCard`): the host `<div>` for the current top card is moved into a `CSS3DObject` and tracked in `cssCards`. `realignCard` keeps the 3D transform aligned with the DOM rect on resize and layout changes, and caches width/height writes so it only touches `style.width` / `style.height` when the rect actually changes.
-2. **Arc-deal** (Phase 2C): at round start each card flies in along a quadratic-Bezier arc with rotation. The handle is tracked in `flyingDeals` and cancellable from `clearAllCards`.
-3. **Flip** (`flipCard3D`): cosine-eased Y rotation with peak forward lift (`liftZ = 40`) and back-tilt (`tiltX = 0.12`). `updateFaceVisibility` swaps front/back DOM nodes around the 90° mark via `onMid`.
-4. **Round-end slide**: the loser's top card arcs to the winner's pile and fades; the winner's card returns to base.
-5. **Deck stack** (Phase 2D): `renderDeckStack3D` mounts up to `MAX_DECK_VISIBLE = 12` face-down cards behind each top card, with small jitter (±2.5px x, ±2px y, ±1.5° rotZ, z = −0.8 − i·1.0). Entries are flagged `isDeckStack: true` so `clearAllCards` / per-round eviction sweeps them automatically.
-
-**Flip-stutter and clipping fixes.**
-- The foil overlay uses `mix-blend-mode: screen`, which forces a per-frame backdrop rasterization. During the spin this caused visible jitter on rare+ cards. Fix: hide the foil for the duration of the flip via a `data-flipping` **attribute** on the host (see MO discipline below). CSS: `.flip-host[data-flipping] .foil-webgl { opacity: 0; transition: opacity 80ms; }`.
-- At the 90° mark of the Y rotation the lifted card is edge-on (~0px wide on screen), so the deck stack behind it is briefly fully visible — the player reads it as the top card "clipping through" the pile. Fix: an `activeFlips` Set in module scope toggles an `is-flipping` class on `#css3d-root` while any card is mid-flip; CSS fades `[data-deck-stack]` to `opacity: 0` for 180ms.
-
-**MutationObserver discipline (critical).** `mountFlipCard` watches the host's `class` attribute (`attributeFilter: ['class']`) to convert game-side `.is-flipped` toggles into `flipCard3D` calls. **Never toggle a class on the host inside `flipCard3D`** — the observer re-enters and breaks game flow at the `cpuPicksStat` setTimeout. The data-attribute / `#css3d-root`-class split above is deliberate: both signals are invisible to the MO.
-
-**Module exports** (live on `window.__webgl3D`): `mountFlipCard`, `unmountFlipCard`, `flip`, `dealFromTo`, `slideToPile`, `renderDeckStack`, plus `clearAllCards` for screen-change cleanup.
+The edition chooser in `index.html` and the "✨ WebGL beta" chip in `toptrumps.html` both open `toptrumps-beta.html`.

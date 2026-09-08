@@ -3,7 +3,7 @@ name: Deploy to Azure Static Web Apps
 on:
   push:
     branches: [main]
-    paths: ['index.html', 'toptrumps.html', 'toptrumps-beta.html', 'assets/**', 'data/**', 'config.json', 'vendor/**']
+    paths: ['index.html', 'toptrumps.html', 'toptrumps-beta.html', 'assets/**', 'data/**', 'config.json', 'vendor/**', '.github/workflows/deploy.yml', '.github/workflows/refresh-vm-skus.yml']
   workflow_dispatch:
 
 jobs:
