@@ -238,9 +238,12 @@ jobs:
           New-Item -ItemType Directory -Path $staging -Force | Out-Null
           Copy-Item "index.html" "$staging/"
           if (Test-Path "toptrumps.html") { Copy-Item "toptrumps.html" "$staging/" }
+          if (Test-Path "toptrumps-beta.html") { Copy-Item "toptrumps-beta.html" "$staging/" }
           if (Test-Path "azure-logo.png") { Copy-Item "azure-logo.png" "$staging/" }
+          if (Test-Path "assets") { Copy-Item -Recurse "assets" "$staging/assets" }
           Copy-Item "config.json" "$staging/"
           Copy-Item -Recurse "data" "$staging/data"
+          if (Test-Path "vendor") { Copy-Item -Recurse "vendor" "$staging/vendor" }
 
           npx --yes @azure/static-web-apps-cli deploy ./deploy-staging `
             --deployment-token ${{ secrets.SWA_DEPLOYMENT_TOKEN }} `
