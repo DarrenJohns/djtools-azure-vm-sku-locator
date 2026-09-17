@@ -90,7 +90,7 @@
 - **Keyboard shortcuts** — press **?** for the full list, **1–6** to switch tabs
 - **Region proximity** — suggests nearby regions when no results found
 - **Data Refresh Summary** — click ℹ️ to see all data sets and their sources
-- **Top Trumps companion** — a standalone card game at `/toptrumps.html`, built on the same SKU data. The **experimental WebGL beta** lives at `/toptrumps-beta.html`, with fully 3D cards, a space backdrop, animated moons, rarity foil, X-wing/TIE fighter flybys, and a centred split-wing CPU-vs-Player live card-count scoreboard — accessed via the "✨ WebGL beta" option.
+- **Top Trumps companion** — a standalone card game at `/toptrumps.html`, built on the same SKU data. The **experimental WebGL beta** lives at `/toptrumps-beta.html`, with fully 3D cards, a space backdrop, animated moons, rarity foil, X-wing/TIE fighter flybys, and a centred CPU-vs-Player live card-count scoreboard — accessed via the "✨ WebGL beta" option.
 
 ## How It Was Built (3 min)
 
