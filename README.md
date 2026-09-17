@@ -16,7 +16,7 @@
 
 👉 **Try the live app here → [vmsku.djtools.co.nz](https://vmsku.djtools.co.nz)**
 
-🎴 **Bonus:** a companion **Top Trumps – Azure VM Edition** card game ships from the same site at [`/toptrumps.html`](toptrumps.html) — a standalone single-page game built on the same SKU data via `scripts/build-cards.py`. An **experimental WebGL beta** is also available at [`/toptrumps-beta.html`](toptrumps-beta.html), with fully 3D cards, a space backdrop, animated moons, spacecraft flybys, and a centred CPU-vs-Player card-count scoreboard.
+🎴 **Bonus:** a companion **Top Trumps – Azure VM Edition** card game ships from the same site at [`/toptrumps.html`](toptrumps.html) — a standalone single-page game built on the same SKU data via `scripts/build-cards.py`. An **experimental WebGL beta** is also available at [`/toptrumps-beta.html`](toptrumps-beta.html), with fully 3D cards, a space backdrop, animated moons, spacecraft flybys, and an integrated CPU-vs-Player scoreboard with a scrolling gameplay notification tray.
 
 ---
 

@@ -31,45 +31,70 @@
     padding: 14px 18px; pointer-events: none; }
   #hud .brand { font-weight: 700; letter-spacing: .3px; }
   #hud .brand small { display: block; font-weight: 500; color: var(--muted); font-size: 12px; }
-  #scoreboard { position: absolute; left: 50%; top: 24px; transform: translateX(-50%);
-    width: clamp(280px, 31vw, 380px); min-height: 44px; display: grid;
-    grid-template-columns: minmax(96px,1fr) 58px minmax(96px,1fr); align-items: center;
-    padding: 0 5px; border: 1px solid rgba(120,190,245,.45); border-radius: 999px;
-    background: linear-gradient(180deg,rgba(10,25,48,.92),rgba(4,12,27,.88));
-    box-shadow: 0 10px 30px rgba(0,0,0,.5), inset 0 1px rgba(255,255,255,.09),
-      0 0 20px rgba(55,182,255,.13); backdrop-filter: blur(9px);
-    font-variant-numeric: tabular-nums; }
+  #scoreboard { position: absolute; left: 50%; top: 20px; transform: translateX(-50%);
+    width: clamp(360px, 38vw, 470px); font-variant-numeric: tabular-nums; }
   #scoreboard[hidden] { display: none; }
-  .score-team { display: grid; align-items: center; gap: 9px; padding: 4px 12px;
-    font-size: clamp(11px,.9vw,14px); font-weight: 700; letter-spacing: .1em;
-    text-transform: uppercase; }
-  .score-team b { color: #fff; font-size: 1.35em; line-height: 1; letter-spacing: 0; }
-  .score-cpu { grid-template-columns: auto 1fr; color: #b8c8dc; text-align: right; }
-  .score-player { grid-template-columns: 1fr auto; color: #91dcff; }
-  .score-vs { position: relative; z-index: 2; display: grid; place-items: center;
-    width: 64px; height: 64px; margin: -10px -3px; border-radius: 50%;
+  .score-row { position: relative; z-index: 2; height: 62px; }
+  .score-bar { position: absolute; left: 28px; right: 28px; top: 9px; height: 44px;
+    display: grid; grid-template-columns: 1fr 1fr; align-items: center;
+    border: 1px solid rgba(120,190,245,.45); border-radius: 999px;
+    background: linear-gradient(180deg,rgba(10,25,48,.94),rgba(4,12,27,.91));
+    box-shadow: 0 10px 30px rgba(0,0,0,.48), inset 0 1px rgba(255,255,255,.09);
+    backdrop-filter: blur(9px); overflow: hidden; }
+  .score-label { padding: 0 38px; color: #b8c8dc; font-size: clamp(11px,.9vw,14px);
+    font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+  .score-label-cpu { text-align: center; }
+  .score-label-player { color: #91dcff; text-align: center; }
+  .score-count { position: absolute; z-index: 3; top: 2px; width: 58px; height: 58px;
+    display: grid; place-items: center; border-radius: 50%; color: #fff;
+    border: 1px solid rgba(126,202,255,.68);
+    background: radial-gradient(circle at 45% 32%,rgba(35,79,119,.98),rgba(4,13,29,.98) 70%);
+    box-shadow: 0 9px 20px rgba(0,0,0,.52), inset 0 0 17px rgba(65,173,245,.2),
+      0 0 14px rgba(55,182,255,.18);
+    font-size: 20px; font-weight: 800; }
+  .score-count-cpu { left: 0; }
+  .score-count-player { right: 0; color: #bcecff; }
+  .score-vs { position: absolute; z-index: 4; left: 50%; top: -3px; transform: translateX(-50%);
+    display: grid; place-items: center; width: 68px; height: 68px; border-radius: 50%;
     color: #f4f9ff; border: 1px solid rgba(126,202,255,.75);
     background: radial-gradient(circle at 48% 35%,rgba(30,72,112,.98),rgba(4,13,29,.98) 68%);
     box-shadow: 0 10px 22px rgba(0,0,0,.55), inset 0 0 20px rgba(65,173,245,.26),
       0 0 20px rgba(55,182,255,.25);
-    font-size: 21px; font-weight: 900; letter-spacing: -.04em; }
-
-  #hint { position: fixed; left: 50%; top: 104px; transform: translateX(-50%);
-    z-index: 5; color: var(--muted); font-size: 14px; letter-spacing: .2px;
-    background: rgba(6,12,24,.55); border: 1px solid rgba(120,160,220,.18);
-    padding: 8px 16px; border-radius: 999px; backdrop-filter: blur(6px);
-    transition: opacity .4s ease; }
+    font-size: 22px; font-weight: 900; letter-spacing: -.04em; }
+  #hint { position: relative; z-index: 1; width: calc(100% - 56px); height: 38px;
+    margin: -13px auto 0; padding: 14px 18px 6px; color: var(--muted);
+    border: 1px solid rgba(120,190,245,.36); border-top-color: rgba(120,190,245,.2);
+    border-radius: 0 0 20px 20px;
+    background: linear-gradient(180deg,rgba(7,19,37,.9),rgba(4,12,26,.86));
+    box-shadow: 0 10px 24px rgba(0,0,0,.38), inset 0 -1px rgba(255,255,255,.04);
+    backdrop-filter: blur(8px); transition: opacity .4s ease; }
+  .hint-viewport { width: 100%; overflow: hidden; white-space: nowrap; text-align: center; }
+  .hint-viewport.scrolling { text-align: left; }
+  #hint-text { display: inline-block; max-width: none; font-size: 12px; line-height: 17px;
+    letter-spacing: .025em; white-space: nowrap; }
+  #hint-text.scrolling { animation: hintScroll var(--hint-duration,8s) ease-in-out 1s infinite; }
+  @keyframes hintScroll {
+    0%, 15% { transform: translateX(0); }
+    85%, 100% { transform: translateX(var(--hint-shift,0)); }
+  }
 
   @media (max-width: 700px) {
     #hud { padding: 11px 14px; }
     #hud .brand { font-size: 13px; }
     #hud .brand small { font-size: 10px; }
-    #scoreboard { top: 54px; width: min(300px,calc(100vw - 24px));
-      grid-template-columns: minmax(80px,1fr) 52px minmax(80px,1fr); min-height: 40px; }
-    .score-team { gap: 6px; padding: 4px 9px; font-size: 10px; }
-    .score-vs { width: 58px; height: 58px; margin: -9px -3px; font-size: 19px; }
-    #hint { top: 122px; max-width: calc(100vw - 28px); text-align: center; white-space: nowrap;
-      overflow: hidden; text-overflow: ellipsis; }
+    #scoreboard { top: 52px; width: min(350px,calc(100vw - 18px)); }
+    .score-row { height: 56px; }
+    .score-bar { left: 25px; right: 25px; top: 8px; height: 40px; }
+    .score-label { padding: 0 31px; font-size: 10px; }
+    .score-count { top: 2px; width: 52px; height: 52px; font-size: 18px; }
+    .score-vs { top: -2px; width: 60px; height: 60px; font-size: 20px; }
+    #hint { width: calc(100% - 50px); height: 34px; margin-top: -12px;
+      padding: 13px 15px 5px; border-radius: 0 0 18px 18px; }
+    #hint-text { font-size: 11px; line-height: 15px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #hint-text.scrolling { animation: none; }
   }
 
   /* ---- Round HUD control cluster — PERSISTENT during a match so the player
@@ -336,13 +361,20 @@
   <div id="hud">
     <div class="brand">Azure Top Trumps <small>WebGL beta</small></div>
     <div id="scoreboard" hidden role="group" aria-label="CPU 0 cards versus Player 0 cards">
-      <div class="score-team score-cpu"><b id="cpu-count">0</b><span>CPU</span></div>
-      <div class="score-vs" aria-hidden="true">VS</div>
-      <div class="score-team score-player"><span>Player</span><b id="you-count">0</b></div>
+      <div class="score-row">
+        <div class="score-bar" aria-hidden="true">
+          <span class="score-label score-label-cpu">CPU</span>
+          <span class="score-label score-label-player">Player</span>
+        </div>
+        <div class="score-count score-count-cpu"><b id="cpu-count">0</b></div>
+        <div class="score-vs" aria-hidden="true">VS</div>
+        <div class="score-count score-count-player"><b id="you-count">0</b></div>
+      </div>
+      <div id="hint" role="status" aria-live="polite">
+        <div class="hint-viewport"><span id="hint-text">Loading deck…</span></div>
+      </div>
     </div>
   </div>
-
-  <div id="hint">Loading deck…</div>
 
   <!-- ===== Welcome / title overlay (DOM, on top of the live WebGL scene) ===== -->
   <div id="welcome" class="w-hidden" aria-label="Azure Top Trumps — start screen">
@@ -3623,6 +3655,8 @@ function resolveStat(stat, pCard, cCard) {
   const elCpu  = document.getElementById('cpu-count');
   const elScoreboard = document.getElementById('scoreboard');
   const elHint = document.getElementById('hint');
+  const elHintViewport = elHint && elHint.querySelector('.hint-viewport');
+  const elHintText = document.getElementById('hint-text');
   function updateHUD() {
     const playerCards = G.player.hand.length;
     const cpuCards = G.cpu.hand.length;
@@ -3634,8 +3668,28 @@ function resolveStat(stat, pCard, cCard) {
   }
   function setMatchHUDVisible(visible) {
     if (elScoreboard) elScoreboard.hidden = !visible;
+    if (visible) requestAnimationFrame(updateHintOverflow);
   }
-  function setHint(msg) { if (elHint) elHint.textContent = msg; }
+  function updateHintOverflow() {
+    if (!elHintText || !elHintViewport) return;
+    elHintText.classList.remove('scrolling');
+    elHintViewport.classList.remove('scrolling');
+    elHintText.style.removeProperty('--hint-shift');
+    elHintText.style.removeProperty('--hint-duration');
+    const overflow = elHintText.scrollWidth - elHintViewport.clientWidth;
+    if (overflow <= 2 || REDUCED) return;
+    elHintText.style.setProperty('--hint-shift', `${-overflow}px`);
+    elHintText.style.setProperty('--hint-duration', `${Math.max(6, Math.min(14, 5 + overflow / 28)).toFixed(1)}s`);
+    void elHintText.offsetWidth;
+    elHintViewport.classList.add('scrolling');
+    elHintText.classList.add('scrolling');
+  }
+  function setHint(msg) {
+    if (!elHintText) return;
+    elHintText.textContent = msg;
+    requestAnimationFrame(updateHintOverflow);
+  }
+  window.addEventListener('resize', () => requestAnimationFrame(updateHintOverflow));
 
   /* ---- Round control cluster: persistent match HUD ---------------------
      The cluster lives for the whole match (bottom-centre) so the player can
