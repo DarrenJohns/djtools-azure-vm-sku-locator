@@ -8,7 +8,7 @@
 >
 > **Browse Azure VM and managed disk SKU availability across every region — filter by processor, family, and features, compare across regions, pin, and see pricing and retirements.**
 
-![Version](https://img.shields.io/badge/version-1.2.1-orange)
+![Version](https://img.shields.io/badge/version-1.2.2-orange)
 ![Azure](https://img.shields.io/badge/Azure-VM_SKUs-0078D4)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Built with](https://img.shields.io/badge/built_with-Copilot_CLI-8957e5)
@@ -16,7 +16,7 @@
 
 👉 **Try the live app here → [vmsku.djtools.co.nz](https://vmsku.djtools.co.nz)**
 
-🎴 **Bonus:** a companion **Top Trumps – Azure VM Edition** card game ships from the same site at [`/toptrumps.html`](toptrumps.html) — a standalone single-page game built on the same SKU data via `scripts/build-cards.py`. An **experimental WebGL beta** is also available at [`/toptrumps-beta.html`](toptrumps-beta.html), with fully 3D cards, a space backdrop, animated moons, and spacecraft flybys.
+🎴 **Bonus:** a companion **Top Trumps – Azure VM Edition** card game ships from the same site at [`/toptrumps.html`](toptrumps.html) — a standalone single-page game built on the same SKU data via `scripts/build-cards.py`. An **experimental WebGL beta** is also available at [`/toptrumps-beta.html`](toptrumps-beta.html), with fully 3D cards, a space backdrop, animated moons, spacecraft flybys, and an integrated CPU-vs-Player scoreboard with a scrolling gameplay notification tray.
 
 ---
 
