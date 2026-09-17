@@ -184,6 +184,7 @@ The refresh pipeline runs on a self-hosted runner with Azure CLI access.
 2. **Space environment** — a galaxy image, starfield, textured moons, hyperspace streaks, and shooting stars provide depth and motion.
 3. **Spacecraft flybys** — vendored X-wing and TIE fighter GLTF models cross the scene on randomized, card-safe paths.
 4. **Rarity and lighting effects** — foil, reflections, shadows, and animated card-back sheen are rendered directly on the card meshes.
+5. **Centred match scoreboard** — a DOM HUD keeps CPU/card count on the left and PLAYER/card count on the right around an overlapping `VS` medallion. `updateHUD()` refreshes the counts while a match-visibility helper keeps the scoreboard off the title and how-to screens.
 
 ### Fallbacks
 - WebGL is required for the beta build. Renderer creation failures and context loss show an explicit fallback message instead of leaving a frozen canvas.

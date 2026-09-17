@@ -27,18 +27,50 @@
 
   /* ---- HUD ---- */
   #hud { position: fixed; left: 0; right: 0; top: 0; z-index: 5;
-    display: flex; justify-content: space-between; align-items: flex-start;
+    display: flex; justify-content: flex-start; align-items: flex-start;
     padding: 14px 18px; pointer-events: none; }
   #hud .brand { font-weight: 700; letter-spacing: .3px; }
   #hud .brand small { display: block; font-weight: 500; color: var(--muted); font-size: 12px; }
-  #hud .counts { text-align: right; font-variant-numeric: tabular-nums; }
-  #hud .counts b { color: var(--accent); }
+  #scoreboard { position: absolute; left: 50%; top: 24px; transform: translateX(-50%);
+    width: clamp(280px, 31vw, 380px); min-height: 44px; display: grid;
+    grid-template-columns: minmax(96px,1fr) 58px minmax(96px,1fr); align-items: center;
+    padding: 0 5px; border: 1px solid rgba(120,190,245,.45); border-radius: 999px;
+    background: linear-gradient(180deg,rgba(10,25,48,.92),rgba(4,12,27,.88));
+    box-shadow: 0 10px 30px rgba(0,0,0,.5), inset 0 1px rgba(255,255,255,.09),
+      0 0 20px rgba(55,182,255,.13); backdrop-filter: blur(9px);
+    font-variant-numeric: tabular-nums; }
+  #scoreboard[hidden] { display: none; }
+  .score-team { display: grid; align-items: center; gap: 9px; padding: 4px 12px;
+    font-size: clamp(11px,.9vw,14px); font-weight: 700; letter-spacing: .1em;
+    text-transform: uppercase; }
+  .score-team b { color: #fff; font-size: 1.35em; line-height: 1; letter-spacing: 0; }
+  .score-cpu { grid-template-columns: auto 1fr; color: #b8c8dc; text-align: right; }
+  .score-player { grid-template-columns: 1fr auto; color: #91dcff; }
+  .score-vs { position: relative; z-index: 2; display: grid; place-items: center;
+    width: 64px; height: 64px; margin: -10px -3px; border-radius: 50%;
+    color: #f4f9ff; border: 1px solid rgba(126,202,255,.75);
+    background: radial-gradient(circle at 48% 35%,rgba(30,72,112,.98),rgba(4,13,29,.98) 68%);
+    box-shadow: 0 10px 22px rgba(0,0,0,.55), inset 0 0 20px rgba(65,173,245,.26),
+      0 0 20px rgba(55,182,255,.25);
+    font-size: 21px; font-weight: 900; letter-spacing: -.04em; }
 
-  #hint { position: fixed; left: 50%; top: 64px; transform: translateX(-50%);
+  #hint { position: fixed; left: 50%; top: 104px; transform: translateX(-50%);
     z-index: 5; color: var(--muted); font-size: 14px; letter-spacing: .2px;
     background: rgba(6,12,24,.55); border: 1px solid rgba(120,160,220,.18);
     padding: 8px 16px; border-radius: 999px; backdrop-filter: blur(6px);
     transition: opacity .4s ease; }
+
+  @media (max-width: 700px) {
+    #hud { padding: 11px 14px; }
+    #hud .brand { font-size: 13px; }
+    #hud .brand small { font-size: 10px; }
+    #scoreboard { top: 54px; width: min(300px,calc(100vw - 24px));
+      grid-template-columns: minmax(80px,1fr) 52px minmax(80px,1fr); min-height: 40px; }
+    .score-team { gap: 6px; padding: 4px 9px; font-size: 10px; }
+    .score-vs { width: 58px; height: 58px; margin: -9px -3px; font-size: 19px; }
+    #hint { top: 122px; max-width: calc(100vw - 28px); text-align: center; white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis; }
+  }
 
   /* ---- Round HUD control cluster — PERSISTENT during a match so the player
      can Pause or Quit at any time. Continue (⏩, wrapped in an auto-advance
@@ -303,7 +335,11 @@
 
   <div id="hud">
     <div class="brand">Azure Top Trumps <small>WebGL beta</small></div>
-    <div class="counts">CPU <b id="cpu-count">0</b> · You <b id="you-count">0</b></div>
+    <div id="scoreboard" hidden role="group" aria-label="CPU 0 cards versus Player 0 cards">
+      <div class="score-team score-cpu"><b id="cpu-count">0</b><span>CPU</span></div>
+      <div class="score-vs" aria-hidden="true">VS</div>
+      <div class="score-team score-player"><span>Player</span><b id="you-count">0</b></div>
+    </div>
   </div>
 
   <div id="hint">Loading deck…</div>
@@ -335,7 +371,7 @@
     </div>
   </div>
   <div id="w-smoke" aria-hidden="true"></div>
-  <div class="w-credit">DJ Tools · WebGL beta · v0.0-beta</div>
+  <div class="w-credit">DJ Tools · WebGL beta · v0.0.1-beta</div>
 
   <!-- How-to-play panel -->
   <div id="w-howto" role="dialog" aria-label="How to play" aria-modal="true">
@@ -3585,10 +3621,19 @@ function resolveStat(stat, pCard, cCard) {
   /* ---- HUD ------------------------------------------------------------- */
   const elYou  = document.getElementById('you-count');
   const elCpu  = document.getElementById('cpu-count');
+  const elScoreboard = document.getElementById('scoreboard');
   const elHint = document.getElementById('hint');
   function updateHUD() {
-    elYou.textContent = G.player.hand.length;
-    elCpu.textContent = G.cpu.hand.length;
+    const playerCards = G.player.hand.length;
+    const cpuCards = G.cpu.hand.length;
+    elYou.textContent = playerCards;
+    elCpu.textContent = cpuCards;
+    if (elScoreboard) {
+      elScoreboard.setAttribute('aria-label', `CPU ${cpuCards} cards versus Player ${playerCards} cards`);
+    }
+  }
+  function setMatchHUDVisible(visible) {
+    if (elScoreboard) elScoreboard.hidden = !visible;
   }
   function setHint(msg) { if (elHint) elHint.textContent = msg; }
 
@@ -3729,6 +3774,7 @@ function resolveStat(stat, pCard, cCard) {
     hideContinue();
     disarmQuit();
     setGamePaused(false);
+    setMatchHUDVisible(true);
     showRoundControls();            // persistent cluster for the whole match
     const deck = shuffle(G.data.cards.slice()).slice(0, DECK_SIZE);
     G.player.hand = []; G.cpu.hand = [];
@@ -4406,6 +4452,7 @@ function resolveStat(stat, pCard, cCard) {
 
   function showWelcome() {
     G.phase = 'welcome';
+    setMatchHUDVisible(false);
     syncDifficultyUI();
     buildHowtoDifficulty();
     if (wHintEl) wHintEl.style.opacity = '0';   // suppress the loading pill under the overlay

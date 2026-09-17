@@ -1,6 +1,6 @@
 # VM SKU Per Region — Specification
 
-> Version: v1.2.1
+> Version: v1.2.2
 
 ## 1. Overview
 
@@ -233,6 +233,7 @@ A second, optional build of the Top Trumps companion ships alongside the stable 
 - **Rendering**: cards are baked to canvas textures and rendered as Three.js meshes, so card ownership, deals, flips, win movement, and deck depth all remain inside the WebGL scene.
 - **Scene**: a galaxy backdrop, starfield, animated textured moons, hyperspace streaks, shooting stars, and X-wing/TIE fighter GLTF flybys provide the environment.
 - **Card effects**: rarity foil, lighting, shadows, and back-face sheen are rendered in the scene.
+- **Match HUD**: a centred pill scoreboard mirrors the playfield ownership (`CPU` left, `PLAYER` right), with each side's live card count separated by an overlapping circular `VS` medallion. It is hidden on the title/how-to screens.
 - **Fallback**: WebGL is required for this beta. If renderer creation fails or the context is lost, the page displays an explicit WebGL-unavailable message rather than silently switching implementations.
 - **Discovery**: the launcher in `index.html` and the "✨ WebGL beta" chip in `toptrumps.html` both open `toptrumps-beta.html`.
 - **Deployment**: both standard and monthly refresh deployments stage `toptrumps-beta.html`, `assets/`, and `vendor/` from the site root.
