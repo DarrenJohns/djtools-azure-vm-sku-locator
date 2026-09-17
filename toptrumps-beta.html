@@ -32,27 +32,28 @@
   #hud .brand { font-weight: 700; letter-spacing: .3px; }
   #hud .brand small { display: block; font-weight: 500; color: var(--muted); font-size: 12px; }
   #scoreboard { position: absolute; left: 50%; top: 24px; transform: translateX(-50%);
-    width: clamp(280px, 31vw, 380px); min-height: 44px; display: grid;
-    grid-template-columns: minmax(96px,1fr) 58px minmax(96px,1fr); align-items: center;
-    padding: 0 5px; border: 1px solid rgba(120,190,245,.45); border-radius: 999px;
-    background: linear-gradient(180deg,rgba(10,25,48,.92),rgba(4,12,27,.88));
-    box-shadow: 0 10px 30px rgba(0,0,0,.5), inset 0 1px rgba(255,255,255,.09),
-      0 0 20px rgba(55,182,255,.13); backdrop-filter: blur(9px);
+    width: clamp(320px, 36vw, 460px); min-height: 46px; display: grid;
+    grid-template-columns: minmax(120px,1fr) 44px minmax(120px,1fr); align-items: center;
     font-variant-numeric: tabular-nums; }
   #scoreboard[hidden] { display: none; }
-  .score-team { display: grid; align-items: center; gap: 9px; padding: 4px 12px;
-    font-size: clamp(11px,.9vw,14px); font-weight: 700; letter-spacing: .1em;
-    text-transform: uppercase; }
-  .score-team b { color: #fff; font-size: 1.35em; line-height: 1; letter-spacing: 0; }
-  .score-cpu { grid-template-columns: auto 1fr; color: #b8c8dc; text-align: right; }
-  .score-player { grid-template-columns: 1fr auto; color: #91dcff; }
+  .score-team { height: 46px; display: grid; align-items: center; gap: 10px; padding: 0 18px;
+    color: #b8c8dc; border: 1px solid rgba(100,184,240,.48);
+    background: linear-gradient(180deg,rgba(10,28,52,.94),rgba(4,13,28,.9));
+    box-shadow: 0 8px 24px rgba(0,0,0,.44), inset 0 1px rgba(255,255,255,.07);
+    backdrop-filter: blur(9px); font-size: clamp(11px,.9vw,14px); font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase; }
+  .score-team b { color: #fff; font-size: 1.45em; line-height: 1; letter-spacing: 0; }
+  .score-cpu { grid-template-columns: auto 1fr; text-align: right;
+    border-radius: 999px 10px 10px 999px; border-right-color: transparent; }
+  .score-player { grid-template-columns: 1fr auto; color: #91dcff;
+    border-radius: 10px 999px 999px 10px; border-left-color: transparent; }
   .score-vs { position: relative; z-index: 2; display: grid; place-items: center;
-    width: 64px; height: 64px; margin: -10px -3px; border-radius: 50%;
-    color: #f4f9ff; border: 1px solid rgba(126,202,255,.75);
-    background: radial-gradient(circle at 48% 35%,rgba(30,72,112,.98),rgba(4,13,29,.98) 68%);
-    box-shadow: 0 10px 22px rgba(0,0,0,.55), inset 0 0 20px rgba(65,173,245,.26),
-      0 0 20px rgba(55,182,255,.25);
-    font-size: 21px; font-weight: 900; letter-spacing: -.04em; }
+    width: 48px; height: 48px; margin: 0 -2px; color: #eaf8ff;
+    border: 1px solid rgba(103,207,255,.85);
+    background: linear-gradient(145deg,#194b70,#07162b);
+    clip-path: polygon(25% 5%,75% 5%,100% 50%,75% 95%,25% 95%,0 50%);
+    filter: drop-shadow(0 5px 8px rgba(0,0,0,.5)) drop-shadow(0 0 8px rgba(85,199,255,.3));
+    font-size: 13px; font-weight: 900; letter-spacing: .05em; }
 
   #hint { position: fixed; left: 50%; top: 104px; transform: translateX(-50%);
     z-index: 5; color: var(--muted); font-size: 14px; letter-spacing: .2px;
@@ -64,11 +65,11 @@
     #hud { padding: 11px 14px; }
     #hud .brand { font-size: 13px; }
     #hud .brand small { font-size: 10px; }
-    #scoreboard { top: 54px; width: min(300px,calc(100vw - 24px));
-      grid-template-columns: minmax(80px,1fr) 52px minmax(80px,1fr); min-height: 40px; }
-    .score-team { gap: 6px; padding: 4px 9px; font-size: 10px; }
-    .score-vs { width: 58px; height: 58px; margin: -9px -3px; font-size: 19px; }
-    #hint { top: 122px; max-width: calc(100vw - 28px); text-align: center; white-space: nowrap;
+    #scoreboard { top: 54px; width: min(320px,calc(100vw - 24px));
+      grid-template-columns: minmax(110px,1fr) 40px minmax(110px,1fr); min-height: 40px; }
+    .score-team { height: 40px; gap: 6px; padding: 0 12px; font-size: 10px; }
+    .score-vs { width: 44px; height: 44px; margin: 0 -2px; font-size: 12px; }
+    #hint { top: 112px; max-width: calc(100vw - 28px); text-align: center; white-space: nowrap;
       overflow: hidden; text-overflow: ellipsis; }
   }
 
