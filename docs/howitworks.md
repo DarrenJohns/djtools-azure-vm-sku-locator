@@ -85,8 +85,9 @@ The app uses a **tabbed interface** with 6 tabs in a sticky tab strip:
 Tabs support keyboard shortcuts (1–6), URL hash routing, and dynamic badge counts.
 
 ### Browse SKUs (See What's Available)
+- Retirement summary banner totalling flagged SKUs, affected families/versions, and the next retirement date for the selected region
 - Filterable, sortable table grouped alphabetically by first letter
-- Filters: text search, size, version, family type, vCPU range, processor type
+- Filters: text search, size, version, family type, vCPU range, processor type, lifecycle status (flagged for retirement / not flagged)
 - Column chooser to show/hide columns
 - Click any SKU for deployment snippet modal (CLI, PowerShell, Bicep)
 - Retirement badges on SKUs from families being retired

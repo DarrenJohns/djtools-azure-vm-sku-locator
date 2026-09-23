@@ -579,6 +579,34 @@ select:focus, input:focus { outline: 2px solid var(--brand-primary); outline-off
   color: #664d03;
 }
 [data-theme="dark"] .retirement-warning { background: #3d3200; border-color: #665200; color: #ffc107; }
+.retirement-summary-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  color: #664d03;
+}
+[data-theme="dark"] .retirement-summary-banner { background: #3d3200; border-color: #665200; color: #ffc107; }
+.retirement-summary-banner.retirement-summary-none {
+  background: var(--bg-layer1);
+  border-color: var(--border-default);
+  color: var(--text-secondary);
+}
+.retirement-summary-icon { font-size: 20px; line-height: 1; }
+.retirement-summary-text { flex: 1; font-size: 13px; line-height: 1.6; }
+.retirement-summary-families { margin-top: 6px; font-size: 12px; opacity: 0.9; }
+.retirement-summary-link {
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 600;
+  color: inherit;
+  text-decoration: underline;
+  align-self: center;
+}
 .proximity-suggestion {
   margin-top: 12px;
   padding: 12px 16px;
@@ -1179,6 +1207,7 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
         <span class="section-badge" id="available-count"></span>
       </div>
       <div class="section-body" id="body-filters">
+        <div id="vm-retirement-summary"></div>
         <div class="filters-row">
           <div class="filters-search">
             <input type="search" id="search-input" placeholder="Search by size, version, family type, vCPUs..." oninput="applyFilters()">
@@ -1203,6 +1232,11 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
               <option value="Intel">Intel</option>
               <option value="AMD">AMD</option>
               <option value="ARM">ARM</option>
+            </select>
+            <select id="retirement-filter" onchange="applyFilters()">
+              <option value="">All Lifecycle Status</option>
+              <option value="retiring">⚠️ Flagged for Retirement</option>
+              <option value="active">Not Flagged for Retirement</option>
             </select>
             <div class="filters-actions">
               <span class="result-count" id="result-count"></span>
@@ -1460,7 +1494,7 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
   <a href="https://github.com/features/copilot/cli/" target="_blank" rel="noopener noreferrer" style="color:var(--brand-primary);text-decoration:none;font-weight:600;">Learn more ↗</a>
   &nbsp;·&nbsp;
   <a href="https://github.com/darjohn_microsoft/vm-sku-per-region" target="_blank" rel="noopener noreferrer" style="color:var(--brand-primary);text-decoration:none;font-weight:600;">GitHub ↗</a>
-  <div style="margin-top:8px;font-size:11px;color:var(--text-tertiary);opacity:0.7;">v1.2.1</div>
+  <div style="margin-top:8px;font-size:11px;color:var(--text-tertiary);opacity:0.7;">v1.2.2</div>
 </footer>
 
 <div class="toast-container" id="toast-container"></div>
@@ -2056,7 +2090,7 @@ async function init() {
         const retirementData = await retirementsResp.json();
         retirementFamilies = {};
         for (const r of retirementData.retirements || []) {
-          retirementFamilies[r.family.toLowerCase()] = { name: r.name, date: r.retireDate };
+          retirementFamilies[r.family.toLowerCase()] = { name: r.name, date: r.retireDate, learnMoreUrl: r.learnMoreUrl };
         }
       }
     } catch (e) {
@@ -2282,6 +2316,7 @@ function rebuildSkuList(regionName) {
 
   applyFilters();
   renderSummary();
+  renderVmRetirementSummary();
   renderWorkloads();
   populateMultiRegionCheckboxes();
   loadHistory(regionName);
@@ -2356,6 +2391,44 @@ function renderSummary() {
       <div class="summary-label">AMD${armCount ? ' / ARM' : ''} CPUs</div>
     </div>
   `;
+}
+
+// === VM RETIREMENT SUMMARY ===
+function renderVmRetirementSummary() {
+  const container = document.getElementById('vm-retirement-summary');
+  if (!container) return;
+  if (!allSkus.length) { container.innerHTML = ''; return; }
+
+  const familyCounts = {};
+  allSkus.forEach(s => {
+    const key = (s.family || '').toLowerCase();
+    const info = retirementFamilies[key];
+    if (!info) return;
+    if (!familyCounts[key]) familyCounts[key] = { ...info, count: 0 };
+    familyCounts[key].count++;
+  });
+  const entries = Object.values(familyCounts);
+
+  if (!entries.length) {
+    container.innerHTML = `<div class="retirement-summary-banner retirement-summary-none">✅ No VM SKUs in this region are currently flagged for retirement.</div>`;
+    return;
+  }
+
+  entries.sort((a, b) => new Date('1 ' + a.date) - new Date('1 ' + b.date));
+  const totalSkus = entries.reduce((sum, e) => sum + e.count, 0);
+  const next = entries[0];
+  const familyList = entries.map(e => `${escapeHtml(e.name)} (${escapeHtml(e.date)})`).join(', ');
+  const learnMoreUrl = next.learnMoreUrl || 'https://learn.microsoft.com/en-us/azure/virtual-machines/sizes-previous-gen';
+
+  container.innerHTML = `
+    <div class="retirement-summary-banner">
+      <div class="retirement-summary-icon">⚠️</div>
+      <div class="retirement-summary-text">
+        There ${totalSkus === 1 ? 'is' : 'are'} <strong>${totalSkus} VM retirement notice${totalSkus === 1 ? '' : 's'}</strong> across <strong>${entries.length} famil${entries.length === 1 ? 'y' : 'ies'}</strong> available in this region. The next retirement is <strong>${escapeHtml(next.name)}</strong> in <strong>${escapeHtml(next.date)}</strong>.
+        <div class="retirement-summary-families">VM family and versions include: ${familyList}</div>
+      </div>
+      <a href="${escapeHtml(learnMoreUrl)}" target="_blank" rel="noopener" class="retirement-summary-link">Learn more ↗</a>
+    </div>`;
 }
 
 // === DISK SKUs ===
@@ -2589,6 +2662,7 @@ function applyFilters() {
   const familyType = document.getElementById('familytype-filter').value;
   const vcpu = document.getElementById('vcpu-filter').value;
   const processor = document.getElementById('processor-filter').value;
+  const retirement = document.getElementById('retirement-filter').value;
 
   filteredSkus = allSkus.filter(s => {
     if (search && !(s.name.toLowerCase().includes(search) || (s.family||'').toLowerCase().includes(search) || (s.size||'').toLowerCase().includes(search))) return false;
@@ -2606,6 +2680,11 @@ function applyFilters() {
       if (vcpu === '4-8' && !(v >= 4 && v <= 8)) return false;
       if (vcpu === '16-32' && !(v >= 16 && v <= 32)) return false;
       if (vcpu === '64+' && v < 64) return false;
+    }
+    if (retirement) {
+      const isRetiring = !!retirementFamilies[(s.family || '').toLowerCase()];
+      if (retirement === 'retiring' && !isRetiring) return false;
+      if (retirement === 'active' && isRetiring) return false;
     }
     return true;
   });
@@ -2633,6 +2712,7 @@ function clearFilters() {
   document.getElementById('familytype-filter').value = '';
   document.getElementById('vcpu-filter').value = '';
   document.getElementById('processor-filter').value = '';
+  document.getElementById('retirement-filter').value = '';
   applyFilters();
 }
 

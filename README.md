@@ -8,7 +8,7 @@
 >
 > **Browse Azure VM and managed disk SKU availability across every region — filter by processor, family, and features, compare across regions, pin, and see pricing and retirements.**
 
-![Version](https://img.shields.io/badge/version-1.2.1-orange)
+![Version](https://img.shields.io/badge/version-1.2.2-orange)
 ![Azure](https://img.shields.io/badge/Azure-VM_SKUs-0078D4)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Built with](https://img.shields.io/badge/built_with-Copilot_CLI-8957e5)
@@ -34,6 +34,7 @@
 | **RI & Savings Plan Pricing** | Compare Pay-As-You-Go, 1/3-year Reserved Instance (actual Azure prices), and 1/3-year Savings Plan (estimated) rates |
 | **Deployment Snippets** | Click any SKU for ready-to-use Azure CLI, PowerShell, and Bicep code |
 | **Retirement Warnings** | SKUs from families being retired are flagged with a warning badge |
+| **Retirement Filter & Summary** | Filter to VMs flagged/not flagged for retirement; an at-a-glance banner summarizes notice counts, the next retirement date, and affected families |
 | **What's New** | See which SKUs were added or removed since the last monthly refresh |
 | **Workload Recommendations** | View which VM series suit different workload types |
 
