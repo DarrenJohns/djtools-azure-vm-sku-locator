@@ -129,7 +129,8 @@ All UI sections are organized into **6 tabs** using a sticky tab strip below the
 - Compares current data against archived history snapshots
 
 ### 🔍 See What's Available
-- **Filters**: Text search, Family, Size, Version, Architecture, vCPU Range dropdowns, Reset button
+- **Retirement summary banner**: Above the filters, shows the count of VM SKUs flagged for retirement in the selected region, the family and versions affected, and the next upcoming retirement date (falls back to a "no retirements" message when none apply)
+- **Filters**: Text search, Family, Size, Version, Architecture, vCPU Range, Lifecycle Status (Flagged for Retirement / Not Flagged for Retirement) dropdowns, Reset button
 - **SKU Table**: Results grouped by family with collapsible letter sections
   - Sortable by clicking column headers
   - Column Chooser (⚙️ Columns) lets users show/hide columns; Pin and Size columns always visible

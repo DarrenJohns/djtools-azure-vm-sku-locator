@@ -33,8 +33,9 @@
 **"Now let's see what's actually available."**
 
 - Open the **Browse SKUs** tab (or press **2**)
+- Point out the **retirement summary banner** at the top — total notices, affected families/versions, and the next retirement date for this region
 - Show the full table — results are letter-grouped
-- Demo the filters: **text search**, **family type**, **vCPU range**, **processor type** (Intel/AMD/ARM)
+- Demo the filters: **text search**, **family type**, **vCPU range**, **processor type** (Intel/AMD/ARM), **lifecycle status** (flagged/not flagged for retirement)
 - Click **⚙️ Columns** to customize visible columns
 - Click a SKU name for the **Snippet Modal** — CLI, PowerShell, and Bicep code ready to copy
 - Point out **retirement badges** on affected SKUs
