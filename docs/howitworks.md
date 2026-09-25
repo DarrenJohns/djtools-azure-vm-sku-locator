@@ -95,6 +95,8 @@ Tabs support keyboard shortcuts (1–6), URL hash routing, and dynamic badge cou
 ### Find a Match (Deployment Checker)
 Users specify minimum requirements (vCPUs, memory, disks, NICs, processor, features) and get ranked matches with percentage scores. Results can be pinned or exported to CSV.
 
+The checker also supports **pinned SKU alternatives** for migration planning. A selected pinned SKU is compared with other SKUs in the current region using weighted similarity across vCPUs, memory, processor type, family, disk/NIC limits, zones, and capability flags. The default safeguards exclude families listed in `data/retirements.json` and require the candidate to provide at least the source VM's vCPU and memory capacity. The top 10 alternatives can be exported independently.
+
 ### Pinned Shortlist & Multi-Region Compare
 - Pin SKUs from browse table or checker results
 - Chips display key specs at a glance
