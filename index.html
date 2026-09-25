@@ -1016,6 +1016,18 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
 .checker-checks input[type="checkbox"] { accent-color: var(--brand-primary); }
 .checker-actions { display: flex; gap: 8px; margin-bottom: 16px; }
 .checker-results { margin-top: 8px; }
+.similarity-panel { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border-default); }
+.similarity-form { display: flex; flex-wrap: wrap; align-items: end; gap: 10px; margin-bottom: 12px; }
+.similarity-form .form-field { display: flex; flex-direction: column; gap: 4px; min-width: 220px; }
+.similarity-form label { font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; }
+.similarity-form select { font-family: var(--font-sans); font-size: 13px; padding: 6px 10px; border: 1px solid var(--border-default); border-radius: var(--radius-sm); background: var(--bg-layer1); color: var(--text-primary); }
+.similarity-options { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; }
+.similarity-options label { display: flex; align-items: center; gap: 5px; font-size: 12px; cursor: pointer; padding: 4px 8px; border-radius: var(--radius-sm); border: 1px solid var(--border-default); background: var(--bg-layer2); }
+.similarity-options input[type="checkbox"] { accent-color: var(--brand-primary); }
+.similarity-help { font-size: 12px; color: var(--text-secondary); margin: 0 0 10px; line-height: 1.45; }
+.similarity-source-row { background: #e8f1fb !important; border-top: 2px solid var(--brand-primary); border-bottom: 2px solid var(--brand-primary); }
+.similarity-source-row td { font-weight: 600; }
+[data-theme="dark"] .similarity-source-row { background: #193451 !important; }
 .checker-summary { padding: 10px 14px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; margin-bottom: 12px; }
 .checker-summary.has-matches { background: #e6f4ea; color: var(--status-success); border: 1px solid #a8dab5; }
 .checker-summary.no-matches { background: #fef7e0; color: var(--status-warning); border: 1px solid #ffe0b2; }
@@ -1304,6 +1316,25 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
           <button class="btn btn-outline" onclick="resetChecker()">✖ Reset</button>
         </div>
         <div class="checker-results" id="checker-results"></div>
+        <div class="similarity-panel">
+          <h4 style="font-size:14px;margin:0 0 4px;">🔁 Find alternatives to a pinned SKU</h4>
+          <p class="similarity-help">Select a pinned VM to find close replacements in the current region. Active SKUs are preferred, and retiring families are excluded by default.</p>
+          <div class="similarity-form">
+            <div class="form-field">
+              <label for="similarity-source">Pinned SKU</label>
+              <select id="similarity-source" onchange="runSimilarSkuSearch()">
+                <option value="">Pin a SKU first</option>
+              </select>
+            </div>
+            <button class="btn btn-outline" onclick="exportSimilarSkuCsv()">📥 CSV Export</button>
+          </div>
+          <div class="similarity-options">
+            <label><input type="checkbox" id="similarity-active-only" checked onchange="runSimilarSkuSearch()"> Exclude retiring families</label>
+            <label><input type="checkbox" id="similarity-capacity" checked onchange="runSimilarSkuSearch()"> Keep at least the same capacity</label>
+            <label><input type="checkbox" id="similarity-processor" checked onchange="runSimilarSkuSearch()"> Prefer the same processor</label>
+          </div>
+          <div class="checker-results" id="similarity-results"></div>
+        </div>
       </div>
     </div>
     </div><!-- /tab-pane match -->
@@ -2870,6 +2901,7 @@ function renderShortlist() {
   const clearBtn = document.getElementById('clear-pins-btn');
 
   const actions = document.getElementById('shortlist-actions');
+  populateSimilarSkuSelect();
   if (clearBtn) clearBtn.disabled = !pinnedSkus.size;
   const clearChkBtn = document.getElementById('clear-pins-chk-btn');
   if (clearChkBtn) clearChkBtn.disabled = !pinnedSkus.size;
@@ -2884,6 +2916,27 @@ function renderShortlist() {
     const pricingCtr = document.getElementById('pricing-container');
     if (pricingCtr) pricingCtr.style.display = 'none';
     return;
+  }
+
+  function populateSimilarSkuSelect() {
+    const select = document.getElementById('similarity-source');
+    if (!select) return;
+    const currentValue = select.value;
+    const pinned = [...pinnedSkus].sort();
+    if (!pinned.length) {
+      select.innerHTML = '<option value="">Pin a SKU first</option>';
+      document.getElementById('similarity-results').innerHTML = '';
+      lastSimilarResults = [];
+      return;
+    }
+    select.innerHTML = '<option value="">Choose a pinned SKU</option>' +
+      pinned.map(size => `<option value="${escapeHtml(size)}">${escapeHtml(size)}</option>`).join('');
+    if (pinned.includes(currentValue)) {
+      select.value = currentValue;
+    } else {
+      document.getElementById('similarity-results').innerHTML = '';
+      lastSimilarResults = [];
+    }
   }
   if (actions) actions.style.display = '';
   if (multiRegionContainer) multiRegionContainer.style.display = '';
@@ -3222,6 +3275,124 @@ function resetChecker() {
   if (checkerBadge) checkerBadge.textContent = '0 matches';
 }
 
+function isRetiringSku(sku) {
+  return !!retirementFamilies[(sku.family || '').toLowerCase()];
+}
+
+function similarityRatio(candidate, source, field) {
+  const sourceValue = Number(source[field]) || 0;
+  const candidateValue = Number(candidate[field]) || 0;
+  if (!sourceValue && !candidateValue) return 1;
+  if (!sourceValue || !candidateValue) return 0;
+  return Math.max(0, 1 - Math.abs(candidateValue - sourceValue) / Math.max(sourceValue, candidateValue));
+}
+
+function runSimilarSkuSearch() {
+  const sourceSize = document.getElementById('similarity-source').value;
+  const container = document.getElementById('similarity-results');
+  if (!sourceSize) {
+    container.innerHTML = '<div class="checker-summary no-matches">Pin a SKU, then choose it here to find alternatives.</div>';
+    lastSimilarResults = [];
+    return;
+  }
+  const source = allSkus.find(s => s.size === sourceSize);
+  if (!source) {
+    container.innerHTML = '<div class="checker-summary no-matches">The selected SKU is not available in the current region.</div>';
+    lastSimilarResults = [];
+    return;
+  }
+
+  const activeOnly = document.getElementById('similarity-active-only').checked;
+  const preserveCapacity = document.getElementById('similarity-capacity').checked;
+  const preferProcessor = document.getElementById('similarity-processor').checked;
+  const sourceProcessor = getProcessorType(source.size);
+  const candidates = allSkus.filter(candidate => {
+    if (candidate.size === source.size) return false;
+    if (pinnedSkus.has(candidate.size)) return false;
+    if (activeOnly && isRetiringSku(candidate)) return false;
+    if (preserveCapacity && (candidate.vCPUs < source.vCPUs || candidate.memoryGB < source.memoryGB)) return false;
+    return true;
+  });
+
+  const scored = candidates.map(candidate => {
+    const processorMatch = getProcessorType(candidate.size) === sourceProcessor;
+    const familyMatch = candidate.family === source.family;
+    const capabilityFields = ['acceleratedNetworking', 'premiumIO', 'ephemeralOSDisk', 'encryptionAtHost', 'spotEligible'];
+    const capabilityScore = capabilityFields.reduce((sum, field) => sum + (Boolean(candidate[field]) === Boolean(source[field]) ? 1 : 0), 0) / capabilityFields.length;
+    const zonesScore = similarityRatio({ zones: candidate.zones ? candidate.zones.length : 0 }, { zones: source.zones ? source.zones.length : 0 }, 'zones');
+    const processorWeight = preferProcessor ? 15 : 0;
+    const score =
+      similarityRatio(candidate, source, 'vCPUs') * 25 +
+      similarityRatio(candidate, source, 'memoryGB') * 25 +
+      (processorMatch ? processorWeight : 0) +
+      (familyMatch ? 10 : 0) +
+      similarityRatio(candidate, source, 'maxDataDisks') * 10 +
+      similarityRatio(candidate, source, 'maxNICs') * 5 +
+      zonesScore * 5 +
+      capabilityScore * 5;
+    const scoreMaximum = 85 + processorWeight;
+    return { sku: candidate, score: Math.round((score / scoreMaximum) * 100), processorMatch, familyMatch };
+  }).sort((a, b) => b.score - a.score || a.sku.vCPUs - b.sku.vCPUs || a.sku.memoryGB - b.sku.memoryGB);
+
+  lastSimilarResults = scored.slice(0, 10);
+  if (!lastSimilarResults.length) {
+    container.innerHTML = `<div class="checker-summary no-matches">No alternatives meet the selected safeguards. Try allowing lower capacity or including retiring families.</div>`;
+    return;
+  }
+  const retirementNote = activeOnly ? ' Retiring families excluded.' : '';
+  container.innerHTML = `<div class="checker-summary has-matches">${lastSimilarResults.length} closest alternatives for ${escapeHtml(source.size)}.${retirementNote}</div>` +
+    buildSimilarityTable(lastSimilarResults, source);
+}
+
+function buildSimilarityTable(rows, source) {
+  const sourceZones = source.zones && source.zones.length ? escapeHtml(source.zones.join(', ')) : '—';
+  const sourceProcessor = getProcessorType(source.size);
+  let html = '<table class="checker-table"><thead><tr><th style="width:36px;">📌</th><th>Size</th><th>Processor</th><th>vCPUs</th><th>Memory (GB)</th><th>Max Data Disks</th><th>Max NICs</th><th>Zones</th><th>Similarity</th></tr></thead><tbody>';
+  html += `<tr class="similarity-source-row" title="Selected pinned SKU — comparison baseline">
+    <td>📍</td>
+    <td><strong>${escapeHtml(source.size)}</strong> <span style="font-size:11px;color:var(--text-secondary);">(selected)</span>${getLifecycleBadge(source)}</td>
+    <td>${sourceProcessor}</td>
+    <td>${source.vCPUs}</td><td>${source.memoryGB}</td><td>${source.maxDataDisks}</td><td>${source.maxNICs}</td>
+    <td>${sourceZones}</td>
+    <td><span class="score-badge perfect">Baseline</span></td>
+  </tr>`;
+  rows.forEach(r => {
+    const s = r.sku;
+    const scoreClass = r.score >= 85 ? 'perfect' : r.score >= 70 ? 'good' : r.score >= 50 ? 'partial' : 'low';
+    const zones = s.zones && s.zones.length ? escapeHtml(s.zones.join(', ')) : '—';
+    const pinned = pinnedSkus.has(s.size);
+    html += `<tr>
+      <td><button class="pin-btn${pinned ? ' pinned' : ''}" onclick="event.stopPropagation();togglePin('${escapeHtml(s.size)}')" title="${pinned ? 'Unpin' : 'Pin to shortlist'}">${pinned ? '📌' : '○'}</button></td>
+      <td><a href="#" onclick="event.preventDefault();openSnippetModal('${escapeHtml(s.size)}')" style="color:var(--brand-primary);text-decoration:none;font-weight:600;">${escapeHtml(s.size)}</a>${getLifecycleBadge(s)}</td>
+      <td>${getProcessorType(s.size)}${getProcessorType(s.size) === getProcessorType(source.size) ? ' ✓' : ''}</td>
+      <td>${s.vCPUs}</td><td>${s.memoryGB}</td><td>${s.maxDataDisks}</td><td>${s.maxNICs}</td>
+      <td>${zones}</td>
+      <td><span class="score-badge ${scoreClass}">${r.score}%</span></td>
+    </tr>`;
+  });
+  return html + '</tbody></table>';
+}
+
+function exportSimilarSkuCsv() {
+  if (!lastSimilarResults.length) { showToast('Find alternatives first', 'warning'); return; }
+  const sourceSize = document.getElementById('similarity-source').value || 'selected-sku';
+  const safeSourceSize = sourceSize.replace(/[^a-z0-9._-]+/gi, '-');
+  const headers = ['Size', 'Processor', 'vCPUs', 'Memory (GB)', 'Max Data Disks', 'Max NICs', 'Zones', 'Similarity'];
+  const rows = lastSimilarResults.map(r => {
+    const s = r.sku;
+    return [s.size, getProcessorType(s.size), s.vCPUs, s.memoryGB, s.maxDataDisks, s.maxNICs, (s.zones || []).join(';'), r.score + '%'];
+  });
+  const csv = [headers, ...rows].map(row => row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `azure-similar-skus-${safeSourceSize}-${selectedRegion || 'export'}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast(`Exported ${lastSimilarResults.length} alternatives to CSV`);
+}
+
 // === MULTI-REGION COMPARE ===
 function populateMultiRegionCheckboxes() {
   const container = document.getElementById('multiregion-checkboxes');
@@ -3457,6 +3628,7 @@ function exportCsv() {
 
 // Store last checker results for export
 let lastCheckerResults = [];
+let lastSimilarResults = [];
 
 function exportCheckerCsv() {
   if (!lastCheckerResults.length) { showToast('Run a search first', 'warning'); return; }

@@ -66,10 +66,12 @@
 1. **Select a region** — Choose an Azure region from the dropdown or click on the map
 2. **Browse VM SKUs** — View the sortable, filterable table of available VM sizes
 3. **Filter** — Narrow results by name, family, processor, vCPU range, or features
-4. **Find a Match** — Set your requirements and get ranked results with match scores
+4. **Find a Match** — Set your requirements and get ranked results with match scores, or select a pinned SKU to find close replacement alternatives
 5. **Pin & Compare** — Pin SKUs to your shortlist, then compare across regions
 6. **View Disks** — Switch to the Disk SKUs tab to see region-level disk type availability and browse available sizes
 7. **Export** — Download filtered results or your pinned shortlist as CSV
+
+When replacing a VM family approaching retirement, use **Find alternatives to a pinned SKU**. The tool can exclude retiring families, require at least the original vCPU and memory capacity, prefer the same processor type, and export the ranked alternatives.
 
 ---
 

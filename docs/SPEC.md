@@ -146,6 +146,9 @@ All UI sections are organized into **6 tabs** using a sticky tab strip below the
 - Finds and ranks matching SKUs with percentage match scores
 - Expand All / Collapse All / Clear All Pins action buttons
 - Export matching results to CSV
+- **Pinned SKU alternatives**: Select a pinned SKU to rank up to 10 close replacements in the current region
+- Alternative safeguards exclude retiring families by default, can require equal-or-greater vCPU and memory capacity, and can prefer the same processor
+- Similarity considers capacity, processor, family, disks, NICs, zones, and capability flags; alternatives can be exported to CSV
 
 ### 📌 Pinned Shortlist
 - Pin individual SKUs from the table or deployment checker

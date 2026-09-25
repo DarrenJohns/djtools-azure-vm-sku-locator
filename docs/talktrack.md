@@ -50,6 +50,8 @@
 - Check **Accelerated Networking** and **Premium IO**
 - Click **Find a Match**
 - Show ranked results with **percentage match scores**
+- Pin an existing VM, select it under **Find alternatives to a pinned SKU**, and leave **Exclude retiring families** enabled
+- Explain that alternatives can preserve capacity and prefer the same processor, then export the shortlist for migration planning
 
 **"100% means it meets everything. Lower scores show where a SKU falls short."**
 
