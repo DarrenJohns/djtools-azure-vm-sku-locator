@@ -27,18 +27,125 @@
 
   /* ---- HUD ---- */
   #hud { position: fixed; left: 0; right: 0; top: 0; z-index: 5;
-    display: flex; justify-content: space-between; align-items: flex-start;
+    display: flex; justify-content: flex-start; align-items: flex-start;
     padding: 14px 18px; pointer-events: none; }
   #hud .brand { font-weight: 700; letter-spacing: .3px; }
   #hud .brand small { display: block; font-weight: 500; color: var(--muted); font-size: 12px; }
-  #hud .counts { text-align: right; font-variant-numeric: tabular-nums; }
-  #hud .counts b { color: var(--accent); }
+  #scoreboard { position: absolute; left: 50%; top: 20px; transform: translateX(-50%);
+    width: clamp(350px, 36vw, 440px); font-variant-numeric: tabular-nums; }
+  #scoreboard[hidden] { display: none; }
+  .score-row { position: relative; z-index: 2; height: 62px; }
+  .score-bar { position: absolute; left: 28px; right: 28px; top: 9px; height: 44px;
+    display: grid; grid-template-columns: 1fr 1fr; align-items: center;
+    border: 1px solid rgba(90,200,255,.5); border-radius: 999px;
+    background:
+      linear-gradient(90deg,rgba(13,31,55,.96),rgba(7,18,35,.96) 43%,
+        rgba(7,18,35,.96) 57%,rgba(9,39,64,.96));
+    box-shadow: 0 10px 30px rgba(0,0,0,.48), inset 0 1px rgba(255,255,255,.1),
+      inset 0 -8px 18px rgba(0,0,0,.22), 0 0 18px rgba(55,182,255,.1);
+    backdrop-filter: blur(9px); overflow: hidden; }
+  .score-bar::before { content: ""; position: absolute; inset: 5px; border-radius: 999px;
+    border: 1px solid rgba(90,200,255,.13); pointer-events: none; }
+  .score-bar::after { content: ""; position: absolute; left: 50%; top: 7px; bottom: 7px;
+    width: 1px; transform: translateX(-50%);
+    background: linear-gradient(transparent,rgba(110,205,255,.35),transparent); }
+  .score-label { position: relative; display: grid; place-items: center; align-content: center;
+    height: 100%; padding: 0 40px; color: #c5d5e7; font-size: clamp(11px,.85vw,13px);
+    font-weight: 800; line-height: 1; letter-spacing: .13em; text-transform: uppercase;
+    text-shadow: 0 0 12px rgba(180,220,255,.18); }
+  .score-label small { display: block; margin-top: 4px; color: #6f88a7; font-size: 7px;
+    font-weight: 700; letter-spacing: .24em; }
+  .score-label-cpu { text-align: center; }
+  .score-label-player { color: #8fe0ff; text-align: center;
+    text-shadow: 0 0 12px rgba(85,199,255,.32); }
+  .score-label-player small { color: #4b9bc5; }
+  .score-count { position: absolute; z-index: 3; top: 2px; width: 58px; height: 58px;
+    display: grid; place-items: center; border-radius: 50%; color: #fff;
+    border: 1px solid rgba(90,200,255,.62);
+    background: radial-gradient(circle at 50% 35%,rgba(26,67,108,.98),rgba(7,16,32,.98) 72%);
+    box-shadow: inset 0 0 16px rgba(60,170,255,.26), 0 10px 26px rgba(0,0,0,.52),
+      0 0 18px rgba(55,182,255,.24);
+    font-size: 20px; font-weight: 850; text-shadow: 0 0 12px rgba(175,225,255,.4); }
+  .score-count::after { content: ""; position: absolute; inset: 6px; border-radius: 50%;
+    border: 1px solid rgba(90,200,255,.2);
+    box-shadow: inset 0 0 9px rgba(60,170,255,.08); }
+  .score-count-cpu { left: 0; }
+  .score-count-player { right: 0; color: #bcecff; }
+  .score-vs { position: absolute; z-index: 4; left: 50%; top: -3px; transform: translateX(-50%);
+    display: grid; place-items: center; width: 68px; height: 68px; border-radius: 50%;
+    color: #f4f9ff; border: 1px solid rgba(110,210,255,.82);
+    background: radial-gradient(circle at 50% 34%,rgba(31,82,125,.99),rgba(5,15,31,.99) 68%);
+    box-shadow: 0 11px 26px rgba(0,0,0,.58), inset 0 0 22px rgba(65,173,245,.3),
+      0 0 24px rgba(55,182,255,.32);
+    font-size: 22px; font-weight: 900; letter-spacing: -.04em;
+    text-shadow: 0 0 14px rgba(185,230,255,.45); }
+  .score-vs::before { content: ""; position: absolute; inset: 6px; border-radius: 50%;
+    border: 1px solid rgba(120,215,255,.22);
+    box-shadow: inset 0 0 11px rgba(60,170,255,.1); }
+  .score-vs::after { content: ""; position: absolute; inset: -4px; border-radius: 50%;
+    border: 1px dashed rgba(95,190,240,.2); }
+  #hint { position: relative; z-index: 1; width: calc(100% - 92px); height: 30px;
+    margin: -5px auto 0; padding: 0 16px; display: grid;
+    grid-template-columns: auto auto minmax(0,1fr); align-items: center; gap: 8px;
+    color: var(--muted); border: 1px solid rgba(90,200,255,.34);
+    background:
+      linear-gradient(90deg,rgba(8,29,49,.96),rgba(4,14,28,.94) 26%,
+        rgba(4,14,28,.94) 74%,rgba(8,29,49,.96));
+    box-shadow: 0 8px 20px rgba(0,0,0,.38), inset 0 1px rgba(255,255,255,.04),
+      inset 0 -7px 14px rgba(0,0,0,.18), 0 0 12px rgba(55,182,255,.08);
+    clip-path: polygon(10px 0,calc(100% - 10px) 0,100% 50%,calc(100% - 10px) 100%,
+      10px 100%,0 50%);
+    backdrop-filter: blur(8px); transition: opacity .4s ease; }
+  #hint::before { content: ""; position: absolute; left: 50%; top: -6px; width: 34px; height: 6px;
+    transform: translateX(-50%);
+    background: linear-gradient(90deg,transparent,rgba(90,200,255,.5),transparent);
+    clip-path: polygon(6px 0,calc(100% - 6px) 0,100% 100%,0 100%); }
+  #hint::after { content: ""; position: absolute; left: 50%; top: -11px; width: 1px; height: 6px;
+    background: rgba(90,200,255,.45); }
+  .hint-signal { width: 6px; height: 6px; border-radius: 50%; background: #6fd7ff;
+    box-shadow: 0 0 8px rgba(90,210,255,.9); animation: hintSignal 2.2s ease-in-out infinite; }
+  @keyframes hintSignal {
+    0%,100% { opacity: .45; box-shadow: 0 0 5px rgba(90,210,255,.55); }
+    50% { opacity: 1; box-shadow: 0 0 11px rgba(90,210,255,1); }
+  }
+  .hint-label { color: #62bce8; font-size: 8px; font-weight: 800; letter-spacing: .17em;
+    text-transform: uppercase; }
+  .hint-viewport { position: relative; min-width: 0; overflow: hidden; white-space: nowrap; text-align: center;
+    border-left: 1px solid rgba(90,200,255,.18); padding-left: 10px; }
+  .hint-viewport::before, .hint-viewport::after { content: ""; position: absolute; z-index: 2;
+    top: 0; bottom: 0; width: 16px; pointer-events: none; }
+  .hint-viewport::before { left: 9px; background: linear-gradient(90deg,#061a30,transparent); }
+  .hint-viewport::after { right: 0; background: linear-gradient(270deg,#06182d,transparent); }
+  .hint-viewport.scrolling { text-align: left; }
+  #hint-text { display: inline-block; max-width: none; font-size: 12px; line-height: 17px;
+    letter-spacing: .035em; white-space: nowrap; text-shadow: 0 0 9px rgba(145,195,235,.16); }
+  #hint-text.scrolling { animation: hintScroll var(--hint-duration,8s) ease-in-out 1s infinite; }
+  @keyframes hintScroll {
+    0%, 15% { transform: translateX(0); }
+    85%, 100% { transform: translateX(var(--hint-shift,0)); }
+  }
 
-  #hint { position: fixed; left: 50%; top: 64px; transform: translateX(-50%);
-    z-index: 5; color: var(--muted); font-size: 14px; letter-spacing: .2px;
-    background: rgba(6,12,24,.55); border: 1px solid rgba(120,160,220,.18);
-    padding: 8px 16px; border-radius: 999px; backdrop-filter: blur(6px);
-    transition: opacity .4s ease; }
+  @media (max-width: 700px) {
+    #hud { padding: 11px 14px; }
+    #hud .brand { font-size: 13px; }
+    #hud .brand small { font-size: 10px; }
+    #scoreboard { top: 52px; width: min(350px,calc(100vw - 18px)); }
+    .score-row { height: 56px; }
+    .score-bar { left: 25px; right: 25px; top: 8px; height: 40px; }
+    .score-label { padding: 0 31px; font-size: 10px; }
+    .score-count { top: 2px; width: 52px; height: 52px; font-size: 18px; }
+    .score-vs { top: -2px; width: 60px; height: 60px; font-size: 20px; }
+    #hint { width: calc(100% - 68px); height: 28px; margin-top: -3px; padding: 0 13px;
+      grid-template-columns: auto minmax(0,1fr); gap: 7px; }
+    .hint-label { display: none; }
+    .hint-viewport { padding-left: 8px; }
+    #hint-text { font-size: 11px; line-height: 15px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #hint-text.scrolling { animation: none; }
+    .hint-signal { animation: none; }
+  }
 
   /* ---- Round HUD control cluster — PERSISTENT during a match so the player
      can Pause or Quit at any time. Continue (⏩, wrapped in an auto-advance
@@ -303,10 +410,23 @@
 
   <div id="hud">
     <div class="brand">Azure Top Trumps <small>WebGL beta</small></div>
-    <div class="counts">CPU <b id="cpu-count">0</b> · You <b id="you-count">0</b></div>
+    <div id="scoreboard" hidden role="group" aria-label="CPU 0 cards versus Player 0 cards">
+      <div class="score-row">
+        <div class="score-bar" aria-hidden="true">
+          <span class="score-label score-label-cpu">CPU<small>Deck</small></span>
+          <span class="score-label score-label-player">Player<small>Deck</small></span>
+        </div>
+        <div class="score-count score-count-cpu"><b id="cpu-count">0</b></div>
+        <div class="score-vs" aria-hidden="true">VS</div>
+        <div class="score-count score-count-player"><b id="you-count">0</b></div>
+      </div>
+      <div id="hint" role="status" aria-live="polite">
+        <span class="hint-signal" aria-hidden="true"></span>
+        <span class="hint-label" aria-hidden="true">Comms</span>
+        <div class="hint-viewport"><span id="hint-text">Loading deck…</span></div>
+      </div>
+    </div>
   </div>
-
-  <div id="hint">Loading deck…</div>
 
   <!-- ===== Welcome / title overlay (DOM, on top of the live WebGL scene) ===== -->
   <div id="welcome" class="w-hidden" aria-label="Azure Top Trumps — start screen">
@@ -335,7 +455,7 @@
     </div>
   </div>
   <div id="w-smoke" aria-hidden="true"></div>
-  <div class="w-credit">DJ Tools · WebGL beta · v0.0-beta</div>
+  <div class="w-credit">DJ Tools · WebGL beta · v0.0.1-beta</div>
 
   <!-- How-to-play panel -->
   <div id="w-howto" role="dialog" aria-label="How to play" aria-modal="true">
@@ -3585,12 +3705,43 @@ function resolveStat(stat, pCard, cCard) {
   /* ---- HUD ------------------------------------------------------------- */
   const elYou  = document.getElementById('you-count');
   const elCpu  = document.getElementById('cpu-count');
+  const elScoreboard = document.getElementById('scoreboard');
   const elHint = document.getElementById('hint');
+  const elHintViewport = elHint && elHint.querySelector('.hint-viewport');
+  const elHintText = document.getElementById('hint-text');
   function updateHUD() {
-    elYou.textContent = G.player.hand.length;
-    elCpu.textContent = G.cpu.hand.length;
+    const playerCards = G.player.hand.length;
+    const cpuCards = G.cpu.hand.length;
+    elYou.textContent = playerCards;
+    elCpu.textContent = cpuCards;
+    if (elScoreboard) {
+      elScoreboard.setAttribute('aria-label', `CPU ${cpuCards} cards versus Player ${playerCards} cards`);
+    }
   }
-  function setHint(msg) { if (elHint) elHint.textContent = msg; }
+  function setMatchHUDVisible(visible) {
+    if (elScoreboard) elScoreboard.hidden = !visible;
+    if (visible) requestAnimationFrame(updateHintOverflow);
+  }
+  function updateHintOverflow() {
+    if (!elHintText || !elHintViewport) return;
+    elHintText.classList.remove('scrolling');
+    elHintViewport.classList.remove('scrolling');
+    elHintText.style.removeProperty('--hint-shift');
+    elHintText.style.removeProperty('--hint-duration');
+    const overflow = elHintText.scrollWidth - elHintViewport.clientWidth;
+    if (overflow <= 2 || REDUCED) return;
+    elHintText.style.setProperty('--hint-shift', `${-overflow}px`);
+    elHintText.style.setProperty('--hint-duration', `${Math.max(6, Math.min(14, 5 + overflow / 28)).toFixed(1)}s`);
+    void elHintText.offsetWidth;
+    elHintViewport.classList.add('scrolling');
+    elHintText.classList.add('scrolling');
+  }
+  function setHint(msg) {
+    if (!elHintText) return;
+    elHintText.textContent = msg;
+    requestAnimationFrame(updateHintOverflow);
+  }
+  window.addEventListener('resize', () => requestAnimationFrame(updateHintOverflow));
 
   /* ---- Round control cluster: persistent match HUD ---------------------
      The cluster lives for the whole match (bottom-centre) so the player can
@@ -3729,6 +3880,7 @@ function resolveStat(stat, pCard, cCard) {
     hideContinue();
     disarmQuit();
     setGamePaused(false);
+    setMatchHUDVisible(true);
     showRoundControls();            // persistent cluster for the whole match
     const deck = shuffle(G.data.cards.slice()).slice(0, DECK_SIZE);
     G.player.hand = []; G.cpu.hand = [];
@@ -4406,6 +4558,7 @@ function resolveStat(stat, pCard, cCard) {
 
   function showWelcome() {
     G.phase = 'welcome';
+    setMatchHUDVisible(false);
     syncDifficultyUI();
     buildHowtoDifficulty();
     if (wHintEl) wHintEl.style.opacity = '0';   // suppress the loading pill under the overlay
