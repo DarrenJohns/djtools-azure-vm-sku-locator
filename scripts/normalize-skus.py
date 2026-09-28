@@ -40,6 +40,7 @@ for item in raw:
         'tier': item.get('tier', ''),
         'size': item.get('size', ''),
         'vCPUs': int(get_cap(caps, 'vCPUs') or 0),
+        'gpuCount': int(get_cap(caps, 'GPUs') or 0),
         'memoryGB': float(get_cap(caps, 'MemoryGB') or 0),
         'maxDataDisks': int(get_cap(caps, 'MaxDataDiskCount') or 0),
         'maxNICs': int(get_cap(caps, 'MaxNetworkInterfaces') or 0),

@@ -1,6 +1,6 @@
 # VM SKU Per Region — Specification
 
-> Version: v1.2.1
+> Version: v1.2.6
 
 ## 1. Overview
 
@@ -33,6 +33,7 @@ This application helps Azure VM administrators browse virtual machine SKU availa
 | `tier` | string | Tier (`Standard`) |
 | `size` | string | Size identifier (e.g., `D2s_v5`) |
 | `vCPUs` | number | Number of virtual CPUs |
+| `gpuCount` | number | Number of GPUs reported by the Azure SKU API (0 for non-GPU SKUs) |
 | `memoryGB` | number | Memory in gigabytes |
 | `maxDataDisks` | number | Maximum data disks |
 | `maxNICs` | number | Maximum network interfaces |
@@ -156,6 +157,8 @@ All UI sections are organized into **6 tabs** using a sticky tab strip below the
 - Expand All / Collapse All / Clear All Pins action buttons
 - Export matching results to CSV
 - **Pinned SKU alternatives**: Select a pinned SKU to rank up to 10 close replacements in the current region
+- Alternative results show GPU count; a GPU-equipped source SKU only returns GPU-equipped candidates
+- Pinning or unpinning an alternative immediately refreshes the shortlist and result list
 - Alternative safeguards exclude retiring families by default, can require equal-or-greater vCPU and memory capacity, and can prefer the same processor
 - Similarity considers capacity, processor, family, disks, NICs, zones, and capability flags; alternatives can be exported to CSV
 
