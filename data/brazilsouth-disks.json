@@ -1,7 +1,7 @@
 {
   "region": "brazilsouth",
   "regionDisplayName": "Brazil South",
-  "lastUpdated": "2026-09-01T05:39:05Z",
+  "lastUpdated": "2026-09-28T09:32:56Z",
   "diskCount": 69,
   "disks": [
     {
@@ -1266,6 +1266,8 @@
       "burstIOPS": 0,
       "burstThroughputMBps": 0.0,
       "zones": [
+        "1",
+        "2",
         "3"
       ],
       "restrictions": []
