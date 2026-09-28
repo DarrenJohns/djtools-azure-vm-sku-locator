@@ -36,7 +36,7 @@ Normalized: { vCPUs: 4, memoryGB: 16, ... }
 ```
 
 ### Key normalized VM fields
-- `vCPUs`, `memoryGB`, `maxDataDisks`, `maxNICs`
+- `vCPUs`, `gpuCount`, `memoryGB`, `maxDataDisks`, `maxNICs`
 - `cpuArchitecture` (x64 or Arm64)
 - `acceleratedNetworking`, `premiumIO`, `ephemeralOSDisk`, `encryptionAtHost`
 - `spotEligible`, `zones`, `restrictions`
@@ -96,6 +96,8 @@ Tabs support keyboard shortcuts (1–6), URL hash routing, and dynamic badge cou
 Users specify minimum requirements (vCPUs, memory, disks, NICs, processor, features) and get ranked matches with percentage scores. Results can be pinned or exported to CSV.
 
 The checker also supports **pinned SKU alternatives** for migration planning. A selected pinned SKU is compared with other SKUs in the current region using weighted similarity across vCPUs, memory, processor type, family, disk/NIC limits, zones, and capability flags. The default safeguards exclude families listed in `data/retirements.json` and require the candidate to provide at least the source VM's vCPU and memory capacity. The top 10 alternatives can be exported independently.
+
+GPU presence is read from the normalized Azure SKU `GPUs` capability, with Azure N-series naming as a fallback for existing static datasets. When the source VM has a GPU, non-GPU SKUs are excluded from alternatives. The GPU column is included in the alternatives table and CSV; pinning an alternative refreshes the list immediately.
 
 ### Pinned Shortlist & Multi-Region Compare
 - Pin SKUs from browse table or checker results
