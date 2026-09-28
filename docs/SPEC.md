@@ -168,8 +168,8 @@ All UI sections are organized into **6 tabs** using a sticky tab strip below the
 - Section prominently displayed when pins are added
 - Export shortlist to CSV
 - Clear all pins button
-- **Pricing comparison**: Fetches live pricing from Azure Retail Prices API, cached per region
-- **Multi-Currency Support**: 17 currencies (USD, EUR, GBP, NZD, AUD, JPY, etc.) — currency selector dropdown, persisted to localStorage
+- **Pricing comparison**: Loads pre-fetched USD Pay-As-You-Go prices for pinned SKUs, cached per region
+- **Pricing refresh scope**: The monthly workflow refreshes USD only; legacy non-USD files may remain in the repository but are not refreshed or used by the app
 - **Pricing Terms**: Term selector pills — PAYG, 1-Year RI, 3-Year RI, 1-Year Savings Plan, 3-Year Savings Plan. RI uses actual per-SKU Azure prices; SP uses industry-average discount multipliers (22%/42% off PAYG)
 - **Multi-Region Compare**: Select up to 5 other regions, shows ✅/❌ availability matrix for pinned SKUs
 

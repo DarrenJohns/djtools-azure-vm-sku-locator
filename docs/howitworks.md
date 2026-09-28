@@ -22,7 +22,7 @@ This is a **single-file HTML web application** with **static JSON data files** �
 |----------|--------|--------|
 | VM SKUs | Azure Resource SKU API | `scripts/normalize-skus.py` |
 | Managed Disk SKUs | Azure Resource SKU API | `scripts/normalize-disks.py` |
-| VM Pricing | Azure Retail Prices API (17 currencies, PAYG + RI) | `scripts/fetch-pricing.py --currency <CODE>` |
+| VM Pricing | Azure Retail Prices API (USD PAYG snapshots) | `scripts/fetch-pricing.py --currency USD --payg-only` |
 | Retirement Dates | [Microsoft Learn retirement and capacity restrictions](https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/retirements-and-capacity-restrictions) | `scripts/update-retirements.py` |
 
 The list of regions to fetch is configured in `config.json`.
@@ -158,14 +158,14 @@ Only web-servable files are deployed (`index.html`, `toptrumps.html`, `toptrumps
 
 ### Data Refresh Pipeline
 ```
-Monthly trigger → fetch VM/disk/pricing (×17 currencies)/retirement data → swa deploy → git commit → push
+Monthly trigger → fetch VM/disk/USD pricing/retirement data → swa deploy → git commit → push
 ```
 
 The refresh pipeline runs on a self-hosted runner with Azure CLI access.
 
 The retirement updater reads the official Microsoft Learn lifecycle tables, maps supported rows to normalized VM-family identifiers, and writes ISO-format dates and lifecycle status to `data/retirements.json`. Unknown rows are reported; a fetch or parse failure fails the refresh rather than silently advancing stale data. Dedicated Host lifecycle entries are excluded because they are not VM SKU families.
 
-The monthly workflow records a `sourceHealth` result in `data/metadata.json` for the region list, VM SKUs, disks, pricing, retirements, history snapshots, and card deck. Each source is marked `success`, `partial`, or `unavailable`, with its last successful full update, a summary, and failed region/currency scopes. Recoverable source failures do not discard the last-known-good file; the clickable app freshness badge shows the refresh date and opens a dialog naming affected sources and scopes. Partial updates do not advance the recorded last successful full-update date.
+The monthly workflow records a `sourceHealth` result in `data/metadata.json` for the region list, VM SKUs, disks, USD pricing, retirements, history snapshots, and card deck. Each source is marked `success`, `partial`, or `unavailable`, with its last successful full update, a summary, and failed region/USD scopes. Recoverable source failures do not discard the last-known-good file; the clickable app freshness badge shows the refresh date and opens a dialog naming affected sources and scopes. Partial updates do not advance the recorded last successful full-update date.
 
 ## Experimental WebGL Top Trumps Build
 

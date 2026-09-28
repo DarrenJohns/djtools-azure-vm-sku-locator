@@ -31,7 +31,7 @@
 | **Find a Match** | Specify your requirements (vCPUs, memory, disks, NICs, features) and get ranked matches with percentage scores |
 | **GPU-aware alternatives** | See recognizable GPU models and reported counts; GPU-based source VMs only receive GPU-equipped recommendations |
 | **Pin & Compare** | Pin SKUs to a shortlist with immediate visual feedback, then compare availability across up to 5 other regions |
-| **Multi-Currency Pricing** | View pricing in 17 currencies (USD, EUR, GBP, NZD, AUD, JPY, and more) — selection persists across sessions |
+| **USD Pricing** | Compare USD Pay-As-You-Go pricing for pinned SKUs across regions |
 | **RI & Savings Plan Pricing** | Compare Pay-As-You-Go, 1/3-year Reserved Instance (actual Azure prices), and 1/3-year Savings Plan (estimated) rates |
 | **Deployment Snippets** | Click any SKU for ready-to-use Azure CLI, PowerShell, and Bicep code |
 | **Retirement Warnings** | Announced and retired VM families are flagged with their status and exact planned retirement date |
@@ -78,13 +78,13 @@ When replacing a VM family approaching retirement, use **Find alternatives to a 
 
 ## 📊 Data Freshness
 
-Data is refreshed **monthly** from Azure APIs and Microsoft Learn. The freshness badge shows the refresh date and whether it completed with errors; click it to see source status and affected regions/currencies. Failed refreshes retain last-known-good data and identify where it may be stale. Older refreshes without source-health records are marked as unverified.
+Data is refreshed **monthly** from Azure APIs and Microsoft Learn. The freshness badge shows the refresh date and whether it completed with errors; click it to see source status and affected regions or scopes. Failed refreshes retain last-known-good data and identify where it may be stale. Older refreshes without source-health records are marked as unverified.
 
 | Data Set | Source |
 |----------|--------|
 | VM SKUs | Azure Resource SKU API |
 | Managed Disk SKUs | Azure Resource SKU API |
-| VM Pricing | Azure Retail Prices API (17 currencies) |
+| VM Pricing | Azure Retail Prices API (USD PAYG; refreshed monthly) |
 | VM Retirement Dates | [Microsoft Learn retirement and capacity restrictions](https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/retirements-and-capacity-restrictions) |
 
 ---
@@ -104,9 +104,8 @@ vm-sku-per-region/
 │   ├── retirements.json          # VM family retirement status and exact dates
 │   ├── <region>.json             # VM SKU data per region
 │   ├── <region>-disks.json       # Disk SKU data per region
-│   ├── <region>-pricing.json     # Pricing data per region (USD, backward compat)
-│   ├── <region>-pricing-<CUR>.json # Pricing data per region per currency
-│   ├── currencies.json           # Currency metadata (code, symbol, decimals)
+│   ├── <region>-pricing.json     # USD PAYG pricing consumed by the app
+│   ├── <region>-pricing-USD.json # USD PAYG pricing source file
 │   └── history/                  # Monthly SKU snapshots for What's New
 ├── scripts/
 │   ├── normalize-skus.py         # VM SKU data pipeline
