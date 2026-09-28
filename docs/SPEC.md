@@ -1,6 +1,6 @@
 # VM SKU Per Region — Specification
 
-> Version: v1.2.6
+> Version: v1.2.8
 
 ## 1. Overview
 
@@ -157,8 +157,8 @@ All UI sections are organized into **6 tabs** using a sticky tab strip below the
 - Expand All / Collapse All / Clear All Pins action buttons
 - Export matching results to CSV
 - **Pinned SKU alternatives**: Select a pinned SKU to rank up to 10 close replacements in the current region
-- Alternative results show GPU count; a GPU-equipped source SKU only returns GPU-equipped candidates
-- Pinning or unpinning an alternative immediately refreshes the shortlist and result list
+- Alternative results show recognized GPU models and API-reported GPU counts when available; a GPU-equipped source SKU only returns GPU-equipped candidates
+- Alternatives are exported directly from this view; pinning alternatives is available from the main SKU table or deployment checker
 - Alternative safeguards exclude retiring families by default, can require equal-or-greater vCPU and memory capacity, and can prefer the same processor
 - Similarity considers capacity, processor, family, disks, NICs, zones, and capability flags; alternatives can be exported to CSV
 

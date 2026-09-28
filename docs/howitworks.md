@@ -97,7 +97,7 @@ Users specify minimum requirements (vCPUs, memory, disks, NICs, processor, featu
 
 The checker also supports **pinned SKU alternatives** for migration planning. A selected pinned SKU is compared with other SKUs in the current region using weighted similarity across vCPUs, memory, processor type, family, disk/NIC limits, zones, and capability flags. The default safeguards exclude families listed in `data/retirements.json` and require the candidate to provide at least the source VM's vCPU and memory capacity. The top 10 alternatives can be exported independently.
 
-GPU presence is read from the normalized Azure SKU `GPUs` capability, with Azure N-series naming as a fallback for existing static datasets. When the source VM has a GPU, non-GPU SKUs are excluded from alternatives. The GPU column is included in the alternatives table and CSV; pinning an alternative refreshes the list immediately.
+GPU presence is read from the normalized Azure SKU `GPUs` capability, with Azure N-series naming as a fallback for existing static datasets. Recognized GPU model identifiers (such as T4, A100, and H100) are extracted from the SKU name; the column displays the model and API-reported count when available, or generic GPU availability otherwise. When the source VM has a GPU, non-GPU SKUs are excluded from alternatives. The GPU column is included in the alternatives table and CSV. Alternatives are exported directly from this view; pinning is handled in the main SKU table or deployment checker.
 
 ### Pinned Shortlist & Multi-Region Compare
 - Pin SKUs from browse table or checker results
