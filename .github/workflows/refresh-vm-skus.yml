@@ -168,10 +168,9 @@ jobs:
         run: |
           $config = Get-Content "config.json" | ConvertFrom-Json
           $regions = $config.targetRegions
-          # Fetch pricing for key currencies only (USD, AUD, NZD), PAYG only to stay within 6h limit.
-          # 3 currencies × 47 regions × 1 pass (PAYG only, skip RI) = ~3 hours of API work.
-          # RI data updates monthly but doesn't change frequently; OK to reuse from prior month.
-          $currencies = @("USD", "AUD", "NZD")
+          # The app and Top Trumps consume USD pricing; refreshing only USD reduces API load.
+          # PAYG only keeps the monthly refresh within the 6h job limit.
+          $currencies = @("USD")
           $successCount = 0
           $failures = @()
           foreach ($currency in $currencies) {
@@ -195,7 +194,7 @@ jobs:
               }
             }
           }
-          # Write USD copies as backward-compatible {region}-pricing.json
+          # Write the USD compatibility file consumed by the app and card builder.
           foreach ($region in $regions) {
             $name = $region.name
             $usdFile = "data/$name-pricing-USD.json"
@@ -207,7 +206,7 @@ jobs:
           "success_count=$successCount" >> $env:GITHUB_OUTPUT
           "fail_count=$($failures.Count)" >> $env:GITHUB_OUTPUT
           "failed=$($failures -join ',')" >> $env:GITHUB_OUTPUT
-          Write-Host "[INFO] Pricing data refreshed for $successCount region/currency pairs; $($failures.Count) failed"
+          Write-Host "[INFO] USD pricing data refreshed for $successCount region/USD pairs; $($failures.Count) failed"
         shell: pwsh
 
       - name: Fetch disk SKU data
@@ -334,10 +333,10 @@ jobs:
             },
             @{
               id = "pricing"; label = "Pricing data"
-              status = Get-SourceStatus $pricingSuccess $pricingFailed ($expectedRegions * 3) $pricingOutcome
+              status = Get-SourceStatus $pricingSuccess $pricingFailed $expectedRegions $pricingOutcome
               checkedAt = $now
-              lastSuccessfulUpdate = if ($pricingSuccess -eq ($expectedRegions * 3) -and $pricingFailed -eq 0 -and $pricingOutcome -eq "success") { $now } else { Get-PreviousSourceUpdate $metadata "pricing" $metadata.lastUpdated }
-              summary = "$pricingSuccess of $($expectedRegions * 3) region/currency pairs refreshed"
+              lastSuccessfulUpdate = if ($pricingSuccess -eq $expectedRegions -and $pricingFailed -eq 0 -and $pricingOutcome -eq "success") { $now } else { Get-PreviousSourceUpdate $metadata "pricing" $metadata.lastUpdated }
+              summary = "$pricingSuccess of $expectedRegions regions refreshed (USD)"
               failures = @("${{ steps.pricing.outputs.failed }}".Split(',', [System.StringSplitOptions]::RemoveEmptyEntries))
             },
             @{

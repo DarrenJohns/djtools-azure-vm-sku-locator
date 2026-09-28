@@ -105,13 +105,13 @@
 - **Single-file architecture** — one HTML file, no frameworks, no build tools, zero dependencies
 - **Pre-fetched data** — monthly refresh via GitHub Actions, no user authentication required
 - **Source health visibility** — the freshness badge identifies partial/unavailable data sources and retains last-known-good files when a refresh fails
-- **Four data sources** — VM SKUs, disk SKUs, pricing (17 currencies × PAYG + RI), and retirement dates
+- **Four data sources** — VM SKUs, disk SKUs, USD PAYG pricing, and retirement dates
 - **AI-assisted development** — Copilot CLI wrote the code, created the repo, set up CI/CD
 - **Hosted on Azure Static Web Apps** — free tier with custom domain and managed SSL
 
 ### Data Pipeline
 - Manual or monthly trigger on a self-hosted runner
-- Fetches VM SKUs, disk SKUs, pricing (PAYG + RI across 17 currencies), and retirement data
+- Fetches VM SKUs, disk SKUs, USD PAYG pricing, and retirement data
 - Normalizes and deploys to Azure Static Web Apps
 - Commits updated data to the repo
 
