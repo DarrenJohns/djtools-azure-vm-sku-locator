@@ -195,6 +195,8 @@ body {
   margin-left: auto;
 }
 .freshness-badge {
+  font-family: var(--font-sans);
+  cursor: pointer;
   font-size: 11px;
   font-weight: 600;
   padding: 3px 10px;
@@ -205,6 +207,21 @@ body {
   gap: 4px;
   margin-left: 8px;
 }
+.freshness-badge:focus-visible { outline: 2px solid var(--brand-primary); outline-offset: 2px; }
+.refresh-details-card { max-width: 520px; padding: 24px 28px; }
+.refresh-details-header { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+.refresh-details-header h4 { flex: 1; margin: 0; }
+.refresh-details-close { width: 32px; height: 32px; border: 1px solid var(--border-default); border-radius: var(--radius-sm); background: var(--bg-layer1); color: var(--text-secondary); font-size: 20px; line-height: 1; cursor: pointer; }
+.refresh-details-close:hover { background: var(--bg-layer2); color: var(--text-primary); }
+.refresh-details-date { margin: 0 0 12px; color: var(--text-secondary); font-size: 13px; }
+.refresh-summary-list { display: grid; }
+.refresh-summary-row { padding: 9px 8px; border-bottom: 1px solid var(--border-default); }
+.refresh-summary-main { display: flex; align-items: baseline; gap: 8px; font-size: 13px; }
+.refresh-summary-icon { width: 17px; flex: 0 0 17px; }
+.refresh-summary-label { font-weight: 600; }
+.refresh-summary-value { margin-left: auto; text-align: right; color: var(--text-secondary); }
+.refresh-summary-error { margin: 6px 0 0 25px; color: var(--status-danger); font-size: 12px; line-height: 1.45; overflow-wrap: anywhere; }
+.refresh-summary-note { margin: 14px 0 0; color: var(--text-tertiary); font-size: 11px; line-height: 1.45; }
 /* Shared overlay card (Top Trumps chooser) */
 .freshness-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 9999; background: rgba(0,0,0,0.4); justify-content: center; align-items: center; }
 .freshness-overlay.show { display: flex; }
@@ -1127,6 +1144,18 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
   </div>
 </div>
 
+<div class="freshness-overlay" id="refresh-details-overlay" onclick="if (event.target === this) closeRefreshDetails()" aria-hidden="true">
+  <div class="freshness-card refresh-details-card" role="dialog" aria-modal="true" aria-labelledby="refresh-details-title" aria-describedby="refresh-details-description">
+    <div class="refresh-details-header">
+      <h4 id="refresh-details-title">📋 Data Refresh Summary</h4>
+      <button class="refresh-details-close" type="button" aria-label="Close refresh summary" onclick="closeRefreshDetails()">&times;</button>
+    </div>
+    <p class="refresh-details-date" id="refresh-details-description"></p>
+    <div class="refresh-summary-list" id="refresh-source-list"></div>
+    <p class="refresh-summary-note">Data is refreshed monthly via GitHub Actions or manual trigger. When a source reports an error, its last-known-good data is retained and may be older than the refresh date.</p>
+  </div>
+</div>
+
 <!-- Sticky Region Selector Bar -->
 <div class="region-bar">
   <label for="region-select">🌏 Azure Region:</label>
@@ -1134,9 +1163,9 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
     <option value="">Loading regions...</option>
   </select>
   <span class="current-region" id="current-region-label"></span>
-  <span class="freshness-badge" id="freshness-badge" style="display:none;" role="status" aria-live="polite">
+  <button class="freshness-badge" id="freshness-badge" type="button" style="display:none;" onclick="openRefreshDetails()" aria-haspopup="dialog" aria-controls="refresh-details-overlay" aria-expanded="false" title="Open data refresh details">
     <span id="freshness-label"></span>
-  </span>
+  </button>
 </div>
 
 <div class="container">
@@ -1513,7 +1542,7 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
   <a href="https://github.com/features/copilot/cli/" target="_blank" rel="noopener noreferrer" style="color:var(--brand-primary);text-decoration:none;font-weight:600;">Learn more ↗</a>
   &nbsp;·&nbsp;
   <a href="https://github.com/darjohn_microsoft/vm-sku-per-region" target="_blank" rel="noopener noreferrer" style="color:var(--brand-primary);text-decoration:none;font-weight:600;">GitHub ↗</a>
-  <div style="margin-top:8px;font-size:11px;color:var(--text-tertiary);opacity:0.7;">v1.2.8</div>
+  <div style="margin-top:8px;font-size:11px;color:var(--text-tertiary);opacity:0.7;">v1.2.9</div>
 </footer>
 
 <div class="toast-container" id="toast-container"></div>
@@ -1906,6 +1935,71 @@ function closeTopTrumpsChooser() {
   if (topTrumpsLaunchTrigger instanceof HTMLElement) topTrumpsLaunchTrigger.focus();
 }
 
+function openRefreshDetails() {
+  const badge = document.getElementById('freshness-badge');
+  const overlay = document.getElementById('refresh-details-overlay');
+  const sources = metadata.sourceHealth && Array.isArray(metadata.sourceHealth.sources)
+    ? metadata.sourceHealth.sources
+    : [];
+  const attemptedAt = metadata.sourceHealth && metadata.sourceHealth.checkedAt
+    ? metadata.sourceHealth.checkedAt
+    : metadata.lastUpdated;
+  const hasErrors = sources.some(source => source.status !== 'success');
+  const date = formatRefreshDate(attemptedAt);
+  document.getElementById('refresh-details-description').textContent = sources.length
+    ? `Refreshed ${date}${hasErrors ? ' (with errors)' : ''}`
+    : 'Refresh status unavailable';
+
+  const list = document.getElementById('refresh-source-list');
+  if (!sources.length) {
+    list.innerHTML = '<div class="refresh-summary-row"><div class="refresh-summary-main"><span class="refresh-summary-icon">⚠️</span><span class="refresh-summary-label">Data source status</span><span class="refresh-summary-value">Unverified</span></div><div class="refresh-summary-error">No per-source refresh details are available for this update.</div></div>';
+  } else {
+    const sourceById = Object.fromEntries(sources.map(source => [source.id, source]));
+    const summaryRows = [
+      { id: 'vmSkus', icon: '🖥️', label: 'VM SKU Data', value: () => `${allSkus.length} SKUs` },
+      { id: 'disks', icon: '💿', label: 'Disk SKU Data', value: () => `${allDisks.length} disks` },
+      { id: 'pricing', icon: '💰', label: 'Pricing Data', value: source => source.summary ? escapeHtml(source.summary.replace('region/currency pairs refreshed', 'pairs refreshed')) : 'Load via pinned shortlist' },
+      { id: 'retirements', icon: '⚠️', label: 'Retirement Alerts', value: source => source.status === 'success' ? 'Included' : 'Unavailable' },
+      { id: 'history', icon: '📊', label: 'History Snapshots', value: source => source.status === 'success' ? 'Archived monthly' : 'Unavailable' },
+      { id: 'regions', icon: '🌐', label: 'Region List', value: () => `${metadata.physicalRegionCount || '—'} regions` }
+    ];
+    list.innerHTML = summaryRows.map(row => {
+      const source = sourceById[row.id];
+      if (!source) return '';
+      const failures = Array.isArray(source.failures) ? source.failures.filter(Boolean) : [];
+      const failureHtml = failures.length
+        ? `<div class="refresh-summary-error"><strong>Errors:</strong> ${failures.map(escapeHtml).join(', ')}</div>`
+        : '';
+      const warning = source.status === 'success' ? '' : ' ⚠️';
+      return `<div class="refresh-summary-row">
+        <div class="refresh-summary-main"><span class="refresh-summary-icon">${row.icon}</span><span class="refresh-summary-label">${row.label}${warning}</span><span class="refresh-summary-value">${row.value(source)}</span></div>
+        ${failureHtml}
+      </div>`;
+    }).join('');
+  }
+
+  overlay.classList.add('show');
+  overlay.setAttribute('aria-hidden', 'false');
+  badge.setAttribute('aria-expanded', 'true');
+  overlay.querySelector('.refresh-details-close').focus();
+}
+
+function closeRefreshDetails() {
+  const overlay = document.getElementById('refresh-details-overlay');
+  overlay.classList.remove('show');
+  overlay.setAttribute('aria-hidden', 'true');
+  const badge = document.getElementById('freshness-badge');
+  badge.setAttribute('aria-expanded', 'false');
+  badge.focus();
+}
+
+function formatRefreshDate(value, includeYear = false) {
+  const date = value ? new Date(value) : null;
+  if (!date || Number.isNaN(date.getTime())) return 'date unknown';
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
+  return `${months[date.getUTCMonth()]} ${date.getUTCDate()}${includeYear ? `, ${date.getUTCFullYear()}` : ''}`;
+}
+
 function launchTopTrumps(edition) {
   const editions = {
     classic: { url: 'toptrumps.html', target: 'azureTopTrumpsClassic' },
@@ -2052,6 +2146,19 @@ function dismissTips() {
 }
 
 document.addEventListener('keydown', function(e) {
+  const refreshOverlay = document.getElementById('refresh-details-overlay');
+  if (refreshOverlay.classList.contains('show')) {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      closeRefreshDetails();
+      return;
+    }
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      refreshOverlay.querySelector('.refresh-details-close').focus();
+      return;
+    }
+  }
   const topTrumpsOverlay = document.getElementById('toptrumps-edition-overlay');
   if (topTrumpsOverlay.classList.contains('show')) {
     if (e.key === 'Escape') {
@@ -2133,7 +2240,7 @@ async function init() {
   try {
     const [regionsResp, metaResp, retirementsResp] = await Promise.all([
       fetch('data/regions.json'),
-      fetch('data/metadata.json'),
+      fetch('data/metadata.json', { cache: 'no-store' }),
       fetch('data/retirements.json').catch(() => null)
     ]);
     allRegions = await regionsResp.json();
@@ -2184,7 +2291,8 @@ function renderFreshness() {
       ? monthNames[lastUpdated.getMonth()] + ' ' + lastUpdated.getFullYear()
       : 'date unknown';
     if (healthUnavailable || sourceOutages.length) {
-      label = '⚠️ Refresh incomplete';
+      const refreshDate = formatRefreshDate(sourceHealth && sourceHealth.checkedAt ? sourceHealth.checkedAt : metadata.lastUpdated);
+      label = healthUnavailable ? '⚠️ Refresh status unknown' : `⚠️ Refreshed ${refreshDate} (with errors)`;
       cls = 'stale';
     } else if (daysSince === null) {
       label = '🔴 Refresh date unknown';
@@ -2201,6 +2309,7 @@ function renderFreshness() {
     }
     badge.querySelector('#freshness-label').textContent = label;
     badge.className = 'freshness-badge ' + cls;
+    badge.setAttribute('aria-label', `${label}. Open data refresh details.`);
     const outageDetails = sourceOutages.slice(0, 5).map(source => {
       const scope = Array.isArray(source.failures) && source.failures.length
         ? `: ${source.failures.slice(0, 5).join(', ')}${source.failures.length > 5 ? ', …' : ''}`

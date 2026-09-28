@@ -27,6 +27,7 @@
 - Show the region dropdown — regions are grouped by geography
 - Point out the KPI dashboard cards: **Total SKUs**, **vCPU Range**, **Memory Range**, **Intel/AMD/ARM counts**
 - Call out the **Data Freshness** badge — color-coded green/yellow/red, with an incomplete warning if any monthly source failed; open it to see affected sources/scopes and selected-region data dates
+- Click an incomplete refresh badge to show the last attempted date and the source errors or failed scopes
 
 ### Browse VM SKUs — "See What's Available" (2 min)
 

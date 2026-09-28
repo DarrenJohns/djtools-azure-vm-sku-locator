@@ -1,6 +1,6 @@
 # VM SKU Per Region — Specification
 
-> Version: v1.2.8
+> Version: v1.2.9
 
 ## 1. Overview
 
@@ -124,8 +124,8 @@ All UI sections are organized into **6 tabs** using a sticky tab strip below the
 - Single region dropdown (default: New Zealand North)
 - Regions grouped by geography in the dropdown
 - Sticky header with data freshness badge (color-coded green/yellow/red)
-- The freshness badge warns when any source is partial/unavailable or the refresh has no source-health record
-- Hovering the freshness badge identifies partial/unavailable sources and affected scopes; failed refreshes retain last-known-good files and are identified as potentially stale
+- The freshness badge shows the refresh date and warns when any source is partial/unavailable or the refresh has no source-health record
+- Clicking the freshness badge opens a dialog listing source status, check dates, summaries, and failed scopes; failed refreshes retain last-known-good files and are identified as potentially stale
 - Freshness shows "Updated {Month} {Year}" (e.g., "Updated April 2026")
 - No-data fallback shows CLI command for regions without pre-fetched data
 

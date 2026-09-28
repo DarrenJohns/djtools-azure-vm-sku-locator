@@ -8,7 +8,7 @@
 >
 > **Browse Azure VM and managed disk SKU availability across every region — filter by processor, family, and features, compare across regions, pin, and see pricing and retirements.**
 
-![Version](https://img.shields.io/badge/version-1.2.8-orange)
+![Version](https://img.shields.io/badge/version-1.2.9-orange)
 ![Azure](https://img.shields.io/badge/Azure-VM_SKUs-0078D4)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Built with](https://img.shields.io/badge/built_with-Copilot_CLI-8957e5)
@@ -78,7 +78,7 @@ When replacing a VM family approaching retirement, use **Find alternatives to a 
 
 ## 📊 Data Freshness
 
-Data is refreshed **monthly** from Azure APIs and Microsoft Learn. The freshness badge flags partial or unavailable sources; hover over it for the affected sources and regions/currencies. Failed refreshes retain last-known-good data and identify where it may be stale. Older refreshes without source-health records are marked as unverified.
+Data is refreshed **monthly** from Azure APIs and Microsoft Learn. The freshness badge shows the refresh date and whether it completed with errors; click it to see source status and affected regions/currencies. Failed refreshes retain last-known-good data and identify where it may be stale. Older refreshes without source-health records are marked as unverified.
 
 | Data Set | Source |
 |----------|--------|
