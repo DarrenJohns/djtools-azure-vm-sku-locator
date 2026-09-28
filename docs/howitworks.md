@@ -165,7 +165,7 @@ The refresh pipeline runs on a self-hosted runner with Azure CLI access.
 
 The retirement updater reads the official Microsoft Learn lifecycle tables, maps supported rows to normalized VM-family identifiers, and writes ISO-format dates and lifecycle status to `data/retirements.json`. Unknown rows are reported; a fetch or parse failure fails the refresh rather than silently advancing stale data. Dedicated Host lifecycle entries are excluded because they are not VM SKU families.
 
-The monthly workflow records a `sourceHealth` result in `data/metadata.json` for the region list, VM SKUs, disks, pricing, retirements, history snapshots, and card deck. Each source is marked `success`, `partial`, or `unavailable`, with its last successful update, a summary, and failed region/currency scopes. Recoverable source failures do not discard the last-known-good file; the app freshness badge warns about incomplete or unverified data, and its hover text names the affected sources and scopes.
+The monthly workflow records a `sourceHealth` result in `data/metadata.json` for the region list, VM SKUs, disks, pricing, retirements, history snapshots, and card deck. Each source is marked `success`, `partial`, or `unavailable`, with its last successful full update, a summary, and failed region/currency scopes. Recoverable source failures do not discard the last-known-good file; the clickable app freshness badge shows the refresh date and opens a dialog naming affected sources and scopes. Partial updates do not advance the recorded last successful full-update date.
 
 ## Experimental WebGL Top Trumps Build
 

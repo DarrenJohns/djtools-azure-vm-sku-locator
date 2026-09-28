@@ -320,7 +320,7 @@ jobs:
               id = "vmSkus"; label = "VM SKU data"
               status = Get-SourceStatus $vmSuccess $vmFailed $expectedRegions $vmOutcome
               checkedAt = $now
-              lastSuccessfulUpdate = if ($vmSuccess -gt 0) { $now } else { Get-PreviousSourceUpdate $metadata "vmSkus" $metadata.lastUpdated }
+              lastSuccessfulUpdate = if ($vmSuccess -eq $expectedRegions -and $vmFailed -eq 0 -and $vmOutcome -eq "success") { $now } else { Get-PreviousSourceUpdate $metadata "vmSkus" $metadata.lastUpdated }
               summary = "$vmSuccess of $expectedRegions regions refreshed"
               failures = @("${{ steps.fetch.outputs.failed }}".Split(',', [System.StringSplitOptions]::RemoveEmptyEntries))
             },
@@ -328,7 +328,7 @@ jobs:
               id = "disks"; label = "Disk SKU data"
               status = Get-SourceStatus $diskSuccess $diskFailed $expectedRegions $diskOutcome
               checkedAt = $now
-              lastSuccessfulUpdate = if ($diskSuccess -gt 0) { $now } else { Get-PreviousSourceUpdate $metadata "disks" $metadata.lastUpdated }
+              lastSuccessfulUpdate = if ($diskSuccess -eq $expectedRegions -and $diskFailed -eq 0 -and $diskOutcome -eq "success") { $now } else { Get-PreviousSourceUpdate $metadata "disks" $metadata.lastUpdated }
               summary = "$diskSuccess of $expectedRegions regions refreshed"
               failures = @("${{ steps.disks.outputs.failed }}".Split(',', [System.StringSplitOptions]::RemoveEmptyEntries))
             },
@@ -336,7 +336,7 @@ jobs:
               id = "pricing"; label = "Pricing data"
               status = Get-SourceStatus $pricingSuccess $pricingFailed ($expectedRegions * 3) $pricingOutcome
               checkedAt = $now
-              lastSuccessfulUpdate = if ($pricingSuccess -gt 0) { $now } else { Get-PreviousSourceUpdate $metadata "pricing" $metadata.lastUpdated }
+              lastSuccessfulUpdate = if ($pricingSuccess -eq ($expectedRegions * 3) -and $pricingFailed -eq 0 -and $pricingOutcome -eq "success") { $now } else { Get-PreviousSourceUpdate $metadata "pricing" $metadata.lastUpdated }
               summary = "$pricingSuccess of $($expectedRegions * 3) region/currency pairs refreshed"
               failures = @("${{ steps.pricing.outputs.failed }}".Split(',', [System.StringSplitOptions]::RemoveEmptyEntries))
             },
@@ -352,7 +352,7 @@ jobs:
               id = "history"; label = "History snapshots"
               status = Get-SourceStatus $vmSuccess $vmFailed $expectedRegions $vmOutcome
               checkedAt = $now
-              lastSuccessfulUpdate = if ($vmSuccess -gt 0) { $now } else { Get-PreviousSourceUpdate $metadata "history" $metadata.lastUpdated }
+              lastSuccessfulUpdate = if ($vmSuccess -eq $expectedRegions -and $vmFailed -eq 0 -and $vmOutcome -eq "success") { $now } else { Get-PreviousSourceUpdate $metadata "history" $metadata.lastUpdated }
               summary = "$vmSuccess of $expectedRegions region snapshots archived"
               failures = @("${{ steps.fetch.outputs.failed }}".Split(',', [System.StringSplitOptions]::RemoveEmptyEntries))
             },
