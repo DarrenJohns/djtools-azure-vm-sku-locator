@@ -765,7 +765,7 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
 .pricing-table .price-cell.cheapest { color: var(--status-success); font-weight: 700; }
 .pricing-note { font-size: 11px; color: var(--text-tertiary); margin-top: 6px; }
 .pricing-loading { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); padding: 8px 0; }
-.pin-btn { cursor: pointer; font-size: 16px; opacity: 0.3; transition: all 0.15s; background: none; border: none; padding: 0 2px; }
+.pin-btn { cursor: pointer; font-size: 16px; opacity: 0.55; transition: all 0.15s; background: none; border: none; padding: 0 2px; min-width: 28px; min-height: 28px; }
 .pin-btn:hover { opacity: 0.7; transform: scale(1.2); }
 .pin-btn.pinned { opacity: 1; color: var(--brand-primary); }
 /* ── Lifecycle Badges ── */
@@ -1306,7 +1306,7 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
         <div class="checker-results" id="checker-results"></div>
         <div class="similarity-panel">
           <h4 style="font-size:14px;margin:0 0 4px;">🔁 Find alternatives to a pinned SKU</h4>
-          <p class="similarity-help">Select a pinned VM to find close replacements in the current region. Active SKUs are preferred, and retiring families are excluded by default.</p>
+          <p class="similarity-help">Select a pinned VM to find close replacements in the current region. GPU-equipped source VMs only show GPU-equipped alternatives. Active SKUs are preferred, and retiring families are excluded by default.</p>
           <div class="similarity-form">
             <div class="form-field">
               <label for="similarity-source">Pinned SKU</label>
@@ -1513,7 +1513,7 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
   <a href="https://github.com/features/copilot/cli/" target="_blank" rel="noopener noreferrer" style="color:var(--brand-primary);text-decoration:none;font-weight:600;">Learn more ↗</a>
   &nbsp;·&nbsp;
   <a href="https://github.com/darjohn_microsoft/vm-sku-per-region" target="_blank" rel="noopener noreferrer" style="color:var(--brand-primary);text-decoration:none;font-weight:600;">GitHub ↗</a>
-  <div style="margin-top:8px;font-size:11px;color:var(--text-tertiary);opacity:0.7;">v1.2.5</div>
+  <div style="margin-top:8px;font-size:11px;color:var(--text-tertiary);opacity:0.7;">v1.2.6</div>
 </footer>
 
 <div class="toast-container" id="toast-container"></div>
@@ -1751,9 +1751,10 @@ async function switchRegionAndRecheck(regionName) {
 const columns = [
   { key: '_pin', label: '📌', width: '36px', render: (v, s) => {
     const pinned = pinnedSkus.has(s.size);
-    return `<button class="pin-btn${pinned ? ' pinned' : ''}" onclick="event.stopPropagation();togglePin('${escapeHtml(s.size)}')" title="${pinned ? 'Unpin' : 'Pin to shortlist'}">${pinned ? '📌' : '○'}</button>`;
+    return `<button class="pin-btn${pinned ? ' pinned' : ''}" onclick="event.stopPropagation();togglePin('${escapeHtml(s.size)}')" title="${pinned ? 'Unpin' : 'Pin to shortlist'}" aria-label="${pinned ? 'Unpin' : 'Pin'} ${escapeHtml(s.size)}">${pinned ? '📌' : '○'}</button>`;
   }},
   { key: 'size', label: 'Size', render: (v, s) => `<a href="#" onclick="event.preventDefault();openSnippetModal('${escapeHtml(v)}')" style="color:var(--brand-primary);text-decoration:none;font-weight:600;" title="View CLI/Bicep snippets">${escapeHtml(v)}</a>${getLifecycleBadge(s)}` },
+  { key: 'gpuCount', label: 'GPUs', width: '55px', render: (v, s) => getGpuDisplay(s) },
   { key: '_processor', label: 'Processor', width: '75px', render: (v, s) => getProcessorType(s.size) },
   { key: 'vCPUs', label: 'vCPUs', width: '65px' },
   { key: 'memoryGB', label: 'Memory (GB)', width: '90px' },
@@ -1773,6 +1774,18 @@ function getProcessorType(size) {
   if (/p/i.test(suffixes)) return 'ARM';
   if (/a/i.test(suffixes)) return 'AMD';
   return 'Intel';
+}
+
+function isGpuSku(sku) {
+  return Number(sku.gpuCount) > 0 ||
+    /^N[A-Z0-9]/i.test(sku.size || '') ||
+    /^standardn/i.test(sku.family || '');
+}
+
+function getGpuDisplay(sku) {
+  const gpuCount = Number(sku.gpuCount);
+  if (Number.isFinite(gpuCount) && gpuCount > 0) return String(gpuCount);
+  return isGpuSku(sku) ? 'GPU' : '—';
 }
 
 const hiddenColumns = new Set();
@@ -2879,6 +2892,7 @@ function togglePin(size) {
   }
   renderShortlist();
   renderTable();
+  if (document.getElementById('similarity-source').value) runSimilarSkuSearch();
 }
 
 function renderShortlist() {
@@ -2947,7 +2961,7 @@ function exportShortlistCsv() {
   if (!pinned.length) { showToast('No pinned SKUs to export', 'error'); return; }
   const headers = columns.filter(c => c.key !== '_pin').map(c => c.label);
   const rows = pinned.map(s => columns.filter(c => c.key !== '_pin').map(c => {
-    const v = s[c.key];
+    const v = c.key === 'gpuCount' ? getGpuDisplay(s) : s[c.key];
     if (Array.isArray(v)) return v.join(';');
     return v != null ? String(v) : '';
   }));
@@ -3295,6 +3309,7 @@ function runSimilarSkuSearch() {
   const candidates = allSkus.filter(candidate => {
     if (candidate.size === source.size) return false;
     if (pinnedSkus.has(candidate.size)) return false;
+    if (isGpuSku(source) && !isGpuSku(candidate)) return false;
     if (activeOnly && isRetiringSku(candidate)) return false;
     if (preserveCapacity && (candidate.vCPUs < source.vCPUs || candidate.memoryGB < source.memoryGB)) return false;
     return true;
@@ -3322,21 +3337,24 @@ function runSimilarSkuSearch() {
 
   lastSimilarResults = scored.slice(0, 10);
   if (!lastSimilarResults.length) {
-    container.innerHTML = `<div class="checker-summary no-matches">No alternatives meet the selected safeguards. Try allowing lower capacity or including retiring families.</div>`;
+    const gpuNote = isGpuSku(source) ? ' No GPU-equipped alternatives meet these safeguards.' : '';
+    container.innerHTML = `<div class="checker-summary no-matches">No alternatives meet the selected safeguards.${gpuNote} Try allowing lower capacity or including retiring families.</div>`;
     return;
   }
+  const gpuNote = isGpuSku(source) ? ' GPU-equipped alternatives only.' : '';
   const retirementNote = activeOnly ? ' Retiring families excluded.' : '';
-  container.innerHTML = `<div class="checker-summary has-matches">${lastSimilarResults.length} closest alternatives for ${escapeHtml(source.size)}.${retirementNote}</div>` +
+  container.innerHTML = `<div class="checker-summary has-matches">${lastSimilarResults.length} closest alternatives for ${escapeHtml(source.size)}.${gpuNote}${retirementNote}</div>` +
     buildSimilarityTable(lastSimilarResults, source);
 }
 
 function buildSimilarityTable(rows, source) {
   const sourceZones = source.zones && source.zones.length ? escapeHtml(source.zones.join(', ')) : '—';
   const sourceProcessor = getProcessorType(source.size);
-  let html = '<table class="checker-table"><thead><tr><th style="width:36px;">📌</th><th>Size</th><th>Processor</th><th>vCPUs</th><th>Memory (GB)</th><th>Max Data Disks</th><th>Max NICs</th><th>Zones</th><th>Similarity</th></tr></thead><tbody>';
+  let html = '<table class="checker-table"><thead><tr><th style="width:36px;">📌</th><th>Size</th><th>GPUs</th><th>Processor</th><th>vCPUs</th><th>Memory (GB)</th><th>Max Data Disks</th><th>Max NICs</th><th>Zones</th><th>Similarity</th></tr></thead><tbody>';
   html += `<tr class="similarity-source-row" title="Selected pinned SKU — comparison baseline">
     <td>📍</td>
     <td><strong>${escapeHtml(source.size)}</strong> <span style="font-size:11px;color:var(--text-secondary);">(selected)</span>${getLifecycleBadge(source)}</td>
+    <td>${getGpuDisplay(source)}</td>
     <td>${sourceProcessor}</td>
     <td>${source.vCPUs}</td><td>${source.memoryGB}</td><td>${source.maxDataDisks}</td><td>${source.maxNICs}</td>
     <td>${sourceZones}</td>
@@ -3348,8 +3366,9 @@ function buildSimilarityTable(rows, source) {
     const zones = s.zones && s.zones.length ? escapeHtml(s.zones.join(', ')) : '—';
     const pinned = pinnedSkus.has(s.size);
     html += `<tr>
-      <td><button class="pin-btn${pinned ? ' pinned' : ''}" onclick="event.stopPropagation();togglePin('${escapeHtml(s.size)}')" title="${pinned ? 'Unpin' : 'Pin to shortlist'}">${pinned ? '📌' : '○'}</button></td>
+      <td><button class="pin-btn${pinned ? ' pinned' : ''}" onclick="event.stopPropagation();togglePin('${escapeHtml(s.size)}')" title="${pinned ? 'Unpin' : 'Pin to shortlist'}" aria-label="${pinned ? 'Unpin' : 'Pin'} ${escapeHtml(s.size)}">${pinned ? '📌' : '○'}</button></td>
       <td><a href="#" onclick="event.preventDefault();openSnippetModal('${escapeHtml(s.size)}')" style="color:var(--brand-primary);text-decoration:none;font-weight:600;">${escapeHtml(s.size)}</a>${getLifecycleBadge(s)}</td>
+      <td>${getGpuDisplay(s)}</td>
       <td>${getProcessorType(s.size)}${getProcessorType(s.size) === getProcessorType(source.size) ? ' ✓' : ''}</td>
       <td>${s.vCPUs}</td><td>${s.memoryGB}</td><td>${s.maxDataDisks}</td><td>${s.maxNICs}</td>
       <td>${zones}</td>
@@ -3363,10 +3382,10 @@ function exportSimilarSkuCsv() {
   if (!lastSimilarResults.length) { showToast('Find alternatives first', 'warning'); return; }
   const sourceSize = document.getElementById('similarity-source').value || 'selected-sku';
   const safeSourceSize = sourceSize.replace(/[^a-z0-9._-]+/gi, '-');
-  const headers = ['Size', 'Processor', 'vCPUs', 'Memory (GB)', 'Max Data Disks', 'Max NICs', 'Zones', 'Similarity'];
+  const headers = ['Size', 'GPUs', 'Processor', 'vCPUs', 'Memory (GB)', 'Max Data Disks', 'Max NICs', 'Zones', 'Similarity'];
   const rows = lastSimilarResults.map(r => {
     const s = r.sku;
-    return [s.size, getProcessorType(s.size), s.vCPUs, s.memoryGB, s.maxDataDisks, s.maxNICs, (s.zones || []).join(';'), r.score + '%'];
+    return [s.size, getGpuDisplay(s), getProcessorType(s.size), s.vCPUs, s.memoryGB, s.maxDataDisks, s.maxNICs, (s.zones || []).join(';'), r.score + '%'];
   });
   const csv = [headers, ...rows].map(row => row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -3592,7 +3611,7 @@ function exportCsv() {
   if (!filteredSkus.length) { showToast('No data to export', 'warning'); return; }
   const headers = columns.map(c => c.label);
   const rows = filteredSkus.map(s => columns.map(c => {
-    const v = s[c.key];
+    const v = c.key === 'gpuCount' ? getGpuDisplay(s) : s[c.key];
     if (Array.isArray(v)) return v.join('; ');
     if (typeof v === 'boolean') return v ? 'Yes' : 'No';
     if (v == null) return '';
