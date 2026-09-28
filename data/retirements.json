@@ -1,60 +1,251 @@
 {
-  "lastUpdated": "2025-07-14",
-  "source": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes-retirement",
+  "lastUpdated": "2026-09-28",
+  "source": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/retirements-and-capacity-restrictions",
   "retirements": [
     {
-      "family": "standardav2family",
-      "name": "Av2-series",
-      "retireDate": "November 2028",
-      "learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes-previous-gen"
+      "family": "standardamv2family",
+      "name": "Av2/Amv2-series",
+      "retireDate": "2028-11-15",
+      "retirementStatus": "Announced",
+      "learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/retirement/retired-sizes-modernization-guide"
     },
     {
-      "family": "standardamv2family",
-      "name": "Amv2-series",
-      "retireDate": "November 2028",
-      "learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes-previous-gen"
+      "family": "standardav2family",
+      "name": "Av2/Amv2-series",
+      "retireDate": "2028-11-15",
+      "retirementStatus": "Announced",
+      "learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/retirement/retired-sizes-modernization-guide"
     },
     {
       "family": "standardbsfamily",
-      "name": "B v1-series",
-      "retireDate": "November 2028",
-      "learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes-previous-gen"
+      "name": "B-series (V1)",
+      "retireDate": "2028-11-15",
+      "retirementStatus": "Announced",
+      "learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/retirement/retired-sizes-modernization-guide"
     },
     {
-      "family": "standarddsfamily",
-      "name": "Ds-series",
-      "retireDate": "November 2028",
-      "learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes-previous-gen"
+      "family": "standarddcaccv5family",
+      "name": "DCas_cc_v5/DCads_cc_v5-series",
+      "retireDate": "2026-09-01",
+      "retirementStatus": "Retired",
+      "learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/retirement/dcccv5-series-retirement"
+    },
+    {
+      "family": "standarddcadccv5family",
+      "name": "DCas_cc_v5/DCads_cc_v5-series",
+      "retireDate": "2026-09-01",
+      "retirementStatus": "Retired",
+      "learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/retirement/dcccv5-series-retirement"
+    },
+    {
+      "family": "standarddcsv2family",
+      "name": "DCsv2-series",
+      "retireDate": "2026-06-30",
+      "retirementStatus": "Retired",
+      "learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/retirement/dcsv2-series-retirement"
+    },
+    {
+      "family": "standarddcsv3family",
+      "name": "DCsv3/DCdsv3-series",
+      "retireDate": "2029-10-31",
+      "retirementStatus": "Announced",
+      "learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/retirement/dcsv3-series-retirement"
+    },
+    {
+      "family": "standardddcsv3family",
+      "name": "DCsv3/DCdsv3-series",
+      "retireDate": "2029-10-31",
+      "retirementStatus": "Announced",
+      "learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/retirement/dcsv3-series-retirement"
     },
     {
       "family": "standarddfamily",
       "name": "D-series",
-      "retireDate": "November 2028",
-      "learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes-previous-gen"
+      "retireDate": "2028-05-01",
+      "retirementStatus": "Announced",
+      "learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/retirement/retired-sizes-modernization-guide"
+    },
+    {
+      "family": "standarddsfamily",
+      "name": "Ds-series",
+      "retireDate": "2028-05-01",
+      "retirementStatus": "Announced",
+      "learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/retirement/retired-sizes-modernization-guide"
     },
     {
       "family": "standarddsv2family",
       "name": "Dsv2-series",
-      "retireDate": "November 2028",
-      "learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes-previous-gen"
+      "retireDate": "2028-05-01",
+      "retirementStatus": "Announced",
+      "learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/retirement/retired-sizes-modernization-guide"
     },
     {
       "family": "standarddsv2promofamily",
-      "name": "Dsv2 Promo-series",
-      "retireDate": "November 2028",
-      "learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes-previous-gen"
+      "name": "Dsv2-series",
+      "retireDate": "2028-05-01",
+      "retirementStatus": "Announced",
+      "learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/retirement/retired-sizes-modernization-guide"
+    },
+    {
+      "family": "standarddsv3family",
+      "name": "Dsv3-series",
+      "retireDate": "2029-11-15",
+      "retirementStatus": "Announced",
+      "learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/retirement/retired-sizes-modernization-guide"
     },
     {
       "family": "standarddv2family",
       "name": "Dv2-series",
-      "retireDate": "November 2028",
-      "learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes-previous-gen"
+      "retireDate": "2028-05-01",
+      "retirementStatus": "Announced",
+      "learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/retirement/retired-sizes-modernization-guide"
     },
     {
       "family": "standarddv2promofamily",
-      "name": "Dv2 Promo-series",
-      "retireDate": "November 2028",
-      "learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes-previous-gen"
+      "name": "Dv2-series",
+      "retireDate": "2028-05-01",
+      "retirementStatus": "Announced",
+      "learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/retirement/retired-sizes-modernization-guide"
+    },
+    {
+      "family": "standarddv3family",
+      "name": "Dv3-series",
+      "retireDate": "2029-11-15",
+      "retirementStatus": "Announced",
+      "learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/retirement/retired-sizes-modernization-guide"
+    },
+    {
+      "family": "standardecaccv5family",
+      "name": "ECas_cc_v5/ECads_cc_v5-series",
+      "retireDate": "2026-09-01",
+      "retirementStatus": "Retired",
+      "learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/retirement/ecccv5-series-retirement"
+    },
+    {
+      "family": "standardecadccv5family",
+      "name": "ECas_cc_v5/ECads_cc_v5-series",
+      "retireDate": "2026-09-01",
+      "retirementStatus": "Retired",
+      "learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/retirement/ecccv5-series-retirement"
+    },
+    {
+      "family": "standardesv3family",
+      "name": "Esv3-series",
+      "retireDate": "2029-11-15",
+      "retirementStatus": "Announced",
+      "learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/retirement/retired-sizes-modernization-guide"
+    },
+    {
+      "family": "standardev3family",
+      "name": "Ev3-series",
+      "retireDate": "2029-11-15",
+      "retirementStatus": "Announced",
+      "learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/retirement/retired-sizes-modernization-guide"
+    },
+    {
+      "family": "standardffamily",
+      "name": "F-series",
+      "retireDate": "2028-11-15",
+      "retirementStatus": "Announced",
+      "learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/retirement/retired-sizes-modernization-guide"
+    },
+    {
+      "family": "standardfsfamily",
+      "name": "Fs-series",
+      "retireDate": "2028-11-15",
+      "retirementStatus": "Announced",
+      "learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/retirement/retired-sizes-modernization-guide"
+    },
+    {
+      "family": "standardfsv2family",
+      "name": "Fsv2-series",
+      "retireDate": "2028-11-15",
+      "retirementStatus": "Announced",
+      "learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/retirement/retired-sizes-modernization-guide"
+    },
+    {
+      "family": "standardgfamily",
+      "name": "G-series",
+      "retireDate": "2028-11-15",
+      "retirementStatus": "Announced",
+      "learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/retirement/retired-sizes-modernization-guide"
+    },
+    {
+      "family": "standardgsfamily",
+      "name": "Gs-series",
+      "retireDate": "2028-11-15",
+      "retirementStatus": "Announced",
+      "learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/retirement/retired-sizes-modernization-guide"
+    },
+    {
+      "family": "standardhbrsv2family",
+      "name": "HBv2-series",
+      "retireDate": "2027-05-31",
+      "retirementStatus": "Announced",
+      "learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/retirement/hbv2-series-retirement"
+    },
+    {
+      "family": "standardhcsfamily",
+      "name": "HC-series",
+      "retireDate": "2027-05-31",
+      "retirementStatus": "Announced",
+      "learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/retirement/hc-series-retirement"
+    },
+    {
+      "family": "standardlsfamily",
+      "name": "Ls-series",
+      "retireDate": "2028-05-01",
+      "retirementStatus": "Announced",
+      "learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/retirement/retired-sizes-modernization-guide"
+    },
+    {
+      "family": "standardlsv2family",
+      "name": "Lsv2-series",
+      "retireDate": "2028-11-15",
+      "retirementStatus": "Announced",
+      "learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/retirement/retired-sizes-modernization-guide"
+    },
+    {
+      "family": "standardmidsmediummemoryv2family",
+      "name": "Standard_M192ids_v2",
+      "retireDate": "2027-03-31",
+      "retirementStatus": "Announced",
+      "learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/retirement/msv2-mdsv2-retirement"
+    },
+    {
+      "family": "standardmismediummemoryv2family",
+      "name": "Standard_M192is_v2",
+      "retireDate": "2027-03-31",
+      "retirementStatus": "Announced",
+      "learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/retirement/msv2-mdsv2-retirement"
+    },
+    {
+      "family": "standardncsv3family",
+      "name": "NCv3-Series",
+      "retireDate": "2025-09-30",
+      "retirementStatus": "Retired",
+      "learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/retirement/ncv3-retirement"
+    },
+    {
+      "family": "standardnpsfamily",
+      "name": "NP-series",
+      "retireDate": "2027-05-31",
+      "retirementStatus": "Announced",
+      "learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/retirement/np-series-retirement"
+    },
+    {
+      "family": "standardnvsv3family",
+      "name": "NVv3-series",
+      "retireDate": "2026-09-30",
+      "retirementStatus": "Announced",
+      "learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/retirement/nvv3-series-retirement"
+    },
+    {
+      "family": "standardnvsv4family",
+      "name": "NVv4-series",
+      "retireDate": "2026-09-30",
+      "retirementStatus": "Announced",
+      "learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/retirement/nvv4-retirement"
     }
   ]
 }

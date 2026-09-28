@@ -63,9 +63,15 @@ This application helps Azure VM administrators browse virtual machine SKU availa
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `family` | string | VM family name being retired |
-| `retirementDate` | string | Planned retirement date |
-| `replacementFamily` | string | Recommended replacement family |
+| `lastUpdated` | string | Date the source data was refreshed (ISO 8601 date) |
+| `source` | string | Microsoft Learn source page |
+| `family` | string | Lowercase VM family key used in normalized SKU data |
+| `name` | string | Published VM series or SKU name |
+| `retireDate` | string | Exact planned retirement date (`YYYY-MM-DD`) |
+| `retirementStatus` | string | `Announced` or `Retired` |
+| `learnMoreUrl` | string | Series modernization or retirement guidance |
+
+The refresh maps official retirement rows to explicit SKU-family keys. Dedicated Host SKU lifecycle rows are not VM families and are excluded. The UI displays the status and exact date on each matching SKU.
 
 ### History Snapshots (`data/history/`)
 
@@ -82,6 +88,7 @@ Target regions for data refresh. Defines which Azure regions are included in the
 | `lastUpdated` | ISO 8601 | Timestamp of last data refresh |
 | `lastUpdatedDisplay` | string | Human-readable month (e.g., "April 2026") |
 | `availableRegions` | string[] | Regions with data files |
+| `sourceHealth` | object | Per-source refresh status, check time, last successful update, completeness, summaries, and failed regions/currencies |
 
 ## 4. Data Pipeline
 
@@ -116,6 +123,8 @@ All UI sections are organized into **6 tabs** using a sticky tab strip below the
 - Single region dropdown (default: New Zealand North)
 - Regions grouped by geography in the dropdown
 - Sticky header with data freshness badge (color-coded green/yellow/red)
+- The freshness badge warns when any source is partial/unavailable or the refresh has no source-health record
+- Hovering the freshness badge identifies partial/unavailable sources and affected scopes; failed refreshes retain last-known-good files and are identified as potentially stale
 - Freshness shows "Updated {Month} {Year}" (e.g., "Updated April 2026")
 - No-data fallback shows CLI command for regions without pre-fetched data
 
@@ -129,13 +138,13 @@ All UI sections are organized into **6 tabs** using a sticky tab strip below the
 - Compares current data against archived history snapshots
 
 ### 🔍 See What's Available
-- **Retirement summary banner**: Above the filters, shows the count of VM SKUs flagged for retirement in the selected region, the family and versions affected, and the next upcoming retirement date (falls back to a "no retirements" message when none apply)
+- **Retirement summary banner**: Above the filters, shows the count of announced/retired VM SKUs in the selected region, affected families and statuses, and the next planned retirement date (falls back to a "no retirements" message when none apply)
 - **Filters**: Text search, Family, Size, Version, Architecture, vCPU Range, Lifecycle Status (Flagged for Retirement / Not Flagged for Retirement) dropdowns, Reset button
 - **SKU Table**: Results grouped by family with collapsible letter sections
   - Sortable by clicking column headers
   - Column Chooser (⚙️ Columns) lets users show/hide columns; Pin and Size columns always visible
   - Feature indicators: AccelNet, PremIO, EphOS, EncHost, Spot
-  - ⚠️ Retiring badge on SKUs from families being retired
+  - ⚠️ Announced/retired badge with the exact planned date on affected SKUs
   - Expand All / Collapse All / Clear All Pins action buttons
 - **CSV export** of currently filtered results (filename includes region and date)
 - **Region proximity suggestions**: When filters return 0 results, suggests nearby regions with matching SKUs

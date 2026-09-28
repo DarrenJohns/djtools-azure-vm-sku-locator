@@ -23,7 +23,7 @@ This is a **single-file HTML web application** with **static JSON data files** �
 | VM SKUs | Azure Resource SKU API | `scripts/normalize-skus.py` |
 | Managed Disk SKUs | Azure Resource SKU API | `scripts/normalize-disks.py` |
 | VM Pricing | Azure Retail Prices API (17 currencies, PAYG + RI) | `scripts/fetch-pricing.py --currency <CODE>` |
-| Retirement Dates | Azure Updates page | `scripts/update-retirements.py` |
+| Retirement Dates | [Microsoft Learn retirement and capacity restrictions](https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/retirements-and-capacity-restrictions) | `scripts/update-retirements.py` |
 
 The list of regions to fetch is configured in `config.json`.
 
@@ -69,7 +69,7 @@ The app loads region data on demand — when a user selects a region, it fetches
 On initialization, the app loads:
 - `data/regions.json` — all available Azure regions
 - `data/metadata.json` — last refresh timestamp and region availability
-- `data/retirements.json` — VM family retirement data
+- `data/retirements.json` — VM family keys, announced/retired status, exact planned dates, and Learn guidance URLs
 
 ## Sections & Features
 
@@ -90,7 +90,7 @@ Tabs support keyboard shortcuts (1–6), URL hash routing, and dynamic badge cou
 - Filters: text search, size, version, family type, vCPU range, processor type, lifecycle status (flagged for retirement / not flagged)
 - Column chooser to show/hide columns
 - Click any SKU for deployment snippet modal (CLI, PowerShell, Bicep)
-- Retirement badges on SKUs from families being retired
+- Retirement badges show whether a family is announced or retired and its exact planned retirement date
 
 ### Find a Match (Deployment Checker)
 Users specify minimum requirements (vCPUs, memory, disks, NICs, processor, features) and get ranked matches with percentage scores. Results can be pinned or exported to CSV.
@@ -160,6 +160,10 @@ Monthly trigger → fetch VM/disk/pricing (×17 currencies)/retirement data → 
 ```
 
 The refresh pipeline runs on a self-hosted runner with Azure CLI access.
+
+The retirement updater reads the official Microsoft Learn lifecycle tables, maps supported rows to normalized VM-family identifiers, and writes ISO-format dates and lifecycle status to `data/retirements.json`. Unknown rows are reported; a fetch or parse failure fails the refresh rather than silently advancing stale data. Dedicated Host lifecycle entries are excluded because they are not VM SKU families.
+
+The monthly workflow records a `sourceHealth` result in `data/metadata.json` for the region list, VM SKUs, disks, pricing, retirements, history snapshots, and card deck. Each source is marked `success`, `partial`, or `unavailable`, with its last successful update, a summary, and failed region/currency scopes. Recoverable source failures do not discard the last-known-good file; the app freshness badge warns about incomplete or unverified data, and its hover text names the affected sources and scopes.
 
 ## Experimental WebGL Top Trumps Build
 

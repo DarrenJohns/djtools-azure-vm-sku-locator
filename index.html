@@ -204,9 +204,8 @@ body {
   align-items: center;
   gap: 4px;
   margin-left: 8px;
-  cursor: pointer;
 }
-/* Freshness detail overlay */
+/* Shared overlay card (Top Trumps chooser) */
 .freshness-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 9999; background: rgba(0,0,0,0.4); justify-content: center; align-items: center; }
 .freshness-overlay.show { display: flex; }
 .freshness-card {
@@ -215,16 +214,13 @@ body {
   border-radius: var(--radius-lg);
   box-shadow: 0 8px 30px rgba(0,0,0,0.25);
   padding: 24px 28px;
-  max-width: 420px;
+  max-width: 620px;
   width: 90%;
+  max-height: 85vh;
+  overflow-y: auto;
   animation: fadeInUp 0.2s ease;
 }
 .freshness-card h4 { font-size: 15px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
-.freshness-card table { width: 100%; font-size: 13px; border-collapse: collapse; }
-.freshness-card td { padding: 8px 10px; border-bottom: 1px solid var(--border-subtle); vertical-align: middle; }
-.freshness-card td:first-child { font-weight: 600; white-space: nowrap; }
-.freshness-card td:last-child { text-align: right; color: var(--text-secondary); }
-.freshness-card .note { font-size: 11px; color: var(--text-tertiary); margin-top: 14px; line-height: 1.5; }
 .freshness-badge.fresh { background: #e6f4ea; color: #137333; border: 1px solid #a8dab5; }
 .freshness-badge.aging { background: #fef7e0; color: #7c6900; border: 1px solid #f9d849; }
 .freshness-badge.stale { background: #fce8e6; color: #c5221f; border: 1px solid #f28b82; }
@@ -1138,17 +1134,9 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
     <option value="">Loading regions...</option>
   </select>
   <span class="current-region" id="current-region-label"></span>
-  <span class="freshness-badge" id="freshness-badge" style="display:none;" onclick="toggleFreshnessFlyout(event)">
+  <span class="freshness-badge" id="freshness-badge" style="display:none;" role="status" aria-live="polite">
     <span id="freshness-label"></span>
   </span>
-</div>
-
-<!-- Freshness Detail Overlay -->
-<div class="freshness-overlay" id="freshness-overlay" onclick="closeFreshnessFlyout()">
-  <div class="freshness-card" onclick="event.stopPropagation()">
-    <h4>📋 Data Refresh Summary <button class="btn btn-outline btn-sm" style="margin-left:auto;" onclick="closeFreshnessFlyout()">✕</button></h4>
-    <div id="freshness-detail"></div>
-  </div>
 </div>
 
 <div class="container">
@@ -1525,7 +1513,7 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
   <a href="https://github.com/features/copilot/cli/" target="_blank" rel="noopener noreferrer" style="color:var(--brand-primary);text-decoration:none;font-weight:600;">Learn more ↗</a>
   &nbsp;·&nbsp;
   <a href="https://github.com/darjohn_microsoft/vm-sku-per-region" target="_blank" rel="noopener noreferrer" style="color:var(--brand-primary);text-decoration:none;font-weight:600;">GitHub ↗</a>
-  <div style="margin-top:8px;font-size:11px;color:var(--text-tertiary);opacity:0.7;">v1.2.2</div>
+  <div style="margin-top:8px;font-size:11px;color:var(--text-tertiary);opacity:0.7;">v1.2.5</div>
 </footer>
 
 <div class="toast-container" id="toast-container"></div>
@@ -1696,10 +1684,24 @@ const workloads = [
 
 let retirementFamilies = {};
 
+function formatRetirementDate(date) {
+  if (!date) return 'date not specified';
+  const parsed = new Date(`${date}T00:00:00Z`);
+  if (Number.isNaN(parsed.getTime())) return date;
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    timeZone: 'UTC'
+  }).format(parsed);
+}
+
 function getLifecycleBadge(sku) {
   if (sku.family && retirementFamilies[sku.family.toLowerCase()]) {
     const r = retirementFamilies[sku.family.toLowerCase()];
-    return `<span class="lifecycle-badge retiring" title="Retiring ${r.date}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:-1px;margin-right:2px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Retiring</span>`;
+    const status = r.status === 'Retired' ? 'Retired' : 'Retiring';
+    const date = formatRetirementDate(r.date);
+    return `<span class="lifecycle-badge retiring"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:-1px;margin-right:2px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${escapeHtml(status)} ${escapeHtml(date)}</span>`;
   }
   return '';
 }
@@ -2121,7 +2123,12 @@ async function init() {
         const retirementData = await retirementsResp.json();
         retirementFamilies = {};
         for (const r of retirementData.retirements || []) {
-          retirementFamilies[r.family.toLowerCase()] = { name: r.name, date: r.retireDate, learnMoreUrl: r.learnMoreUrl };
+          retirementFamilies[r.family.toLowerCase()] = {
+            name: r.name,
+            date: r.retireDate,
+            status: r.retirementStatus,
+            learnMoreUrl: r.learnMoreUrl
+          };
         }
       }
     } catch (e) {
@@ -2142,13 +2149,25 @@ function renderFreshness() {
   const badge = document.getElementById('freshness-badge');
   const lastUpdated = metadata.lastUpdated ? new Date(metadata.lastUpdated) : null;
   const daysSince = lastUpdated ? Math.floor((Date.now() - lastUpdated.getTime()) / 86400000) : null;
+  const sourceHealth = metadata.sourceHealth;
+  const sourceStatuses = sourceHealth && Array.isArray(sourceHealth.sources) ? sourceHealth.sources : [];
+  const sourceOutages = sourceStatuses.filter(source => source.status !== 'success');
+  const healthUnavailable = !sourceStatuses.length;
 
   // Region bar badge
-  if (lastUpdated && badge) {
+  if (badge) {
     let label, cls;
     const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-    const updatedMonth = monthNames[lastUpdated.getMonth()] + ' ' + lastUpdated.getFullYear();
-    if (daysSince <= 30) {
+    const updatedMonth = lastUpdated && !Number.isNaN(lastUpdated.getTime())
+      ? monthNames[lastUpdated.getMonth()] + ' ' + lastUpdated.getFullYear()
+      : 'date unknown';
+    if (healthUnavailable || sourceOutages.length) {
+      label = '⚠️ Refresh incomplete';
+      cls = 'stale';
+    } else if (daysSince === null) {
+      label = '🔴 Refresh date unknown';
+      cls = 'stale';
+    } else if (daysSince <= 30) {
       label = `🟢 Updated ${updatedMonth}`;
       cls = 'fresh';
     } else if (daysSince <= 60) {
@@ -2158,61 +2177,21 @@ function renderFreshness() {
       label = `🔴 Updated ${updatedMonth}`;
       cls = 'stale';
     }
-    badge.querySelector('#freshness-label').textContent = label + ' ▾';
+    badge.querySelector('#freshness-label').textContent = label;
     badge.className = 'freshness-badge ' + cls;
-    badge.title = 'Click for data refresh details';
+    const outageDetails = sourceOutages.slice(0, 5).map(source => {
+      const scope = Array.isArray(source.failures) && source.failures.length
+        ? `: ${source.failures.slice(0, 5).join(', ')}${source.failures.length > 5 ? ', …' : ''}`
+        : '';
+      return `${source.label || source.id} (${source.status})${scope}`;
+    });
+    badge.title = healthUnavailable
+      ? 'This refresh did not record source availability; data completeness is unverified.'
+      : sourceOutages.length
+        ? `Refresh may be incomplete or out of date. ${outageDetails.join('; ')}${sourceOutages.length > 5 ? '; …' : ''}`
+        : `All tracked sources refreshed successfully. Last update: ${updatedMonth}.`;
     badge.style.display = '';
   }
-}
-
-function renderFreshnessFlyout() {
-  const detail = document.getElementById('freshness-detail');
-  if (!detail) return;
-
-  const regionData = regionDataCache[selectedRegion];
-  const skuDateRaw = regionData && regionData.lastUpdated;
-  const skuDate = formatFlyoutDate(skuDateRaw) !== '—' ? formatFlyoutDate(skuDateRaw) : (metadata.lastUpdatedDisplay || '—');
-  const skuCount = allSkus ? allSkus.length : 0;
-
-  const hasPricing = _pricingCache && _pricingCache._region === selectedRegion;
-  const pricingDate = hasPricing && _pricingCache._lastUpdated ? formatFlyoutDate(_pricingCache._lastUpdated) : null;
-
-  const diskData = diskDataCache[selectedRegion];
-  const diskCount = diskData ? (diskData.disks || []).length : 0;
-
-  let html = `<div style="font-size:13px;color:var(--text-secondary);margin-bottom:10px;">Last refreshed: <strong>${skuDate}</strong></div>
-    <table>
-      <tr><td>🖥️ VM SKU Data</td><td>${skuCount} SKUs</td></tr>
-      <tr><td>💿 Disk SKU Data</td><td>${diskCount ? diskCount + ' disks' : 'No data'}</td></tr>
-      <tr><td>💰 Pricing Data</td><td>${pricingDate || 'Load via pinned shortlist'}</td></tr>
-      <tr><td>⚠️ Retirement Alerts</td><td>Included</td></tr>
-      <tr><td>📊 History Snapshots</td><td>Archived monthly</td></tr>
-      <tr><td>🌏 Region List</td><td>${allRegions ? allRegions.length + ' regions' : '—'}</td></tr>
-    </table>
-    <div class="note">All data is refreshed monthly via GitHub Actions workflow or manual trigger. Pricing sourced from the Azure Retail Prices API (no auth required). Disk data sourced from Azure Resource SKU API.</div>`;
-
-  detail.innerHTML = html;
-}
-
-function formatFlyoutDate(dateStr) {
-  try {
-    const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return '—';
-    return d.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
-  } catch { return '—'; }
-}
-
-function toggleFreshnessFlyout(e) {
-  e.stopPropagation();
-  const overlay = document.getElementById('freshness-overlay');
-  if (!overlay) return;
-  renderFreshnessFlyout();
-  overlay.classList.toggle('show');
-}
-
-function closeFreshnessFlyout() {
-  const overlay = document.getElementById('freshness-overlay');
-  if (overlay) overlay.classList.remove('show');
 }
 
 function buildDropdown() {
@@ -2445,17 +2424,24 @@ function renderVmRetirementSummary() {
     return;
   }
 
-  entries.sort((a, b) => new Date('1 ' + a.date) - new Date('1 ' + b.date));
+  entries.sort((a, b) => {
+    const aDate = Date.parse(a.date);
+    const bDate = Date.parse(b.date);
+    return (Number.isNaN(aDate) ? Infinity : aDate) - (Number.isNaN(bDate) ? Infinity : bDate);
+  });
   const totalSkus = entries.reduce((sum, e) => sum + e.count, 0);
-  const next = entries[0];
-  const familyList = entries.map(e => `${escapeHtml(e.name)} (${escapeHtml(e.date)})`).join(', ');
-  const learnMoreUrl = next.learnMoreUrl || 'https://learn.microsoft.com/en-us/azure/virtual-machines/sizes-previous-gen';
+  const next = entries.find(e => e.status !== 'Retired');
+  const familyList = entries.map(e => `${escapeHtml(e.name)} (${escapeHtml(e.status || 'Announced')}, ${escapeHtml(formatRetirementDate(e.date))})`).join(', ');
+  const learnMoreUrl = next?.learnMoreUrl || 'https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/retirements-and-capacity-restrictions';
+  const nextRetirement = next
+    ? `The next planned retirement is <strong>${escapeHtml(next.name)}</strong> on <strong>${escapeHtml(formatRetirementDate(next.date))}</strong>.`
+    : 'All listed retirement dates in this region have passed.';
 
   container.innerHTML = `
     <div class="retirement-summary-banner">
       <div class="retirement-summary-icon">⚠️</div>
       <div class="retirement-summary-text">
-        There ${totalSkus === 1 ? 'is' : 'are'} <strong>${totalSkus} VM retirement notice${totalSkus === 1 ? '' : 's'}</strong> across <strong>${entries.length} famil${entries.length === 1 ? 'y' : 'ies'}</strong> available in this region. The next retirement is <strong>${escapeHtml(next.name)}</strong> in <strong>${escapeHtml(next.date)}</strong>.
+        There ${totalSkus === 1 ? 'is' : 'are'} <strong>${totalSkus} VM retirement notice${totalSkus === 1 ? '' : 's'}</strong> across <strong>${entries.length} famil${entries.length === 1 ? 'y' : 'ies'}</strong> available in this region. ${nextRetirement}
         <div class="retirement-summary-families">VM family and versions include: ${familyList}</div>
       </div>
       <a href="${escapeHtml(learnMoreUrl)}" target="_blank" rel="noopener" class="retirement-summary-link">Learn more ↗</a>
