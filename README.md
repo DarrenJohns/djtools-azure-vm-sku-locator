@@ -8,7 +8,7 @@
 >
 > **Browse Azure VM and managed disk SKU availability across every region — filter by processor, family, and features, compare across regions, pin, and see pricing and retirements.**
 
-![Version](https://img.shields.io/badge/version-1.2.6-orange)
+![Version](https://img.shields.io/badge/version-1.2.8-orange)
 ![Azure](https://img.shields.io/badge/Azure-VM_SKUs-0078D4)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Built with](https://img.shields.io/badge/built_with-Copilot_CLI-8957e5)
@@ -29,7 +29,7 @@
 | **Browse by Region** | Select an Azure region to view all available VM sizes |
 | **Search & Filter** | Filter by name, family, vCPU range, processor type (Intel/AMD/ARM), and more |
 | **Find a Match** | Specify your requirements (vCPUs, memory, disks, NICs, features) and get ranked matches with percentage scores |
-| **GPU-aware alternatives** | Find alternatives with a GPU column; GPU-based source VMs only receive GPU-equipped recommendations |
+| **GPU-aware alternatives** | See recognizable GPU models and reported counts; GPU-based source VMs only receive GPU-equipped recommendations |
 | **Pin & Compare** | Pin SKUs to a shortlist with immediate visual feedback, then compare availability across up to 5 other regions |
 | **Multi-Currency Pricing** | View pricing in 17 currencies (USD, EUR, GBP, NZD, AUD, JPY, and more) — selection persists across sessions |
 | **RI & Savings Plan Pricing** | Compare Pay-As-You-Go, 1/3-year Reserved Instance (actual Azure prices), and 1/3-year Savings Plan (estimated) rates |
@@ -72,7 +72,7 @@
 6. **View Disks** — Switch to the Disk SKUs tab to see region-level disk type availability and browse available sizes
 7. **Export** — Download filtered results or your pinned shortlist as CSV
 
-When replacing a VM family approaching retirement, use **Find alternatives to a pinned SKU**. The table shows GPU availability and, for a GPU source VM, only returns GPU-equipped alternatives. Pin buttons immediately update the shortlist and results. You can also exclude retiring families, require at least the original vCPU and memory capacity, prefer the same processor type, and export the ranked alternatives.
+When replacing a VM family approaching retirement, use **Find alternatives to a pinned SKU**. The table shows a GPU model when it is identifiable from the SKU name and the reported GPU count when available; otherwise it shows generic GPU availability. GPU source VMs only receive GPU-equipped alternatives. Export the ranked alternatives directly from this view; pinning remains available from the main SKU table and deployment checker. You can also exclude retiring families, require at least the original vCPU and memory capacity, and prefer the same processor type.
 
 ---
 

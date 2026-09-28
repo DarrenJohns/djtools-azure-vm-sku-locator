@@ -1513,7 +1513,7 @@ table.sku-table tbody tr:hover { background: rgba(15,108,189,0.06); }
   <a href="https://github.com/features/copilot/cli/" target="_blank" rel="noopener noreferrer" style="color:var(--brand-primary);text-decoration:none;font-weight:600;">Learn more ↗</a>
   &nbsp;·&nbsp;
   <a href="https://github.com/darjohn_microsoft/vm-sku-per-region" target="_blank" rel="noopener noreferrer" style="color:var(--brand-primary);text-decoration:none;font-weight:600;">GitHub ↗</a>
-  <div style="margin-top:8px;font-size:11px;color:var(--text-tertiary);opacity:0.7;">v1.2.6</div>
+  <div style="margin-top:8px;font-size:11px;color:var(--text-tertiary);opacity:0.7;">v1.2.8</div>
 </footer>
 
 <div class="toast-container" id="toast-container"></div>
@@ -1784,8 +1784,17 @@ function isGpuSku(sku) {
 
 function getGpuDisplay(sku) {
   const gpuCount = Number(sku.gpuCount);
+  const gpuModel = getGpuModel(sku);
+  if (gpuModel && Number.isFinite(gpuCount) && gpuCount > 0) return `${gpuCount} × ${gpuModel}`;
+  if (gpuModel) return gpuModel;
   if (Number.isFinite(gpuCount) && gpuCount > 0) return String(gpuCount);
   return isGpuSku(sku) ? 'GPU' : '—';
+}
+
+function getGpuModel(sku) {
+  const skuText = `${sku.name || ''} ${sku.size || ''} ${sku.family || ''}`;
+  const models = ['MI300X', 'H200', 'H100', 'A100', 'L40S', 'A10G', 'A10', 'V100', 'P100', 'T4', 'L4', 'M60', 'MI100', 'MI25', 'K80'];
+  return models.find(model => new RegExp(`(^|[^A-Z0-9])${model}([^A-Z0-9]|$)`, 'i').test(skuText)) || '';
 }
 
 const hiddenColumns = new Set();
@@ -3350,9 +3359,8 @@ function runSimilarSkuSearch() {
 function buildSimilarityTable(rows, source) {
   const sourceZones = source.zones && source.zones.length ? escapeHtml(source.zones.join(', ')) : '—';
   const sourceProcessor = getProcessorType(source.size);
-  let html = '<table class="checker-table"><thead><tr><th style="width:36px;">📌</th><th>Size</th><th>GPUs</th><th>Processor</th><th>vCPUs</th><th>Memory (GB)</th><th>Max Data Disks</th><th>Max NICs</th><th>Zones</th><th>Similarity</th></tr></thead><tbody>';
+  let html = '<table class="checker-table"><thead><tr><th>Size</th><th>GPUs</th><th>Processor</th><th>vCPUs</th><th>Memory (GB)</th><th>Max Data Disks</th><th>Max NICs</th><th>Zones</th><th>Similarity</th></tr></thead><tbody>';
   html += `<tr class="similarity-source-row" title="Selected pinned SKU — comparison baseline">
-    <td>📍</td>
     <td><strong>${escapeHtml(source.size)}</strong> <span style="font-size:11px;color:var(--text-secondary);">(selected)</span>${getLifecycleBadge(source)}</td>
     <td>${getGpuDisplay(source)}</td>
     <td>${sourceProcessor}</td>
@@ -3364,9 +3372,7 @@ function buildSimilarityTable(rows, source) {
     const s = r.sku;
     const scoreClass = r.score >= 85 ? 'perfect' : r.score >= 70 ? 'good' : r.score >= 50 ? 'partial' : 'low';
     const zones = s.zones && s.zones.length ? escapeHtml(s.zones.join(', ')) : '—';
-    const pinned = pinnedSkus.has(s.size);
     html += `<tr>
-      <td><button class="pin-btn${pinned ? ' pinned' : ''}" onclick="event.stopPropagation();togglePin('${escapeHtml(s.size)}')" title="${pinned ? 'Unpin' : 'Pin to shortlist'}" aria-label="${pinned ? 'Unpin' : 'Pin'} ${escapeHtml(s.size)}">${pinned ? '📌' : '○'}</button></td>
       <td><a href="#" onclick="event.preventDefault();openSnippetModal('${escapeHtml(s.size)}')" style="color:var(--brand-primary);text-decoration:none;font-weight:600;">${escapeHtml(s.size)}</a>${getLifecycleBadge(s)}</td>
       <td>${getGpuDisplay(s)}</td>
       <td>${getProcessorType(s.size)}${getProcessorType(s.size) === getProcessorType(source.size) ? ' ✓' : ''}</td>
