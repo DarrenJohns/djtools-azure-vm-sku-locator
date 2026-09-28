@@ -25,6 +25,7 @@ jobs:
         shell: pwsh
 
       - name: Azure Login (OIDC)
+        continue-on-error: true
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
@@ -32,14 +33,20 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Get all Azure regions and target regions from config
+        id: regions
+        continue-on-error: true
         run: |
           # Read config
           $config = Get-Content "config.json" | ConvertFrom-Json
 
           # Fetch all physical regions for the map/dropdown (list-locations doesn't use --subscription)
-          $allRegions = az account list-locations --query "[?metadata.regionType=='Physical'].{name:name, displayName:displayName, geographyGroup:metadata.geographyGroup, latitude:metadata.latitude, longitude:metadata.longitude}" -o json | ConvertFrom-Json -AsHashtable
+          $regionsJson = az account list-locations --query "[?metadata.regionType=='Physical'].{name:name, displayName:displayName, geographyGroup:metadata.geographyGroup, latitude:metadata.latitude, longitude:metadata.longitude}" -o json
+          if ($LASTEXITCODE -ne 0 -or -not $regionsJson) { throw "Azure region list could not be fetched" }
+          $allRegions = $regionsJson | ConvertFrom-Json -AsHashtable
+          if (-not $allRegions -or $allRegions.Count -eq 0) { throw "Azure region list was empty" }
           $allRegions | ConvertTo-Json -Depth 3 | Set-Content "data/regions.json" -Encoding UTF8
           Write-Host "[OK] Found $($allRegions.Count) physical regions"
+          "region_count=$($allRegions.Count)" >> $env:GITHUB_OUTPUT
 
           # Read target regions from config.json
           $targetRegions = $config.targetRegions
@@ -48,6 +55,7 @@ jobs:
 
       - name: Fetch SKU data for target regions
         id: fetch
+        continue-on-error: true
         run: |
           $config = Get-Content "config.json" | ConvertFrom-Json
           $regions = $config.targetRegions
@@ -70,19 +78,11 @@ jobs:
                 $subId = "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
                 $subArgs = if ($subId) { @("--subscription", $subId) } else { @() }
                 $raw = az vm list-skus --location $name --resource-type virtualMachines --all @subArgs -o json 2>$null
+                if ($LASTEXITCODE -ne 0) { throw "Azure SKU query failed for $name (exit $LASTEXITCODE)" }
                 if (-not $raw -or $raw -eq "[]") {
-                  Write-Host "  [WARN] No VM SKUs for $name — removing stale data if present"
-                  $staleFile = "$dataDir/$name.json"
-                  if (Test-Path $staleFile) { Remove-Item $staleFile; Write-Host "  [CLEAN] Removed $staleFile" }
-                  $staleDisk = "$dataDir/$name-disks.json"
-                  if (Test-Path $staleDisk) { Remove-Item $staleDisk; Write-Host "  [CLEAN] Removed $staleDisk" }
-                  $stalePricing = "$dataDir/$name-pricing.json"
-                  if (Test-Path $stalePricing) { Remove-Item $stalePricing; Write-Host "  [CLEAN] Removed $stalePricing" }
-                  Get-ChildItem "$dataDir/$name-pricing-*.json" -ErrorAction SilentlyContinue | ForEach-Object {
-                    Remove-Item $_.FullName; Write-Host "  [CLEAN] Removed $($_.Name)"
+                    Write-Host "  [WARN] No VM SKUs returned for $name — preserving last-known-good data"
+                    break
                   }
-                  break
-                }
 
                 # Archive existing data before overwriting
                 $existingFile = "$dataDir/$name.json"
@@ -112,6 +112,7 @@ jobs:
                 # Save raw and normalize with Python script
                 $raw | Set-Content "$dataDir/$name-raw.json" -Encoding UTF8
                 python scripts/normalize-skus.py "$dataDir/$name-raw.json" "$dataDir/$name.json" "$display"
+                if ($LASTEXITCODE -ne 0) { throw "SKU normalization failed for $name" }
 
                 # Clean up raw file
                 Remove-Item "$dataDir/$name-raw.json" -ErrorAction SilentlyContinue
@@ -147,28 +148,23 @@ jobs:
           "available=$($availableRegions -join ',')" >> $env:GITHUB_OUTPUT
           "failed=$($failedRegions -join ',')" >> $env:GITHUB_OUTPUT
 
-          # Update metadata
-          $month = (Get-Date).ToString("MMMM yyyy")
-          $metadata = @{
-            lastUpdated = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
-            lastUpdatedDisplay = $month
-            availableRegions = $availableRegions
-            physicalRegionCount = $allRegions.Count
-            regionsWithData = $successCount
-            failedRegions = $failedRegions
-          } | ConvertTo-Json
-          $metadata | Set-Content "$dataDir/metadata.json" -Encoding UTF8
-          Write-Host "[OK] Metadata updated: $month ($successCount regions with data, $failCount failed)"
         shell: pwsh
 
       - name: Refresh retirement data
+        id: retirements
+        continue-on-error: true
         run: |
           pip install requests beautifulsoup4 -q
           python scripts/update-retirements.py
+          if ($LASTEXITCODE -ne 0) { throw "Retirement source refresh failed" }
+          $retirementData = Get-Content "data/retirements.json" | ConvertFrom-Json
+          "entry_count=$($retirementData.retirements.Count)" >> $env:GITHUB_OUTPUT
           Write-Host "[OK] Retirement data refresh complete"
         shell: pwsh
 
       - name: Fetch pricing data
+        id: pricing
+        continue-on-error: true
         run: |
           $config = Get-Content "config.json" | ConvertFrom-Json
           $regions = $config.targetRegions
@@ -176,15 +172,26 @@ jobs:
           # 3 currencies × 47 regions × 1 pass (PAYG only, skip RI) = ~3 hours of API work.
           # RI data updates monthly but doesn't change frequently; OK to reuse from prior month.
           $currencies = @("USD", "AUD", "NZD")
+          $successCount = 0
+          $failures = @()
           foreach ($currency in $currencies) {
             Write-Host "=== Fetching PAYG pricing in $currency ==="
             foreach ($region in $regions) {
               $name = $region.name
               $dataFile = "data/$name.json"
               $pricingFile = "data/$name-pricing-$currency.json"
-              if (Test-Path $dataFile) {
+              if (-not (Test-Path $dataFile)) {
+                $failures += "$name/$currency (VM SKU data unavailable)"
+                continue
+              }
+              try {
                 Write-Host "  Fetching pricing for $name ($currency)..."
                 python scripts/fetch-pricing.py $dataFile $pricingFile --currency $currency --payg-only
+                if ($LASTEXITCODE -ne 0) { throw "Pricing fetch failed (exit $LASTEXITCODE)" }
+                $successCount++
+              } catch {
+                Write-Host "  [WARN] Pricing unavailable for $name/$currency`: $_"
+                $failures += "$name/$currency"
               }
             }
           }
@@ -197,37 +204,181 @@ jobs:
               Copy-Item $usdFile $compatFile -Force
             }
           }
-          Write-Host "[OK] Pricing data refresh complete ($($currencies.Count) currencies: USD, AUD, NZD, PAYG only)"
+          "success_count=$successCount" >> $env:GITHUB_OUTPUT
+          "fail_count=$($failures.Count)" >> $env:GITHUB_OUTPUT
+          "failed=$($failures -join ',')" >> $env:GITHUB_OUTPUT
+          Write-Host "[INFO] Pricing data refreshed for $successCount region/currency pairs; $($failures.Count) failed"
         shell: pwsh
 
       - name: Fetch disk SKU data
+        id: disks
+        continue-on-error: true
         run: |
           $config = Get-Content "config.json" | ConvertFrom-Json
           $regions = $config.targetRegions
           $subId = "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
           $subArgs = if ($subId) { @("--subscription", $subId) } else { @() }
+          $successRegions = @()
+          $failedRegions = @()
           foreach ($region in $regions) {
             $name = $region.name
             $display = $region.displayName
-            Write-Host "Fetching disk SKUs for $display ($name)..."
-            $raw = az vm list-skus --location $name --resource-type disks --all @subArgs -o json 2>$null
-            if ($raw -and $raw -ne "[]") {
+            try {
+              Write-Host "Fetching disk SKUs for $display ($name)..."
+              $raw = az vm list-skus --location $name --resource-type disks --all @subArgs -o json 2>$null
+              if ($LASTEXITCODE -ne 0 -or -not $raw -or $raw -eq "[]") {
+                throw "Azure returned no disk SKU data"
+              }
               $rawFile = "data/$name-disks-raw.json"
               $raw | Set-Content $rawFile -Encoding UTF8
               python scripts/normalize-disks.py $rawFile "data/$name-disks.json" "$display"
+              if ($LASTEXITCODE -ne 0) { throw "Disk normalization failed" }
               Remove-Item $rawFile -ErrorAction SilentlyContinue
+              $successRegions += $name
               Write-Host "  [OK] Disk data saved for $name"
-            } else {
-              Write-Host "  [WARN] No disk SKUs for $name"
+            } catch {
+              Remove-Item "data/$name-disks-raw.json" -ErrorAction SilentlyContinue
+              $failedRegions += $name
+              Write-Host "  [WARN] Disk data unavailable for $name`: $_ (preserving last-known-good data)"
             }
           }
-          Write-Host "[OK] Disk SKU data refresh complete"
+          "success_count=$($successRegions.Count)" >> $env:GITHUB_OUTPUT
+          "fail_count=$($failedRegions.Count)" >> $env:GITHUB_OUTPUT
+          "failed=$($failedRegions -join ',')" >> $env:GITHUB_OUTPUT
+          Write-Host "[INFO] Disk data refreshed for $($successRegions.Count) regions; $($failedRegions.Count) failed"
         shell: pwsh
 
       - name: Build Top Trumps card deck (data/cards.json)
+        id: cards
+        continue-on-error: true
         run: |
           python scripts/build-cards.py
+          if ($LASTEXITCODE -ne 0) { throw "Top Trumps card generation failed" }
           Write-Host "[OK] Top Trumps cards.json regenerated"
+        shell: pwsh
+
+      - name: Record source refresh health
+        if: always()
+        run: |
+          $metadataPath = "data/metadata.json"
+          $metadata = if (Test-Path $metadataPath) {
+            Get-Content $metadataPath -Raw | ConvertFrom-Json -AsHashtable
+          } else {
+            @{}
+          }
+          $config = Get-Content "config.json" -Raw | ConvertFrom-Json
+          $expectedRegions = $config.targetRegions.Count
+          $now = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+
+          function Get-SourceStatus($successCount, $failureCount, $expectedCount, $outcome) {
+            if ($outcome -eq "failure" -and $successCount -eq 0) { return "unavailable" }
+            if ($successCount -eq 0) { return "unavailable" }
+            if ($failureCount -gt 0 -or $successCount -lt $expectedCount -or $outcome -eq "failure") { return "partial" }
+            return "success"
+          }
+
+          function ConvertTo-Count($value) {
+            if ($value -match '^\d+$') { return [int]$value }
+            return 0
+          }
+
+          function Get-PreviousSourceUpdate($metadata, $sourceId, $fallback) {
+            $previousSource = $metadata.sourceHealth.sources | Where-Object { $_.id -eq $sourceId } | Select-Object -First 1
+            if ($previousSource -and $previousSource.lastSuccessfulUpdate) {
+              return $previousSource.lastSuccessfulUpdate
+            }
+            return $fallback
+          }
+
+          $vmSuccess = ConvertTo-Count "${{ steps.fetch.outputs.success_count }}"
+          $vmFailed = ConvertTo-Count "${{ steps.fetch.outputs.fail_count }}"
+          $diskSuccess = ConvertTo-Count "${{ steps.disks.outputs.success_count }}"
+          $diskFailed = ConvertTo-Count "${{ steps.disks.outputs.fail_count }}"
+          $pricingSuccess = ConvertTo-Count "${{ steps.pricing.outputs.success_count }}"
+          $pricingFailed = ConvertTo-Count "${{ steps.pricing.outputs.fail_count }}"
+          $regionsCount = ConvertTo-Count "${{ steps.regions.outputs.region_count }}"
+
+          $retirementData = if (Test-Path "data/retirements.json") { Get-Content "data/retirements.json" -Raw | ConvertFrom-Json } else { $null }
+          $retirementCount = if ($retirementData) { $retirementData.retirements.Count } else { 0 }
+          $retirementOutcome = "${{ steps.retirements.outcome }}"
+          $regionsOutcome = "${{ steps.regions.outcome }}"
+          $vmOutcome = "${{ steps.fetch.outcome }}"
+          $diskOutcome = "${{ steps.disks.outcome }}"
+          $pricingOutcome = "${{ steps.pricing.outcome }}"
+          $cardsOutcome = "${{ steps.cards.outcome }}"
+
+          $sources = @(
+            @{
+              id = "regions"; label = "Azure region list"
+              status = Get-SourceStatus $regionsCount 0 1 $regionsOutcome
+              checkedAt = $now
+              lastSuccessfulUpdate = if ($regionsCount -gt 0 -and $regionsOutcome -eq "success") { $now } else { Get-PreviousSourceUpdate $metadata "regions" $metadata.lastUpdated }
+              summary = "$regionsCount physical regions returned"
+              failures = @()
+            },
+            @{
+              id = "vmSkus"; label = "VM SKU data"
+              status = Get-SourceStatus $vmSuccess $vmFailed $expectedRegions $vmOutcome
+              checkedAt = $now
+              lastSuccessfulUpdate = if ($vmSuccess -gt 0) { $now } else { Get-PreviousSourceUpdate $metadata "vmSkus" $metadata.lastUpdated }
+              summary = "$vmSuccess of $expectedRegions regions refreshed"
+              failures = @("${{ steps.fetch.outputs.failed }}".Split(',', [System.StringSplitOptions]::RemoveEmptyEntries))
+            },
+            @{
+              id = "disks"; label = "Disk SKU data"
+              status = Get-SourceStatus $diskSuccess $diskFailed $expectedRegions $diskOutcome
+              checkedAt = $now
+              lastSuccessfulUpdate = if ($diskSuccess -gt 0) { $now } else { Get-PreviousSourceUpdate $metadata "disks" $metadata.lastUpdated }
+              summary = "$diskSuccess of $expectedRegions regions refreshed"
+              failures = @("${{ steps.disks.outputs.failed }}".Split(',', [System.StringSplitOptions]::RemoveEmptyEntries))
+            },
+            @{
+              id = "pricing"; label = "Pricing data"
+              status = Get-SourceStatus $pricingSuccess $pricingFailed ($expectedRegions * 3) $pricingOutcome
+              checkedAt = $now
+              lastSuccessfulUpdate = if ($pricingSuccess -gt 0) { $now } else { Get-PreviousSourceUpdate $metadata "pricing" $metadata.lastUpdated }
+              summary = "$pricingSuccess of $($expectedRegions * 3) region/currency pairs refreshed"
+              failures = @("${{ steps.pricing.outputs.failed }}".Split(',', [System.StringSplitOptions]::RemoveEmptyEntries))
+            },
+            @{
+              id = "retirements"; label = "Retirement alerts"
+              status = if ($retirementOutcome -eq "success" -and $retirementCount -gt 0) { "success" } else { "unavailable" }
+              checkedAt = $now
+              lastSuccessfulUpdate = if ($retirementOutcome -eq "success" -and $retirementData) { $retirementData.lastUpdated } else { Get-PreviousSourceUpdate $metadata "retirements" $(if ($retirementData) { $retirementData.lastUpdated } else { "" }) }
+              summary = if ($retirementOutcome -eq "success") { "$retirementCount family records refreshed" } else { "Refresh failed; last-known-good data retained" }
+              failures = if ($retirementOutcome -eq "success") { @() } else { @("Microsoft Learn retirement source") }
+            },
+            @{
+              id = "history"; label = "History snapshots"
+              status = Get-SourceStatus $vmSuccess $vmFailed $expectedRegions $vmOutcome
+              checkedAt = $now
+              lastSuccessfulUpdate = if ($vmSuccess -gt 0) { $now } else { Get-PreviousSourceUpdate $metadata "history" $metadata.lastUpdated }
+              summary = "$vmSuccess of $expectedRegions region snapshots archived"
+              failures = @("${{ steps.fetch.outputs.failed }}".Split(',', [System.StringSplitOptions]::RemoveEmptyEntries))
+            },
+            @{
+              id = "cards"; label = "Top Trumps cards"
+              status = if ($cardsOutcome -eq "success") { "success" } else { "unavailable" }
+              checkedAt = $now
+              lastSuccessfulUpdate = if ($cardsOutcome -eq "success") { $now } else { Get-PreviousSourceUpdate $metadata "cards" $metadata.lastUpdated }
+              summary = if ($cardsOutcome -eq "success") { "Card deck generated" } else { "Card generation failed; last-known-good data retained" }
+              failures = if ($cardsOutcome -eq "success") { @() } else { @("Card data generation") }
+            }
+          )
+
+          $metadata.lastUpdated = $now
+          $metadata.lastUpdatedDisplay = (Get-Date).ToString("MMMM yyyy")
+          $metadata.availableRegions = @($config.targetRegions | ForEach-Object { $_.name } | Where-Object { Test-Path "data/$_.json" })
+          $metadata.physicalRegionCount = if ($regionsCount -gt 0) { $regionsCount } else { $metadata.physicalRegionCount }
+          $metadata.regionsWithData = $vmSuccess
+          $metadata.failedRegions = @("${{ steps.fetch.outputs.failed }}".Split(',', [System.StringSplitOptions]::RemoveEmptyEntries))
+          $metadata.sourceHealth = @{
+            checkedAt = $now
+            complete = -not [bool]($sources | Where-Object { $_.status -ne "success" })
+            sources = $sources
+          }
+          $metadata | ConvertTo-Json -Depth 8 | Set-Content $metadataPath -Encoding UTF8
+          Write-Host "[INFO] Source refresh health recorded: $(@($sources | Where-Object { $_.status -ne 'success' }).Count) source(s) incomplete or unavailable"
         shell: pwsh
 
       - name: Deploy to Azure Static Web Apps
@@ -305,6 +456,20 @@ jobs:
             }
           } else {
             $summary += "`n- _None_ [NONE]"
+          }
+
+          $summary += "`n`n### Data Source Availability"
+          if (Test-Path "data/metadata.json") {
+            $metadata = Get-Content "data/metadata.json" -Raw | ConvertFrom-Json
+            foreach ($source in $metadata.sourceHealth.sources) {
+              $icon = if ($source.status -eq "success") { "[OK]" } elseif ($source.status -eq "partial") { "[WARN]" } else { "[FAIL]" }
+              $summary += "`n- $icon **$($source.label):** $($source.summary)"
+              if ($source.failures.Count -gt 0) {
+                $summary += " — Failed: $($source.failures -join ', ')"
+              }
+            }
+          } else {
+            $summary += "`n- [FAIL] Source availability metadata unavailable"
           }
 
           $summary += "`n`n---`n_Notification recipient: darren.johns@microsoft.com_"

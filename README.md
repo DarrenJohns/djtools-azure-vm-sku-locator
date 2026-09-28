@@ -8,7 +8,7 @@
 >
 > **Browse Azure VM and managed disk SKU availability across every region — filter by processor, family, and features, compare across regions, pin, and see pricing and retirements.**
 
-![Version](https://img.shields.io/badge/version-1.2.2-orange)
+![Version](https://img.shields.io/badge/version-1.2.5-orange)
 ![Azure](https://img.shields.io/badge/Azure-VM_SKUs-0078D4)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Built with](https://img.shields.io/badge/built_with-Copilot_CLI-8957e5)
@@ -33,8 +33,8 @@
 | **Multi-Currency Pricing** | View pricing in 17 currencies (USD, EUR, GBP, NZD, AUD, JPY, and more) — selection persists across sessions |
 | **RI & Savings Plan Pricing** | Compare Pay-As-You-Go, 1/3-year Reserved Instance (actual Azure prices), and 1/3-year Savings Plan (estimated) rates |
 | **Deployment Snippets** | Click any SKU for ready-to-use Azure CLI, PowerShell, and Bicep code |
-| **Retirement Warnings** | SKUs from families being retired are flagged with a warning badge |
-| **Retirement Filter & Summary** | Filter to VMs flagged/not flagged for retirement; an at-a-glance banner summarizes notice counts, the next retirement date, and affected families |
+| **Retirement Warnings** | Announced and retired VM families are flagged with their status and exact planned retirement date |
+| **Retirement Filter & Summary** | Filter to flagged/not flagged SKUs; a regional banner summarizes notice counts, the next retirement date, status, and affected families |
 | **What's New** | See which SKUs were added or removed since the last monthly refresh |
 | **Workload Recommendations** | View which VM series suit different workload types |
 
@@ -77,14 +77,14 @@ When replacing a VM family approaching retirement, use **Find alternatives to a 
 
 ## 📊 Data Freshness
 
-All data is refreshed **monthly** from Azure APIs. Check the Data Refresh Summary (ℹ️ in the header) for the last update date.
+Data is refreshed **monthly** from Azure APIs and Microsoft Learn. The freshness badge flags partial or unavailable sources; hover over it for the affected sources and regions/currencies. Failed refreshes retain last-known-good data and identify where it may be stale. Older refreshes without source-health records are marked as unverified.
 
 | Data Set | Source |
 |----------|--------|
 | VM SKUs | Azure Resource SKU API |
 | Managed Disk SKUs | Azure Resource SKU API |
 | VM Pricing | Azure Retail Prices API (17 currencies) |
-| VM Retirement Dates | Azure Updates page |
+| VM Retirement Dates | [Microsoft Learn retirement and capacity restrictions](https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/retirements-and-capacity-restrictions) |
 
 ---
 
@@ -100,7 +100,7 @@ vm-sku-per-region/
 ├── data/
 │   ├── regions.json              # Available regions list
 │   ├── metadata.json             # Data refresh timestamps
-│   ├── retirements.json          # VM family retirement dates
+│   ├── retirements.json          # VM family retirement status and exact dates
 │   ├── <region>.json             # VM SKU data per region
 │   ├── <region>-disks.json       # Disk SKU data per region
 │   ├── <region>-pricing.json     # Pricing data per region (USD, backward compat)

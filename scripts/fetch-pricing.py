@@ -68,11 +68,18 @@ def fetch_batched(api_sku_names, region_name, currency, price_type):
                     if attempt < 2:
                         time.sleep(2 * (attempt + 1))
                     else:
-                        print(f"  [WARN] Failed to fetch batch {i//BATCH_SIZE + 1} ({price_type}): {e}")
-                        url = None
+                        raise RuntimeError(
+                            f"Failed to fetch {price_type} batch "
+                            f"{i // BATCH_SIZE + 1} for {region_name} ({currency}): {e}"
+                        ) from e
 
         if i + BATCH_SIZE < len(api_sku_names):
             time.sleep(0.2)
+    if url:
+        raise RuntimeError(
+            f"Pricing API exceeded the 10-page safety limit for "
+            f"{region_name} ({currency}, {price_type})"
+        )
     return items
 
 

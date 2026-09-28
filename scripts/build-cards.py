@@ -130,6 +130,15 @@ def scale(value: float, lo: float, hi: float) -> float:
     return max(0.0, min(1.0, (value - lo) / (hi - lo)))
 
 
+def retirement_date_display(value: str) -> str:
+    """Format ISO retirement dates for card copy while retaining unknown values."""
+    try:
+        parsed = datetime.strptime(value, "%Y-%m-%d").date()
+    except (TypeError, ValueError):
+        return value or "a date not specified"
+    return f"{parsed.strftime('%B')} {parsed.day}, {parsed.year}"
+
+
 def family_clean(family: str) -> str:
     """Strip 'Standard' prefix and 'Family' suffix, case-insensitive."""
     if not family:
@@ -265,9 +274,11 @@ def build_ability(sku: dict, gpu_label: str | None,
       4. Family-type honest fallback (no more "Pocket Worker" filler).
     """
     if retirement:
+        retired = retirement.get("status") == "Retired"
+        verb = "was retired" if retired else "is scheduled to retire"
         out = {
             "title": "Sunset Era",
-            "description": f"{retirement['name']} is retiring on {retirement['date']}. Plan a migration to a newer family.",
+            "description": f"{retirement['name']} {verb} on {retirement_date_display(retirement['date'])}. Plan a migration to a newer family.",
         }
         if retirement.get("url"):
             out["url"] = retirement["url"]
@@ -548,6 +559,7 @@ def main() -> int:
                 retirement_lookup[fam] = {
                     "name": r.get("name") or fam,
                     "date": r.get("retireDate") or "",
+                    "status": r.get("retirementStatus") or "Announced",
                     "url":  r.get("learnMoreUrl") or "",
                 }
 

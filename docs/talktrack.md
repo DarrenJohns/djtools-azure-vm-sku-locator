@@ -26,19 +26,19 @@
 - Default region is New Zealand North
 - Show the region dropdown — regions are grouped by geography
 - Point out the KPI dashboard cards: **Total SKUs**, **vCPU Range**, **Memory Range**, **Intel/AMD/ARM counts**
-- Call out the **Data Freshness** badge — color-coded green/yellow/red
+- Call out the **Data Freshness** badge — color-coded green/yellow/red, with an incomplete warning if any monthly source failed; open it to see affected sources/scopes and selected-region data dates
 
 ### Browse VM SKUs — "See What's Available" (2 min)
 
 **"Now let's see what's actually available."**
 
 - Open the **Browse SKUs** tab (or press **2**)
-- Point out the **retirement summary banner** at the top — total notices, affected families/versions, and the next retirement date for this region
+- Point out the **retirement summary banner** at the top — announced/retired notices, affected families, and the next exact retirement date for this region
 - Show the full table — results are letter-grouped
 - Demo the filters: **text search**, **family type**, **vCPU range**, **processor type** (Intel/AMD/ARM), **lifecycle status** (flagged/not flagged for retirement)
 - Click **⚙️ Columns** to customize visible columns
 - Click a SKU name for the **Snippet Modal** — CLI, PowerShell, and Bicep code ready to copy
-- Point out **retirement badges** on affected SKUs
+- Point out **retirement badges** on affected SKUs, showing announced/retired status and the planned date
 
 **"So you can go from browsing to deploying in seconds."**
 
@@ -92,7 +92,7 @@
 - **Dark mode** — press **T** to toggle
 - **Keyboard shortcuts** — press **?** for the full list, **1–6** to switch tabs
 - **Region proximity** — suggests nearby regions when no results found
-- **Data Refresh Summary** — click ℹ️ to see all data sets and their sources
+- **Data source health** — the freshness badge warns if any refresh source is incomplete; hover for affected sources and scopes
 - **Top Trumps companion** — a standalone card game at `/toptrumps.html`, built on the same SKU data. The **experimental WebGL beta** lives at `/toptrumps-beta.html`, with fully 3D cards, a space backdrop, animated moons, rarity foil, and X-wing/TIE fighter flybys — accessed via the "✨ WebGL beta" option.
 
 ## How It Was Built (3 min)
@@ -102,6 +102,7 @@
 ### Key Points
 - **Single-file architecture** — one HTML file, no frameworks, no build tools, zero dependencies
 - **Pre-fetched data** — monthly refresh via GitHub Actions, no user authentication required
+- **Source health visibility** — the freshness badge identifies partial/unavailable data sources and retains last-known-good files when a refresh fails
 - **Four data sources** — VM SKUs, disk SKUs, pricing (17 currencies × PAYG + RI), and retirement dates
 - **AI-assisted development** — Copilot CLI wrote the code, created the repo, set up CI/CD
 - **Hosted on Azure Static Web Apps** — free tier with custom domain and managed SSL
