@@ -1,7 +1,7 @@
 {
   "region": "westindia",
   "regionDisplayName": "West India",
-  "lastUpdated": "2026-09-28T05:31:11Z",
+  "lastUpdated": "2026-09-29T00:30:26Z",
   "skuCount": 199,
   "skus": [
     {
@@ -526,7 +526,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [],
       "restrictions": [
         "NotAvailableForSubscription"

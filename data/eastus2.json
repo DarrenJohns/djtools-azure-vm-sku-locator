@@ -1,7 +1,7 @@
 {
   "region": "eastus2",
   "regionDisplayName": "East US 2",
-  "lastUpdated": "2026-09-28T04:46:39Z",
+  "lastUpdated": "2026-09-28T23:51:52Z",
   "skuCount": 1327,
   "skus": [
     {
@@ -20,7 +20,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1",
         "2",
@@ -44,7 +44,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1",
         "2",
@@ -68,7 +68,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1",
         "2",
@@ -12688,7 +12688,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1",
         "2"

@@ -1,7 +1,7 @@
 {
   "region": "koreacentral",
   "regionDisplayName": "Korea Central",
-  "lastUpdated": "2026-09-28T05:27:01Z",
+  "lastUpdated": "2026-09-29T00:26:47Z",
   "skuCount": 986,
   "skus": [
     {
@@ -7136,7 +7136,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": false,
+      "spotEligible": true,
       "zones": [
         "3"
       ],
@@ -17694,9 +17694,7 @@
         "2",
         "3"
       ],
-      "restrictions": [
-        "NotAvailableForSubscription"
-      ]
+      "restrictions": []
     },
     {
       "name": "Standard_E112ias_v5",

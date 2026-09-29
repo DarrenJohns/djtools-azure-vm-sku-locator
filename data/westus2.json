@@ -1,7 +1,7 @@
 {
   "region": "westus2",
   "regionDisplayName": "West US 2",
-  "lastUpdated": "2026-09-28T04:49:29Z",
+  "lastUpdated": "2026-09-28T23:54:16Z",
   "skuCount": 1329,
   "skus": [
     {
@@ -12688,7 +12688,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1",
         "2",
@@ -12712,7 +12712,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1",
         "2",
@@ -12892,7 +12892,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": false,
+      "spotEligible": true,
       "zones": [
         "1"
       ],
@@ -12914,7 +12914,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": false,
+      "spotEligible": true,
       "zones": [
         "1"
       ],
@@ -31782,7 +31782,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1",
         "2"

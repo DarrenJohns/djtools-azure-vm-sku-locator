@@ -1,7 +1,7 @@
 {
   "region": "westus",
   "regionDisplayName": "West US",
-  "lastUpdated": "2026-09-28T04:48:04Z",
+  "lastUpdated": "2026-09-28T23:53:05Z",
   "skuCount": 1299,
   "skus": [
     {
@@ -10028,7 +10028,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": false,
+      "spotEligible": true,
       "zones": [],
       "restrictions": []
     },
@@ -10068,7 +10068,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [],
       "restrictions": []
     },
@@ -10176,7 +10176,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [],
       "restrictions": [
         "NotAvailableForSubscription"
@@ -10198,7 +10198,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [],
       "restrictions": [
         "NotAvailableForSubscription"

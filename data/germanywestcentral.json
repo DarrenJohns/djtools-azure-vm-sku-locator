@@ -1,7 +1,7 @@
 {
   "region": "germanywestcentral",
   "regionDisplayName": "Germany West Central",
-  "lastUpdated": "2026-09-28T05:10:20Z",
+  "lastUpdated": "2026-09-29T00:12:14Z",
   "skuCount": 1301,
   "skus": [
     {
@@ -20,7 +20,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "2",
         "3"
@@ -45,7 +45,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "2",
         "3"
@@ -70,7 +70,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "2",
         "3"
@@ -95,7 +95,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "2",
         "3"
@@ -12599,7 +12599,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1",
         "3"
@@ -12622,7 +12622,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1",
         "3"
