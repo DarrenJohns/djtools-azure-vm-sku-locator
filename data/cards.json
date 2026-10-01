@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "generated": "2026-09-29T04:44:35Z",
+  "generated": "2026-10-01T05:43:31Z",
   "regions": [
     {
       "id": "australiaeast",
@@ -492,7 +492,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": true,
+        "spotEligible": false,
         "encryptionAtHost": true,
         "ephemeralOSDisk": true,
         "cpuArchitecture": "x64",
@@ -862,7 +862,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": true,
+        "spotEligible": false,
         "encryptionAtHost": true,
         "ephemeralOSDisk": true,
         "cpuArchitecture": "x64",
@@ -1232,7 +1232,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": true,
+        "spotEligible": false,
         "encryptionAtHost": true,
         "ephemeralOSDisk": false,
         "cpuArchitecture": "x64",
@@ -1602,7 +1602,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": true,
+        "spotEligible": false,
         "encryptionAtHost": true,
         "ephemeralOSDisk": false,
         "cpuArchitecture": "x64",
@@ -12406,7 +12406,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": true,
+        "spotEligible": false,
         "encryptionAtHost": true,
         "ephemeralOSDisk": true,
         "cpuArchitecture": "x64",
@@ -12443,7 +12443,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": true,
+        "spotEligible": false,
         "encryptionAtHost": true,
         "ephemeralOSDisk": true,
         "cpuArchitecture": "x64",
@@ -12480,7 +12480,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": true,
+        "spotEligible": false,
         "encryptionAtHost": true,
         "ephemeralOSDisk": true,
         "cpuArchitecture": "x64",
@@ -12739,7 +12739,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": true,
+        "spotEligible": false,
         "encryptionAtHost": true,
         "ephemeralOSDisk": true,
         "cpuArchitecture": "x64",
@@ -12776,7 +12776,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": true,
+        "spotEligible": false,
         "encryptionAtHost": true,
         "ephemeralOSDisk": true,
         "cpuArchitecture": "x64",
@@ -12813,7 +12813,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": true,
+        "spotEligible": false,
         "encryptionAtHost": true,
         "ephemeralOSDisk": true,
         "cpuArchitecture": "x64",
@@ -13331,7 +13331,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": true,
+        "spotEligible": false,
         "encryptionAtHost": true,
         "ephemeralOSDisk": false,
         "cpuArchitecture": "x64",
@@ -13368,7 +13368,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": true,
+        "spotEligible": false,
         "encryptionAtHost": true,
         "ephemeralOSDisk": false,
         "cpuArchitecture": "x64",
@@ -13405,7 +13405,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": true,
+        "spotEligible": false,
         "encryptionAtHost": true,
         "ephemeralOSDisk": false,
         "cpuArchitecture": "x64",
@@ -13997,7 +13997,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": true,
+        "spotEligible": false,
         "encryptionAtHost": true,
         "ephemeralOSDisk": true,
         "cpuArchitecture": "x64",
@@ -14034,7 +14034,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": true,
+        "spotEligible": false,
         "encryptionAtHost": true,
         "ephemeralOSDisk": true,
         "cpuArchitecture": "x64",
@@ -14071,7 +14071,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": true,
+        "spotEligible": false,
         "encryptionAtHost": true,
         "ephemeralOSDisk": true,
         "cpuArchitecture": "x64",
@@ -14108,7 +14108,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": true,
+        "spotEligible": false,
         "encryptionAtHost": true,
         "ephemeralOSDisk": true,
         "cpuArchitecture": "x64",
@@ -14145,7 +14145,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": true,
+        "spotEligible": false,
         "encryptionAtHost": true,
         "ephemeralOSDisk": true,
         "cpuArchitecture": "x64",
@@ -14996,7 +14996,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": true,
+        "spotEligible": false,
         "encryptionAtHost": true,
         "ephemeralOSDisk": false,
         "cpuArchitecture": "x64",
@@ -15033,7 +15033,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": true,
+        "spotEligible": false,
         "encryptionAtHost": true,
         "ephemeralOSDisk": false,
         "cpuArchitecture": "x64",
@@ -15070,7 +15070,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": true,
+        "spotEligible": false,
         "encryptionAtHost": true,
         "ephemeralOSDisk": false,
         "cpuArchitecture": "x64",
@@ -15107,7 +15107,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": true,
+        "spotEligible": false,
         "encryptionAtHost": true,
         "ephemeralOSDisk": false,
         "cpuArchitecture": "x64",
@@ -15144,7 +15144,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": true,
+        "spotEligible": false,
         "encryptionAtHost": true,
         "ephemeralOSDisk": false,
         "cpuArchitecture": "x64",
@@ -15662,7 +15662,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": true,
+        "spotEligible": false,
         "encryptionAtHost": true,
         "ephemeralOSDisk": false,
         "cpuArchitecture": "x64",
@@ -15699,7 +15699,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": true,
+        "spotEligible": false,
         "encryptionAtHost": true,
         "ephemeralOSDisk": false,
         "cpuArchitecture": "x64",
@@ -15736,7 +15736,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": true,
+        "spotEligible": false,
         "encryptionAtHost": true,
         "ephemeralOSDisk": false,
         "cpuArchitecture": "x64",
@@ -16772,7 +16772,7 @@
         "gpu": "A100",
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": false,
+        "spotEligible": true,
         "encryptionAtHost": true,
         "ephemeralOSDisk": true,
         "cpuArchitecture": "x64",
@@ -16809,7 +16809,7 @@
         "gpu": "A100",
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": false,
+        "spotEligible": true,
         "encryptionAtHost": true,
         "ephemeralOSDisk": true,
         "cpuArchitecture": "x64",
@@ -83267,7 +83267,7 @@
         "memoryGB": 5696.0,
         "maxDataDisks": 64,
         "nics": 8,
-        "pricePerHourUSD": null,
+        "pricePerHourUSD": 73.164,
         "powerScore": 60
       },
       "tags": {
@@ -83304,7 +83304,7 @@
         "memoryGB": 7600.0,
         "maxDataDisks": 64,
         "nics": 8,
-        "pricePerHourUSD": null,
+        "pricePerHourUSD": 97.552,
         "powerScore": 60
       },
       "tags": {
@@ -83341,7 +83341,7 @@
         "memoryGB": 8568.0,
         "maxDataDisks": 64,
         "nics": 8,
-        "pricePerHourUSD": null,
+        "pricePerHourUSD": 109.977,
         "powerScore": 60
       },
       "tags": {
@@ -83378,7 +83378,7 @@
         "memoryGB": 9496.0,
         "maxDataDisks": 64,
         "nics": 8,
-        "pricePerHourUSD": null,
+        "pricePerHourUSD": 121.888,
         "powerScore": 60
       },
       "tags": {
@@ -83415,7 +83415,7 @@
         "memoryGB": 11400.0,
         "maxDataDisks": 64,
         "nics": 8,
-        "pricePerHourUSD": null,
+        "pricePerHourUSD": 146.226,
         "powerScore": 60
       },
       "tags": {
@@ -83452,7 +83452,7 @@
         "memoryGB": 11400.0,
         "maxDataDisks": 64,
         "nics": 8,
-        "pricePerHourUSD": null,
+        "pricePerHourUSD": 146.328,
         "powerScore": 60
       },
       "tags": {
@@ -83489,7 +83489,7 @@
         "memoryGB": 11400.0,
         "maxDataDisks": 64,
         "nics": 8,
-        "pricePerHourUSD": null,
+        "pricePerHourUSD": 146.798,
         "powerScore": 60
       },
       "tags": {
@@ -83970,7 +83970,7 @@
         "memoryGB": 15200.0,
         "maxDataDisks": 64,
         "nics": 8,
-        "pricePerHourUSD": null,
+        "pricePerHourUSD": 216.781,
         "powerScore": 60
       },
       "tags": {
@@ -84007,7 +84007,7 @@
         "memoryGB": 15200.0,
         "maxDataDisks": 64,
         "nics": 8,
-        "pricePerHourUSD": null,
+        "pricePerHourUSD": 206.4586,
         "powerScore": 60
       },
       "tags": {
@@ -84932,7 +84932,7 @@
         "memoryGB": 5696.0,
         "maxDataDisks": 64,
         "nics": 8,
-        "pricePerHourUSD": null,
+        "pricePerHourUSD": 69.6798,
         "powerScore": 60
       },
       "tags": {
@@ -84969,7 +84969,7 @@
         "memoryGB": 7600.0,
         "maxDataDisks": 64,
         "nics": 8,
-        "pricePerHourUSD": null,
+        "pricePerHourUSD": 92.9064,
         "powerScore": 60
       },
       "tags": {
@@ -85006,7 +85006,7 @@
         "memoryGB": 8568.0,
         "maxDataDisks": 64,
         "nics": 8,
-        "pricePerHourUSD": null,
+        "pricePerHourUSD": 104.7397,
         "powerScore": 60
       },
       "tags": {
@@ -85043,7 +85043,7 @@
         "memoryGB": 9496.0,
         "maxDataDisks": 64,
         "nics": 8,
-        "pricePerHourUSD": null,
+        "pricePerHourUSD": 116.4569,
         "powerScore": 60
       },
       "tags": {
@@ -85080,7 +85080,7 @@
         "memoryGB": 11400.0,
         "maxDataDisks": 64,
         "nics": 8,
-        "pricePerHourUSD": null,
+        "pricePerHourUSD": 139.3308,
         "powerScore": 60
       },
       "tags": {
@@ -85117,7 +85117,7 @@
         "memoryGB": 11400.0,
         "maxDataDisks": 64,
         "nics": 8,
-        "pricePerHourUSD": null,
+        "pricePerHourUSD": 139.3595,
         "powerScore": 60
       },
       "tags": {
@@ -85154,7 +85154,7 @@
         "memoryGB": 11400.0,
         "maxDataDisks": 64,
         "nics": 8,
-        "pricePerHourUSD": null,
+        "pricePerHourUSD": 139.8072,
         "powerScore": 60
       },
       "tags": {

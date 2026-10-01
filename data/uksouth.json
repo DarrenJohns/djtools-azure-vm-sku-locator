@@ -1,7 +1,7 @@
 {
   "region": "uksouth",
   "regionDisplayName": "UK South",
-  "lastUpdated": "2026-09-29T00:08:39Z",
+  "lastUpdated": "2026-10-01T03:24:56Z",
   "skuCount": 1277,
   "skus": [
     {
@@ -92,7 +92,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "1",
         "2",
@@ -12110,7 +12110,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "2",
         "3"
@@ -12133,7 +12133,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "2",
         "3"

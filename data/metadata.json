@@ -47,86 +47,77 @@
     "qatarcentral",
     "israelcentral"
   ],
-  "lastUpdated": "2026-09-29T04:44:35Z",
-  "lastUpdatedDisplay": "September 2026",
+  "lastUpdated": "2026-10-01T05:43:31Z",
+  "lastUpdatedDisplay": "October 2026",
   "physicalRegionCount": 63,
   "failedRegions": [],
   "sourceHealth": {
-    "checkedAt": "2026-09-29T04:44:35Z",
     "sources": [
       {
+        "label": "Azure region list",
+        "checkedAt": "2026-10-01T05:43:31Z",
         "summary": "63 physical regions returned",
-        "checkedAt": "2026-09-29T04:44:35Z",
-        "status": "success",
-        "lastSuccessfulUpdate": "2026-09-29T04:44:35Z",
+        "lastSuccessfulUpdate": "2026-10-01T05:43:31Z",
         "id": "regions",
-        "failures": [],
-        "label": "Azure region list"
+        "status": "success",
+        "failures": []
       },
       {
+        "label": "VM SKU data",
+        "checkedAt": "2026-10-01T05:43:31Z",
         "summary": "45 of 45 regions refreshed",
-        "checkedAt": "2026-09-29T04:44:35Z",
-        "status": "success",
-        "lastSuccessfulUpdate": "2026-09-29T04:44:35Z",
+        "lastSuccessfulUpdate": "2026-10-01T05:43:31Z",
         "id": "vmSkus",
-        "failures": [],
-        "label": "VM SKU data"
+        "status": "success",
+        "failures": []
       },
       {
+        "label": "Disk SKU data",
+        "checkedAt": "2026-10-01T05:43:31Z",
         "summary": "45 of 45 regions refreshed",
-        "checkedAt": "2026-09-29T04:44:35Z",
-        "status": "success",
-        "lastSuccessfulUpdate": "2026-09-29T04:44:35Z",
+        "lastSuccessfulUpdate": "2026-10-01T05:43:31Z",
         "id": "disks",
-        "failures": [],
-        "label": "Disk SKU data"
+        "status": "success",
+        "failures": []
       },
       {
-        "summary": "37 of 45 regions refreshed (USD)",
-        "checkedAt": "2026-09-29T04:44:35Z",
-        "status": "partial",
-        "lastSuccessfulUpdate": "2026-09-28T10:16:56Z",
+        "label": "Pricing data",
+        "checkedAt": "2026-10-01T05:43:31Z",
+        "summary": "45 of 45 regions refreshed (USD)",
+        "lastSuccessfulUpdate": "2026-10-01T05:43:31Z",
         "id": "pricing",
-        "failures": [
-          "eastus/USD",
-          "eastus2/USD",
-          "westus2/USD",
-          "westus3/USD",
-          "northcentralus/USD",
-          "southcentralus/USD",
-          "canadacentral/USD",
-          "northeurope/USD"
-        ],
-        "label": "Pricing data"
+        "status": "success",
+        "failures": []
       },
       {
+        "label": "Retirement alerts",
+        "checkedAt": "2026-10-01T05:43:31Z",
         "summary": "35 family records refreshed",
-        "checkedAt": "2026-09-29T04:44:35Z",
-        "status": "success",
-        "lastSuccessfulUpdate": "2026-09-29",
+        "lastSuccessfulUpdate": "2026-10-01",
         "id": "retirements",
-        "failures": null,
-        "label": "Retirement alerts"
+        "status": "success",
+        "failures": null
       },
       {
+        "label": "History snapshots",
+        "checkedAt": "2026-10-01T05:43:31Z",
         "summary": "45 of 45 region snapshots archived",
-        "checkedAt": "2026-09-29T04:44:35Z",
-        "status": "success",
-        "lastSuccessfulUpdate": "2026-09-29T04:44:35Z",
+        "lastSuccessfulUpdate": "2026-10-01T05:43:31Z",
         "id": "history",
-        "failures": [],
-        "label": "History snapshots"
+        "status": "success",
+        "failures": []
       },
       {
+        "label": "Top Trumps cards",
+        "checkedAt": "2026-10-01T05:43:31Z",
         "summary": "Card deck generated",
-        "checkedAt": "2026-09-29T04:44:35Z",
-        "status": "success",
-        "lastSuccessfulUpdate": "2026-09-29T04:44:35Z",
+        "lastSuccessfulUpdate": "2026-10-01T05:43:31Z",
         "id": "cards",
-        "failures": null,
-        "label": "Top Trumps cards"
+        "status": "success",
+        "failures": null
       }
     ],
-    "complete": false
+    "complete": true,
+    "checkedAt": "2026-10-01T05:43:31Z"
   }
 }

@@ -1,7 +1,7 @@
 {
   "region": "brazilsouth",
   "regionDisplayName": "Brazil South",
-  "lastUpdated": "2026-09-29T00:05:02Z",
+  "lastUpdated": "2026-10-01T03:20:29Z",
   "skuCount": 1212,
   "skus": [
     {
@@ -11906,7 +11906,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "2"
       ],
@@ -11928,7 +11928,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "2"
       ],

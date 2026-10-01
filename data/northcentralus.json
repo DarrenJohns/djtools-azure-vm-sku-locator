@@ -1,7 +1,7 @@
 {
   "region": "northcentralus",
   "regionDisplayName": "North Central US",
-  "lastUpdated": "2026-09-28T23:57:46Z",
+  "lastUpdated": "2026-10-01T03:11:37Z",
   "skuCount": 1241,
   "skus": [
     {
@@ -20,7 +20,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": false,
+      "spotEligible": true,
       "zones": [],
       "restrictions": []
     },
@@ -40,7 +40,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": false,
+      "spotEligible": true,
       "zones": [],
       "restrictions": []
     },
@@ -60,7 +60,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": false,
+      "spotEligible": true,
       "zones": [],
       "restrictions": []
     },
@@ -80,7 +80,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": false,
+      "spotEligible": true,
       "zones": [],
       "restrictions": []
     },

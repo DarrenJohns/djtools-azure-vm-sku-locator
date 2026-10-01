@@ -1,7 +1,7 @@
 {
   "region": "southeastasia",
   "regionDisplayName": "Southeast Asia",
-  "lastUpdated": "2026-09-29T00:22:01Z",
+  "lastUpdated": "2026-10-01T03:40:59Z",
   "skuCount": 1317,
   "skus": [
     {
@@ -10870,7 +10870,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": false,
+      "spotEligible": true,
       "zones": [
         "1"
       ],
@@ -10892,7 +10892,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": false,
+      "spotEligible": true,
       "zones": [
         "1"
       ],
@@ -10958,7 +10958,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": false,
+      "spotEligible": true,
       "zones": [
         "1"
       ],
@@ -10980,7 +10980,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": false,
+      "spotEligible": true,
       "zones": [
         "1"
       ],

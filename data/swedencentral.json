@@ -1,7 +1,7 @@
 {
   "region": "swedencentral",
   "regionDisplayName": "Sweden Central",
-  "lastUpdated": "2026-09-29T00:15:50Z",
+  "lastUpdated": "2026-10-01T03:33:45Z",
   "skuCount": 1252,
   "skus": [
     {
@@ -20,7 +20,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": false,
+      "spotEligible": true,
       "zones": [
         "1",
         "3"
@@ -43,7 +43,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": false,
+      "spotEligible": true,
       "zones": [
         "1",
         "3"
@@ -66,7 +66,7 @@
       "premiumIO": true,
       "ephemeralOSDisk": true,
       "encryptionAtHost": true,
-      "spotEligible": false,
+      "spotEligible": true,
       "zones": [
         "1",
         "3"

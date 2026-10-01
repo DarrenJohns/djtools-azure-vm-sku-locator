@@ -1,7 +1,7 @@
 {
   "region": "switzerlandnorth",
   "regionDisplayName": "Switzerland North",
-  "lastUpdated": "2026-09-29T00:13:27Z",
+  "lastUpdated": "2026-10-01T03:30:49Z",
   "skuCount": 1085,
   "skus": [
     {
@@ -11834,7 +11834,7 @@
       "premiumIO": false,
       "ephemeralOSDisk": false,
       "encryptionAtHost": false,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "3"
       ],
@@ -11878,7 +11878,7 @@
       "premiumIO": false,
       "ephemeralOSDisk": false,
       "encryptionAtHost": false,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "3"
       ],
@@ -11922,7 +11922,7 @@
       "premiumIO": false,
       "ephemeralOSDisk": false,
       "encryptionAtHost": false,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "3"
       ],
@@ -11966,7 +11966,7 @@
       "premiumIO": false,
       "ephemeralOSDisk": false,
       "encryptionAtHost": false,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "3"
       ],
@@ -11988,7 +11988,7 @@
       "premiumIO": false,
       "ephemeralOSDisk": false,
       "encryptionAtHost": false,
-      "spotEligible": true,
+      "spotEligible": false,
       "zones": [
         "3"
       ],
