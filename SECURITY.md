@@ -4,7 +4,7 @@
 
 If you discover a security vulnerability in this project, please report it responsibly:
 
-1. **Open a GitHub Issue** — [Create an issue](https://github.com/darjohn_microsoft/vm-sku-per-region/issues/new) with the label `security`
+1. **Open a GitHub Issue** — [Create an issue](https://github.com/DarrenJohns/djtools-azure-vm-sku-locator/issues/new) with the label `security`
 2. **Email** — Contact the maintainer directly via GitHub profile
 
 Please include:
