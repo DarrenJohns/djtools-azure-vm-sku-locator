@@ -1,8 +1,8 @@
 {
   "region": "japanwest",
   "regionDisplayName": "Japan West",
-  "lastUpdated": "2026-10-01T03:45:25Z",
-  "skuCount": 973,
+  "lastUpdated": "2026-11-01T03:53:58Z",
+  "skuCount": 975,
   "skus": [
     {
       "name": "Standard_NC4as_T4_v3",
@@ -22741,6 +22741,29 @@
       "restrictions": []
     },
     {
+      "name": "Standard_M16s_v3",
+      "family": "standardMSMediumMemoryv3Family",
+      "tier": "Standard",
+      "size": "M16s_v3",
+      "vCPUs": 16,
+      "gpuCount": 0,
+      "memoryGB": 256.0,
+      "maxDataDisks": 64,
+      "maxNICs": 8,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": false,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "1",
+        "3"
+      ],
+      "restrictions": []
+    },
+    {
       "name": "Standard_M24s_v3",
       "family": "standardMSMediumMemoryv3Family",
       "tier": "Standard",
@@ -22748,6 +22771,29 @@
       "vCPUs": 24,
       "gpuCount": 0,
       "memoryGB": 480.0,
+      "maxDataDisks": 64,
+      "maxNICs": 8,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": false,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "1",
+        "3"
+      ],
+      "restrictions": []
+    },
+    {
+      "name": "Standard_M32ts_v3",
+      "family": "standardMSMediumMemoryv3Family",
+      "tier": "Standard",
+      "size": "M32ts_v3",
+      "vCPUs": 32,
+      "gpuCount": 0,
+      "memoryGB": 512.0,
       "maxDataDisks": 64,
       "maxNICs": 8,
       "cpuArchitecture": "x64",

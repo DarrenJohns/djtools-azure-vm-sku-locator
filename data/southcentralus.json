@@ -1,8 +1,8 @@
 {
   "region": "southcentralus",
   "regionDisplayName": "South Central US",
-  "lastUpdated": "2026-10-01T03:13:08Z",
-  "skuCount": 1365,
+  "lastUpdated": "2026-11-01T03:19:56Z",
+  "skuCount": 1366,
   "skus": [
     {
       "name": "Standard_NC4as_T4_v3",
@@ -9450,7 +9450,7 @@
       "gpuCount": 0,
       "memoryGB": 16.0,
       "maxDataDisks": 26,
-      "maxNICs": 2,
+      "maxNICs": 4,
       "cpuArchitecture": "x64",
       "hyperVGenerations": "V2",
       "acceleratedNetworking": true,
@@ -9473,7 +9473,7 @@
       "gpuCount": 0,
       "memoryGB": 32.0,
       "maxDataDisks": 48,
-      "maxNICs": 4,
+      "maxNICs": 8,
       "cpuArchitecture": "x64",
       "hyperVGenerations": "V2",
       "acceleratedNetworking": true,
@@ -9657,7 +9657,7 @@
       "gpuCount": 0,
       "memoryGB": 8.0,
       "maxDataDisks": 26,
-      "maxNICs": 2,
+      "maxNICs": 4,
       "cpuArchitecture": "x64",
       "hyperVGenerations": "V2",
       "acceleratedNetworking": true,
@@ -9680,7 +9680,7 @@
       "gpuCount": 0,
       "memoryGB": 16.0,
       "maxDataDisks": 48,
-      "maxNICs": 4,
+      "maxNICs": 8,
       "cpuArchitecture": "x64",
       "hyperVGenerations": "V2",
       "acceleratedNetworking": true,
@@ -10048,7 +10048,7 @@
       "gpuCount": 0,
       "memoryGB": 16.0,
       "maxDataDisks": 48,
-      "maxNICs": 4,
+      "maxNICs": 8,
       "cpuArchitecture": "x64",
       "hyperVGenerations": "V2",
       "acceleratedNetworking": true,
@@ -10301,7 +10301,7 @@
       "gpuCount": 0,
       "memoryGB": 32.0,
       "maxDataDisks": 26,
-      "maxNICs": 2,
+      "maxNICs": 4,
       "cpuArchitecture": "x64",
       "hyperVGenerations": "V2",
       "acceleratedNetworking": true,
@@ -10370,7 +10370,7 @@
       "gpuCount": 0,
       "memoryGB": 64.0,
       "maxDataDisks": 48,
-      "maxNICs": 4,
+      "maxNICs": 8,
       "cpuArchitecture": "x64",
       "hyperVGenerations": "V2",
       "acceleratedNetworking": true,
@@ -10922,7 +10922,7 @@
       "gpuCount": 0,
       "memoryGB": 32.0,
       "maxDataDisks": 26,
-      "maxNICs": 2,
+      "maxNICs": 4,
       "cpuArchitecture": "x64",
       "hyperVGenerations": "V2",
       "acceleratedNetworking": true,
@@ -10991,7 +10991,7 @@
       "gpuCount": 0,
       "memoryGB": 64.0,
       "maxDataDisks": 48,
-      "maxNICs": 4,
+      "maxNICs": 8,
       "cpuArchitecture": "x64",
       "hyperVGenerations": "V2",
       "acceleratedNetworking": true,
@@ -12370,6 +12370,204 @@
       "spotEligible": true,
       "zones": [
         "1",
+        "3"
+      ],
+      "restrictions": []
+    },
+    {
+      "name": "Standard_NC24lds_xl_RTXPRO6000BSE_v6",
+      "family": "StandardNCdsRTXPRO6000BSEv6XLFamily",
+      "tier": "Standard",
+      "size": "NC24lds_xl_RTXPRO6000BSE_v6",
+      "vCPUs": 24,
+      "gpuCount": 1,
+      "memoryGB": 72.0,
+      "maxDataDisks": 2,
+      "maxNICs": 4,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": false,
+      "zones": [
+        "3"
+      ],
+      "restrictions": []
+    },
+    {
+      "name": "Standard_NC36lds_xl_RTXPRO6000BSE_v6",
+      "family": "StandardNCdsRTXPRO6000BSEv6XLFamily",
+      "tier": "Standard",
+      "size": "NC36lds_xl_RTXPRO6000BSE_v6",
+      "vCPUs": 36,
+      "gpuCount": 1,
+      "memoryGB": 72.0,
+      "maxDataDisks": 2,
+      "maxNICs": 6,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": false,
+      "zones": [
+        "3"
+      ],
+      "restrictions": []
+    },
+    {
+      "name": "Standard_NC36ds_xl_RTXPRO6000BSE_v6",
+      "family": "StandardNCdsRTXPRO6000BSEv6XLFamily",
+      "tier": "Standard",
+      "size": "NC36ds_xl_RTXPRO6000BSE_v6",
+      "vCPUs": 36,
+      "gpuCount": 1,
+      "memoryGB": 132.0,
+      "maxDataDisks": 2,
+      "maxNICs": 6,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": false,
+      "zones": [
+        "3"
+      ],
+      "restrictions": []
+    },
+    {
+      "name": "Standard_NC72lds_xl_RTXPRO6000BSE_v6",
+      "family": "StandardNCdsRTXPRO6000BSEv6XLFamily",
+      "tier": "Standard",
+      "size": "NC72lds_xl_RTXPRO6000BSE_v6",
+      "vCPUs": 72,
+      "gpuCount": 1,
+      "memoryGB": 132.0,
+      "maxDataDisks": 4,
+      "maxNICs": 6,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "3"
+      ],
+      "restrictions": []
+    },
+    {
+      "name": "Standard_NC72ds_xl_RTXPRO6000BSE_v6",
+      "family": "StandardNCdsRTXPRO6000BSEv6XLFamily",
+      "tier": "Standard",
+      "size": "NC72ds_xl_RTXPRO6000BSE_v6",
+      "vCPUs": 72,
+      "gpuCount": 1,
+      "memoryGB": 264.0,
+      "maxDataDisks": 4,
+      "maxNICs": 6,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "3"
+      ],
+      "restrictions": []
+    },
+    {
+      "name": "Standard_NC144lds_xl_RTXPRO6000BSE_v6",
+      "family": "StandardNCdsRTXPRO6000BSEv6XLFamily",
+      "tier": "Standard",
+      "size": "NC144lds_xl_RTXPRO6000BSE_v6",
+      "vCPUs": 144,
+      "gpuCount": 1,
+      "memoryGB": 264.0,
+      "maxDataDisks": 8,
+      "maxNICs": 8,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": false,
+      "zones": [
+        "3"
+      ],
+      "restrictions": []
+    },
+    {
+      "name": "Standard_NC144ds_xl_RTXPRO6000BSE_v6",
+      "family": "StandardNCdsRTXPRO6000BSEv6XLFamily",
+      "tier": "Standard",
+      "size": "NC144ds_xl_RTXPRO6000BSE_v6",
+      "vCPUs": 144,
+      "gpuCount": 1,
+      "memoryGB": 516.0,
+      "maxDataDisks": 8,
+      "maxNICs": 8,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": false,
+      "zones": [
+        "3"
+      ],
+      "restrictions": []
+    },
+    {
+      "name": "Standard_NC288lds_xl_RTXPRO6000BSE_v6",
+      "family": "StandardNCdsRTXPRO6000BSEv6XLFamily",
+      "tier": "Standard",
+      "size": "NC288lds_xl_RTXPRO6000BSE_v6",
+      "vCPUs": 288,
+      "gpuCount": 2,
+      "memoryGB": 516.0,
+      "maxDataDisks": 16,
+      "maxNICs": 8,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": false,
+      "zones": [
+        "3"
+      ],
+      "restrictions": []
+    },
+    {
+      "name": "Standard_NC288ds_xl_RTXPRO6000BSE_v6",
+      "family": "StandardNCdsRTXPRO6000BSEv6XLFamily",
+      "tier": "Standard",
+      "size": "NC288ds_xl_RTXPRO6000BSE_v6",
+      "vCPUs": 288,
+      "gpuCount": 2,
+      "memoryGB": 1032.0,
+      "maxDataDisks": 16,
+      "maxNICs": 8,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": true,
+      "encryptionAtHost": true,
+      "spotEligible": false,
+      "zones": [
         "3"
       ],
       "restrictions": []
@@ -29876,7 +30074,7 @@
       "size": "L160iaos_v5",
       "vCPUs": 160,
       "gpuCount": 0,
-      "memoryGB": 1055.0,
+      "memoryGB": 1040.0,
       "maxDataDisks": 64,
       "maxNICs": 15,
       "cpuArchitecture": "x64",
@@ -32036,6 +32234,30 @@
       "restrictions": []
     },
     {
+      "name": "Standard_M16s_v3",
+      "family": "standardMSMediumMemoryv3Family",
+      "tier": "Standard",
+      "size": "M16s_v3",
+      "vCPUs": 16,
+      "gpuCount": 0,
+      "memoryGB": 256.0,
+      "maxDataDisks": 64,
+      "maxNICs": 8,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": false,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "1",
+        "2",
+        "3"
+      ],
+      "restrictions": []
+    },
+    {
       "name": "Standard_M24s_v3",
       "family": "standardMSMediumMemoryv3Family",
       "tier": "Standard",
@@ -32043,6 +32265,30 @@
       "vCPUs": 24,
       "gpuCount": 0,
       "memoryGB": 480.0,
+      "maxDataDisks": 64,
+      "maxNICs": 8,
+      "cpuArchitecture": "x64",
+      "hyperVGenerations": "V2",
+      "acceleratedNetworking": true,
+      "premiumIO": true,
+      "ephemeralOSDisk": false,
+      "encryptionAtHost": true,
+      "spotEligible": true,
+      "zones": [
+        "1",
+        "2",
+        "3"
+      ],
+      "restrictions": []
+    },
+    {
+      "name": "Standard_M32ts_v3",
+      "family": "standardMSMediumMemoryv3Family",
+      "tier": "Standard",
+      "size": "M32ts_v3",
+      "vCPUs": 32,
+      "gpuCount": 0,
+      "memoryGB": 512.0,
       "maxDataDisks": 64,
       "maxNICs": 8,
       "cpuArchitecture": "x64",
@@ -32502,263 +32748,6 @@
         "1"
       ],
       "restrictions": []
-    },
-    {
-      "name": "Standard_NV6s_v2",
-      "family": "standardNVSv2Family",
-      "tier": "Standard",
-      "size": "NV6s_v2",
-      "vCPUs": 6,
-      "gpuCount": 1,
-      "memoryGB": 112.0,
-      "maxDataDisks": 12,
-      "maxNICs": 4,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V1,V2",
-      "acceleratedNetworking": false,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": false,
-      "zones": [
-        "1",
-        "3"
-      ],
-      "restrictions": [
-        "NotAvailableForSubscription"
-      ]
-    },
-    {
-      "name": "Standard_NV12s_v2",
-      "family": "standardNVSv2Family",
-      "tier": "Standard",
-      "size": "NV12s_v2",
-      "vCPUs": 12,
-      "gpuCount": 2,
-      "memoryGB": 224.0,
-      "maxDataDisks": 24,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V1,V2",
-      "acceleratedNetworking": false,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": false,
-      "zones": [
-        "1",
-        "3"
-      ],
-      "restrictions": [
-        "NotAvailableForSubscription"
-      ]
-    },
-    {
-      "name": "Standard_NV24s_v2",
-      "family": "standardNVSv2Family",
-      "tier": "Standard",
-      "size": "NV24s_v2",
-      "vCPUs": 24,
-      "gpuCount": 4,
-      "memoryGB": 448.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V1,V2",
-      "acceleratedNetworking": false,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": false,
-      "zones": [
-        "1",
-        "3"
-      ],
-      "restrictions": [
-        "NotAvailableForSubscription"
-      ]
-    },
-    {
-      "name": "Standard_NV12s_v3",
-      "family": "standardNVSv3Family",
-      "tier": "Standard",
-      "size": "NV12s_v3",
-      "vCPUs": 12,
-      "gpuCount": 1,
-      "memoryGB": 112.0,
-      "maxDataDisks": 12,
-      "maxNICs": 4,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V1,V2",
-      "acceleratedNetworking": true,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "1",
-        "3"
-      ],
-      "restrictions": [
-        "NotAvailableForSubscription",
-        "NotAvailableForSubscription"
-      ]
-    },
-    {
-      "name": "Standard_NV24s_v3",
-      "family": "standardNVSv3Family",
-      "tier": "Standard",
-      "size": "NV24s_v3",
-      "vCPUs": 24,
-      "gpuCount": 2,
-      "memoryGB": 224.0,
-      "maxDataDisks": 24,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V1,V2",
-      "acceleratedNetworking": true,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "1",
-        "3"
-      ],
-      "restrictions": [
-        "NotAvailableForSubscription",
-        "NotAvailableForSubscription"
-      ]
-    },
-    {
-      "name": "Standard_NV48s_v3",
-      "family": "standardNVSv3Family",
-      "tier": "Standard",
-      "size": "NV48s_v3",
-      "vCPUs": 48,
-      "gpuCount": 4,
-      "memoryGB": 448.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V1,V2",
-      "acceleratedNetworking": true,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "1",
-        "3"
-      ],
-      "restrictions": [
-        "NotAvailableForSubscription",
-        "NotAvailableForSubscription"
-      ]
-    },
-    {
-      "name": "Standard_NV4as_v4",
-      "family": "standardNVSv4Family",
-      "tier": "Standard",
-      "size": "NV4as_v4",
-      "vCPUs": 4,
-      "gpuCount": 1,
-      "memoryGB": 14.0,
-      "maxDataDisks": 8,
-      "maxNICs": 2,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V1,V2",
-      "acceleratedNetworking": true,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "1",
-        "3"
-      ],
-      "restrictions": [
-        "NotAvailableForSubscription",
-        "NotAvailableForSubscription"
-      ]
-    },
-    {
-      "name": "Standard_NV8as_v4",
-      "family": "standardNVSv4Family",
-      "tier": "Standard",
-      "size": "NV8as_v4",
-      "vCPUs": 8,
-      "gpuCount": 1,
-      "memoryGB": 28.0,
-      "maxDataDisks": 16,
-      "maxNICs": 4,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V1,V2",
-      "acceleratedNetworking": true,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "1",
-        "3"
-      ],
-      "restrictions": [
-        "NotAvailableForSubscription",
-        "NotAvailableForSubscription"
-      ]
-    },
-    {
-      "name": "Standard_NV16as_v4",
-      "family": "standardNVSv4Family",
-      "tier": "Standard",
-      "size": "NV16as_v4",
-      "vCPUs": 16,
-      "gpuCount": 1,
-      "memoryGB": 56.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V1,V2",
-      "acceleratedNetworking": true,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "1",
-        "3"
-      ],
-      "restrictions": [
-        "NotAvailableForSubscription",
-        "NotAvailableForSubscription"
-      ]
-    },
-    {
-      "name": "Standard_NV32as_v4",
-      "family": "standardNVSv4Family",
-      "tier": "Standard",
-      "size": "NV32as_v4",
-      "vCPUs": 32,
-      "gpuCount": 1,
-      "memoryGB": 112.0,
-      "maxDataDisks": 32,
-      "maxNICs": 8,
-      "cpuArchitecture": "x64",
-      "hyperVGenerations": "V1,V2",
-      "acceleratedNetworking": true,
-      "premiumIO": true,
-      "ephemeralOSDisk": true,
-      "encryptionAtHost": true,
-      "spotEligible": true,
-      "zones": [
-        "1",
-        "3"
-      ],
-      "restrictions": [
-        "NotAvailableForSubscription",
-        "NotAvailableForSubscription"
-      ]
     },
     {
       "name": "Standard_E80ids_v4",

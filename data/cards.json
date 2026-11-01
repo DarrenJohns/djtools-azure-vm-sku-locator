@@ -1,24 +1,24 @@
 {
   "version": "1.0",
-  "generated": "2026-10-01T05:43:31Z",
+  "generated": "2026-11-01T06:03:25Z",
   "regions": [
     {
       "id": "australiaeast",
       "short": "AU-EAST",
       "display": "Australia East",
-      "cardCount": 1231
+      "cardCount": 1229
     },
     {
       "id": "newzealandnorth",
       "short": "NZ-NORTH",
       "display": "New Zealand North",
-      "cardCount": 1083
+      "cardCount": 1085
     }
   ],
   "rarityCounts": {
-    "rare": 597,
-    "common": 272,
-    "uncommon": 1029,
+    "rare": 601,
+    "common": 271,
+    "uncommon": 1026,
     "epic": 314,
     "legendary": 102
   },
@@ -492,7 +492,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": false,
+        "spotEligible": true,
         "encryptionAtHost": true,
         "ephemeralOSDisk": true,
         "cpuArchitecture": "x64",
@@ -529,7 +529,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": false,
+        "spotEligible": true,
         "encryptionAtHost": true,
         "ephemeralOSDisk": true,
         "cpuArchitecture": "x64",
@@ -862,7 +862,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": false,
+        "spotEligible": true,
         "encryptionAtHost": true,
         "ephemeralOSDisk": true,
         "cpuArchitecture": "x64",
@@ -899,7 +899,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": false,
+        "spotEligible": true,
         "encryptionAtHost": true,
         "ephemeralOSDisk": true,
         "cpuArchitecture": "x64",
@@ -1232,7 +1232,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": false,
+        "spotEligible": true,
         "encryptionAtHost": true,
         "ephemeralOSDisk": false,
         "cpuArchitecture": "x64",
@@ -1269,7 +1269,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": false,
+        "spotEligible": true,
         "encryptionAtHost": true,
         "ephemeralOSDisk": false,
         "cpuArchitecture": "x64",
@@ -1602,7 +1602,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": false,
+        "spotEligible": true,
         "encryptionAtHost": true,
         "ephemeralOSDisk": false,
         "cpuArchitecture": "x64",
@@ -1639,7 +1639,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": false,
+        "spotEligible": true,
         "encryptionAtHost": true,
         "ephemeralOSDisk": false,
         "cpuArchitecture": "x64",
@@ -6301,7 +6301,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": false,
+        "spotEligible": true,
         "encryptionAtHost": true,
         "ephemeralOSDisk": true,
         "cpuArchitecture": "x64",
@@ -6338,7 +6338,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": false,
+        "spotEligible": true,
         "encryptionAtHost": true,
         "ephemeralOSDisk": true,
         "cpuArchitecture": "x64",
@@ -7115,7 +7115,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": false,
+        "spotEligible": true,
         "encryptionAtHost": true,
         "ephemeralOSDisk": false,
         "cpuArchitecture": "x64",
@@ -12250,9 +12250,9 @@
         "vcpus": 4,
         "memoryGB": 16.0,
         "maxDataDisks": 26,
-        "nics": 2,
+        "nics": 4,
         "pricePerHourUSD": 0.431,
-        "powerScore": 10
+        "powerScore": 11
       },
       "tags": {
         "gpu": null,
@@ -12287,9 +12287,9 @@
         "vcpus": 8,
         "memoryGB": 32.0,
         "maxDataDisks": 48,
-        "nics": 4,
+        "nics": 8,
         "pricePerHourUSD": 0.862,
-        "powerScore": 15
+        "powerScore": 16
       },
       "tags": {
         "gpu": null,
@@ -12406,7 +12406,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": false,
+        "spotEligible": true,
         "encryptionAtHost": true,
         "ephemeralOSDisk": true,
         "cpuArchitecture": "x64",
@@ -12443,7 +12443,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": false,
+        "spotEligible": true,
         "encryptionAtHost": true,
         "ephemeralOSDisk": true,
         "cpuArchitecture": "x64",
@@ -12480,7 +12480,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": false,
+        "spotEligible": true,
         "encryptionAtHost": true,
         "ephemeralOSDisk": true,
         "cpuArchitecture": "x64",
@@ -12583,9 +12583,9 @@
         "vcpus": 4,
         "memoryGB": 8.0,
         "maxDataDisks": 26,
-        "nics": 2,
+        "nics": 4,
         "pricePerHourUSD": 0.359,
-        "powerScore": 9
+        "powerScore": 11
       },
       "tags": {
         "gpu": null,
@@ -12620,9 +12620,9 @@
         "vcpus": 8,
         "memoryGB": 16.0,
         "maxDataDisks": 48,
-        "nics": 4,
+        "nics": 8,
         "pricePerHourUSD": 0.718,
-        "powerScore": 14
+        "powerScore": 16
       },
       "tags": {
         "gpu": null,
@@ -12739,7 +12739,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": false,
+        "spotEligible": true,
         "encryptionAtHost": true,
         "ephemeralOSDisk": true,
         "cpuArchitecture": "x64",
@@ -12776,7 +12776,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": false,
+        "spotEligible": true,
         "encryptionAtHost": true,
         "ephemeralOSDisk": true,
         "cpuArchitecture": "x64",
@@ -12813,7 +12813,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": false,
+        "spotEligible": true,
         "encryptionAtHost": true,
         "ephemeralOSDisk": true,
         "cpuArchitecture": "x64",
@@ -13212,9 +13212,9 @@
         "vcpus": 8,
         "memoryGB": 16.0,
         "maxDataDisks": 48,
-        "nics": 4,
+        "nics": 8,
         "pricePerHourUSD": 0.607,
-        "powerScore": 14
+        "powerScore": 16
       },
       "tags": {
         "gpu": null,
@@ -13331,7 +13331,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": false,
+        "spotEligible": true,
         "encryptionAtHost": true,
         "ephemeralOSDisk": false,
         "cpuArchitecture": "x64",
@@ -13368,7 +13368,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": false,
+        "spotEligible": true,
         "encryptionAtHost": true,
         "ephemeralOSDisk": false,
         "cpuArchitecture": "x64",
@@ -13405,7 +13405,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": false,
+        "spotEligible": true,
         "encryptionAtHost": true,
         "ephemeralOSDisk": false,
         "cpuArchitecture": "x64",
@@ -13619,9 +13619,9 @@
         "vcpus": 4,
         "memoryGB": 32.0,
         "maxDataDisks": 26,
-        "nics": 2,
+        "nics": 4,
         "pricePerHourUSD": 0.547,
-        "powerScore": 10
+        "powerScore": 12
       },
       "tags": {
         "gpu": null,
@@ -13730,9 +13730,9 @@
         "vcpus": 8,
         "memoryGB": 64.0,
         "maxDataDisks": 48,
-        "nics": 4,
+        "nics": 8,
         "pricePerHourUSD": 1.094,
-        "powerScore": 16
+        "powerScore": 17
       },
       "tags": {
         "gpu": null,
@@ -13997,7 +13997,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": false,
+        "spotEligible": true,
         "encryptionAtHost": true,
         "ephemeralOSDisk": true,
         "cpuArchitecture": "x64",
@@ -14034,7 +14034,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": false,
+        "spotEligible": true,
         "encryptionAtHost": true,
         "ephemeralOSDisk": true,
         "cpuArchitecture": "x64",
@@ -14071,7 +14071,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": false,
+        "spotEligible": true,
         "encryptionAtHost": true,
         "ephemeralOSDisk": true,
         "cpuArchitecture": "x64",
@@ -14108,7 +14108,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": false,
+        "spotEligible": true,
         "encryptionAtHost": true,
         "ephemeralOSDisk": true,
         "cpuArchitecture": "x64",
@@ -14145,7 +14145,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": false,
+        "spotEligible": true,
         "encryptionAtHost": true,
         "ephemeralOSDisk": true,
         "cpuArchitecture": "x64",
@@ -14618,9 +14618,9 @@
         "vcpus": 4,
         "memoryGB": 32.0,
         "maxDataDisks": 26,
-        "nics": 2,
+        "nics": 4,
         "pricePerHourUSD": 0.449,
-        "powerScore": 10
+        "powerScore": 12
       },
       "tags": {
         "gpu": null,
@@ -14729,9 +14729,9 @@
         "vcpus": 8,
         "memoryGB": 64.0,
         "maxDataDisks": 48,
-        "nics": 4,
+        "nics": 8,
         "pricePerHourUSD": 0.898,
-        "powerScore": 16
+        "powerScore": 17
       },
       "tags": {
         "gpu": null,
@@ -14996,7 +14996,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": false,
+        "spotEligible": true,
         "encryptionAtHost": true,
         "ephemeralOSDisk": false,
         "cpuArchitecture": "x64",
@@ -15033,7 +15033,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": false,
+        "spotEligible": true,
         "encryptionAtHost": true,
         "ephemeralOSDisk": false,
         "cpuArchitecture": "x64",
@@ -15070,7 +15070,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": false,
+        "spotEligible": true,
         "encryptionAtHost": true,
         "ephemeralOSDisk": false,
         "cpuArchitecture": "x64",
@@ -15107,7 +15107,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": false,
+        "spotEligible": true,
         "encryptionAtHost": true,
         "ephemeralOSDisk": false,
         "cpuArchitecture": "x64",
@@ -15144,7 +15144,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": false,
+        "spotEligible": true,
         "encryptionAtHost": true,
         "ephemeralOSDisk": false,
         "cpuArchitecture": "x64",
@@ -15662,7 +15662,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": false,
+        "spotEligible": true,
         "encryptionAtHost": true,
         "ephemeralOSDisk": false,
         "cpuArchitecture": "x64",
@@ -15699,7 +15699,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": false,
+        "spotEligible": true,
         "encryptionAtHost": true,
         "ephemeralOSDisk": false,
         "cpuArchitecture": "x64",
@@ -15736,7 +15736,7 @@
         "gpu": null,
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": false,
+        "spotEligible": true,
         "encryptionAtHost": true,
         "ephemeralOSDisk": false,
         "cpuArchitecture": "x64",
@@ -16735,7 +16735,7 @@
         "gpu": "A100",
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": true,
+        "spotEligible": false,
         "encryptionAtHost": true,
         "ephemeralOSDisk": true,
         "cpuArchitecture": "x64",
@@ -16772,7 +16772,7 @@
         "gpu": "A100",
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": true,
+        "spotEligible": false,
         "encryptionAtHost": true,
         "ephemeralOSDisk": true,
         "cpuArchitecture": "x64",
@@ -16809,7 +16809,7 @@
         "gpu": "A100",
         "acceleratedNetworking": true,
         "premiumIO": true,
-        "spotEligible": true,
+        "spotEligible": false,
         "encryptionAtHost": true,
         "ephemeralOSDisk": true,
         "cpuArchitecture": "x64",
@@ -44646,6 +44646,43 @@
       }
     },
     {
+      "id": "australiaeast::Standard_M16s_v3",
+      "sku": "Standard_M16s_v3",
+      "displayName": "M16s v3",
+      "nickname": "Cache Hunter",
+      "region": "australiaeast",
+      "regionShort": "AU-EAST",
+      "regionDisplay": "Australia East",
+      "family": "standardMSMediumMemoryv3Family",
+      "familyDisplay": "MSMediumMemoryv3",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 16,
+        "memoryGB": 256.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 1.968,
+        "powerScore": 23
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "SAP HANA Class",
+        "description": "Certified for SAP HANA — multi-TB RAM for in-memory analytics and large databases."
+      }
+    },
+    {
       "id": "australiaeast::Standard_M24s_v3",
       "sku": "Standard_M24s_v3",
       "displayName": "M24s v3",
@@ -44665,6 +44702,43 @@
         "nics": 8,
         "pricePerHourUSD": 3.6803,
         "powerScore": 27
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "SAP HANA Class",
+        "description": "Certified for SAP HANA — multi-TB RAM for in-memory analytics and large databases."
+      }
+    },
+    {
+      "id": "australiaeast::Standard_M32ts_v3",
+      "sku": "Standard_M32ts_v3",
+      "displayName": "M32ts v3",
+      "nickname": "Memory Champion",
+      "region": "australiaeast",
+      "regionShort": "AU-EAST",
+      "regionDisplay": "Australia East",
+      "family": "standardMSMediumMemoryv3Family",
+      "familyDisplay": "MSMediumMemoryv3",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 32,
+        "memoryGB": 512.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 3.936,
+        "powerScore": 29
       },
       "tags": {
         "gpu": null,
@@ -45534,158 +45608,6 @@
         "title": "Sunset Era",
         "description": "NVv3-series is scheduled to retire on September 30, 2026. Plan a migration to a newer family.",
         "url": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/retirement/nvv3-series-retirement"
-      }
-    },
-    {
-      "id": "australiaeast::Standard_NV4as_v4",
-      "sku": "Standard_NV4as_v4",
-      "displayName": "NV4as v4",
-      "nickname": "GPU Drone",
-      "region": "australiaeast",
-      "regionShort": "AU-EAST",
-      "regionDisplay": "Australia East",
-      "family": "standardNVSv4Family",
-      "familyDisplay": "NVSv4",
-      "familyType": "GPU Accelerated",
-      "familyColor": "#c4314b",
-      "rarity": "common",
-      "stats": {
-        "vcpus": 4,
-        "memoryGB": 14.0,
-        "maxDataDisks": 8,
-        "nics": 2,
-        "pricePerHourUSD": 0.338,
-        "powerScore": 8
-      },
-      "tags": {
-        "gpu": null,
-        "acceleratedNetworking": true,
-        "premiumIO": true,
-        "spotEligible": true,
-        "encryptionAtHost": true,
-        "ephemeralOSDisk": true,
-        "cpuArchitecture": "x64",
-        "retiring": true,
-        "retirementDate": "2026-09-30"
-      },
-      "ability": {
-        "title": "Sunset Era",
-        "description": "NVv4-series is scheduled to retire on September 30, 2026. Plan a migration to a newer family.",
-        "url": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/retirement/nvv4-retirement"
-      }
-    },
-    {
-      "id": "australiaeast::Standard_NV8as_v4",
-      "sku": "Standard_NV8as_v4",
-      "displayName": "NV8as v4",
-      "nickname": "Vector Builder",
-      "region": "australiaeast",
-      "regionShort": "AU-EAST",
-      "regionDisplay": "Australia East",
-      "family": "standardNVSv4Family",
-      "familyDisplay": "NVSv4",
-      "familyType": "GPU Accelerated",
-      "familyColor": "#c4314b",
-      "rarity": "uncommon",
-      "stats": {
-        "vcpus": 8,
-        "memoryGB": 28.0,
-        "maxDataDisks": 16,
-        "nics": 4,
-        "pricePerHourUSD": 0.676,
-        "powerScore": 13
-      },
-      "tags": {
-        "gpu": null,
-        "acceleratedNetworking": true,
-        "premiumIO": true,
-        "spotEligible": true,
-        "encryptionAtHost": true,
-        "ephemeralOSDisk": true,
-        "cpuArchitecture": "x64",
-        "retiring": true,
-        "retirementDate": "2026-09-30"
-      },
-      "ability": {
-        "title": "Sunset Era",
-        "description": "NVv4-series is scheduled to retire on September 30, 2026. Plan a migration to a newer family.",
-        "url": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/retirement/nvv4-retirement"
-      }
-    },
-    {
-      "id": "australiaeast::Standard_NV16as_v4",
-      "sku": "Standard_NV16as_v4",
-      "displayName": "NV16as v4",
-      "nickname": "Tensor Squire",
-      "region": "australiaeast",
-      "regionShort": "AU-EAST",
-      "regionDisplay": "Australia East",
-      "family": "standardNVSv4Family",
-      "familyDisplay": "NVSv4",
-      "familyType": "GPU Accelerated",
-      "familyColor": "#c4314b",
-      "rarity": "uncommon",
-      "stats": {
-        "vcpus": 16,
-        "memoryGB": 56.0,
-        "maxDataDisks": 32,
-        "nics": 8,
-        "pricePerHourUSD": 1.351,
-        "powerScore": 18
-      },
-      "tags": {
-        "gpu": null,
-        "acceleratedNetworking": true,
-        "premiumIO": true,
-        "spotEligible": true,
-        "encryptionAtHost": true,
-        "ephemeralOSDisk": true,
-        "cpuArchitecture": "x64",
-        "retiring": true,
-        "retirementDate": "2026-09-30"
-      },
-      "ability": {
-        "title": "Sunset Era",
-        "description": "NVv4-series is scheduled to retire on September 30, 2026. Plan a migration to a newer family.",
-        "url": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/retirement/nvv4-retirement"
-      }
-    },
-    {
-      "id": "australiaeast::Standard_NV32as_v4",
-      "sku": "Standard_NV32as_v4",
-      "displayName": "NV32as v4",
-      "nickname": "Vector Squire",
-      "region": "australiaeast",
-      "regionShort": "AU-EAST",
-      "regionDisplay": "Australia East",
-      "family": "standardNVSv4Family",
-      "familyDisplay": "NVSv4",
-      "familyType": "GPU Accelerated",
-      "familyColor": "#c4314b",
-      "rarity": "uncommon",
-      "stats": {
-        "vcpus": 32,
-        "memoryGB": 112.0,
-        "maxDataDisks": 32,
-        "nics": 8,
-        "pricePerHourUSD": 2.703,
-        "powerScore": 23
-      },
-      "tags": {
-        "gpu": null,
-        "acceleratedNetworking": true,
-        "premiumIO": true,
-        "spotEligible": true,
-        "encryptionAtHost": true,
-        "ephemeralOSDisk": true,
-        "cpuArchitecture": "x64",
-        "retiring": true,
-        "retirementDate": "2026-09-30"
-      },
-      "ability": {
-        "title": "Sunset Era",
-        "description": "NVv4-series is scheduled to retire on September 30, 2026. Plan a migration to a newer family.",
-        "url": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/retirement/nvv4-retirement"
       }
     },
     {
@@ -57841,9 +57763,9 @@
         "vcpus": 4,
         "memoryGB": 16.0,
         "maxDataDisks": 26,
-        "nics": 2,
+        "nics": 4,
         "pricePerHourUSD": null,
-        "powerScore": 10
+        "powerScore": 11
       },
       "tags": {
         "gpu": null,
@@ -57878,9 +57800,9 @@
         "vcpus": 8,
         "memoryGB": 32.0,
         "maxDataDisks": 48,
-        "nics": 4,
+        "nics": 8,
         "pricePerHourUSD": null,
-        "powerScore": 15
+        "powerScore": 16
       },
       "tags": {
         "gpu": null,
@@ -58174,9 +58096,9 @@
         "vcpus": 4,
         "memoryGB": 8.0,
         "maxDataDisks": 26,
-        "nics": 2,
+        "nics": 4,
         "pricePerHourUSD": null,
-        "powerScore": 9
+        "powerScore": 11
       },
       "tags": {
         "gpu": null,
@@ -58211,9 +58133,9 @@
         "vcpus": 8,
         "memoryGB": 16.0,
         "maxDataDisks": 48,
-        "nics": 4,
+        "nics": 8,
         "pricePerHourUSD": null,
-        "powerScore": 14
+        "powerScore": 16
       },
       "tags": {
         "gpu": null,
@@ -58803,9 +58725,9 @@
         "vcpus": 8,
         "memoryGB": 16.0,
         "maxDataDisks": 48,
-        "nics": 4,
+        "nics": 8,
         "pricePerHourUSD": null,
-        "powerScore": 14
+        "powerScore": 16
       },
       "tags": {
         "gpu": null,
@@ -59210,9 +59132,9 @@
         "vcpus": 4,
         "memoryGB": 32.0,
         "maxDataDisks": 26,
-        "nics": 2,
+        "nics": 4,
         "pricePerHourUSD": null,
-        "powerScore": 10
+        "powerScore": 12
       },
       "tags": {
         "gpu": null,
@@ -59321,9 +59243,9 @@
         "vcpus": 8,
         "memoryGB": 64.0,
         "maxDataDisks": 48,
-        "nics": 4,
+        "nics": 8,
         "pricePerHourUSD": null,
-        "powerScore": 16
+        "powerScore": 17
       },
       "tags": {
         "gpu": null,
@@ -60209,9 +60131,9 @@
         "vcpus": 4,
         "memoryGB": 32.0,
         "maxDataDisks": 26,
-        "nics": 2,
+        "nics": 4,
         "pricePerHourUSD": null,
-        "powerScore": 10
+        "powerScore": 12
       },
       "tags": {
         "gpu": null,
@@ -60320,9 +60242,9 @@
         "vcpus": 8,
         "memoryGB": 64.0,
         "maxDataDisks": 48,
-        "nics": 4,
+        "nics": 8,
         "pricePerHourUSD": null,
-        "powerScore": 16
+        "powerScore": 17
       },
       "tags": {
         "gpu": null,
@@ -85396,6 +85318,43 @@
       }
     },
     {
+      "id": "newzealandnorth::Standard_M16s_v3",
+      "sku": "Standard_M16s_v3",
+      "displayName": "M16s v3",
+      "nickname": "Cache Hunter",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardMSMediumMemoryv3Family",
+      "familyDisplay": "MSMediumMemoryv3",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 16,
+        "memoryGB": 256.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 2.0664,
+        "powerScore": 23
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "SAP HANA Class",
+        "description": "Certified for SAP HANA — multi-TB RAM for in-memory analytics and large databases."
+      }
+    },
+    {
       "id": "newzealandnorth::Standard_M24s_v3",
       "sku": "Standard_M24s_v3",
       "displayName": "M24s v3",
@@ -85415,6 +85374,43 @@
         "nics": 8,
         "pricePerHourUSD": 3.8643,
         "powerScore": 27
+      },
+      "tags": {
+        "gpu": null,
+        "acceleratedNetworking": true,
+        "premiumIO": true,
+        "spotEligible": true,
+        "encryptionAtHost": true,
+        "ephemeralOSDisk": false,
+        "cpuArchitecture": "x64",
+        "retiring": false,
+        "retirementDate": null
+      },
+      "ability": {
+        "title": "SAP HANA Class",
+        "description": "Certified for SAP HANA — multi-TB RAM for in-memory analytics and large databases."
+      }
+    },
+    {
+      "id": "newzealandnorth::Standard_M32ts_v3",
+      "sku": "Standard_M32ts_v3",
+      "displayName": "M32ts v3",
+      "nickname": "Memory Champion",
+      "region": "newzealandnorth",
+      "regionShort": "NZ-NORTH",
+      "regionDisplay": "New Zealand North",
+      "family": "standardMSMediumMemoryv3Family",
+      "familyDisplay": "MSMediumMemoryv3",
+      "familyType": "Memory Optimized",
+      "familyColor": "#8764b8",
+      "rarity": "rare",
+      "stats": {
+        "vcpus": 32,
+        "memoryGB": 512.0,
+        "maxDataDisks": 64,
+        "nics": 8,
+        "pricePerHourUSD": 4.1328,
+        "powerScore": 29
       },
       "tags": {
         "gpu": null,
@@ -85635,7 +85631,7 @@
         "memoryGB": 2850.0,
         "maxDataDisks": 64,
         "nics": 8,
-        "pricePerHourUSD": null,
+        "pricePerHourUSD": 28.0637,
         "powerScore": 56
       },
       "tags": {
@@ -85672,7 +85668,7 @@
         "memoryGB": 5700.0,
         "maxDataDisks": 64,
         "nics": 8,
-        "pricePerHourUSD": null,
+        "pricePerHourUSD": 56.1275,
         "powerScore": 60
       },
       "tags": {
@@ -85746,7 +85742,7 @@
         "memoryGB": 5700.0,
         "maxDataDisks": 64,
         "nics": 8,
-        "pricePerHourUSD": null,
+        "pricePerHourUSD": 62.3667,
         "powerScore": 60
       },
       "tags": {
@@ -85783,7 +85779,7 @@
         "memoryGB": 7600.0,
         "maxDataDisks": 64,
         "nics": 8,
-        "pricePerHourUSD": null,
+        "pricePerHourUSD": 83.1598,
         "powerScore": 60
       },
       "tags": {
@@ -85820,7 +85816,7 @@
         "memoryGB": 8568.0,
         "maxDataDisks": 64,
         "nics": 8,
-        "pricePerHourUSD": null,
+        "pricePerHourUSD": 93.7639,
         "powerScore": 60
       },
       "tags": {
@@ -85857,7 +85853,7 @@
         "memoryGB": 9496.0,
         "maxDataDisks": 64,
         "nics": 8,
-        "pricePerHourUSD": null,
+        "pricePerHourUSD": 103.9529,
         "powerScore": 60
       },
       "tags": {
@@ -85931,7 +85927,7 @@
         "memoryGB": 11400.0,
         "maxDataDisks": 64,
         "nics": 8,
-        "pricePerHourUSD": null,
+        "pricePerHourUSD": 124.7208,
         "powerScore": 60
       },
       "tags": {

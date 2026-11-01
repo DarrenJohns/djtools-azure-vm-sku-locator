@@ -47,77 +47,77 @@
     "qatarcentral",
     "israelcentral"
   ],
-  "lastUpdated": "2026-10-01T05:43:31Z",
-  "lastUpdatedDisplay": "October 2026",
+  "lastUpdated": "2026-11-01T06:03:25Z",
+  "lastUpdatedDisplay": "November 2026",
   "physicalRegionCount": 63,
   "failedRegions": [],
   "sourceHealth": {
+    "checkedAt": "2026-11-01T06:03:25Z",
     "sources": [
       {
-        "label": "Azure region list",
-        "checkedAt": "2026-10-01T05:43:31Z",
-        "summary": "63 physical regions returned",
-        "lastSuccessfulUpdate": "2026-10-01T05:43:31Z",
+        "checkedAt": "2026-11-01T06:03:25Z",
         "id": "regions",
+        "failures": [],
+        "summary": "63 physical regions returned",
         "status": "success",
-        "failures": []
+        "lastSuccessfulUpdate": "2026-11-01T06:03:25Z",
+        "label": "Azure region list"
       },
       {
-        "label": "VM SKU data",
-        "checkedAt": "2026-10-01T05:43:31Z",
-        "summary": "45 of 45 regions refreshed",
-        "lastSuccessfulUpdate": "2026-10-01T05:43:31Z",
+        "checkedAt": "2026-11-01T06:03:25Z",
         "id": "vmSkus",
-        "status": "success",
-        "failures": []
-      },
-      {
-        "label": "Disk SKU data",
-        "checkedAt": "2026-10-01T05:43:31Z",
+        "failures": [],
         "summary": "45 of 45 regions refreshed",
-        "lastSuccessfulUpdate": "2026-10-01T05:43:31Z",
+        "status": "success",
+        "lastSuccessfulUpdate": "2026-11-01T06:03:25Z",
+        "label": "VM SKU data"
+      },
+      {
+        "checkedAt": "2026-11-01T06:03:25Z",
         "id": "disks",
+        "failures": [],
+        "summary": "45 of 45 regions refreshed",
         "status": "success",
-        "failures": []
+        "lastSuccessfulUpdate": "2026-11-01T06:03:25Z",
+        "label": "Disk SKU data"
       },
       {
-        "label": "Pricing data",
-        "checkedAt": "2026-10-01T05:43:31Z",
-        "summary": "45 of 45 regions refreshed (USD)",
-        "lastSuccessfulUpdate": "2026-10-01T05:43:31Z",
+        "checkedAt": "2026-11-01T06:03:25Z",
         "id": "pricing",
+        "failures": [],
+        "summary": "45 of 45 regions refreshed (USD)",
         "status": "success",
-        "failures": []
+        "lastSuccessfulUpdate": "2026-11-01T06:03:25Z",
+        "label": "Pricing data"
       },
       {
-        "label": "Retirement alerts",
-        "checkedAt": "2026-10-01T05:43:31Z",
-        "summary": "35 family records refreshed",
-        "lastSuccessfulUpdate": "2026-10-01",
+        "checkedAt": "2026-11-01T06:03:25Z",
         "id": "retirements",
+        "failures": null,
+        "summary": "35 family records refreshed",
         "status": "success",
-        "failures": null
+        "lastSuccessfulUpdate": "2026-11-01",
+        "label": "Retirement alerts"
       },
       {
-        "label": "History snapshots",
-        "checkedAt": "2026-10-01T05:43:31Z",
-        "summary": "45 of 45 region snapshots archived",
-        "lastSuccessfulUpdate": "2026-10-01T05:43:31Z",
+        "checkedAt": "2026-11-01T06:03:25Z",
         "id": "history",
+        "failures": [],
+        "summary": "45 of 45 region snapshots archived",
         "status": "success",
-        "failures": []
+        "lastSuccessfulUpdate": "2026-11-01T06:03:25Z",
+        "label": "History snapshots"
       },
       {
-        "label": "Top Trumps cards",
-        "checkedAt": "2026-10-01T05:43:31Z",
-        "summary": "Card deck generated",
-        "lastSuccessfulUpdate": "2026-10-01T05:43:31Z",
+        "checkedAt": "2026-11-01T06:03:25Z",
         "id": "cards",
+        "failures": null,
+        "summary": "Card deck generated",
         "status": "success",
-        "failures": null
+        "lastSuccessfulUpdate": "2026-11-01T06:03:25Z",
+        "label": "Top Trumps cards"
       }
     ],
-    "complete": true,
-    "checkedAt": "2026-10-01T05:43:31Z"
+    "complete": true
   }
 }
